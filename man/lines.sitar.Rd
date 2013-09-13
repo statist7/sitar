@@ -3,19 +3,16 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{lines.sitar}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+The lines function for sitar to draw growth curves in various ways.
 }
 \usage{
 lines.sitar(model, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{model}{
-%%     ~~Describe \code{model} here~~
-}
+  \item{model}{sitar model object}
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
+Further graphical parameters (see par) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -30,9 +27,7 @@ lines.sitar(model, ...)
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

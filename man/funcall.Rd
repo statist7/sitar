@@ -1,46 +1,23 @@
 \name{funcall}
 \alias{funcall}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{funcall}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+Applies an expression to vector v, optionally inverting the expression first. For example if the expression is log, funcall returns log(v) if inverse is FALSE, and exp(v) if inverse is TRUE.}
 \usage{
 funcall(v, vcall, inverse = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{v}{
-%%     ~~Describe \code{v} here~~
-}
-  \item{vcall}{
-%%     ~~Describe \code{vcall} here~~
-}
-  \item{inverse}{
-%%     ~~Describe \code{inverse} here~~
-}
+  \item{v}{vector}
+  \item{vcall}{expression}
+  \item{inverse}{logical}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+Inverse covers functions log, exp, sqrt, ^, *, /, +, -.}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Returns a vector of length v
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
