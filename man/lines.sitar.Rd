@@ -3,16 +3,29 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{lines.sitar}
 \description{
+<<<<<<< HEAD
 The lines function for sitar to draw growth curves in various ways.
+=======
+%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+>>>>>>> 62df7c832c5e30769135f5c9dd6ffbba872bb60d
 }
 \usage{
 lines.sitar(model, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+<<<<<<< HEAD
   \item{model}{sitar model object}
   \item{\dots}{
 Further graphical parameters (see par) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.
+=======
+  \item{model}{
+%%     ~~Describe \code{model} here~~
+}
+  \item{\dots}{
+%%     ~~Describe \code{\dots} here~~
+}
+>>>>>>> 62df7c832c5e30769135f5c9dd6ffbba872bb60d
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -27,7 +40,13 @@ Further graphical parameters (see par) may also be supplied as arguments, partic
 \references{
 %% ~put references to the literature/web site here ~
 }
+<<<<<<< HEAD
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
+=======
+\author{
+%%  ~~who you are~~
+}
+>>>>>>> 62df7c832c5e30769135f5c9dd6ffbba872bb60d
 \note{
 %%  ~~further notes~~
 }
