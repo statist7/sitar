@@ -12,7 +12,7 @@ lines.sitar(model, ...)
 \arguments{
   \item{model}{sitar model object}
   \item{\dots}{
-Further graphical parameters (see par) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.
+Further graphical parameters (see par) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~

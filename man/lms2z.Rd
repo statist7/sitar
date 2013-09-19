@@ -18,31 +18,17 @@ two-level factor with level 1 male and level 2 female}
   \item{data}{
 dataframe containing \code{x}, \code{y} and \code{sex}}
   \item{measure}{
-character indicating the name of the measurement}, depending on the choice of \code{ref}.}
+character indicating the name of the measurement, depending on the choice of \code{ref}.}
   \item{ref}{
 character indicating the name of the growth reference, available as a data object.}
   \item{toz}{
 logical set to TRUE for conversion from measurement to z-score, and FALSE for the reverse.}
 }
 \details{
-Vectors of L, M and S corresponding to \code{x} and \code{sex} are created and passed to either \code{\link{cLMS}} or \code{\link{zLMS}.}
-\value{
-A vector of the same length as \code{y} containing the transformed values.}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
+Vectors of L, M and S corresponding to \code{x} and \code{sex} are created and passed to either \code{\link{cLMS}} or \code{\link{zLMS}}.}
+\value{A vector of the same length as \code{y} containing the transformed values.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-\code{\link{cLMS}}, \code{\link{zLMS}}
-}
+\seealso{\code{\link{cLMS}}, \code{\link{zLMS}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,

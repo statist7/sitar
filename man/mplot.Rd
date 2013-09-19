@@ -25,11 +25,6 @@ optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE)
 Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd, color, col and character pch.
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~

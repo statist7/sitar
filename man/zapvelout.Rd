@@ -11,6 +11,7 @@ zapvelout(outliers, icode)
 \arguments{
   \item{outliers}{dataframe returned by \code{\link{velout}}.}
   \item{icode}{code(s) to be zapped. See Details.}
+}
 \details{
 Codes range from 0 (normal) to 8, where 4 and 6 are conventional outliers (see \code{\link{velout}}.}
 \value{

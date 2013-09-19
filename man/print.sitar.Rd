@@ -13,6 +13,7 @@ print.sitar(x, ...)
 an object inheriting class \code{sitar}.}
   \item{\dots}{
 other optional arguments.}
+}
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
