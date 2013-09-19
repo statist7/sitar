@@ -3,15 +3,15 @@
 \title{
 Compares the deviance of models including an adjustment for power-transformed y variables.}
 \description{
-devadj calculates the deviance for one or more SITAR models, adjusting the likelihood for Box-Cox transformed y variables.
+\code{devadj} calculates the deviance for one or more SITAR models, adjusting the likelihood for Box-Cox transformed y variables.
 }
 \usage{
 devadj(..., pattern)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{\dots}{One or more SITAR model names}
-  \item{pattern}{a character string defining a search term for names of SITAR models. It is passed to ls(pattern=pattern), and  objects so identified are concatenated with  explicitly given model names.}
+  \item{\dots}{one or more SITAR model names}
+  \item{pattern}{a character string defining a search term for names of SITAR models. It is passed to \code{ls(pattern=pattern)}, and  any objects so identified are concatenated with  explicitly given model names.}
 }
 \details{
 The deviance for each model is adjusted if the y variable is power-transformed, using the formula 

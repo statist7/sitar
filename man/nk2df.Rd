@@ -3,33 +3,24 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{nk2df}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+A routine to update old-style \code{sitar} objects containing the \code{nk} argument to change it to \code{df}. This can also be done using \code{update}.}
 \usage{
 nk2df(obj)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{obj}{
-%%     ~~Describe \code{obj} here~~
-}
+an object of class \code{sitar}.}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
+The object \code{obj} is returned, with the parameter \code{nk} in \code{call.sitar} changed to \code{df}.}
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

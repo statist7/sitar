@@ -1,38 +1,33 @@
 \name{y2plot}
 \alias{y2plot}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{y2plot}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+Function to plot two y variables, y1 and y2, against a single x variable, with the y1 and y2 axes on the left and right of the plot respectively.}
 \usage{
-y2plot(x, y1, y2 = NULL, labels, y2par = NULL, newplot = TRUE, xy, xlegend = "topleft", inset = 0.05, ...)
+y2plot(x, y1, y2 = NULL, labels, y2par = NULL, add = FALSE, xy, xlegend = "topleft", inset = 0.05, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{vector of ages}
-  \item{y1}{vector of measurements for plotting on left y axis}
-  \item{y2}{optional vector of measurements for plotting on right y axis}
-  \item{labels}{character vector containing labels for x, y1 and y2}
-  \item{y2par}{named list of par arguments to format the y2 axis}
-  \item{newplot}{logical flag to specify if a new plot (with axes etc) is to be drawn}
-  \item{xy}{Obsolete}
-  \item{xlegend}{position for legend}
-  \item{inset}{inset for legend}
-  \item{\dots}{optional par arguments}
+  \item{x}{vector of ages.}
+  \item{y1}{vector of measurements for plotting on left y axis.}
+  \item{y2}{optional vector of measurements for plotting on right y axis.}
+  \item{labels}{character vector containing labels for x, y1 and y2.}
+  \item{y2par}{named list of par arguments to format the y2 axis.}
+  \item{add}{logical flag to specify if a new plot (with axes etc) is to be drawn (FALSE) or an existing plot is to be added to (TRUE).}
+  \item{xy}{obsolete.}
+  \item{xlegend}{position for legend.}
+  \item{inset}{inset for legend.}
+  \item{\dots}{optional par arguments.}
 }
 \details{
-y2plot draws up to two superimposed plots, one with the y axis on the left and the other on the right, with suitable adjustment for par('mar') and including a legend. The format for y1 is controlled by par arguments, and that for y2 by the list y2par. }
+y2plot draws up to two superimposed plots, one with the y axis on the left and the other on the right, with suitable adjustment for \code{par('mar')} and including a legend. The format for y1 is controlled by par arguments, and that for y2 by the list y2par. }
 \value{
 Returns the list
   \item{usr}{par('usr') for y1 axis}
   \item{usr2}{par('usr') for y2 axis}
-In addition the variable par.usr2, equal to usr2, is created in globalenv(), which obviates the need to use xy at all.
+In addition the variable par.usr2, equal to usr2, is created in globalenv(), which obviates the need for xy.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+\seealso{\code{\link{plot.sitar}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,

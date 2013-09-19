@@ -3,42 +3,30 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{makess}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+A wrapper to fit a cubic smoothing spline to the supplied data, allowing derivatives to be calculated.}
 \usage{
 makess(x, y, xfun, yfun)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+vector giving the values of the predictor variable.}
   \item{y}{
-%%     ~~Describe \code{y} here~~
-}
+vector of responses.}
   \item{xfun}{
-%%     ~~Describe \code{xfun} here~~
-}
+optional function to be applied to \code{x} prior to fitting.}
   \item{yfun}{
-%%     ~~Describe \code{yfun} here~~
-}
+optional function to be applied to \code{y} prior to fitting.}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
+An object of class \code{smooth.spline} with the extra component \code{apv}, a length-2 vector containing the age at peak velocity and peak velocity. If no peak is identified (based on the 2nd derivative changing sign) the values are for maximum rather than peak velocity.}
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

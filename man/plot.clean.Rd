@@ -3,51 +3,40 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{plot.clean}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+A version of \code{mplot} to plot growth curves and identify outliers. Outliers are clicked on and the corresponding growth curve is highlighted.}
 \usage{
 plot.clean(x, y = NULL, id = NULL, data = NULL, n = length(x), pch = 20, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+vector of x coordinates.}
   \item{y}{
-%%     ~~Describe \code{y} here~~
-}
+vector of y coordinates.}
   \item{id}{
-%%     ~~Describe \code{id} here~~
-}
+factor of subject levels indexing each growth curve.}
   \item{data}{
-%%     ~~Describe \code{data} here~~
-}
+optional dataframe containing \code{x}, \code{y} and \code{id}.}
   \item{n}{
-%%     ~~Describe \code{n} here~~
-}
+maximum number of points to be identified.}
   \item{pch}{
-%%     ~~Describe \code{pch} here~~
-}
+plot character.}
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd and color, col.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+\code{plot.clean} returns either a vector \code{rows} or a list:
+\item{rows}{a vector of row numbers corresponding to the selected points.}
+\item{data}{a dataframe returned if \code{data} has been provided in the call, containing as columns \code{rows}, \code{id}, \code{x} and \code{y} for the selected points.}
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

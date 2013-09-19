@@ -3,50 +3,36 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{lms2z}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+A function to convert between measurements and z-scores using a growth reference previously fitted by the LMS method.}
 \usage{
 lms2z(x, y, sex, data = NULL, measure, ref, toz = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+vector of ages}
   \item{y}{
-%%     ~~Describe \code{y} here~~
-}
+vector of either measurements or z-scores, depending on the value of \code{toz}.}
   \item{sex}{
-%%     ~~Describe \code{sex} here~~
-}
+two-level factor with level 1 male and level 2 female}
   \item{data}{
-%%     ~~Describe \code{data} here~~
-}
+dataframe containing \code{x}, \code{y} and \code{sex}}
   \item{measure}{
-%%     ~~Describe \code{measure} here~~
-}
+character indicating the name of the measurement}, depending on the choice of \code{ref}.}
   \item{ref}{
-%%     ~~Describe \code{ref} here~~
-}
+character indicating the name of the growth reference, available as a data object.}
   \item{toz}{
-%%     ~~Describe \code{toz} here~~
-}
+logical set to TRUE for conversion from measurement to z-score, and FALSE for the reverse.}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+Vectors of L, M and S corresponding to \code{x} and \code{sex} are created and passed to either \code{\link{cLMS}} or \code{\link{zLMS}.}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
+A vector of the same length as \code{y} containing the transformed values.}
 \references{
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 }
 \note{
 %%  ~~further notes~~
@@ -55,7 +41,7 @@ lms2z(x, y, sex, data = NULL, measure, ref, toz = TRUE)
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{cLMS}}, \code{\link{zLMS}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

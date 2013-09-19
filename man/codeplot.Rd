@@ -3,7 +3,7 @@
 \alias{zapvelout}
 \title{codeplot}
 \description{
-Plot output from velout function to display growth curves with outlying points.}
+Plots output from velout function to display growth curves with outlying points.}
 \usage{
 codeplot(outliers, icode = 4, ..., print = TRUE)
 zapvelout(outliers, icode)

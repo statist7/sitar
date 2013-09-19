@@ -3,39 +3,29 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{print.summary.sitar}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+A \code{print.summary} method for \code{sitar} objects.}
 \usage{
 print.summary.sitar(x, verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+an object inheriting class \code{nlme}.}
   \item{verbose}{
-%%     ~~Describe \code{verbose} here~~
-}
+a logical to control the amount of output.}
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
+to specify extra arguments.}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A formatted summary of the object.
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

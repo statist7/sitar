@@ -41,9 +41,7 @@ code AB+BC AC	interpretation
   8	 -	-		later duplicate age
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{
-\code{\link{codeplot}}, \code{\link{zapvelout}}
-}
+\seealso{\code{\link{codeplot}}, \code{\link{zapvelout}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,

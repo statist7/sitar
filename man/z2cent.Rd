@@ -7,7 +7,6 @@ Converts z-scores, typically defining centiles in a growth chart, to character s
 \usage{
 z2cent(z)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{z}{a scalar or vector of z-scores.}
 }

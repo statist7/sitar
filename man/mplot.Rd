@@ -3,51 +3,34 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{mplot}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+Function to plot multiple growth curves.}
 \usage{
-mplot(x, y, id, data = NULL, subset = NULL, newplot = TRUE, ...)
+mplot(x, y, id, data = NULL, subset = NULL, add = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+vector of x coordinates.}
   \item{y}{
-%%     ~~Describe \code{y} here~~
-}
+vector of y coordinates.}
   \item{id}{
-%%     ~~Describe \code{id} here~~
-}
+factor denoting subject levels.}
   \item{data}{
-%%     ~~Describe \code{data} here~~
-}
+dataframe containing \code{x}, \code{y} and \code{id}.}
   \item{subset}{
-%%     ~~Describe \code{subset} here~~
-}
-  \item{newplot}{
-%%     ~~Describe \code{newplot} here~~
-}
+optional logical defining a subset of rows in \code{data}.}
+  \item{add}{
+optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE).}
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd, color, col and character pch.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }
@@ -55,7 +38,7 @@ mplot(x, y, id, data = NULL, subset = NULL, newplot = TRUE, ...)
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{y2plot}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

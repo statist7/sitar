@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{lines.sitar}
 \description{
-The lines function for sitar to draw growth curves in various ways.
+The \code{lines} function for \code{sitar} to draw growth curves in various ways.
 }
 \usage{
 lines.sitar(model, ...)
@@ -24,9 +24,6 @@ Further graphical parameters (see par) may also be supplied as arguments, partic
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
@@ -35,7 +32,7 @@ Further graphical parameters (see par) may also be supplied as arguments, partic
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{plot.sitar}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

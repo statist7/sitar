@@ -2,9 +2,9 @@
 \alias{zLMS}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{zLMS}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\description{Routines to handle references constructed with the
+LMS method. Given a set of LMS values, the functions convert
+z-scores to measurement centiles and vice versa.}
 \usage{
 zLMS(x, L, M, S, data = NULL)
 }
@@ -39,15 +39,7 @@ zLMS(x, L, M, S, data = NULL)
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }

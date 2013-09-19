@@ -3,45 +3,20 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{zapvelout}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\code{zapvelout} sets to missing values of \code{y} flagged as outliers by \code{velout}.}
 \usage{
 zapvelout(outliers, icode)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{outliers}{
-%%     ~~Describe \code{outliers} here~~
-}
-  \item{icode}{
-%%     ~~Describe \code{icode} here~~
-}
-}
+  \item{outliers}{dataframe returned by \code{\link{velout}}.}
+  \item{icode}{code(s) to be zapped. See Details.}
 \details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+Codes range from 0 (normal) to 8, where 4 and 6 are conventional outliers (see \code{\link{velout}}.}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+Returns dataframe \code{data} from \code{velout} with values of \code{y} set to \code{NA} corresponding to the specified \code{icode}(s).}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
+\seealso{\code{\link{codeplot}}, \code{\link{velout}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,

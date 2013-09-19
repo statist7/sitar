@@ -9,11 +9,11 @@ varexp(..., pattern)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{\dots}{One or more SITAR models}
+  \item{\dots}{one or more SITAR models}
   \item{pattern}{a character string defining a search term for names of SITAR models}
 }
 \details{
-pattern is passed to ls(pattern=pattern), and any filenames so identified are concatenated with any explicitly given filenames. The variance explained is given by
+pattern is passed to \code{ls(pattern=pattern)}, and any filenames so identified are concatenated with any explicitly given filenames. The variance explained is given by
         pc[i] <- 100 * (1 - (sigma2/sigma1)^2)
 where sigma1 is the cross-sectional RSD and sigma2 the SITAR RSD.
 }

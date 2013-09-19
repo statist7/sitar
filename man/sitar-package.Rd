@@ -3,7 +3,7 @@
 \alias{sitar}
 \docType{package}
 \title{SITAR growth curve analysis}
-\description{SITAR is a method of growth curve analysis, based on nlme, that estimates
+\description{SITAR is a method of growth curve analysis, based on \pkg{nlme}, that estimates
  a single mean growth curve as a regression spline, plus a set of up to three fixed and
  random effects (a, b and c) defining how individual growth curves differ from the mean
  curve. Effect a (or alpha) measures size, and is a random intercept relative to the
@@ -20,7 +20,7 @@ Version: \tab 1.0\cr
 Date: \tab 2013-02-22\cr
 License: \tab GPL-2\cr
 }
-The package creates an object of class sitar, based on nlme, representing the nonlinear mixed-effects model
+The package creates an object of class sitar, based on \pkg{nlme}, representing the nonlinear mixed-effects model
  fit. Generic functions such as print, plot and summary have methods to show the results
  of the fit. The functions resid, coef, fitted, fixed.effects, and random.effects can be
  used to extract some of its components. The functions devadj and varexp compare

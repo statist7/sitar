@@ -7,7 +7,7 @@
 \alias{lines.sitar}
 \alias{update.sitar}
 \title{SITAR growth curve analysis}
-\description{SITAR is a method of growth curve analysis, based on nlme, that estimates
+\description{SITAR is a method of growth curve analysis, based on \code{nlme}, that takes a set of growth curves and estimates
  a mean growth curve as a regression spline, plus a set of up to three fixed and
  random effects (a, b and c) defining how individual growth curves differ from the mean
  curve. Effect a (or alpha) measures size, and is a random intercept relative to the
@@ -15,43 +15,42 @@
  process, and reflects a shift on the x scale relative to the mean. Effect c (or gamma)
  is velocity, and indicates how the x scale is stretched or shrunk reflecting the rate
  at which 'time' passes for individuals. The aim is for individual curves, adjusted for
- a, b and c, to lie on top of the mean curve.}
-\usage{sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c", a.formula = ~1,
- b.formula = ~1, c.formula = ~1, bounds = 0.04, start, bstart = 0, xoffset = "mean",
- file = ".sitar.temp.R", verbose = FALSE, correlation = NULL, weights = NULL, subset = NULL, 
- method = "ML", na.action = na.fail, control = nlmeControl(returnObject = TRUE))}
+ a, b and c, to be superimposed on the mean curve. SITAR means SuperImposition by Translation And Rotation.}
+ \usage{sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c", a.formula = ~1,
+ b.formula = ~1, c.formula = ~1, bounds = 0.04, start, bstart = "mean", xoffset = "mean",
+ file = ".sitar.temp.R", returndata=FALSE, verbose = FALSE, correlation = NULL, weights = NULL, subset = NULL, method = "ML", na.action = na.fail, control = nlmeControl(returnObject = TRUE), newform = TRUE)
+ 
+update.sitar(object, ..., evaluate = TRUE)
+}
 \arguments{
-  \item{x}{vector of ages}
-  \item{y}{vector of measurements}
-  \item{id}{factor of subject identifiers}
-  \item{data}{optional data frame containing variables x, y and id}
-  \item{df}{degrees of freedom for regression spline}
-  \item{knots}{vector of ages for knots (default df quantiles of x distribution)}
-  \item{fixed}{character string defining which of a, b and c are fixed effects (default random)}
-  \item{random}{character string defining which of a, b and c are random effects (default "a+b+c")}
-  \item{a.formula}{formula for fixed effect a (default ~ 1)}
-  \item{b.formula}{formula for fixed effect b (default ~ 1)}
-  \item{c.formula}{formula for fixed effect c (default ~ 1)}
-  \item{bounds}{span of x for regression spline, or extension (default range(x) +/- 0.04)}
-  \item{start}{optional numeric vector, or list of initial estimates for the fixed effects and random effects}
-  \item{bstart}{optional starting value for fixed effect b}
-  \item{xoffset}{optional value of offset for x (either "mean" (default), "apv" or value)}
-  \item{file}{filename for intermediate code (default .sitar.temp.R)}
-  \item{verbose}{optional logical value to print information on the evolution of the iterative algorithm (default FALSE)}
-  \item{correlation}{optional corStruct object describing the within-group correlation structure (see NLME documentation)}
-  \item{weights}{optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure (see NLME documentation)}
-  \item{subset}{optional expression indicating the subset of the rows of data that should be used in the fit (see NLME documentation)}
-  \item{method}{character string, either "REML" or "ML" (default) (see NLME documentation)}
-  \item{na.action}{function for when the data contain NAs (see NLME documentation)}
-  \item{control}{list of control values for the estimation algorithm (see NLME documentation)}
+  \item{x}{vector of ages.}
+  \item{y}{vector of measurements.}
+  \item{id}{factor of subject identifiers.}
+  \item{data}{optional data frame containing variables \code{x}, \code{y} and \code{id}.}
+  \item{df}{degrees of freedom for regression spline.}
+  \item{knots}{vector of values for knots (default df quantiles of \code{x} distribution).}
+  \item{fixed}{character string defining which of a, b and c are fixed effects (default random).}
+  \item{random}{character string defining which of a, b and c are random effects (default "a+b+c").}
+  \item{a.formula}{formula for fixed effect a (default ~ 1).}
+  \item{b.formula}{formula for fixed effect b (default ~ 1).}
+  \item{c.formula}{formula for fixed effect c (default ~ 1).}
+  \item{bounds}{span of \code{x} for regression spline, or extension (default range(\code{x}) +/- 0.04).}
+  \item{start}{optional numeric vector, or list of initial estimates for the fixed effects and random effects.}
+  \item{bstart}{optional starting value for fixed effect b (either "mean" (default), "apv" or value).}
+  \item{xoffset}{optional value of offset for \code{x} (either "mean" (default), "apv" or value).}
+  \item{file}{filename for intermediate code (default .sitar.temp.R).}
+  \item{verbose}{optional logical value to print information on the evolution of the iterative algorithm (default FALSE).}
+  \item{correlation}{optional \code{corStruct} object describing the within-group correlation structure (see NLME documentation).}
+  \item{weights}{optional \code{varFunc} object or one-sided formula describing the within-group heteroscedasticity structure (see \code{\link{nlme}}).}
+  \item{subset}{optional expression indicating the subset of the rows of data that should be used in the fit (see \code{\link{nlme}}).}
+  \item{method}{character string, either "REML" or "ML" (default) (see \code{\link{nlme}}).}
+  \item{na.action}{function for when the data contain NAs (see \code{\link{nlme}}).}
+  \item{control}{list of control values for the estimation algorithm (see \code{\link{nlme}}).}
 }
 \details{
 }
 \value{
-an object of class sitar, based on nlme, representing the nonlinear mixed-effects model
- fit. Generic functions such as print, plot and summary have methods to show the results
- of the fit. The functions resid, coef, fitted, fixed.effects, and random.effects can be
- used to extract some of its components.
+An object of class \code{sitar}, based on \code{nlme}, representing the nonlinear mixed-effects model fit. Generic functions such as \code{print}, \code{plot} and \code{summary} have methods to show the results of the fit. The functions \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects}, and \code{random.effects} can be used to extract some of its components. \code{update} updates the model.
 }
 \references{
 The idea of SITAR growth curve analysis arose from the paper by Beath (2007) and was first described in Cole et al (2010). The other references describe applications of SITAR to a variety of data forms.

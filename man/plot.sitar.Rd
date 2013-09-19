@@ -3,66 +3,48 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{plot.sitar}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+A version of \code{plot} for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{
-plot.sitar(model, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), newplot = TRUE, xy = NULL, nlme = FALSE, ...)
+plot.sitar(model, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE, xy = NULL, nlme = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{model}{
-%%     ~~Describe \code{model} here~~
-}
+an object of class \code{sitar}.}
   \item{opt}{
-%%     ~~Describe \code{opt} here~~
-}
+character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve, 'f' for individual Fitted growth curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dvf' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and legend identifying the distance and velocity curves is provided.}
   \item{labels}{
-%%     ~~Describe \code{labels} here~~
-}
+optional character vector containing plot labels for \code{x}, \code{y} and \code{y} velocity from \code{model}. The first two elements can alternatively be provided via \code{\link{par}} parameters \code{xlab} and \code{ylab}, and the third element via \code{y2par} (see Details). Default labels are the names of \code{x} and \code{y}, and "\code{y} velocity".}
   \item{apv}{
-%%     ~~Describe \code{apv} here~~
-}
+optional logical specifying whether or not to calculate the age at peak velocity from the velocity curve. If TRUE, age at peak velocity is calculated as the age when the second derivative of the fitted curve changes sign (if necessary after applying \code{xfun} and \code{yfun}). Age at peak velocity is marked in the plot with a vertical dotted line, and its value, along with peak velocity, is returned.}
   \item{xfun}{
-%%     ~~Describe \code{xfun} here~~
-}
+optional function to be applied to \code{x} prior to plotting.}
   \item{yfun}{
-%%     ~~Describe \code{yfun} here~~
-}
+optional function to be applied to \code{y} prior to plotting.}
   \item{subset}{
-%%     ~~Describe \code{subset} here~~
-}
+optional logical vector of length \code{x} defining a subset of data rows to be plotted.}
   \item{abc}{
-%%     ~~Describe \code{abc} here~~
-}
-  \item{newplot}{
-%%     ~~Describe \code{newplot} here~~
-}
+a character string matching an /code{id} level in \code{ranef(model)}, or else a list of up to three values labelled a, b and c, e.g. abc=list(a=1, b=0.1, c=-0.1), or where the values of a, b and c are random effects defining an individual growth curve from the average curve.}
+  \item{add}{
+optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE). Alternatively use \code{lines}.}
   \item{xy}{
-%%     ~~Describe \code{xy} here~~
-}
+defunct.}
   \item{nlme}{
-%%     ~~Describe \code{nlme} here~~
-}
+optional logical which set TRUE plots the model as an \code{nlme} object, using \code{\link{plot.nlme}} arguments.}
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
-}
+Further graphical parameters (see \code{par}) may also be supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line type, lty, line width, lwd, and color, col. For the velocity (y2) plot \code{y2par} can be used (see Details).}
 \details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+For option 'dv' (the default) the velocity curve plot (with right axis) can be annotated with \code{par} parameters given as a named list called \code{y2par}.}
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Returns a list of three objects:
+\item{ss}{the \code{smooth.spline} object corresponding to the fitted distance curve.}
+\item{usr}{the value of \code{par('usr')}.}
+\item{usr2}{the value of \code{par('usr')} for the velocity curve.}
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }
@@ -70,7 +52,7 @@ plot.sitar(model, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, ab
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{lines.sitar}}, \code{\link{mplot}}, \code{\link{plot.clean}}, \code{\link{y2plot}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

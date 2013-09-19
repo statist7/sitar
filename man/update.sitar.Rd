@@ -2,9 +2,7 @@
 \alias{update.sitar}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{update.sitar}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\description{Updates \code{sitar} objects.}
 \usage{
 update.sitar(object, ..., evaluate = TRUE)
 }
@@ -33,9 +31,7 @@ update.sitar(object, ..., evaluate = TRUE)
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

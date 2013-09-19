@@ -3,20 +3,16 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{print.sitar}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+Print method for \code{sitar} objects, based on \code{nlme:::print.lme}.}
 \usage{
 print.sitar(x, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+an object inheriting class \code{sitar}.}
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
-}
+other optional arguments.}
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
@@ -30,9 +26,7 @@ print.sitar(x, ...)
 \references{
 %% ~put references to the literature/web site here ~
 }
-\author{
-%%  ~~who you are~~
-}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \note{
 %%  ~~further notes~~
 }

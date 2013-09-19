@@ -2,7 +2,7 @@
 \alias{cLMS}
 \alias{zLMS}
 \title{LMS conversion to and from z-scores}
-\description{ Routines to handle references constructed with the
+\description{Routines to handle references constructed with the
 LMS method. Given a set of LMS values, the functions convert
 z-scores to measurement centiles and vice versa. }
 \usage{
@@ -17,16 +17,16 @@ cLMS(z, L, M, S, data = NULL)
   \item{S}{vector of coefficients of variation, S in the LMS method.}
   \item{data}{optional data frame containing the variables L, M and S.}
 }
-\details{The variables x, L, M and S should all be the same length. Variable z
+\details{The variables x, L, M and S should all be the same length. Variable \code{z}
 can be scalar or vector.}
-\value{ If z is scalar \code{cLMS} returns a vector the same length as L, M and S.  
-If z is a vector \code{cLMS} returns a matrix where dim(matrix) = c(length(z),length(M)).
-\code{zLMS} returns z-score the same length as L, M and S. }
+\value{ If \code{z} is scalar \code{cLMS} returns a vector the same length as \code{L}, \code{M} and \code{S}.  
+If \code{z} is a vector \code{cLMS} returns a matrix where dim(matrix) = \code{c(length(z),length(M))}.
+\code{zLMS} returns z-scores the same length as \code{L}, \code{M} and \code{S}.}
 \references{
 %% ~put references to the literature/web site here ~
 %% }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{\code{\link{z2cent}}}
+\seealso{\code{\link{z2cent}}, \code{\link{lms2z}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
