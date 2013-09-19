@@ -42,5 +42,5 @@ Dean MC, Cole TJ. Human life history evolution explains dissociation between the
 }
 \keyword{ package }
 \examples{
-~~ simple examples of the most important functions ~~
+## ~~ simple examples of the most important functions ~~
 }
