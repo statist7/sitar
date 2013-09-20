@@ -1,15 +1,13 @@
 \name{plot.sitar}
 \alias{plot.sitar}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{plot.sitar}
 \description{
 A version of \code{plot} for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{
-plot.sitar(model, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE, xy = NULL, nlme = FALSE, ...)
+plot.sitar(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE, xy = NULL, nlme = FALSE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{model}{
+  \item{x}{
 an object of class \code{sitar}.}
   \item{opt}{
 character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve, 'f' for individual Fitted growth curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dvf' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and legend identifying the distance and velocity curves is provided.}
@@ -42,16 +40,7 @@ Returns a list of three objects:
 \item{usr}{the value of \code{par('usr')}.}
 \item{usr2}{the value of \code{par('usr')} for the velocity curve.}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 \code{\link{lines.sitar}}, \code{\link{mplot}}, \code{\link{plot.clean}}, \code{\link{y2plot}}
 }
@@ -61,10 +50,11 @@ Returns a list of three objects:
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (model, opt = "dv", labels, apv = FALSE, xfun, yfun, 
+function (x, opt = "dv", labels, apv = FALSE, xfun, yfun, 
     subset = NULL, abc = c(a = 0, b = 0, c = 0), newplot = TRUE, 
     xy = NULL, nlme = FALSE, ...) 
 {
+	model <- x
     if (nlme) {
         call <- match.call()[-1]
         names(call)[[1]] <- "x"
@@ -196,7 +186,3 @@ function (model, opt = "dv", labels, apv = FALSE, xfun, yfun,
     }
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

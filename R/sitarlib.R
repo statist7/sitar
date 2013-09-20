@@ -382,7 +382,7 @@
 #
 #############################
 
-	plot.sitar <- function(model, opt="dv", labels, apv=FALSE, xfun, yfun, subset=NULL, abc=c(a=0, b=0, c=0), add=FALSE, xy=NULL, nlme=FALSE, ...)
+	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun, yfun, subset=NULL, abc=c(a=0, b=0, c=0), add=FALSE, xy=NULL, nlme=FALSE, ...)
 #	plot curves from sitar model
 #	opt: 
 #		d = fitted distance curve (labels[1] = x, labels[2] = y)
@@ -412,6 +412,7 @@
 #
 #		nlme TRUE plots model as nlme object
 {
+	model <- x
 	if (nlme) {
 		mcall <- match.call()[-1]
 		names(mcall)[[1]] <- 'x'
