@@ -547,7 +547,6 @@
 	lines.sitar <- function (x, ...) 
 {
 	mcall <- match.call()[-1]
-	names(mcall)[1] <- 'model'
 	if (!"add" %in% names(mcall)) mcall <- c(as.list(mcall), list(add=TRUE))
 	do.call('plot.sitar', as.list(mcall))
 }
