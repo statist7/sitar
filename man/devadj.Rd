@@ -5,10 +5,7 @@ Compares the deviance of models including an adjustment for power-transformed y 
 \description{
 \code{devadj} calculates the deviance for one or more SITAR models, adjusting the likelihood for Box-Cox transformed y variables.
 }
-\usage{
-devadj(..., pattern)
-}
-%- maybe also 'usage' for other objects documented here.
+\usage{devadj(..., pattern)}
 \arguments{
   \item{\dots}{one or more SITAR model names}
   \item{pattern}{a character string defining a search term for names of SITAR models. It is passed to \code{ls(pattern=pattern)}, and  any objects so identified are concatenated with  explicitly given model names.}
@@ -18,21 +15,9 @@ The deviance for each model is adjusted if the y variable is power-transformed, 
         adjusted deviance = deviance - 2n {(lambda-1) * log(gm) + log(abs(lambda))}
 where lambda is the power transform, and n and gm are the length and geometric mean of y.
 }
-\value{
-A vector of deviances, in increasing order, each named by the corresponding model.}
-\references{
-%% ~put references to the literature/web site here ~
-}
+\value{A vector of deviances, in increasing order, each named by the corresponding model.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-\code{\link{varexp}}
-}
+\seealso{\code{\link{varexp}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -69,7 +54,3 @@ function (..., pattern)
 	dev[order(dev)]
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

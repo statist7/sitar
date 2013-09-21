@@ -1,6 +1,5 @@
 \name{zLMS}
 \alias{zLMS}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{zLMS}
 \description{Routines to handle references constructed with the
 LMS method. Given a set of LMS values, the functions convert
@@ -8,41 +7,19 @@ z-scores to measurement centiles and vice versa.}
 \usage{
 zLMS(x, L, M, S, data = NULL)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+x}
   \item{L}{
-%%     ~~Describe \code{L} here~~
-}
+L}
   \item{M}{
-%%     ~~Describe \code{M} here~~
-}
+L}
   \item{S}{
-%%     ~~Describe \code{S} here~~
-}
+S}
   \item{data}{
-%%     ~~Describe \code{data} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+data}
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -56,7 +33,3 @@ function (x, L, M, S, data = NULL)
     ((x/M)^L - 1)/L/S
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

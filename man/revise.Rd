@@ -1,28 +1,17 @@
 \name{revise}
 \alias{revise}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{revise}
 \description{Change old-style \code{sitar} obect to new-style. Outdated, and better to use \code{update}.}
 \usage{
 revise(obj)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{obj}{
 an old-style \code{sitar} object.}
 }
 \value{
 Returns an new-style \code{sitar} object.}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 \code{\link{nk2df}}, \code{\link{update}}
 }
@@ -78,7 +67,3 @@ function (obj)
     new
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -1,13 +1,11 @@
 \name{velout}
 \alias{velout}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{velout}
 \description{
 Quickly identify putative outliers in a large number of growth curves.}
 \usage{
 velout(x, y, id, data, lag = 1, velpower = 0.5, limit = 5, linearise = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{An age variable.}
   \item{y}{A outcome variable, typically weight or height.}

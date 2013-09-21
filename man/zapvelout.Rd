@@ -1,13 +1,11 @@
 \name{zapvelout}
 \alias{zapvelout}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{zapvelout}
 \description{
 \code{zapvelout} sets to missing values of \code{y} flagged as outliers by \code{velout}.}
 \usage{
 zapvelout(outliers, icode)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{outliers}{dataframe returned by \code{\link{velout}}.}
   \item{icode}{code(s) to be zapped. See Details.}
@@ -36,7 +34,3 @@ function (outliers, icode)
     invisible(data)
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

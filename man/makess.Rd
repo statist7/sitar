@@ -1,13 +1,9 @@
 \name{makess}
 \alias{makess}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{makess}
 \description{
 A wrapper to fit a cubic smoothing spline to the supplied data, allowing derivatives to be calculated.}
-\usage{
-makess(x, y, xfun, yfun)
-}
-%- maybe also 'usage' for other objects documented here.
+\usage{makess(x, y, xfun, yfun)}
 \arguments{
   \item{x}{
 vector giving the values of the predictor variable.}
@@ -18,24 +14,9 @@ optional function to be applied to \code{x} prior to fitting.}
   \item{yfun}{
 optional function to be applied to \code{y} prior to fitting.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 An object of class \code{smooth.spline} with the extra component \code{apv}, a length-2 vector containing the age at peak velocity and peak velocity. If no peak is identified (based on the 2nd derivative changing sign) the values are for maximum rather than peak velocity.}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -75,7 +56,3 @@ function (x, y, xfun, yfun)
     ss
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

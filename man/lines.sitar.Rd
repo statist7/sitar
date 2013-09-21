@@ -1,39 +1,17 @@
 \name{lines.sitar}
 \alias{lines.sitar}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{lines.sitar}
 \description{
 The \code{lines} function for \code{sitar} to draw growth curves in various ways.
 }
-\usage{
-lines.sitar(model, ...)
-}
-%- maybe also 'usage' for other objects documented here.
+\usage{lines.sitar(model, ...)}
 \arguments{
   \item{model}{sitar model object}
   \item{\dots}{
 Further graphical parameters (see par) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-\code{\link{plot.sitar}}
-}
+\seealso{\code{\link{plot.sitar}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -43,12 +21,8 @@ Further graphical parameters (see par) may also be supplied as arguments, partic
 function (model, ...) 
 {
     call <- match.call()[-1]
-    if (!"newplot" \%in\% names(call)) 
-        call <- c(as.list(call), list(newplot = FALSE))
+    if (!"add" \%in\% names(call)) 
+        call <- c(as.list(call), list(add = TRUE))
     do.call("plot.sitar", as.list(call))
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

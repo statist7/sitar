@@ -1,13 +1,11 @@
 \name{mplot}
 \alias{mplot}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{mplot}
 \description{
 Function to plot multiple growth curves.}
 \usage{
 mplot(x, y, id, data = NULL, subset = NULL, add = FALSE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 vector of x coordinates.}
@@ -22,19 +20,10 @@ optional logical defining a subset of rows in \code{data}.}
   \item{add}{
 optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE).}
   \item{\dots}{
-Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd, color, col and character pch.
-}
+Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd, color, col and character pch.}
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-\code{\link{y2plot}}
-}
+\seealso{\code{\link{y2plot}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -83,7 +72,3 @@ function (x, y, id, data = NULL, subset = NULL, newplot = TRUE,
     })
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

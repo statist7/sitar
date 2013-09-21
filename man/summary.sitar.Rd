@@ -1,13 +1,11 @@
 \name{summary.sitar}
 \alias{summary.sitar}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{summary.sitar}
 \description{
 A \code{summary} method for \code{sitar} objects based on \code{\link{summary.lme}}.}
 \usage{
 summary.sitar(object, adjustSigma = TRUE, verbose = FALSE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{an object inheriting from class \code{sitar}.}
   \item{adjustSigma}{an optional logical value (see \code{\link{summary.lme}}.}
@@ -20,19 +18,7 @@ an object inheriting from class \code{summary.sitar} with all components include
 \item{y.adj}{vector of length \code{y} in \code{object} with \code{y} values adjusted for subject-specific random effects a.}
 \item{apv}{length 2 vector giving respectively age at peak velocity and peak velocity based on the fitted distance curve (using transformed \code{x} and \code{y} where specified).}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -74,7 +60,3 @@ function (object, adjustSigma = TRUE, verbose = FALSE, ...)
     object
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

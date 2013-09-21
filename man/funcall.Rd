@@ -3,24 +3,15 @@
 \title{funcall}
 \description{
 Applies an expression to vector v, optionally inverting the expression first. For example if the expression is log, funcall returns log(v) if inverse is FALSE, and exp(v) if inverse is TRUE.}
-\usage{
-funcall(v, vcall, inverse = FALSE)
-}
-%- maybe also 'usage' for other objects documented here.
+\usage{funcall(v, vcall, inverse = FALSE)}
 \arguments{
   \item{v}{vector}
   \item{vcall}{expression}
   \item{inverse}{logical}
 }
-\details{
-Inverse covers functions log, exp, sqrt, ^, *, /, +, -.}
-\value{
-Returns a vector of length v
-}
+\details{Inverse covers functions log, exp, sqrt, ^, *, /, +, -.}
+\value{Returns a vector of length v.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -59,7 +50,3 @@ function (v, vcall, inverse = FALSE)
     eval(vcall)
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

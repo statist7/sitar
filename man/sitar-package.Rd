@@ -41,6 +41,3 @@ Prentice A, Dibba B, Sawo Y, et al. The effect of prepubertal calcium carbonate 
 Dean MC, Cole TJ. Human life history evolution explains dissociation between the timing of tooth eruption and peak rates of root growth. PLoS ONE 2013;8:e54534.
 }
 \keyword{ package }
-\examples{
-## ~~ simple examples of the most important functions ~~
-}

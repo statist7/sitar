@@ -1,13 +1,11 @@
 \name{plot.clean}
 \alias{plot.clean}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{plot.clean}
 \description{
 A version of \code{mplot} to plot growth curves and identify outliers. Outliers are clicked on and the corresponding growth curve is highlighted.}
 \usage{
 plot.clean(x, y = NULL, id = NULL, data = NULL, n = length(x), pch = 20, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 vector of x coordinates.}
@@ -22,30 +20,14 @@ maximum number of points to be identified.}
   \item{pch}{
 plot character.}
   \item{\dots}{
-Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd and color, col.
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments, particularly line type, lty, line width, lwd and color, col.}
 }
 \value{
 \code{plot.clean} returns either a vector \code{rows} or a list:
 \item{rows}{a vector of row numbers corresponding to the selected points.}
 \item{data}{a dataframe returned if \code{data} has been provided in the call, containing as columns \code{rows}, \code{id}, \code{x} and \code{y} for the selected points.}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -103,7 +85,3 @@ function (x, y = NULL, id = NULL, data = NULL, n = length(x),
     else list(rows = res, data = data[res, c(idlab, xlab, ylab)])
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

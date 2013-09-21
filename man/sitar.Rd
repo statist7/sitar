@@ -47,8 +47,6 @@ update.sitar(object, ..., evaluate = TRUE)
   \item{na.action}{function for when the data contain NAs (see \code{\link{nlme}}).}
   \item{control}{list of control values for the estimation algorithm (see \code{\link{nlme}}).}
 }
-\details{
-}
 \value{
 An object of class \code{sitar}, based on \code{nlme}, representing the nonlinear mixed-effects model fit. Generic functions such as \code{print}, \code{plot} and \code{summary} have methods to show the results of the fit. The functions \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects}, and \code{random.effects} can be used to extract some of its components. \code{update} updates the model.
 }

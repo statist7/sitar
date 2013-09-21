@@ -7,7 +7,6 @@ varexp calculates the variance explained by one or more SITAR models, based on t
 \usage{
 varexp(..., pattern)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{one or more SITAR models}
   \item{pattern}{a character string defining a search term for names of SITAR models}
@@ -19,16 +18,7 @@ where sigma1 is the cross-sectional RSD and sigma2 the SITAR RSD.
 }
 \value{
 A vector of percentages, in decreasing order, each named by the corresponding model.}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 \code{\link{devadj}}
 }
@@ -54,7 +44,3 @@ function (...)
     round(pc[rev(order(pc))], 2)
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

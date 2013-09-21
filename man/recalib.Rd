@@ -1,13 +1,11 @@
 \name{recalib}
 \alias{recalib}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{recalib}
 \description{
 A function to recalibrate x,y data using SITAR random effects}
 \usage{
 recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model, from, to)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{xc}{character vector defining column name(s) of \code{x} data to be recalibrated.}
   \item{yc}{character vector defining column name(s) of \code{y} data to be recalibrated.}
@@ -27,12 +25,6 @@ recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model, from, to)
 \value{
 Returns the dataframe \code{data} with the \code{from} rows of \code{xc} and \code{yc} recalibrated.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -76,7 +68,3 @@ function (xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL,
     invisible(data)
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

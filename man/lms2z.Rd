@@ -1,13 +1,11 @@
 \name{lms2z}
 \alias{lms2z}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{lms2z}
 \description{
 A function to convert between measurements and z-scores using a growth reference previously fitted by the LMS method.}
 \usage{
 lms2z(x, y, sex, data = NULL, measure, ref, toz = TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 vector of ages}
@@ -55,7 +53,3 @@ function (x, y, sex, data = NULL, measure, ref, toz = TRUE)
     else cLMS(y, lmsout[, 1], lmsout[, 2], lmsout[, 3])
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

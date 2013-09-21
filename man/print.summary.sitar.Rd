@@ -1,13 +1,11 @@
 \name{print.summary.sitar}
 \alias{print.summary.sitar}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{print.summary.sitar}
 \description{
 A \code{print.summary} method for \code{sitar} objects.}
 \usage{
 print.summary.sitar(x, verbose = FALSE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 an object inheriting class \code{nlme}.}
@@ -16,25 +14,10 @@ a logical to control the amount of output.}
   \item{\dots}{
 to specify extra arguments.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 A formatted summary of the object.
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
@@ -101,7 +84,3 @@ function (x, verbose = FALSE, ...)
     invisible(x)
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
