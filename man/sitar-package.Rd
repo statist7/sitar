@@ -1,6 +1,6 @@
 \name{sitar-package}
 \alias{sitar-package}
-\alias{sitar}
+% \alias{sitar}
 \docType{package}
 \title{SITAR growth curve analysis}
 \description{SITAR is a method of growth curve analysis, based on \pkg{nlme}, that estimates

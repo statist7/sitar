@@ -28,7 +28,7 @@ optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE)
   \item{xy}{
 defunct.}
   \item{nlme}{
-optional logical which set TRUE plots the model as an \code{nlme} object, using \code{\link{plot.nlme}} arguments.}
+optional logical which set TRUE plots the model as an \code{nlme} object, using \code{plot.nlme} arguments.}
   \item{\dots}{
 Further graphical parameters (see \code{par}) may also be supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line type, lty, line width, lwd, and color, col. For the velocity (y2) plot \code{y2par} can be used (see Details).}
 }

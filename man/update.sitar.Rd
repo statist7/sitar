@@ -6,15 +6,9 @@
 update.sitar(object, ..., evaluate = TRUE)
 }
 \arguments{
-  \item{object}{
-object of class \code{sitar}.
-}
-  \item{\dots}{
-dots.
-}
-  \item{evaluate}{
-logical to control evaluation. 
-}
+  \item{object}{object of class \code{sitar}.}
+  \item{\dots}{dots.}
+  \item{evaluate}{logical to control evaluation.}
 }
 \value{
 If set FALSE returns the expanded call to \code{sitar}, or if TRUE (default) evaluates it.}

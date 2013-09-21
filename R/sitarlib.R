@@ -911,7 +911,7 @@
 #	looks for log, sqrt or ^ - assumes no multipliers
 {	ARG <- list(...)
 	if (!is.null(pattern)) {
-		pattern <- ls(env=parent.frame(), pattern=pattern)
+		pattern <- ls(envir=parent.frame(), pattern=pattern)
 		ARG <- c(ARG, lapply(as.list(pattern), get))
 	}
 	dev <- lapply(ARG, function(obj) {
@@ -951,7 +951,7 @@
 #	returns % of variance explained by sitar model(s)
 {	ARG <- list(...)
 	if (!is.null(pattern)) {
-		pattern <- ls(env=parent.frame(), pattern=pattern)
+		pattern <- ls(envir=parent.frame(), pattern=pattern)
 		ARG <- c(ARG, lapply(as.list(pattern), get))
 	}
 	pc <- lapply(ARG, function(obj) {
@@ -1080,7 +1080,7 @@
 #	fit spline curve to convert y to residual adjusted for x
 		require(quantreg)
 		spline.lm <- rq(dc[,2] ~ bs(dc[,1], df=5))
-		dc[,2] <- residual(spline.lm)
+		dc[,2] <- residuals(spline.lm)
 	}
 #	calculate velocity between successive measurements
 	dt1 <-  diff(dc[,1], lag=lag)

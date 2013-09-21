@@ -1,11 +1,12 @@
 \name{sitar}
 \alias{sitar}
-\alias{summary.sitar}
-\alias{print.sitar}
-\alias{plot.sitar}
-\alias{print.summary.sitar}
-\alias{lines.sitar}
 \alias{update.sitar}
+% \alias{summary.sitar}
+% \alias{print.sitar}
+% \alias{plot.sitar}
+% \alias{print.summary.sitar}
+% \alias{lines.sitar}
+% \alias{update.sitar}
 \title{SITAR growth curve analysis}
 \description{SITAR is a method of growth curve analysis, based on \code{nlme}, that takes a set of growth curves and estimates
  a mean growth curve as a regression spline, plus a set of up to three fixed and
@@ -39,6 +40,7 @@ update.sitar(object, ..., evaluate = TRUE)
   \item{bstart}{optional starting value for fixed effect b (either "mean" (default), "apv" or value).}
   \item{xoffset}{optional value of offset for \code{x} (either "mean" (default), "apv" or value).}
   \item{file}{filename for intermediate code (default .sitar.temp.R).}
+  \item{returndata}{logical which if TRUE causes the working matrix to be returned, or if FALSE (default) returns the fitted model. Setting returndata TRUE is useful in conjunction with \code{subset} and \code{subsample} for simulation purposes.}
   \item{verbose}{optional logical value to print information on the evolution of the iterative algorithm (default FALSE).}
   \item{correlation}{optional \code{corStruct} object describing the within-group correlation structure (see NLME documentation).}
   \item{weights}{optional \code{varFunc} object or one-sided formula describing the within-group heteroscedasticity structure (see \code{\link{nlme}}).}
@@ -46,6 +48,10 @@ update.sitar(object, ..., evaluate = TRUE)
   \item{method}{character string, either "REML" or "ML" (default) (see \code{\link{nlme}}).}
   \item{na.action}{function for when the data contain NAs (see \code{\link{nlme}}).}
   \item{control}{list of control values for the estimation algorithm (see \code{\link{nlme}}).}
+  \item{newform}{logical to distinguish between old and new forms of \code{sitar} object - default TRUE indicates new form.}
+  \item{object}{object of class \code{sitar}.}
+  \item{\dots}{dots.}
+  \item{evaluate}{logical to control evaluation.}
 }
 \value{
 An object of class \code{sitar}, based on \code{nlme}, representing the nonlinear mixed-effects model fit. Generic functions such as \code{print}, \code{plot} and \code{summary} have methods to show the results of the fit. The functions \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects}, and \code{random.effects} can be used to extract some of its components. \code{update} updates the model.

@@ -4,11 +4,11 @@
 \description{
 The \code{lines} function for \code{sitar} to draw growth curves in various ways.
 }
-\usage{lines.sitar(model, ...)}
+\usage{lines.sitar(x, ...)}
 \arguments{
-  \item{model}{sitar model object}
+  \item{x}{\code{sitar} object}
   \item{\dots}{
-Further graphical parameters (see par) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.}
+Further graphical parameters (see \code{par}) may also be supplied as arguments, particularly, line type, lty, line width, lwd, and color, col.}
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{plot.sitar}}}
@@ -18,7 +18,7 @@ Further graphical parameters (see par) may also be supplied as arguments, partic
 ##--	or do  help(data=index)  for the standard data sets.
 
 ## The function is currently defined as
-function (model, ...) 
+function (x, ...) 
 {
     call <- match.call()[-1]
     if (!"add" \%in\% names(call)) 
