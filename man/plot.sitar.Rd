@@ -4,7 +4,7 @@
 \description{
 A version of \code{plot} for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{
-plot.sitar(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE, xy = NULL, nlme = FALSE, ...)
+\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE, xy = NULL, nlme = FALSE, ...)
 }
 \arguments{
   \item{x}{

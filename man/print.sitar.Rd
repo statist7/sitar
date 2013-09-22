@@ -3,7 +3,7 @@
 \title{print.sitar}
 \description{
 Print method for \code{sitar} objects, based on \code{nlme:::print.lme}.}
-\usage{print.sitar(x, ...)}
+\usage{\method{print}{sitar}(x, ...)}
 \arguments{
   \item{x}{
 an object inheriting class \code{sitar}.}

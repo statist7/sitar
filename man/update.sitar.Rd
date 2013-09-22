@@ -3,7 +3,7 @@
 \title{update.sitar}
 \description{Updates \code{sitar} objects.}
 \usage{
-update.sitar(object, ..., evaluate = TRUE)
+\method{update}{sitar}(object, ..., evaluate = TRUE)
 }
 \arguments{
   \item{object}{object of class \code{sitar}.}

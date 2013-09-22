@@ -4,7 +4,7 @@
 \description{
 A \code{summary} method for \code{sitar} objects based on \code{\link{summary.lme}}.}
 \usage{
-summary.sitar(object, adjustSigma = TRUE, verbose = FALSE, ...)
+\method{summary}{sitar}(object, adjustSigma = TRUE, verbose = FALSE, ...)
 }
 \arguments{
   \item{object}{an object inheriting from class \code{sitar}.}

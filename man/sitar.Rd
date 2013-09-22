@@ -6,7 +6,6 @@
 % \alias{plot.sitar}
 % \alias{print.summary.sitar}
 % \alias{lines.sitar}
-% \alias{update.sitar}
 \title{SITAR growth curve analysis}
 \description{SITAR is a method of growth curve analysis, based on \code{nlme}, that takes a set of growth curves and estimates
  a mean growth curve as a regression spline, plus a set of up to three fixed and
