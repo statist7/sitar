@@ -20,7 +20,7 @@
  b.formula = ~1, c.formula = ~1, bounds = 0.04, start, bstart = "mean", xoffset = "mean",
  file = ".sitar.temp.R", returndata=FALSE, verbose = FALSE, correlation = NULL, weights = NULL, subset = NULL, method = "ML", na.action = na.fail, control = nlmeControl(returnObject = TRUE), newform = TRUE)
  
-update.sitar(object, ..., evaluate = TRUE)
+\method{update}{sitar}(object, ..., evaluate = TRUE)
 }
 \arguments{
   \item{x}{vector of ages.}
@@ -49,8 +49,8 @@ update.sitar(object, ..., evaluate = TRUE)
   \item{control}{list of control values for the estimation algorithm (see \code{\link{nlme}}).}
   \item{newform}{logical to distinguish between old and new forms of \code{sitar} object - default TRUE indicates new form.}
   \item{object}{object of class \code{sitar}.}
-  \item{\dots}{dots.}
-  \item{evaluate}{logical to control evaluation.}
+  \item{\dots}{further parameters for \code{update} consisting of any of the parameters for \code{sitar}.}
+  \item{evaluate}{logical to control evaluation.  If TRUE (default) the expanded \code{update} call is passed to \code{sitar} for evaluation, while if FALSE the expanded call itself is returned.}
 }
 \value{
 An object of class \code{sitar}, based on \code{nlme}, representing the nonlinear mixed-effects model fit. Generic functions such as \code{print}, \code{plot} and \code{summary} have methods to show the results of the fit. The functions \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects}, and \code{random.effects} can be used to extract some of its components. \code{update} updates the model.

@@ -828,11 +828,11 @@
 
 #############################
 #
-#	plot.clean
+#	plotclean
 #
 #############################
 
-	plot.clean <- function(x, y=NULL, id=NULL, data=NULL, n=length(x), pch=20, ...)
+	plotclean <- function(x, y=NULL, id=NULL, data=NULL, n=length(x), pch=20, ...)
 #	plot growth curves to identify outlying points and curves
 #	plot y ~ x by id with data
 #	identify up to n points, with pch as plot character

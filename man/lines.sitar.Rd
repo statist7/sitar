@@ -4,7 +4,7 @@
 \description{
 The \code{lines} function for \code{sitar} to draw growth curves in various ways.
 }
-\usage{method{lines}{sitar}(x, ...)}
+\usage{\method{lines}{sitar}(x, ...)}
 \arguments{
   \item{x}{\code{sitar} object}
   \item{\dots}{

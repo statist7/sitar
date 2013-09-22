@@ -4,7 +4,7 @@
 \description{
 A \code{print.summary} method for \code{sitar} objects.}
 \usage{
-\method{print}{ummary.sitar}(x, verbose = FALSE, ...)
+\method{print}{summary.sitar}(x, verbose = FALSE, ...)
 }
 \arguments{
   \item{x}{

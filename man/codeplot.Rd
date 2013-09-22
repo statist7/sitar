@@ -1,6 +1,6 @@
 \name{codeplot}
 \alias{codeplot}
-% \alias{zapvelout}
+\alias{zapvelout}
 \title{codeplot}
 \description{
 Plots output from velout function to display growth curves with outlying points.}
