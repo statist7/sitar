@@ -42,7 +42,7 @@ Returns a list of three objects:
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{
-\code{\link{lines.sitar}}, \code{\link{mplot}}, \code{\link{plot.clean}}, \code{\link{y2plot}}
+\code{\link{lines.sitar}}, \code{\link{mplot}}, \code{\link{plotclean}}, \code{\link{y2plot}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----

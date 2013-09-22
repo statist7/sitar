@@ -1,5 +1,5 @@
-# exportPattern("^[[:alpha:]]+")
-export("bupdate", "cLMS", "codeplot", "devadj", "do.call...", "funcall", "lines.sitar", "lms2z", "makess", "mplot", "nk2df", "plot.clean", "plot.sitar", "print.sitar", "print.summary.sitar", "recalib", "revise", "sitar", "subsample", "summary.sitar", "update.sitar", "varexp", "velout", "xaxsd", "y2plot", "yaxsd", "z2cent", "zapvelout", "zLMS", "subsample")
+exportPattern("^[[:alpha:]]+")
+# export("bupdate", "cLMS", "codeplot", "devadj", "do.call...", "funcall", "heights", "lines.sitar", "lms2z", "makess", "mplot", "nk2df", "plotclean", "plot.sitar", "print.sitar", "print.summary.sitar", "recalib", "revise", "sitar", "subsample", "summary.sitar", "update.sitar", "varexp", "velout", "xaxsd", "y2plot", "yaxsd", "z2cent", "zapvelout", "zLMS", "subsample")
 S3method(print, sitar)
 S3method(plot, sitar)
 S3method(update, sitar)

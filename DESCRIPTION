@@ -2,7 +2,7 @@ Package: sitar
 Type: Package
 Title: SITAR growth curve analysis
 Version: 1.0
-Date: 2013-02-22
+Date: 2013-09-22
 Author: Tim Cole
 Maintainer: Tim Cole <tim.cole@ucl.ac.uk>
 Description: A set of functions for fitting SITAR growth curve models as described in Cole, Donaldson and Ben-Shlomo (2010)

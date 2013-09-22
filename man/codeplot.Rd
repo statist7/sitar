@@ -3,21 +3,22 @@
 \alias{zapvelout}
 \title{codeplot}
 \description{
-Plots output from velout function to display growth curves with outlying points.}
+Handles output from \code{velout} function to display growth curves with outlying points, either plotting or zapping the outliers.}
 \usage{
 codeplot(outliers, icode = 4, ..., print = TRUE)
 zapvelout(outliers, icode)
 }
 \arguments{
   \item{outliers}{ Data frame returned from velout.}
-  \item{icode}{ The code number(s) defining the subset of curves to be displayed.}
+  \item{icode}{ The code number(s) defining the subset of curves to be displayed or zapped (between 1 and 6).}
   \item{\dots}{ Optional plot parameters.}
   \item{print}{ Option to print as well as plot information on each curve.}
 }
 \details{
-The function \code{velout} identifies putative outliers for variable y in data frame \code{data}, \code{codeplot} plots them, and \code{zapvelout} flags those confirmed as outliers.}
+The function \code{velout} identifies putative outliers for \code{y} in \code{data}, \code{codeplot} plots them, and \code{zapvelout} sets missing those confirmed as outliers.  Codes range from 0 (normal) to 8, where 4 and 6 are conventional outliers (see \code{\link{velout}}.
+}
 \value{
-\code{codeplot} returns summary information on each curve with an outlier of the relevant code. \code{zapvelout} sets to NA values of the variable in the underlying data frame.
+\code{codeplot} returns summary information on each curve with an outlier of the relevant code, and optionally plots the curve. \code{zapvelout} sets to NA values of \code{y} whose code is contained in \code{icode}, and returns the modified data frame.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{
