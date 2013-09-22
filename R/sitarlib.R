@@ -4,8 +4,8 @@
 #
 #############################
 
-	library(nlme)
-	library(splines)
+	# library(nlme)
+	# library(splines)
 
 #	global variables
 	if (getRversion() >= "3.0.0") utils::globalVariables(c('par.usr2'))
