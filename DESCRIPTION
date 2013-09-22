@@ -9,5 +9,5 @@ Description: A set of functions for fitting SITAR growth curve models as describ
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
-Depends: nlme, splines
+Depends: R (>= 3.0.0), nlme, splines
 Suggests: quantreg

@@ -7,6 +7,9 @@
 	library(nlme)
 	library(splines)
 
+#	global variables
+	if (getRversion() >= "3.0.0") utils::globalVariables(c('par.usr2'))
+
 #############################
 #
 #	sitar
@@ -737,7 +740,7 @@
 #	xy set uses par() from previous call
 #	xlegend and inset place legend (NULL suppresses)
 {
-	if (getRversion() >= "2.15.1") utils::globalVariables(c('par.usr2'))
+	# if (getRversion() >= "3.0.0") utils::globalVariables(c('par.usr2'))
 # get axis labels
 	if (missing(labels)) labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
 	if (is.null(y2par$ylab)) y2par$ylab <- labels[3]
