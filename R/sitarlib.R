@@ -1,12 +1,3 @@
-#############################
-#
-#	libraries
-#
-#############################
-
-	# library(nlme)
-	# library(splines)
-
 #	global variables
 	if (getRversion() >= "3.0.0") utils::globalVariables(c('par.usr2'))
 
@@ -287,8 +278,8 @@
 	mcall <- object$call.sitar
 	data <- eval(mcall$data)
 	if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
-	attach(data, warn.conflicts=FALSE)
 	on.exit(detach(data))
+	attach(data, warn.conflicts=FALSE)
 	y <- eval(mcall$y)
 	nf <- length(fitted(object))
 	if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
@@ -423,14 +414,10 @@
 	} 
 	else {
 		mcall <- model$call.sitar
-		# cnames <- names(mcall)
-		# mnames <- c("x", "y", "id", "data")
-		# cnames <- cnames[match(mnames, cnames, 0)]
-		# mcall <- mcall[cnames]
 		data <- eval(mcall$data)
 		if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
-		attach(data)
 		on.exit(detach(data))
+		attach(data)
 #	rm(xy) needed to eval xy$apv at top level
 		# rm(xy)
 		x <- eval(mcall$x)
@@ -1320,15 +1307,17 @@
 	}
 
 	zLMS <- function(x, L, M, S, data=NULL) {
-		attach(data)
-		on.exit(detach(data))
-		((x/M)^L - 1)/L/S
+		with(data, {
+			L0 <- L + 1e-7 * (L == 0)
+			( (x / M) ^ L0 - 1) / L0 / S
+		} )
 	}
 	
 	cLMS <- function(z, L, M, S, data=NULL) {
-		attach(data)
-		on.exit(detach(data))
-		as.numeric(M * (1 + L * S %o% z) ^ (1/L))
+		with(data, {
+			L0 <- L + 1e-7 * (L == 0)
+			as.numeric(M * (1 + L0 * S %o% z) ^ (1 / L0))
+		} )
 	}
 	
 	lms2z <- function(x, y, sex, data=NULL, measure, ref, toz=TRUE) {
@@ -1343,8 +1332,8 @@
 #	ref		name of reference, one of: 'uk90' 'who06'
 #	toz		if TRUE returns measurement converted to z-score using ref
 #			if FALSE returns z-score converted to measurement using ref
-	attach(data)
 	on.exit(detach(data))
+	attach(data)
 	lms <- paste(c('L','M','S'), measure, sep='.')
 	lmsout <- matrix(nrow=length(x), ncol=3)
 	ref <- get(ref)
