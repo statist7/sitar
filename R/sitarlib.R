@@ -1316,7 +1316,9 @@
 	cLMS <- function(z, L, M, S, data=NULL) {
 		with(data, {
 			L0 <- L + 1e-7 * (L == 0)
-			as.numeric(M * (1 + L0 * S %o% z) ^ (1 / L0))
+			c <- M * (1 + L0 * S %o% z) ^ (1 / L0)
+			if (length(z) == 1) as.numeric(c)
+				else c
 		} )
 	}
 	
