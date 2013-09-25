@@ -2,7 +2,7 @@
 \alias{bupdate}
 \title{bupdate}
 \description{
-A function to update the value of \code{bstart} when fitting a \code{sitar} model to minimise the correlation between the random effects b and c.}
+A function to update the value of \code{bstart}, the starting value for the b fixed effect, to minimise the correlation between the random effects b and c.}
 \usage{bupdate(x)}
 \arguments{
   \item{x}{a \code{sitar} object.}
@@ -11,14 +11,12 @@ A function to update the value of \code{bstart} when fitting a \code{sitar} mode
 Returns an updated value of the b fixed effect, based on the random effect covariance matrix.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## fit sitar model with b fixed effect starting value defaulting to 'mean'
+m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+print(fixef(m1)['b'])
 
-## The function is currently defined as
-function (x) 
-{
-    cov <- as.matrix(x$modelStruct[[1]][[1]])
-    fixef(x)["b"] + cov[2, 3]/cov[3, 3]
-  }
+## refit with starting value chosen to minimise b-c correlation
+m2 <- update(m1, bstart=bupdate(m1))
+print(fixef(m2)['b'])
 }
+\keyword{regression}

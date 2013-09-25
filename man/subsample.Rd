@@ -23,7 +23,7 @@ With the first sampling scheme \code{xlim} is set to \code{NULL} (default), and 
 \value{
 Returns a logical the length of \code{x} where \code{TRUE} indicates a sampled value.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{\code{\link{sitar}}, \code{\link{sitar}}}
+\seealso{\code{\link{sitar}}}
 \examples{
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,

@@ -12,35 +12,25 @@ cLMS(z, L, M, S, data = NULL)
 \arguments{
   \item{x}{vector of measurements to be converted to z-scores.}
   \item{z}{scalar or vector of z-scores to be converted to measurements.}
-  \item{L}{vector of Box-Cox transformation lambda values, L in the LMS method.}
-  \item{M}{vector of medians, M in the LMS method.}
-  \item{S}{vector of coefficients of variation, S in the LMS method.}
+  \item{L}{vector of Box-Cox transformation (lambda) values, L in the LMS method.}
+  \item{M}{vector of medians (mu), M in the LMS method.}
+  \item{S}{vector of coefficients of variation (sigma), S in the LMS method.}
   \item{data}{optional data frame containing the variables L, M and S.}
 }
-\details{The variables x, L, M and S should all be the same length. Variable \code{z}
-can be scalar or vector.}
-\value{If \code{z} is scalar \code{cLMS} returns a vector the same length as \code{L}, \code{M} and \code{S}.  
-If \code{z} is a vector \code{cLMS} returns a matrix where dim(matrix) = \code{c(length(z),length(M))}.
-\code{zLMS} returns z-scores the same length as \code{L}, \code{M} and \code{S}.}
+\details{x, L, M and S should all be the same length. \code{z}
+can be scalar or vector. The formulae converting \code{x} to \code{z} and vice versa are:
+\deqn{z = \frac{(x/M)^L - 1}{L S}}{%z = ((x/M)^L - 1)/L/S}
+\deqn{x = M (1 + L S z)^{1/L})}{%
+x = M (1 + L S z)^(1/L)}
+where L has 10^-7 added if it is zero.}
+\value{\code{zLMS} returns a vector the same length as \code{M}.
+If \code{z} is scalar \code{cLMS} returns a vector the same length as \code{M}.  
+If \code{z} is a vector \code{cLMS} returns a matrix with the number of columns equal to its length.
+}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{z2cent}}, \code{\link{lms2z}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-##
-## The function is currently defined as
-function (z, L, M, S, data = NULL) 
-{
-    attach(data)
-    on.exit(detach(data))
-    as.numeric(M * (1 + L * S \%o\% z)^(1/L))
+cLMS(z = -2:2, L = 1:-1, M = 5:7, S = rep(0.1, 3))
+zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 }
-## The function is currently defined as
-function (x, L, M, S, data = NULL) 
-{
-    attach(data)
-    on.exit(detach(data))
-    ((x/M)^L - 1)/L/S
-  }
-}
+\keyword{arith}

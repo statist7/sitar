@@ -12,44 +12,19 @@ vector of ages}
   \item{y}{
 vector of either measurements or z-scores, depending on the value of \code{toz}.}
   \item{sex}{
-two-level factor with level 1 male and level 2 female}
+two-level factor with level 1 male and level 2 female.}
   \item{data}{
-dataframe containing \code{x}, \code{y} and \code{sex}}
+dataframe containing \code{x}, \code{y} and \code{sex}.}
   \item{measure}{
 character indicating the name of the measurement, depending on the choice of \code{ref}.}
   \item{ref}{
-character indicating the name of the growth reference, available as a data object.}
+character indicating the name of the growth reference, available as a \code{data} object.}
   \item{toz}{
-logical set to TRUE for conversion from measurement to z-score, and FALSE for the reverse.}
+logical set to TRUE for conversion from measurement to z-score, or FALSE for the reverse.}
 }
 \details{
-Vectors of L, M and S corresponding to \code{x} and \code{sex} are created and passed to either \code{\link{cLMS}} or \code{\link{zLMS}}.}
+Vectors of L, M and S corresponding to \code{x} and \code{sex} are extracted and passed to either \code{\link{cLMS}} or \code{\link{zLMS}}.}
 \value{A vector of the same length as \code{y} containing the transformed values.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{\code{\link{cLMS}}, \code{\link{zLMS}}}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, y, sex, data = NULL, measure, ref, toz = TRUE) 
-{
-    attach(data)
-    on.exit(detach(data))
-    lms <- paste(c("L", "M", "S"), measure, sep = ".")
-    lmsout <- matrix(nrow = length(x), ncol = 3)
-    ref <- get(ref)
-    for (i in 1:3) {
-        for (ix in 1:2) {
-            if (sum(as.numeric(sex) == ix, na.rm = TRUE) > 0) 
-                lmsout[as.numeric(sex) == ix, i] <- spline(ref$years[ref$sex == 
-                  ix], ref[ref$sex == ix, lms[i]], method = "natural", 
-                  xout = x[as.numeric(sex) == ix])$y
-        }
-    }
-    if (toz) 
-        zLMS(y, lmsout[, 1], lmsout[, 2], lmsout[, 3])
-    else cLMS(y, lmsout[, 1], lmsout[, 2], lmsout[, 3])
-  }
-}
+\seealso{\code{\link{z2cent}}}
+\keyword{arith}

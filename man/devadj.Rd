@@ -1,56 +1,52 @@
 \name{devadj}
 \alias{devadj}
-\title{
-Compares the deviance of models including an adjustment for power-transformed y variables.}
+\alias{varexp}
+\title{Two ways to compare SITAR models for fit.}
 \description{
-\code{devadj} calculates the deviance for one or more SITAR models, adjusting the likelihood for Box-Cox transformed y variables.
+\code{devadj} calculates the deviance for SITAR models, adjusting 
+the likelihood for Box-Cox transformed y variables. \code{varexp} 
+calculates the variance explained by SITAR models, compared to 
+the fixed effect model.
 }
-\usage{devadj(..., pattern)}
+\usage{
+devadj(..., pattern)
+varexp(..., pattern)
+}
 \arguments{
-  \item{\dots}{one or more SITAR model names}
-  \item{pattern}{a character string defining a search term for names of SITAR models. It is passed to \code{ls(pattern=pattern)}, and  any objects so identified are concatenated with  explicitly given model names.}
+  \item{\dots}{one or more SITAR models.}
+  \item{pattern}{regular expression defining names of SITAR models.}
 }
 \details{
-The deviance for each model is adjusted if the y variable is power-transformed, using the formula 
-        adjusted deviance = deviance - 2n {(lambda-1) * log(gm) + log(abs(lambda))}
+The deviance is adjusted if the y variable is power-transformed, using the formula 
+        \deqn{adjusted deviance = deviance - 2n ( (\lambda-1) * log(gm) + log(abs(\lambda)) )}{%
+        adjusted deviance = deviance - 2n ( (lambda-1) * log(gm) + log(abs(lambda)) )}
 where lambda is the power transform, and n and gm are the length and geometric mean of y.
-}
-\value{A vector of deviances, in increasing order, each named by the corresponding model.}
-\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{\code{\link{varexp}}}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (..., pattern) 
-{
-	ARG <- list(...)
-	if (!missing(pattern)) {
-		pattern <- ls(env=parent.frame(), pattern=pattern)
-		ARG <- c(ARG, pattern)
-	}
-	else pattern <- NULL
-	dev <- numeric(length(ARG))
-	names(dev) <- c(match.call(expand.dots=FALSE)$..., pattern)
-	for (i in 1:length(ARG)) {
-		obj <- ARG[[i]]
-		if (is.character(obj)) obj <- get(obj)
-		if (!is.null(obj$call.sitar)) obj$call <- obj$call.sitar
-		if (!is.null(obj$call$y)) ycall <- obj$call$y else ycall <- obj$call$model[[2]]
-		lambda <- 1
-		if (length(ycall) == 1) yt <- ycall else {
-			yt <- as.symbol(ycall[[2]])
-			fun <- ycall[1]
-			if (fun == "log()") lambda <- 0 else
-			if (fun == "sqrt()") lambda <- 0.5 else 
-			if (fun == "`^`()") lambda <- eval(ycall[[3]])
-		}
-		y <- eval(yt, eval(obj$call$data, sys.parent()))
-		sly <- ifelse(lambda == 1, 0, sum(log(y)))
-		dev[i] <- -2 * (obj$logLik + (lambda-1) * sly + length(y) * log(abs(lambda) + (lambda == 0)))
-	}
-	dev[order(dev)]
-  }
+The variance explained is given by
+        \deqn{% explained = 100 * (1 - (\sigma2/\sigma1)^2)}{%
+        \% explained = 100 * (1 - (sigma2/sigma1)^2)}
+where sigma1 is the cross-sectional RSD and sigma2 the SITAR RSD.
+
+Objects not of class \code{sitar} are ignored by \code{pattern} in \code{varexp}. In \code{devadj} non-\code{sitar} objects containing \code{call} and\code{logLik} are included.
 }
+\value{
+For \code{devadj} a vector of deviances in increasing order. For \code{varexp} a vector of percentages in decreasing order. Value names correspond to the models.
+}
+\author{Tim Cole \email{tim.cole@ucl.ac.uk}}
+\examples{
+data(heights)
+## fit sitar model for height
+m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+
+## update it for log(height) 
+m2 <- update(m1, y=sqrt(height))
+
+## compared variance explained in the two models
+varexp(m1, m2)
+
+## compare their deviances, adjusting for sqrt transform
+## the regular expression looks for model names starting "m"
+## followed by a digit
+devadj(pattern="^m[0-9]")
+}
+\keyword{regression}
