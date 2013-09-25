@@ -51,11 +51,11 @@ Returns a list of three objects:
 m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
 
 ## draw fitted distance and velocity curves
-##	adding age at peak velocity
+## adding age at peak velocity
 plot(m1, apv=TRUE)
 
-## draw individually coloured growth curves adjusted for random effects
-plot(m1, opt='a', col=1 + as.numeric(id) %% 5)
+## draw individual growth curves adjusted for random effects
+plot(m1, opt='a', col='grey')
 
 ## add mean curve in red
 lines(m1, opt='d', col='red', lwd=2)
