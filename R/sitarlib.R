@@ -727,7 +727,6 @@
 #	xy set uses par() from previous call
 #	xlegend and inset place legend (NULL suppresses)
 {
-	# if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2'))
 # get axis labels
 	if (missing(labels)) labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
 	if (is.null(y2par$ylab)) y2par$ylab <- labels[3]
