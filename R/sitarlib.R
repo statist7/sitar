@@ -1,5 +1,5 @@
 #	global variables
-	if (getRversion() >= "3.0.0") utils::globalVariables(c('par.usr2'))
+	if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2'))
 
 #############################
 #
@@ -727,7 +727,7 @@
 #	xy set uses par() from previous call
 #	xlegend and inset place legend (NULL suppresses)
 {
-	# if (getRversion() >= "3.0.0") utils::globalVariables(c('par.usr2'))
+	# if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2'))
 # get axis labels
 	if (missing(labels)) labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
 	if (is.null(y2par$ylab)) y2par$ylab <- labels[3]
@@ -782,7 +782,7 @@
 			do.call('plot', c(list(x=x, y=y2, ann=FALSE, bty="n", xaxt="n", yaxt="n", type="l"), y2par))
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
-			assign('par.usr2', par('usr'), globalenv())
+			assign('.par.usr2', par('usr'), globalenv())
 #	add y2 axis 
 			if (par('mar')[4] >= 2) axis(4)
 #	unset col
@@ -802,10 +802,10 @@
 		if (!missing(y2)) {
 			if (exists('xy$usr2')) {
 				par(usr=xy$usr2)
-				assign('par.usr2', par('usr'), globalenv())
+				assign('.par.usr2', par('usr'), globalenv())
 			}
-			else if (exists('par.usr2')) {
-				par(usr=par.usr2)
+			else if (exists('.par.usr2')) {
+				par(usr=.par.usr2)
 				xy$usr2 <- par('usr')
 			}
 			else stop("Error in y2plot: second y axis requires previous call to set it\n", call.=FALSE)
