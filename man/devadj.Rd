@@ -19,15 +19,16 @@ varexp(..., pattern)
 \details{
 The deviance is adjusted if the y variable is power-transformed, using the formula 
         \deqn{adjusted deviance = deviance - 2n ( (\lambda-1) * log(gm) + log(abs(\lambda)) )}{%
-        adjusted deviance = deviance - 2n ( (lambda-1) * log(gm) + log(abs(lambda)) )}
+        deviance - 2n ( (lambda-1) * log(gm) + log(abs(lambda)) )}
 where lambda is the power transform, and n and gm are the length and geometric mean of y.
 
 The variance explained is given by
-        \deqn{% explained = 100 * (1 - (\sigma2/\sigma1)^2)}{%
+        \deqn{\% explained = 100 * (1 - (\sigma2/\sigma1)^2)}{%
         \% explained = 100 * (1 - (sigma2/sigma1)^2)}
 where sigma1 is the cross-sectional RSD and sigma2 the SITAR RSD.
 
-Objects not of class \code{sitar} are ignored by \code{pattern} in \code{varexp}. In \code{devadj} non-\code{sitar} objects containing \code{call} and\code{logLik} are included.
+Objects not of class \code{sitar} are ignored by \code{pattern} in \code{varexp}, while in
+\code{devadj} non-\code{sitar} objects containing \code{call} and\code{logLik} are included.
 }
 \value{
 For \code{devadj} a vector of deviances in increasing order. For \code{varexp} a vector of percentages in decreasing order. Value names correspond to the models.
@@ -38,15 +39,14 @@ data(heights)
 ## fit sitar model for height
 m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
 
-## update it for log(height) 
+## update it for log(height)
 m2 <- update(m1, y=sqrt(height))
 
 ## compared variance explained in the two models
 varexp(m1, m2)
 
 ## compare their deviances, adjusting for sqrt transform
-## the regular expression looks for model names starting "m"
-## followed by a digit
+## the pattern matches names starting with "m" followed by a digit
 devadj(pattern="^m[0-9]")
 }
 \keyword{regression}

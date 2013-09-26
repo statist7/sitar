@@ -13,19 +13,24 @@ yaxsd(usr = par()$usr[3:4])
   \item{usr}{a length-2 vector defining the length of the x-axis or y-axis.}
 }
 \details{
-Implements par('xaxs') and par('yaxs') option 'd'
-e.g. plot(..., xlim=xaxsd(), ylim=yaxsd()).
+Implements par('xaxs') and par('yaxs') option 'd', i.e. uses previous axis scales in a new plot.
 }
 \value{
 By default returns xlim/ylim args to match current setting of par()$usr, i.e. previous plot scales. Specifying \code{usr} gives scales with the usr args at the extremes.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## generate and plot 100 data points
+x <- rnorm(100)
+y <- rnorm(100)
+plot(x, y, pch=19)
 
-## The function is currently defined as
-function (usr = par()$usr[1:2]) 
-(usr + mean(usr) * 0.08)/1.08
+## generate and plot 10 more 
+## constraining axis scales to be as before
+x <- rnorm(10)
+y <- rnorm(10)
+plot(x, y, pch=19, xlim=xaxsd(), ylim=yaxsd())
+
+## force axis extremes to be -3 and 3
+plot(x, y, pch=19, xlim=xaxsd(c(-3,3)), ylim=yaxsd(c(-3,3)))
 }

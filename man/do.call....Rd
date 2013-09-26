@@ -20,25 +20,3 @@ an environment within which to evaluate the call. This will be most useful if \c
 }
 \value{The result of the (evaluated) function call.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (what, args, ..., quote = FALSE, envir = parent.frame()) 
-{
-    ddd <- list(...)
-    if (!is.null(ddd)) {
-        for (i in names(ddd)) {
-            if (i \%in\% names(args)) 
-                args[i] <- ddd[i]
-            else {
-                args <- c(args, i = ddd[i])
-                names(args)[length(args)] <- i
-            }
-        }
-    }
-    do.call(what, args, quote = quote, envir = envir)
-  }
-}
