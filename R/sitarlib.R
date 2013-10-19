@@ -407,6 +407,7 @@
 #		nlme TRUE plots model as nlme object
 {
 	model <- x
+	rm(x)
 	if (nlme) {
 		mcall <- match.call()[-1]
 		names(mcall)[[1]] <- 'x'
