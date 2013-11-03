@@ -11,7 +11,7 @@ Converts z-scores, typically defining centiles in a growth chart, to character s
 \value{
 A character string is returned, the same length as z. Z-scores in the range +/- 3.3 are converted to centiles with one or two significant figures (lower tail) or to their complement (upper tail). For z-scores exceeding 3.3 in absolute value the character consists of "SDS" appended to the z-score rounded to one decimal place.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{\code{link{cLMS}}}
+\seealso{\code{\link{cLMS}}}
 \examples{
 z2cent(-4:4)
 }
