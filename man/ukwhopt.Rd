@@ -1,0 +1,62 @@
+\name{ukwhopt}
+\alias{ukwhopt}
+\docType{data}
+\title{UK 1990 growth reference}
+\description{
+The UK 1990 revised growth reference (Cole et al 2011) for birth length, weight
+and head circumference, fitted by the LMS method and summarised by values of L,
+M and S by sex from 23 to 42 weeks gestation.
+}
+\usage{data(ukwhopt)}
+\format{
+  A data frame with 40 observations on the following 12 variables:
+  \describe{
+    \item{\code{weeks}}{numeric vector}
+    \item{\code{years}}{numeric vector}
+    \item{\code{L.ht}}{numeric vector}
+    \item{\code{M.ht}}{numeric vector}
+    \item{\code{S.ht}}{numeric vector}
+    \item{\code{L.wt}}{numeric vector}
+    \item{\code{M.wt}}{numeric vector}
+    \item{\code{S.wt}}{numeric vector}
+    \item{\code{L.head}}{numeric vector}
+    \item{\code{M.head}}{numeric vector}
+    \item{\code{S.head}}{numeric vector}
+    \item{\code{sex}}{two-level factor with level 1 male and level 2 female}
+  }
+}
+\details{
+The growth reference is the birth section of the UK-WHO growth reference 
+(see Wright et al 2010).
+
+The L, M and S values for each measurement correspond respectively to the Box-Cox power, 
+median and coefficient of variation of the distribution by age and sex 
+(Cole & Green 1992). The short names for each measurement (see \code{\link{lms2z}}) 
+are as follows: height (ht), weight (wt) and head circumference (head).
+
+Age is measured in \code{weeks} gestation and \code{years} post-term, 
+where 0 years corresponds to 40 weeks gestation.
+}
+\source{
+The values are tabulated in the Excel spreadsheet UK_WHO_preterm.xls provided
+with the Excel add-in LMSgrowth from
+\url{http://www.healthforallchildren.com/?product_cat=software}.
+}
+\references{
+Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and
+penalized likelihood. Stat Med 1992;11:1305-19.
+
+Cole TJ, Williams AF, Wright CM, et al. Revised birth centiles for weight,
+length and head circumference in the UK-WHO growth charts. Ann Hum Biol
+2011;38:7-11.
+
+Wright CM, Williams AF, Elliman D, et al. Using the new UK-WHO growth charts.
+BMJ 2010;340:c1140.
+}
+\examples{
+data(ukwhopt)
+## calculate median birth weight in girls from 23 to 42 weeks gestation
+lms2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, data = NULL, measure = 'wt', 
+    ref = 'ukwhopt', toz = FALSE)
+}
+\keyword{datasets}
