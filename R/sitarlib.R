@@ -61,13 +61,6 @@
 		mcall$xoffset <- NULL
 		if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0 
 		else bstart <- b.origin(bstart)
-		# else if (bstart == 'mean') bstart <- mean(x)
-		# else if (bstart == 'apv') {
-			# spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-			# bstart <- makess(x, fitted(spline.lm))$apv[1]
-		# }
-		# else if (!is.numeric(bstart)) stop('bstart must be "mean" or "apv" or numeric')
-		# xc <- x
 		knots <- knots - bstart
 		bounds <- bounds - bstart
 #	get spline start values
@@ -75,12 +68,6 @@
 	} 
 	else { # using xoffset
 		xoffset <- b.origin(xoffset)
-		# if (xoffset == 'mean') xoffset <- mean(x)
-		# else if (xoffset == 'apv') {
-			# spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-			# xoffset <- makess(x, fitted(spline.lm))$apv[1]
-		# }
-		# else if (!is.numeric(xoffset)) stop('xoffset must be "mean" or "apv" or numeric')
 #	apply xoffset	
 		x <- x - xoffset
 		knots <- knots - xoffset
@@ -633,13 +620,11 @@
 				if (is.character(bstart)) bstart <- mean(x)
 				start.$fixed['b'] <- bstart
 			}
-			c <- start.$fixed['c']
-			if (is.na(c)) c <- 0
-			x <- (x - bstart) * exp(c)
+			start.$fixed['c'] <- 0
 			knots <- knots - bstart
 			bounds <- bounds - bstart
 #	get spline start values
-			spline.lm <- lm(fitted(object, level=0) ~ ns(x, knots=knots, Bound=bounds))
+			spline.lm <- lm(fitted(object, level=0) ~ ns(x - bstart, knots=knots, Bound=bounds))
 			start.$fixed <- c(coef(spline.lm)[c(2:(df+1), 1)], start.$fixed[fixed.extra])
 		}
 #	save start. object
