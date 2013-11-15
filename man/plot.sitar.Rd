@@ -3,7 +3,7 @@
 \alias{lines.sitar}
 \title{plot.sitar}
 \description{
-\code{plot} and \code{lines} methods for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
+\code{plot} and \code{lines} methods for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves.}
 \usage{
 \method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE, xy = NULL, nlme = FALSE, ...)
 \method{lines}{sitar}(x, ...)
@@ -30,11 +30,10 @@ optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE)
 defunct.}
   \item{nlme}{
 optional logical which set TRUE plots the model as an \code{nlme} object, using \code{plot.nlme} arguments.}
+  \item{y2par}{
+optional named list of graphical parameters (see \code{par}) for annotating the velocity (y2) curve plot (right axis).}
   \item{\dots}{
-Further graphical parameters (see \code{par}) may also be supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line type, lty, line width, lwd, and color, col. For the velocity (y2) plot \code{y2par} can be used (see Details).}
-}
-\details{
-For option 'dv' (the default) the velocity curve plot (with right axis) can be annotated with \code{par} parameters given as a named list called \code{y2par}.
+Further graphical parameters (see \code{par}) may also be supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line type, lty, line width, lwd, and color, col. See also \code{y2par} argument.}
 }
 \value{
 Returns a list of three objects:
