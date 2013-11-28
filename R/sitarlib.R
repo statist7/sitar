@@ -838,7 +838,9 @@
 		points(x[ans], y[ans], pch = pch)
 		if (!is.null(id)) {
 			text(x[ans], y[ans], label=id[ans], adj=c(0.5, 0.1))
-			lines(x[id==id[ans]], y[id==id[ans]])
+			idt <- id==id[ans]
+			ox <- order(x[idt])
+			lines(x[idt][ox], y[idt][ox])
 		}	
 		sel[ans] <- TRUE
 		res <- c(res, ans)
