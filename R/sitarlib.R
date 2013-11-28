@@ -1160,7 +1160,8 @@
 		if (print) cat('\ncase', kount, 'of', nids, '-', id, as.character(z[1, 1]), 'with', dim(z)[[1]], 'points\n')
 		inc <- z[z$res,]
 		if (print) print(inc[,1:7])
-		do.call...('plot', list(z[,2], z[,3], type='b', xlab=x, ylab=y, pch=46), ...)
+		ox <- order(z[,2])
+		do.call...('plot', list(z[,2][ox], z[,3][ox], type='b', xlab=x, ylab=y, pch=46), ...)
 		do.call...('points', list(inc[,2], inc[,3], pch=8), ...)
 		title(paste(id, z[1, 1], 'code', 
 			paste(unique(inc$code), collapse=' ')))
