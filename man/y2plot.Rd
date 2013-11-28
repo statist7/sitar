@@ -4,7 +4,8 @@
 \description{
 Function to plot two y variables, y1 and y2, against a single x variable, with the y1 and y2 axes on the left and right of the plot respectively.}
 \usage{
-y2plot(x, y1, y2 = NULL, labels, y2par = NULL, add = FALSE, xy, xlegend = "topleft", inset = 0.05, ...)
+y2plot(x, y1, y2 = NULL, labels, y2par = NULL, add = FALSE, xy, xlegend = "topleft",
+ inset = 0.05, ...)
 }
 \arguments{
   \item{x}{vector of ages.}
@@ -30,5 +31,6 @@ In addition the variable .par.usr2, equal to usr2, is created in globalenv(), wh
 \seealso{\code{\link{plot.sitar}}}
 \examples{
 ## plot boys median height and weight on the UK 1990 reference
-with(uk90[uk90$sex == 1,], y2plot(x=years, y=M.ht, y2=M.wt, labels=c('years', 'median height', 'median weight'), y2par=list(col='red'), xy=NULL))
+with(uk90[uk90$sex == 1,], y2plot(x=years, y=M.ht, y2=M.wt,
+ labels=c('years', 'median height', 'median weight'), y2par=list(col='red'), xy=NULL))
 }
