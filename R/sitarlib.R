@@ -52,6 +52,7 @@
 	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
 	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df) 
 		else df <- length(knots) + 1
+	if (dim(data)[1] <= df) stop("too few data to fit spline curve")
 #	define bounds, default x range ±4% 
 	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x)) 
 	if (length(bounds) != 2) stop("bounds should be length 1 or 2")
@@ -576,7 +577,6 @@
 			mcall <- as.call(c(as.list(mcall), extras[!existing]))
 	}
 #	check if can use previous start values
-#	need to add "subset"
 	if (sum(pmatch(names(extras), c("x", "y", "id", "data", "fixed", "random", "a.formula", "b.formula", "c.formula", "start", "subset", "returndata")), na.rm=TRUE) == 0) {
 #	update start random effects if dataframe changed
 		data <- eval(mcall$data)
@@ -999,10 +999,12 @@
 		ts <- c(NA, ts) # expand
 		iapv <- which.max(ss1$y * ts) # point of peak velocity
 		o <- (iapv-2):(iapv+2) # region of peak
-		mc <- lm(ss1$y[o] ~ poly(ss$x[o], 2, raw=TRUE))$coef # velocity as quadratic in age
-		apv[1] <- - mc[2] / 2 / mc[3] # age at peak velocity
+		mn <- mean(ss$x[o])
+		mc <- lm(ss1$y[o] ~ poly(ss$x[o] - mn, 2, raw=TRUE))$coef # velocity as quadratic in age
+		apv[1] <- - mc[2] / 2 / mc[3] + mn # age at peak velocity
 		apv[2] <- mc[1] - mc[2]^2 / 4 / mc[3] # peak velocity
 		names(apv) <- c('apv', 'pv')
+		if (any(is.na(apv))) warning('apv undefined')
 	}
 	else {
 		iapv <- which.max(ss1$y) # max not peak velocity
