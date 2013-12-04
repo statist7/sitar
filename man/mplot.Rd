@@ -24,7 +24,7 @@ Further graphical parameters (see \code{\link{par}}) may also be supplied as arg
   particularly line type, lty, line width, lwd, color, col and character pch.}
 }
 \details{
-The arguments \code{x}, \code{y} and \code{id} can be given as characters. The \code{\link{par}} parameters can be functions of variables in \code(data), e.g. to colour curves separately by id use \code{col = as.numeric(id) %% 6 + 1}.
+The arguments \code{x}, \code{y} and \code{id} can be given as characters. The \code{\link{par}} parameters can be functions of variables in \code{data}, e.g. to colour curves separately by id use \code{col = as.numeric(id) %% 6 + 1}.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{y2plot}}}
