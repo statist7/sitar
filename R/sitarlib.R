@@ -409,8 +409,13 @@
 		nf <- length(fitted(model))
 		if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
 		if (is.null(subset)) subset <- rep(TRUE, nf)
-	
-		ARG <- list(...)
+
+#	extract list(...)
+		ccall <- match.call()[-1]
+		cnames <- names(ccall)
+		dots <- cnames[!cnames %in% names(formals(plot.sitar))]
+		if (length(dots) > 0) ARG <- lapply(ccall[dots], eval, data, parent.frame())
+			else ARG <- NULL
 #	if xlab not specified replace with label or else x name
 		if (!"xlab" %in% names(ARG)) {
 			xl <- ifelse(missing(labels), deparse(mcall$x), labels[1])
@@ -656,9 +661,9 @@
 
 #	extract and save vector par args: col lty lwd pch
 	cnames <- names(mcall)
-	select <- !cnames %in% names(formals(mplot))
-	if (sum(select) > 0) {
-		ARG <- lapply(as.list(mcall[select]), eval, envir = data, enclos = parent.frame())
+	dots <- !cnames %in% names(formals(mplot))
+	if (sum(dots) > 0) {
+		ARG <- lapply(as.list(mcall[dots]), eval, envir = data, enclos = parent.frame())
 		cnames <- names(ARG)[lapply(ARG, length) == nrow(df)]
 		df[, cnames] <- ARG[cnames]
 		ARG[cnames] <- NULL
