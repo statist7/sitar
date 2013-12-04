@@ -266,13 +266,11 @@
 	mcall <- object$call.sitar
 	data <- eval(mcall$data)
 	if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
-	on.exit(detach(data))
-	attach(data, warn.conflicts=FALSE)
-	y <- eval(mcall$y)
+	x <- eval(mcall$x, data)
+	y <- eval(mcall$y, data)
+	id <- eval(mcall$id, data)
 	nf <- length(fitted(object))
 	if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
-	x <- eval(mcall$x)
-	id <- eval(mcall$id)
 	xoffset <- object$xoffset
 	if (is.null(xoffset)) xoffset <- 0
 	if (!is.na(fixef(object)['b'])) xoffset <- xoffset + fixef(object)['b'] # added 23/4/13
@@ -405,13 +403,9 @@
 		mcall <- model$call.sitar
 		data <- eval(mcall$data)
 		if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
-		on.exit(detach(data))
-		attach(data)
-#	rm(xy) needed to eval xy$apv at top level
-		# rm(xy)
-		x <- eval(mcall$x)
-		y <- eval(mcall$y)
-		id <- factor(eval(mcall$id)) # factor added 23/4/13
+		x <- eval(mcall$x, data)
+		y <- eval(mcall$y, data)
+		id <- factor(eval(mcall$id, data)) # factor added 23/4/13
 		nf <- length(fitted(model))
 		if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
 		if (is.null(subset)) subset <- rep(TRUE, nf)
@@ -644,58 +638,61 @@
 #
 #############################
 
-	mplot <- function(x, y, id, data=NULL, subset=NULL, add=FALSE, ...)
+	mplot <- function(x, y, id, data=NULL, subset=NULL, add=FALSE, ...) {
 #	plots y ~ x by id with data
+#	x and y can be name or character
 #	subset defines a subset of rows
 #	add TRUE suppresses plot axes
 #	... parameters where col, lty, lwd, pch can depend on id
-{	
-#	save names
-	xl <- deparse(substitute(x))
-	yl <- deparse(substitute(y))
-	
-#	attach or create data
-	if (!is.null(data)) {
-		data <- data[, c(xl, yl, deparse(substitute(id)))]
-		on.exit(detach(data))
-		attach(data)
-		xv <- substitute(x)
-		yv <- substitute(y)
-	} 
-	else {
-#	save values
-		xv <- substitute(x, globalenv())
-		yv <- substitute(y, globalenv())
-		data <- as.data.frame(cbind(x, y, id))
-	}
-#	extract and save vector ... args: col lty lwd pch
-	ARG <- list(...)
-	cnames <- names(ARG)
-	if (!is.null(cnames)) {
-		cnames <- cnames[lapply(ARG, length) == dim(data)[[1]]]
-		data[, cnames] <- ARG[cnames]
-		ARG[cnames] <- NULL
-	}
-#	handle subset
-	if (is.null(subset)) subset <- rep(TRUE, length(id))
-	subset <- ifelse(is.na(x) | is.na(y), FALSE, subset)
-	if (sum(subset, na.rm=TRUE) == 0) stop("no data to plot")
 
-#	if new graph plot axes
-	if (!add) do.call...("plot", list(x=eval(x)[subset], y=eval(y)[subset], type='n', xlab=xl, ylab=yl), ...)
+#	save x y id	
+	mcall <- match.call()[-1]
+	x.y.id <- as.list(mcall[1:3])
+	df <- lapply(x.y.id, eval, envir = data, enclos = parent.frame())
+	df <- as.data.frame(lapply(df, function(z) {
+		if (is.character(z)) with(data, get(z, inherits = TRUE)) else z
+	}))
+	names(df) <- unlist(lapply(lapply(x.y.id, as.name),deparse))
+
+#	extract and save vector par args: col lty lwd pch
+	cnames <- names(mcall)
+	select <- !cnames %in% names(formals(mplot))
+	if (sum(select) > 0) {
+		ARG <- lapply(as.list(mcall[select]), eval, envir = data, enclos = parent.frame())
+		cnames <- names(ARG)[lapply(ARG, length) == nrow(df)]
+		df[, cnames] <- ARG[cnames]
+		ARG[cnames] <- NULL
+	} else {
+		ARG <- list()
+		cnames <- NULL
+	}
+
+#	subset data
+	subset <- eval(substitute(subset), data)
+	if (!is.null(subset)) {
+		if (length(subset) != nrow(df)) stop('subset wrong length for data')
+		subset <- ifelse(is.na(df[, 1]) | is.na(df[, 2]), FALSE, subset)
+		df <- df[subset, ]		
+	}
+	if (nrow(df) == 0) stop("no data to plot")
+
+#	plot axes if new graph
+	if (!add) {
+		if (!"xlab" %in% names(ARG)) ARG <- c(ARG, list(xlab=quote(names(df)[1])))
+		if (!"ylab" %in% names(ARG)) ARG <- c(ARG, list(ylab=quote(names(df)[2])))
+		type <- match(names(ARG), "type", 0)
+		do.call("plot", c(list(x=df[, 1], y=df[, 2], type='n'), ARG[!type]))	
+	}
 
 #	draw growth curves
-	tt <- by(data[subset,], id[subset], function(z) {
+	tt <- by(df, df[, 3], function(z) {
 #	sort by x
-		zs <- z[order(eval(xv, z)),]
-		xvt <- eval(xv, zs)
-		yvt <- eval(yv, zs)
+		ox <- order(z[, 1])
 #	restore vector ... args
-		if (!is.null(cnames)) ARG[cnames] <- as.list(as.data.frame(zs[, cnames]))
-
-#	lines(xvt, yvt, ...)
-		do.call("lines", c(list(x=xvt, y=yvt), ARG))
-	}	)
+		if (length(cnames) > 0) ARG[cnames] <- as.list(as.data.frame(z[ox, cnames]))
+#	lines(x, y, ...)
+		do.call("lines", c(list(x=z[ox, 1], y=z[ox, 2]), ARG))
+	})		
 }
 
 #############################
