@@ -1,5 +1,5 @@
 #	global variables
-	if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2'))
+	# if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2'))
 
 #############################
 #
@@ -758,7 +758,7 @@
 		}
 		par(mar=mar)
 #	plot x & y1 axes and y1 ~ x
-		do.call('plot', c(list(x=x, y=y1, type='l'), ypar))
+		do.call('plot', c(list(x=quote(x), y=quote(y1), type='l'), ypar))
 #	save x & y1 axis limits
 		xy$usr <- par('usr')
 #	optionally plot y2 and add right axis, with y2par as ...
@@ -766,10 +766,11 @@
 			par(new=TRUE)
 #	ensure x axis same for y2 as y1
 			if (!is.null(ypar$xlim) && is.null(y2par$xlim)) y2par$xlim <- ypar$xlim
-			do.call('plot', c(list(x=x, y=y2, ann=FALSE, bty="n", xaxt="n", yaxt="n", type="l"), y2par))
+			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, bty="n", xaxt="n", yaxt="n", type="l"), y2par))
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
-			assign('.par.usr2', par('usr'), globalenv())
+			.par.usr2 <<- par('usr')
+			# assign('.par.usr2', par('usr'), globalenv())
 #	add y2 axis 
 			if (par('mar')[4] >= 2) axis(4)
 #	unset col
@@ -789,7 +790,8 @@
 		if (!missing(y2)) {
 			if (exists('xy$usr2')) {
 				par(usr=xy$usr2)
-				assign('.par.usr2', par('usr'), globalenv())
+				.par.usr2 <<- par('usr')
+				# assign('.par.usr2', par('usr'), globalenv())
 			}
 			else if (exists('.par.usr2')) {
 				par(usr=.par.usr2)
@@ -1297,62 +1299,6 @@
 		}
 		new
 	}
-
-	zLMS <- function(x, L, M, S, data=NULL) {
-		with(data, {
-			L0 <- L + 1e-7 * (L == 0)
-			( (x / M) ^ L0 - 1) / L0 / S
-		} )
-	}
-	
-	cLMS <- function(z, L, M, S, data=NULL) {
-		with(data, {
-			L0 <- L + 1e-7 * (L == 0)
-			c <- M * (1 + L0 * S %o% z) ^ (1 / L0)
-			if (length(z) == 1) as.numeric(c)
-				else c
-		} )
-	}
-	
-	lms2z <- function(x, y, sex, data=NULL, measure, ref, toz=TRUE) {
-#	converts measurement y to/from z-score adjusted for x & sex
-#		using LMS reference 'ref' for 'measure'
-#	x		age
-#	y		measurement (or z-score if toz FALSE)
-#	sex		sex variable (male=1, female=2)
-#	data	source of x, y and sex
-#	measure label for measurement, one of:
-#		'ht' 'wt' 'bmi' 'head' 'sitht' 'leglen' 'waist' 'bfat'
-#	ref		name of reference, one of: 'uk90' 'who06'
-#	toz		if TRUE returns measurement converted to z-score using ref
-#			if FALSE returns z-score converted to measurement using ref
-	on.exit(detach(data))
-	attach(data)
-	lms <- paste(c('L','M','S'), measure, sep='.')
-	lmsout <- matrix(nrow=length(x), ncol=3)
-	ref <- get(ref)
-	for (i in 1:3) {
-		for (ix in 1:2) {
-			if (sum(as.numeric(sex) == ix, na.rm=TRUE) > 0)
-			lmsout[as.numeric(sex) == ix, i] <- spline(ref$years[ref$sex == ix], ref[ref$sex == ix, lms[i]], method='natural', xout=x[as.numeric(sex) == ix])$y
-		}
-	}
-	if (toz) zLMS(y, lmsout[,1], lmsout[,2],lmsout[,3])
-	else cLMS(y, lmsout[,1], lmsout[,2],lmsout[,3])
-}	
-	z2cent <- function(z)
-#	z is z-score
-#	returns corresponding centile as label
-{
-	np <- ifelse(abs(z) < 2.33, 0, 1)
-	ct <- round(pnorm(z) * 100, np)
-	mod10 <- ifelse(np == 1, 0, floor(ct %% 10))
-	th <- ifelse(mod10 == 0 | mod10 > 4, 4, mod10)
-	th <- paste(ct, c('st','nd','rd','th')[th], sep='')
-	th[th == '0th'] <- paste('SDS', round(z[th == '0th'], 1), sep='')
-	th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
-	th
-}
 
 ###################
 #	xaxsd  yaxsd  #

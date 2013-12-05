@@ -29,10 +29,22 @@ Vectors of L, M and S corresponding to \code{x} and \code{sex} are extracted and
 passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{toz}.}
 \value{A vector of the same length as \code{y} containing the transformed values.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
-\seealso{\code{\link{z2cent}}}
+\seealso{\code{\link{z2cent}}. The LMS method can be fitted to data using the package
+  \code{\link{gamlss}} with the \code{\link{BCCG}} family, where mu, sigma and nu
+  correspond to L, M and S respectively.}
 \examples{
+## convert file of age, sex and weight to WHO z-scores
+data(uk90)
+data <- data.frame(age=1:20, sex=rep(1:2, times=10), wt=rnorm(20, mean=40, sd=5))
+lms2z(age, wt, sex, data, measure = 'wt', ref = 'uk90')
+
 data(who06)
-## calculate z-score for length 60 cm in boys at age 0:12 months
-lms2z(x = 0:12/12, y = 60, sex = 1, data = NULL, measure = 'ht', ref = 'who06')
-}
+zs <- -4:4*2/3 # z-scores for height centiles
+ages <- 0:12/4 # 3-month ages
+v <- as.data.frame(lapply(as.list(zs), function(z) {
+  v <- lms2z(ages, z, sex = 1, measure = 'ht', ref = 'who06', toz=FALSE)
+}))
+names(v) <- z2cent(zs)
+rownames(v) <- ages
+round(v, 2)}
 \keyword{arith}
