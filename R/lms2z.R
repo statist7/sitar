@@ -25,7 +25,7 @@
 			if (sum(sexvar) > 0) v[sexvar] <- spline(ref$years[sexref], 
 				ref[sexref, lmsv[i]], method='natural', xout=df[sexvar, 1])$y
 		}
-		assign(lms[[i]], v)
+		assign(lms[i], v)
 	}
 	if (toz) zLMS(df[, 2], L, M, S)
 		else cLMS(df[, 2], L, M, S)
@@ -48,10 +48,9 @@
 		} )
 	}
 	
-	z2cent <- function(z)
+	z2cent <- function(z) {
 #	z is z-score
 #	returns corresponding centile as label
-{
 	np <- ifelse(abs(z) < 2.33, 0, 1)
 	ct <- round(pnorm(z) * 100, np)
 	mod10 <- ifelse(np == 1, 0, floor(ct %% 10))
