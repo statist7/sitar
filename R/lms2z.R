@@ -61,16 +61,3 @@
 	th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
 	th
 }
-
-#	convert file of age, sex and weight to z-scores
-data <- data.frame(age=1:20, sex=rep(1:2, times=10), wt=rnorm(20, mean=40, sd=5))
-lms2z(age, wt, sex, data, measure = 'wt', ref = 'uk90')
-
-zs <- -4:4*2/3 # z-scores for height centiles
-ages <- 0:12/4 # 3-month ages
-v <- as.data.frame(lapply(as.list(zs), function(z) {
-	v <- lms2z(ages, z, sex = 1, measure = 'ht', ref = 'who06', toz=FALSE)
-}))
-names(v) <- z2cent(zs)
-rownames(v) <- ages
-round(v, 2)
