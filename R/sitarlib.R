@@ -408,6 +408,7 @@
 		id <- factor(eval(mcall$id, data)) # factor added 23/4/13
 		nf <- length(fitted(model))
 		if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
+		subset <- eval(mcall$subset, data)
 		if (is.null(subset)) subset <- rep(TRUE, nf)
 
 #	extract list(...)
@@ -673,7 +674,7 @@
 	}
 
 #	subset data
-	subset <- eval(substitute(subset), data)
+	subset <- eval(substitute(subset), data, parent.frame())
 	if (!is.null(subset)) {
 		if (length(subset) != nrow(df)) stop('subset wrong length for data')
 		subset <- ifelse(is.na(df[, 1]) | is.na(df[, 2]), FALSE, subset)

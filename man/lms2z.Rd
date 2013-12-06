@@ -33,19 +33,20 @@ passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{to
   \code{gamlss} with the \code{BCCG} family, where mu, sigma and nu
   correspond to L, M and S respectively.}
 \examples{
-## convert file of age, sex and weight to UK 90 z-scores
+## convert girls' heights data to UK 90 z-scores
+data(heights)
 data(uk90)
-data <- data.frame(age=1:20, sex=rep(1:2, times=10), wt=rnorm(20, mean=40, sd=5))
-lms2z(age, wt, sex, data, measure = 'wt', ref = 'uk90')
+lms2z(age, height, sex = 2, heights, measure = 'ht', ref = 'uk90')
 
-## construct boys height centiles for WHO standard on 3-month age grid
+## construct table of boys weight centiles for WHO standard on 3-month age grid
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages
 v <- as.data.frame(lapply(as.list(zs), function(z) {
-  v <- lms2z(ages, z, sex = 1, measure = 'ht', ref = 'who06', toz=FALSE)
+  v <- lms2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
 }))
 names(v) <- z2cent(zs)
 rownames(v) <- ages
-round(v, 2)}
+round(v, 2)
+}
 \keyword{arith}

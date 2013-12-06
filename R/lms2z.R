@@ -10,42 +10,31 @@
 #	ref		name of reference, one of: 'uk90' 'who06'
 #	toz		if TRUE returns measurement converted to z-score using ref
 #			if FALSE returns z-score converted to measurement using ref
-	mcall <- match.call()[-1]
-	vars <- c('x', 'y', 'sex')
-	if (!is.null(data)) df <- as.data.frame(lapply(as.list(mcall[vars]), eval, envir = data, enclos = parent.frame()))
-	else df <- as.data.frame(cbind(x, y, sex))
-	lms <- c('L', 'M', 'S')
-	lmsv <- paste(lms, measure, sep='.')
+	mcall <- as.list(match.call()[c('x', 'y', 'sex')])
+	df <- as.data.frame(lapply(mcall, eval, envir = data, enclos = parent.frame()))
 	ref <- get(ref)
-	v <- df[, 1]
+	lms <- paste(c('L', 'M', 'S'), measure, sep='.')
+	v <- matrix(nrow=nrow(df), ncol=3)
 	for (i in 1:3) {
 		for (ix in 1:2) {
 			sexvar <- as.numeric(df[, 3]) == ix
 			sexref <- as.numeric(ref$sex) == ix
-			if (sum(sexvar) > 0) v[sexvar] <- spline(ref$years[sexref], 
-				ref[sexref, lmsv[i]], method='natural', xout=df[sexvar, 1])$y
+			if (sum(sexvar) > 0) v[sexvar, i] <- spline(ref$years[sexref], 
+				ref[sexref, lms[i]], method='natural', xout=df[sexvar, 1])$y
 		}
-		assign(lms[i], v)
 	}
-	if (toz) zLMS(df[, 2], L, M, S)
-		else cLMS(df[, 2], L, M, S)
+	if (toz) zLMS(df[, 2], v[, 1], v[, 2], v[, 3])
+		else cLMS(df[, 2], v[, 1], v[, 2], v[, 3])
 }
 
-	zLMS <- function(x, L, M, S, data=NULL) {
-		with(data, {
-			L0 <- L + 1e-7 * (L == 0)
-			( (x / M) ^ L0 - 1) / L0 / S
-		} )
+	zLMS <- function(x, L, M, S) {
+		L0 <- L + 1e-7 * (L == 0)
+		( (x / M) ^ L0 - 1) / L0 / S
 	}
 	
-	cLMS <- function(z, L, M, S, data=NULL) {
-		with(data, {
-			L0 <- L + 1e-7 * (L == 0)
-			c <- M * (1 + L0 * S * z) ^ (1 / L0)
-			# c <- M * (1 + L0 * S %o% z) ^ (1 / L0)
-			if (length(z) == 1) as.numeric(c)
-				else c
-		} )
+	cLMS <- function(z, L, M, S) {
+		L0 <- L + 1e-7 * (L == 0)
+		M * (1 + L0 * S * z) ^ (1 / L0)
 	}
 	
 	z2cent <- function(z) {
