@@ -909,7 +909,7 @@
 				else return(NA)
 		lambda <- 1
 		if (length(ycall) == 1) yt <- ycall else {
-			yt <- as.symbol(ycall[[2]])
+			yt <- ycall[[2]]
 			fun <- ycall[1]
 			if (fun == "log()") lambda <- 0 else
 			if (fun == "sqrt()") lambda <- 0.5 else 
