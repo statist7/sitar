@@ -402,17 +402,19 @@
 	else {
 		mcall <- model$call.sitar
 		data <- eval(mcall$data)
+#	subset used to fit model
 		if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
 		x <- eval(mcall$x, data)
 		y <- eval(mcall$y, data)
 		id <- factor(eval(mcall$id, data)) # factor added 23/4/13
 		nf <- length(fitted(model))
 		if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
-		subset <- eval(mcall$subset, data)
-		if (is.null(subset)) subset <- rep(TRUE, nf)
 
 #	extract list(...)
 		ccall <- match.call()[-1]
+#	subset to plot model
+		subset <- eval(ccall$subset, data)
+		if (is.null(subset)) subset <- rep(TRUE, nf)
 		cnames <- names(ccall)
 		dots <- cnames[!cnames %in% names(formals(plot.sitar))]
 		if (length(dots) > 0) ARG <- lapply(ccall[dots], eval, data, parent.frame())
