@@ -50,7 +50,7 @@ The value of \code{xoffset} is ignored unless \code{newform} is FALSE. \code{bst
  \code{xoffset} if \code{!newform}) allow the origin of b to be varied, which affects its 
  random effect variance. \code{update} updates the model by taking the \code{object} call, 
  adding any new parameters and replacing changed ones. Where possible the fixed and random
- effects of the model being updated are passed via the \{start} argument.
+ effects of the model being updated are passed via the \code{start} argument.
 }
 \value{
 An object of class \code{sitar} representing the nonlinear mixed-effects model fit. Generic functions such 

@@ -143,14 +143,14 @@
 	
 	#	code to parse		
 		code <- c(
-	"	fitnlme <<- function($pars) {",
+	"	.fitnlme <<- function($pars) {",
 	"		splinecoefs <- as.matrix(cbind($sscomma))",
 	"		as.vector( $nsd",
 	"		(splinecoefs * as.matrix(ns($nsf,",
 	"			knots=knots, Boundary.knots=bounds))) %*% ",
 	"			matrix(rep(1,df), ncol=1))",
 	"	}",
-	"	nlme(y ~ fitnlme($pars),",
+	"	nlme(y ~ .fitnlme($pars),",
 	"	fixed = $fixed ~ 1,",
 	"	random = $random ~ 1 | id,",
 	"	data = fulldata,",
@@ -178,7 +178,6 @@
 	
 	#	save fitted model
 		nlme.out <- eval(parse(text=code), envir=sys.frame(sys.nframe()), enclos=sys.frame(-1))
-		rm(fitnlme, inherits=TRUE)
 		nlme.out$call.sitar <- mcall
 		if (newform) nlme.out$bstart <- bstart
 			else nlme.out$xoffset <- xoffset
