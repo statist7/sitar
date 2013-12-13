@@ -1,5 +1,5 @@
 #	global variables
-	if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2'))
+	if (getRversion() >= "3.0.0") utils::globalVariables('.par.usr2')
 
 #############################
 #
@@ -566,7 +566,8 @@
 			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, bty="n", xaxt="n", yaxt="n", type="l"), y2par))
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
-			.par.usr2 <<- par('usr')
+			eval(parse(text=".par.usr2 <<- par('usr')"))
+			# .par.usr2 <<- par('usr')
 			# assign('.par.usr2', par('usr'), globalenv())
 #	add y2 axis 
 			if (par('mar')[4] >= 2) axis(4)
@@ -587,7 +588,8 @@
 		if (!missing(y2)) {
 			if (exists('xy$usr2')) {
 				par(usr=xy$usr2)
-				.par.usr2 <<- par('usr')
+				eval(parse(text=".par.usr2 <<- par('usr')"))
+				# .par.usr2 <<- par('usr')
 				# assign('.par.usr2', par('usr'), globalenv())
 			}
 			else if (exists('.par.usr2')) {
