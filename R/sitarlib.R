@@ -436,69 +436,6 @@
 
 #############################
 #
-#	mplot
-#
-#############################
-
-	mplot <- function(x, y, id, data=NULL, subset=NULL, add=FALSE, ...) {
-#	plots y ~ x by id with data
-#	x and y can be name or character
-#	subset defines a subset of rows
-#	add TRUE suppresses plot axes
-#	... parameters where col, lty, lwd, pch can depend on id
-
-#	save x y id	
-	mcall <- match.call()[-1]
-	x.y.id <- as.list(mcall[1:3])
-	df <- lapply(x.y.id, eval, envir = data, enclos = parent.frame())
-	df <- as.data.frame(lapply(df, function(z) {
-		if (is.character(z)) with(data, get(z, inherits = TRUE)) else z
-	}))
-	names(df) <- unlist(lapply(lapply(x.y.id, as.name),deparse))
-
-#	extract and save vector par args: col lty lwd pch
-	cnames <- names(mcall)
-	dots <- !cnames %in% names(formals(mplot))
-	if (sum(dots) > 0) {
-		ARG <- lapply(as.list(mcall[dots]), eval, envir = data, enclos = parent.frame())
-		cnames <- names(ARG)[lapply(ARG, length) == nrow(df)]
-		df[, cnames] <- ARG[cnames]
-		ARG[cnames] <- NULL
-	} else {
-		ARG <- list()
-		cnames <- NULL
-	}
-
-#	subset data
-	subset <- eval(substitute(subset), data, parent.frame())
-	if (!is.null(subset)) {
-		if (length(subset) != nrow(df)) stop('subset wrong length for data')
-		subset <- ifelse(is.na(df[, 1]) | is.na(df[, 2]), FALSE, subset)
-		df <- df[subset, ]		
-	}
-	if (nrow(df) == 0) stop("no data to plot")
-
-#	plot axes if new graph
-	if (!add) {
-		if (!"xlab" %in% names(ARG)) ARG <- c(ARG, list(xlab=quote(names(df)[1])))
-		if (!"ylab" %in% names(ARG)) ARG <- c(ARG, list(ylab=quote(names(df)[2])))
-		type <- match(names(ARG), "type", 0)
-		do.call("plot", c(list(x=df[, 1], y=df[, 2], type='n'), ARG[!type]))	
-	}
-
-#	draw growth curves
-	tt <- by(df, df[, 3], function(z) {
-#	sort by x
-		ox <- order(z[, 1])
-#	restore vector ... args
-		if (length(cnames) > 0) ARG[cnames] <- as.list(as.data.frame(z[ox, cnames]))
-#	lines(x, y, ...)
-		do.call("lines", c(list(x=z[ox, 1], y=z[ox, 2]), ARG))
-	})		
-}
-
-#############################
-#
 #	y2plot
 #
 #############################
