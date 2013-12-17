@@ -277,7 +277,7 @@
 		if (grepl("u", opt)) {
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=subset, add=add), ARG))
+			do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
 	
@@ -286,7 +286,7 @@
 			y <- fitted(model, level=1)
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=subset, add=add), ARG))
+			do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
 	
@@ -297,7 +297,7 @@
 			y <- fred$y.adj
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=subset, add=add), ARG))
+			do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
 #	plot vertical line at age of peak velocity

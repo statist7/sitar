@@ -7,16 +7,13 @@
 
 #	save x y id	
 	mcall <- match.call()[-1]
-	x.y.id <- lapply(as.list(mcall[1:3]), function(z) {
-		if (is.symbol(z)) deparse(z)
-		else if (is.character(z)) z
-		else eval(z)
-	})
-	df <- as.data.frame(lapply(x.y.id, function(z) {
-		if (is.null(data)) get(z, envir=sys.frame(-4), inherits = TRUE)
-		else with(data, get(z, inherits = TRUE))
+	df <- as.data.frame(lapply(as.list(mcall[1:3]), function(z) {
+		if (is.character(z)) with(data, get(z, inherits=TRUE))
+		else eval(z, envir = data, enclos = parent.frame())
 	}))
-	names(df) <- x.y.id
+	names(df) <- lapply(as.list(mcall[1:3]), function(z) {
+		if (is.character(z)) z else deparse(z)
+	})
 
 #	extract and save vector par args: col lty lwd pch
 	cnames <- names(mcall)
