@@ -5,10 +5,11 @@
 #	add TRUE suppresses plot axes
 #	... parameters where col, lty, lwd, pch can depend on id
 
+	if (is.null(data)) data <- parent.frame()
 #	save x y id	
 	mcall <- match.call()[-1]
 	df <- as.data.frame(lapply(as.list(mcall[1:3]), function(z) {
-		if (is.character(z)) with(data, get(z, inherits=TRUE))
+		if (is.character(z)) with(data,	get(z, inherits=TRUE))
 		else eval(z, envir = data, enclos = parent.frame())
 	}))
 	names(df) <- lapply(as.list(mcall[1:3]), function(z) {
