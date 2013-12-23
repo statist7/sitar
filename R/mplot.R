@@ -1,11 +1,10 @@
-	mplot <- function(x, y, id, data=NULL, subset=NULL, add=FALSE, ...) {
+	mplot <- function(x, y, id, data=parent.frame(), subset=NULL, add=FALSE, ...) {
 #	plots y ~ x by id with data
 #	x and y can be name or character
 #	subset defines a subset of rows
 #	add TRUE suppresses plot axes
 #	... parameters where col, lty, lwd, pch can depend on id
 
-	if (is.null(data)) data <- parent.frame()
 #	save x y id	
 	mcall <- match.call()[-1]
 	df <- as.data.frame(lapply(as.list(mcall[1:3]), function(z) {
