@@ -6,8 +6,8 @@
 LMS method. Given a set of LMS values, the functions convert
 z-scores to measurement centiles and vice versa.}
 \usage{
-zLMS(x, L, M, S, data = NULL)
-cLMS(z, L, M, S, data = NULL)
+zLMS(x, L, M, S, data = parent.frame())
+cLMS(z, L, M, S, data = parent.frame())
 }
 \arguments{
   \item{x}{vector of measurements to be converted to z-scores.}
@@ -19,7 +19,9 @@ cLMS(z, L, M, S, data = NULL)
 }
 \details{x, L, M and S should all be the same length. \code{z}
 can be scalar or vector. The formulae converting \code{x} to \code{z} and vice versa are:
-\deqn{z = \frac{(x/M)^L - 1}{L S}}{%z = ((x/M)^L - 1)/L/S}
+\deqn{z = \frac{(x/M)^L - 1}{L S}}{%
+z = ((x/M)^L - 1)/L/S}
+
 \deqn{x = M (1 + L S z)^{1/L})}{%
 x = M (1 + L S z)^(1/L)}
 where L has 10^-7 added if it is zero.}

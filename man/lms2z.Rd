@@ -5,7 +5,7 @@
 A function to convert between measurements and z-scores using a growth reference
 previously fitted by the LMS method.}
 \usage{
-lms2z(x, y, sex, data = NULL, measure, ref, toz = TRUE)
+lms2z(x, y, sex, data = parent.frame(), measure, ref, toz = TRUE)
 }
 \arguments{
   \item{x}{
@@ -15,7 +15,7 @@ vector of either measurements or z-scores, depending on the value of \code{toz}.
   \item{sex}{
 two-level factor with level 1 male and level 2 female.}
   \item{data}{
-dataframe containing \code{x}, \code{y} and \code{sex}.}
+optional data frame containing \code{x}, \code{y} and \code{sex}.}
   \item{measure}{
 character indicating the name of the measurement, depending on the choice of
 \code{ref} (see e.g. references \code{uk90}, \code{who06} and \code{ukwhopt}).}
@@ -30,7 +30,7 @@ passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{to
 \value{A vector of the same length as \code{y} containing the transformed values.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{z2cent}}. The LMS method can be fitted to data using the package
-  \code{gamlss} with the \code{BCCG} family, where mu, sigma and nu
+  \code{gamlss} with the \code{BCCG} family, where nu (originally lambda), mu and sigma
   correspond to L, M and S respectively.}
 \examples{
 ## convert girls' heights data to UK 90 z-scores
