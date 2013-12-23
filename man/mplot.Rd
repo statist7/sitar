@@ -4,7 +4,7 @@
 \description{
 Function to plot multiple growth curves indexed by subject id.}
 \usage{
-mplot(x, y, id, data = NULL, subset = NULL, add = FALSE, ...)
+mplot(x, y, id, data = parent.frame(), subset = NULL, add = FALSE, ...)
 }
 \arguments{
   \item{x}{
@@ -26,7 +26,7 @@ Further graphical parameters (see \code{\link{par}}) may also be supplied as arg
 \details{
 The arguments \code{x}, \code{y} and \code{id} can be given as character strings. The 
   \code{\link{par}} parameters can be functions of vector variables, e.g. to 
-  colour curves separately by \code{id} use: col = 1 + as.integer(id) %% 6.
+  colour curves separately by \code{id} use: col = 1 + as.integer(id) \%\% 6.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{y2plot}}}
