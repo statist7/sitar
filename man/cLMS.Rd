@@ -6,8 +6,8 @@
 LMS method. Given a set of LMS values, the functions convert
 z-scores to measurement centiles and vice versa.}
 \usage{
-zLMS(x, L, M, S, data = parent.frame())
-cLMS(z, L, M, S, data = parent.frame())
+zLMS(x, L = 1, M, S)
+cLMS(z, L = 1, M, S)
 }
 \arguments{
   \item{x}{vector of measurements to be converted to z-scores.}
@@ -15,7 +15,6 @@ cLMS(z, L, M, S, data = parent.frame())
   \item{L}{vector of Box-Cox transformation (lambda) values, L in the LMS method.}
   \item{M}{vector of medians (mu), M in the LMS method.}
   \item{S}{vector of coefficients of variation (sigma), S in the LMS method.}
-  \item{data}{optional data frame containing the variables L, M and S.}
 }
 \details{x, L, M and S should all be the same length. \code{z}
 can be scalar or vector. The formulae converting \code{x} to \code{z} and vice versa are:
@@ -24,10 +23,9 @@ z = ((x/M)^L - 1)/L/S}
 
 \deqn{x = M (1 + L S z)^{1/L})}{%
 x = M (1 + L S z)^(1/L)}
-where L has 10^-7 added if it is zero.}
-\value{\code{zLMS} returns a vector the same length as \code{M}.
-If \code{z} is scalar \code{cLMS} returns a vector the same length as \code{M}.  
-If \code{z} is a vector \code{cLMS} returns a matrix with the number of columns equal to its length.
+where L has 10^-7 added if it is zero. The LMS method is the same as the BCCG family in
+ the \code{gamlss} package.}
+\value{\code{zLMS} and \code{cLMS} return a vector the same length as \code{M}.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{z2cent}}, \code{\link{lms2z}}}

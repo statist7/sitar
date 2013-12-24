@@ -27,18 +27,14 @@
 		else cLMS(df[, 2], v[, 1], v[, 2], v[, 3])
 }
 
-	zLMS <- function(x, L, M, S, data = parent.frame()) {
-	with(data, {	
-		L0 <- L + 1e-7 * (L == 0)
-		( (x / M) ^ L0 - 1) / L0 / S
-	})
+	zLMS <- function(x, L = 1, M, S) {
+	L0 <- L + 1e-7 * (L == 0)
+	( (x / M) ^ L0 - 1) / L0 / S
 }
 	
-	cLMS <- function(z, L, M, S, data = parent.frame()) {
-	with(data, {	
-		L0 <- L + 1e-7 * (L == 0)
-		M * (1 + L0 * S * z) ^ (1 / L0)
-	})
+	cLMS <- function(z, L = 1, M, S) {
+	L0 <- L + 1e-7 * (L == 0)
+	M * (1 + L0 * S * z) ^ (1 / L0)
 }
 	
 	z2cent <- function(z) {
