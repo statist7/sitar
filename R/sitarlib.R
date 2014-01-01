@@ -161,6 +161,7 @@
 #	opt: 
 #		d = fitted distance curve (labels[1] = x, labels[2] = y)
 #		v = fitted velocity curve (labels[3] = y)
+#		e = fitted fixed effects distance curve (labels[1] = x, labels[2] = y)
 #		f = fitted distance curves by subject
 #		u = unadjusted y vs t curves by subject
 #		a = adjusted y vs adjusted t curves by subject
@@ -273,6 +274,17 @@
 			}
 		}
 		
+#	plot fixed effects distance curve
+		if (grepl("e", opt)) {
+			xt <- x[subset]
+			yt <- model$ns$fitted[subset]
+			if (!missing(xfun)) xt <- xfun(xt)
+			if (!missing(yfun)) yt <- yfun(yt)
+			ox <- order(xt)
+			xy <- do.call("y2plot", c(list(x=quote(xt[ox]), y1=quote(yt[ox]), add=add, xy=xy), ARG))
+			add <- TRUE
+		}
+
 #	plot y vs t by subject
 		if (grepl("u", opt)) {
 			if (!missing(xfun)) x <- xfun(x)

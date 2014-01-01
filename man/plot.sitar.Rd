@@ -12,7 +12,9 @@
 \arguments{
   \item{x}{object of class \code{sitar}.}
   \item{opt}{
-character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve, 'f' for individual Fitted growth curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dvf' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and a legend identifying the distance and velocity curves is provided.}
+character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve, 
+'e' for fitted fixed Effects distance curve,
+'f' for individual Fitted growth curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dvef' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and a legend identifying the distance and velocity curves is provided.}
   \item{labels}{
 optional character vector containing plot labels for \code{x}, \code{y} and \code{y} velocity from the original SITAR model. The first two elements can alternatively be provided via \code{\link{par}} parameters \code{xlab} and \code{ylab}, and the third element via \code{y2par} (see Details). Default labels are the names of \code{x} and \code{y}, and "\code{y} velocity".}
   \item{apv}{
@@ -35,7 +37,8 @@ optional logical which set TRUE plots the model as an \code{nlme} object, using 
 Further graphical parameters (see \code{par}) may also be supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line type \code{lty}, line width \code{lwd}, and color \code{col}. For the velocity (y2) plot \code{y2par} can be used (see Details).}
 }
 \details{
-For option 'dv' (the default) the velocity curve plot (with right axis) can be annotated with \code{par} parameters given as a named list called \code{y2par}.
+For option 'dv' (the default) the velocity curve plot (with right axis) can be annotated with \code{par} parameters given as a named list called \code{y2par}. To suppress the
+legend that comes with it set \code{xlegend = NULL}.
 }
 \value{
 Returns a list of three objects:
@@ -53,11 +56,13 @@ Returns a list of three objects:
 m1 <- sitar(x=age, y=height, id=id, data=heights, df=7)
 
 ## draw fitted distance and velocity curves
+## with velocity curve in blue
 ## adding age at peak velocity
-plot(m1, apv=TRUE)
+plot(m1, y2par=list(col='blue'), apv=TRUE)
 
 ## draw individually coloured growth curves adjusted for random effects
-plot(m1, opt='a', col=1 + as.integer(id) \%\% 5)
+## using same x-axis limits as for previous plot
+plot(m1, opt='a', col=1 + as.integer(id) \%\% 5, xlim=xaxsd())
 
 ## add mean curve in red
 lines(m1, opt='d', col='red', lwd=2)
