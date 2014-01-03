@@ -522,7 +522,6 @@
 			xy$usr2 <- par('usr')
 			eval(parse(text=".par.usr2 <<- par('usr')"))
 			# .par.usr2 <<- par('usr')
-			# assign('.par.usr2', par('usr'), globalenv())
 #	add y2 axis 
 			if (par('mar')[4] >= 2) axis(4)
 #	unset col
@@ -544,7 +543,6 @@
 				par(usr=xy$usr2)
 				eval(parse(text=".par.usr2 <<- par('usr')"))
 				# .par.usr2 <<- par('usr')
-				# assign('.par.usr2', par('usr'), globalenv())
 			}
 			else if (exists('.par.usr2')) {
 				par(usr=.par.usr2)
@@ -1106,10 +1104,6 @@
 
 #	plot.sitar
 #		back-transform transformed x / y scales
-#		omit long line segments from adjusted plot
 #		derive new fitted values for spline curves
-#		sort out mar problem
 #		add acceleration curve option
 #		improve ylim for dau plots
-#		provide lines.sitar 									# added 04/01/13
-#		change newplot (default TRUE) to add (default FALSE)	# added 05/04/13
