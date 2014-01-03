@@ -29,8 +29,6 @@ optional logical vector of length \code{x} defining a subset of \code{data} rows
 character string defining an \code{id} level, or a list of values labelled a, b and c, e.g. abc=list(a=1, b=0.1, c=-0.1), where the values of a, b and c are random effects defining an individual growth curve. If a, b or c are missing their values are treated as zero.}
   \item{add}{
 optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE). TRUE is equivalent to using \code{lines}.}
-  \item{xy}{
-defunct.}
   \item{nlme}{
 optional logical which set TRUE plots the model as an \code{nlme} object, using \code{plot.nlme} arguments.}
   \item{\dots}{

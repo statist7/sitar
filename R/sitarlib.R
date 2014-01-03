@@ -156,7 +156,7 @@
 #
 #############################
 
-	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun, yfun, subset=NULL, abc=c(a=0, b=0, c=0), add=FALSE, xy=NULL, nlme=FALSE, ...)
+	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun, yfun, subset=NULL, abc=c(a=0, b=0, c=0), add=FALSE, nlme=FALSE, ...)
 #	plot curves from sitar model
 #	opt: 
 #		d = fitted distance curve (labels[1] = x, labels[2] = y)
@@ -226,7 +226,10 @@
 			ARG <- c(ARG, list(ylab=yl))
 		} 
 		else yl <- ARG$ylab
-		
+
+#	create output list
+		xy <- list()
+			
 #	plot fitted distance and velocity curves
 		if (grepl("d", opt) || grepl("v", opt) || apv) {
 			xt <- x[subset]
@@ -452,7 +455,7 @@
 #
 #############################
 
-	y2plot <- function(x, y1, y2=NULL, labels, y2par=NULL, add=FALSE, xy, xlegend="topleft", inset=0.05, ...)
+	y2plot <- function(x, y1, y2=NULL, labels, y2par=NULL, add=FALSE, xy=NULL, xlegend="topleft", inset=0.04, ...)
 #	plot x versus y1 and y2 using left/right axes for the two y's
 #	returns par() for y1 or list(par(), par("usr")) with y2
 #	labels are labels for x, y1 and y2 (xlab and ylab override x and y1, y2par['ylab'] overrides y2)
@@ -463,13 +466,12 @@
 {
 # get axis labels
 	if (missing(labels)) labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
-	if (is.null(y2par$ylab)) y2par$ylab <- labels[3]
 #	plot y1
 	ypar <- list(...)
 #	save y1 par args
 	opar <- par(no.readonly=TRUE)
 	lty <- 1:2
-	lwd <- c(1, 1)
+	lwd <- rep(par('lwd'), 2)
 	col <- rep(par('col'), 2)
 	for (i in c('lty', 'lwd', 'col')) {
 		j <- get(i)
@@ -504,6 +506,8 @@
 		}
 		par(mar=mar)
 #	plot x & y1 axes and y1 ~ x
+		if (is.null(ypar$xlab)) ypar$xlab <- labels[1]
+		if (is.null(ypar$ylab)) ypar$ylab <- labels[2]
 		do.call('plot', c(list(x=quote(x), y=quote(y1), type='l'), ypar))
 #	save x & y1 axis limits
 		xy$usr <- par('usr')
@@ -512,6 +516,7 @@
 			par(new=TRUE)
 #	ensure x axis same for y2 as y1
 			if (!is.null(ypar$xlim) && is.null(y2par$xlim)) y2par$xlim <- ypar$xlim
+			if (is.null(y2par$ylab)) y2par$ylab <- labels[3]
 			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, bty="n", xaxt="n", yaxt="n", type="l"), y2par))
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
