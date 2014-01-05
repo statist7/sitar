@@ -5,8 +5,8 @@
 Function to plot two y variables, y1 and y2, against a single x variable, with the y1
  and y2 axes on the left and right of the plot respectively.}
 \usage{
-y2plot(x, y1, y2 = NULL, labels, y2par = NULL, add = FALSE, xy = NULL, xlegend = "topleft",
- inset = 0.04, ...)
+y2plot(x, y1, y2 = NULL, labels, y2par = NULL, add = FALSE, xy = NULL, 
+xlegend = "topleft", inset = 0.04, ...)
 }
 \arguments{
   \item{x}{vector of ages.}
