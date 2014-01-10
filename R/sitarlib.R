@@ -455,7 +455,7 @@
 #
 #############################
 
-	y2plot <- function(x, y1, y2=NULL, labels, y2par=NULL, add=FALSE, xy=NULL, xlegend="topleft", inset=0.04, ...)
+	y2plot <- function(x, y1, y2=NULL, labels, y2par=list(), add=FALSE, xy=NULL, xlegend="topleft", inset=0.04, ...)
 #	plot x versus y1 and y2 using left/right axes for the two y's
 #	returns par() for y1 or list(par(), par("usr")) with y2
 #	labels are labels for x, y1 and y2 (xlab and ylab override x and y1, y2par['ylab'] overrides y2)
@@ -468,6 +468,7 @@
 	if (missing(labels)) labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
 #	plot y1
 	ypar <- list(...)
+	y2par <- as.list(y2par)
 #	save y1 par args
 	opar <- par(no.readonly=TRUE)
 	lty <- 1:2

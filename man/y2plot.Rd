@@ -5,7 +5,7 @@
 Function to plot two y variables, y1 and y2, against a single x variable, with the y1
  and y2 axes on the left and right of the plot respectively.}
 \usage{
-y2plot(x, y1, y2 = NULL, labels, y2par = NULL, add = FALSE, xy = NULL, 
+y2plot(x, y1, y2 = NULL, labels, y2par = list(), add = FALSE, xy = NULL, 
 xlegend = "topleft", inset = 0.04, ...)
 }
 \arguments{
@@ -13,7 +13,7 @@ xlegend = "topleft", inset = 0.04, ...)
   \item{y1}{vector of measurements for plotting on left y axis.}
   \item{y2}{optional vector of measurements for plotting on right y axis.}
   \item{labels}{character vector containing labels for x, y1 and y2.}
-  \item{y2par}{named list of par arguments to format the y2 axis.}
+  \item{y2par}{optional named list of par arguments to format the y2 axis.}
   \item{add}{logical flag to specify if a new plot (with axes etc) is to be drawn (FALSE)
    or an existing plot is to be added to (TRUE).}
   \item{xy}{optional list to pass \code{usr} and \code{usr2} (see Value).}
@@ -35,5 +35,5 @@ In addition the variable \code{.par.usr2}, equal to \code{usr2}, is created in g
 \seealso{\code{\link{plot.sitar}}}
 \examples{
 ## plot boys median height and weight on the UK 1990 reference
-with(uk90[uk90$sex == 1,], y2plot(x=years, y=M.ht, y2=M.wt, y2par=list(col='red')))
+with(uk90[uk90$sex == 1,], y2plot(x=years, y1=M.ht, y2=M.wt, y2par=list(col='red')))
 }
