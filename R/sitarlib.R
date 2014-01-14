@@ -415,15 +415,15 @@
 			if (length(fixef(object)) > df + 1) fixed.extra <- (df+2):length(fixef(object))
 				else fixed.extra <- NULL
 			if (!is.null(extras$knots)) {
-				knots <- extras$knots
+				knots <- eval(extras$knots)
 				df <- length(knots) + 1
 			}
 			else if (!is.null(extras$df)) {
-				df <- extras$df
+				df <- eval(extras$df)
 				knots <- quantile(x, (1:(df-1))/df)
 			}
 			if (!is.null(extras$bounds)) {
-				bounds <- extras$bounds
+				bounds <- eval(extras$bounds)
 				if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
 			}
 			if (!is.null(extras$bstart)) {
