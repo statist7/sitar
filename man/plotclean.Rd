@@ -6,7 +6,7 @@ A version of \code{mplot} to plot growth curves and identify outliers. When outl
  clicked on, and if id is specified, the corresponding growth curve is highlighted. 
  If id is not specified the selected point is highlighted. Use right-click to exit.}
 \usage{
-plotclean(x, y = NULL, id = NULL, data = parent.frame(), n = length(x), 
+plotclean(x, y, id = NULL, data = parent.frame(), n = length(x), 
 par.out = list(pch = 20), ...)
 }
 \arguments{
