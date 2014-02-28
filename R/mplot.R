@@ -50,7 +50,7 @@
 #	sort by x
 		ox <- order(z[, 1])
 #	restore vector ... args
-		if (length(cnames) > 0) ARG[cnames] <- as.list(as.data.frame(z[ox, cnames]))
+		if (length(cnames) > 0) ARG[cnames] <- as.list(as.data.frame(z[ox, cnames], stringsAsFactors=FALSE))
 #	lines(x, y, ...)
 		do.call("lines", c(list(x=z[ox, 1], y=z[ox, 2]), ARG))
 	})		
