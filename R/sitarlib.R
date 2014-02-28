@@ -666,7 +666,7 @@
 	if (any(ts, na.rm=TRUE)) { # turning point(s) found
 		ts <- c(NA, ts) # expand
 		iapv <- which.max(ss1$y * ts) # point of peak velocity
-		o <- (iapv-2):(iapv+2) # region of peak
+		o <- max(1, iapv-2):min(iapv+2, length(ss$x)) # region of peak
 		mn <- mean(ss$x[o])
 		mc <- lm(ss1$y[o] ~ poly(ss$x[o] - mn, 2, raw=TRUE))$coef # velocity as quadratic in age
 		apv[1] <- - mc[2] / 2 / mc[3] + mn # age at peak velocity
