@@ -384,33 +384,6 @@
 
 #############################
 #
-#	do.call...
-#
-#############################
-
-	do.call... <- function(what, args, ..., quote=FALSE, envir=parent.frame()) {
-#	do.call avoiding clashes between what args and ... args
-#	... args override what args
-#	what	function name
-#	args	list of args for what
-#	quote and envir	from do.call
-#	...		args from parent call
-
-	ddd <- list(...)
-	if (!is.null(ddd)) {
-		for (i in names(ddd)) {
-			if (i %in% names(args)) args[i] <- ddd[i]
-			else {
-				args <- c(args, i=ddd[i])
-				names(args)[length(args)] <- i
-			}
-		}
-	}
-	do.call(what, args, quote=quote, envir=envir)
-}
-		
-#############################
-#
 #	varexp
 #
 #############################
@@ -536,13 +509,11 @@
 #	limit (default 5 SD) to identify outliers
 #	linearise straightens out growth curves first
 {	
-	if (missing(x) | missing(y) | missing(id) | missing(data)) stop('x, y, id and data must all be specified')
-	data.name <- deparse(substitute(data))
-	if (data.name %in% search()) stop('data already attached - needs detaching')
+	mcall <- match.call()
+	data <- eval(mcall$data)
 #	create data frame of x, y and id with no NAs
-	nrow <- dim(data)[1]
-	xyid <- c(deparse(substitute(x)), deparse(substitute(y)), deparse(substitute(id)))
-	dc <- data[, xyid]
+	dc <- data[, sapply(mcall[c('x', 'y', 'id')], deparse)]
+	nrow <- nrow(data)
 	dc <- na.omit(cbind(dc, count=1:nrow))
 #	sort into id/x order
 	dc <- dc[order(dc[,3], dc[,1]), ]
@@ -594,14 +565,14 @@
 #	7		-	-		first duplicate age
 #	8		-	-		later duplicate age
 
-	dc <- cbind(dc[,c(3,1,2,4)], code, vel1, vel2, vel3)
+	dc <- cbind(dc[, c(3, 1, 2, 4)], code, vel1, vel2, vel3)
 	mat <- as.data.frame(matrix(nrow=nrow, ncol=dim(dc)[2],
 		dimnames=list(row.names(data), dimnames(dc)[[2]])))
-	attr(mat, 'data') <- data.name
-	mat[dc$count,] <- dc
-	if (is.factor(dc[,1])) {
-		mat[,1] <- as.factor(mat[,1])
-		levels(mat[,1]) <- levels(dc[,1])
+	attr(mat, 'data') <- deparse(mcall$data)
+	mat[dc$count, ] <- dc
+	if (is.factor(dc[, 1])) {
+		mat[, 1] <- as.factor(mat[, 1])
+		levels(mat[, 1]) <- levels(dc[, 1])
 	}
 	mat$count <- NULL
 	mat$code <- factor(mat$code)
@@ -645,15 +616,23 @@
 	} )
 	el <- new.env()
 	assign('kount', 0, envir=el)
-	by(dat, factor(dat[,1]), function(z) {
+	by(dat, factor(dat[, 1]), function(z) {
 		kount <- get('kount', envir=el) + 1
 		assign('kount', kount, envir=el)
-		if (print) cat('\ncase', kount, 'of', nids, '-', id, as.character(z[1, 1]), 'with', dim(z)[[1]], 'points\n')
-		inc <- z[z$res,]
-		if (print) print(inc[,1:7])
-		ox <- order(z[,2])
-		do.call...('plot', list(z[,2][ox], z[,3][ox], type='b', xlab=x, ylab=y, pch=46), ...)
-		do.call...('points', list(inc[,2], inc[,3], pch=8), ...)
+		if (print) cat('\ncase', kount, 'of', nids, '-', id, as.character(z[1, 1]), 'with', nrow(z), 'points\n')
+		inc <- z[z$res, ]
+		if (print) print(inc[, 1:7])
+		ox <- order(z[, 2])
+		dots <- list(...)
+		if (is.null(dots$type)) dots$type <- 'b'
+		if (is.null(dots$xlab)) dots$xlab <- x
+		if (is.null(dots$ylab)) dots$ylab <- y
+		pcht <- dots$pch
+		dots$pch <- NULL
+		do.call('plot', c(list(z[, 2][ox], z[, 3][ox], pch=46), dots))
+		dots$type <- NULL
+		if (is.null(pcht)) pcht <- 8
+		do.call('points', c(list(inc[, 2], inc[, 3], pch=pcht), dots))
 		title(paste(id, z[1, 1], 'code', 
 			paste(unique(inc$code), collapse=' ')))
 		locator(1)
@@ -671,7 +650,7 @@
 {
 #	set outliers missing for specified code(s)
 	data <- get(attr(outliers, 'data'))
-	if (dim(data)[1] != dim(outliers)[1]) stop('numbers of rows in data and outliers differ')
+	if (nrow(data) != nrow(outliers)) stop('numbers of rows in data and outliers differ')
 	y <- names(outliers)[3]
 	zap <- outliers$code %in% icode
 	cat(sum(zap), y, 'values set missing\n')
@@ -813,10 +792,9 @@
 #		otherwise IDs are sampled and their ages limited to xlim
 #	xlim - age range to be selected (default NULL)
 #	returns subset as logical vector of rows to be included
-	if (!missing(data)) {
-		on.exit(detach(data))
-		attach(data)
-	}
+	mcall <- match.call()
+	data <- eval(mcall$data)
+	x <- eval(mcall$x, data)
 	nx <- length(x)
 	subset <- rep(TRUE, nx)
 #	simple sampling of whole dataset
@@ -826,6 +804,7 @@
 	} 
 	else {
 #	sampling of individuals and restricting their age range to xlim
+		id <- eval(mcall$id, data)
 		nid <- nlevels(factor(id))
 		lid <- levels(factor(id))
 		sid <- sample(lid, prob * nid)
