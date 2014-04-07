@@ -31,17 +31,20 @@
 		b
 	}
 	mcall <- match.call()
-	if (!missing(data)) {
-		if (!deparse(substitute(data), width.cutoff=99) %in% search()) {
-			on.exit(detach(data))
-			attach(data)
-		}
-	}
+	# if (!missing(data)) {
+		# if (!deparse(substitute(data), width.cutoff=99) %in% search()) {
+			# on.exit(detach(data))
+			# attach(data)
+		# }
+	# }
+	data <- eval(mcall$data)
+	x <- eval(mcall$x, data)
+	y <- eval(mcall$y, data)
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
 	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
 	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df) 
 		else df <- length(knots) + 1
-	if (dim(data)[1] <= df) stop("too few data to fit spline curve")
+	if (nrow(data) <= df) stop("too few data to fit spline curve")
 #	define bounds, default x range ±4% 
 	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x)) 
 	if (length(bounds) != 2) stop("bounds should be length 1 or 2")
@@ -76,6 +79,8 @@
 	names(model) <- model <- letters[1:3]
 	constant <- mm.formula <- as.formula('~ 1')
 	# mm.intercept <- TRUE
+	id <- eval(mcall$id, data)
+	subset <- eval(mcall$subset, data)
 	if (is.null(subset)) subset <- 1:length(x)
 	fulldata <- data.frame(x, y, id, subset)
 	for (l in model) {

@@ -40,7 +40,8 @@
 		mcall <- model$call.sitar
 		data <- eval(mcall$data)
 #	subset used to fit model
-		if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
+		subset <- eval(mcall$subset, data)
+		if (!is.null(subset)) data <- data[subset, ]
 		x <- eval(mcall$x, data)
 		y <- eval(mcall$y, data)
 		id <- factor(eval(mcall$id, data)) # factor added 23/4/13

@@ -59,7 +59,8 @@
 	random <- as.character(object$call$random)[2]
 	mcall <- object$call.sitar
 	data <- eval(mcall$data)
-	if (!is.null(mcall$subset)) data <- data[eval(mcall$subset),]
+	subset <- eval(mcall$subset, data)
+	if (!is.null(subset)) data <- data[subset,]
 	x <- eval(mcall$x, data)
 	y <- eval(mcall$y, data)
 	id <- eval(mcall$id, data)
@@ -213,6 +214,8 @@
 	if (sum(pmatch(names(extras), c("x", "y", "id", "data", "fixed", "random", "a.formula", "b.formula", "c.formula", "start", "subset", "returndata")), na.rm=TRUE) == 0) {
 #	update start random effects if dataframe changed
 		data <- eval(mcall$data)
+		subset <- eval(mcall$subset, data)
+		if (!is.null(subset)) data <- data[subset, ]
 		id <- factor(eval(mcall$id, data))
 		if (nlevels(id) != dim(ranef(object))[1]) {
 #	omit random effects for missing levels in id
