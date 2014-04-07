@@ -2,7 +2,7 @@
 \alias{BICadj}
 \alias{AICadj}
 \alias{varexp}
-\title{Ways to compare SITAR models for fit.}
+\title{Ways to compare SITAR models for fit}
 \description{
 \code{BICadj} and \code{AICadj} calculate the BIC and AIC for SITAR models, adjusting 
 the likelihood for Box-Cox transformed y variables. \code{varexp} calculates the variance

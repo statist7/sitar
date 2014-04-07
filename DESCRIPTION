@@ -5,7 +5,8 @@ Version: 1.0
 Date: 2013-09-22
 Author: Tim Cole
 Maintainer: Tim Cole <tim.cole@ucl.ac.uk>
-Description: A set of functions for fitting SITAR growth curve models as described in Cole, Donaldson and Ben-Shlomo (2010)
+Description: Functions for fitting and plotting SITAR (SuperImposition by
+ Translation And Rotation) growth curve models
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes

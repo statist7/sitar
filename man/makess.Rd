@@ -1,6 +1,6 @@
 \name{makess}
 \alias{makess}
-\title{makess}
+\title{Create cubic smoothing spline from data}
 \description{
 A wrapper to fit a cubic smoothing spline to the supplied data, allowing derivatives to be calculated.}
 \usage{makess(x, y, xfun, yfun)}

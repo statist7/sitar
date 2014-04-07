@@ -1,6 +1,6 @@
 \name{velout}
 \alias{velout}
-\title{velout}
+\title{Identify outliers with abnormal velocity in growth curves}
 \description{
 Quickly identifies putative outliers in a large number of growth curves.}
 \usage{

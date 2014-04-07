@@ -1,6 +1,6 @@
 \name{mplot}
 \alias{mplot}
-\title{mplot}
+\title{Plot multiple growth curves}
 \description{
 Function to plot multiple growth curves indexed by subject id.}
 \usage{

@@ -1,6 +1,6 @@
 \name{lms2z}
 \alias{lms2z}
-\title{lms2z}
+\title{Convert to/from measurement from/to z-score with growth reference}
 \description{
 A function to convert between measurements and z-scores using a growth reference
 previously fitted by the LMS method.}

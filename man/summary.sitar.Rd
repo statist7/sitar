@@ -1,6 +1,6 @@
 \name{summary.sitar}
 \alias{summary.sitar}
-\title{summary.sitar}
+\title{Create summary of SITAR model}
 \description{
 A \code{summary} method for \code{sitar} objects based on \code{\link{summary.lme}}.}
 \usage{

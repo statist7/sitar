@@ -1,7 +1,7 @@
 \name{sitar}
 \alias{sitar}
 \alias{update.sitar}
-\title{SITAR growth curve analysis}
+\title{Fit SITAR growth curve model}
 \description{SITAR is a method of growth curve analysis, based on \pkg{nlme}, that summarises a set of growth
  curves with a mean growth curve as a regression spline, plus a set of up to three fixed and
  random effects (a, b and c) defining how individual growth curves differ from the mean curve.}

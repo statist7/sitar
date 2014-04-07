@@ -1,7 +1,7 @@
 \name{sitar-package}
 \alias{sitar-package}
 \docType{package}
-\title{SITAR growth curve analysis}
+\title{SITAR (SuperImposition by Translation And Rotation) growth curve analysis}
 \description{SITAR is a method of growth curve analysis, based on \pkg{nlme},
 that estimates a single mean growth curve as a regression spline, plus a set of
 up to three fixed and random effects (a, b and c) defining how individual growth

@@ -1,6 +1,6 @@
 \name{y2plot}
 \alias{y2plot}
-\title{y2plot}
+\title{Plot with two y axes}
 \description{
 Function to plot two y variables, y1 and y2, against a single x variable, with the y1
  and y2 axes on the left and right of the plot respectively.}

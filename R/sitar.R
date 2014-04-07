@@ -31,12 +31,6 @@
 		b
 	}
 	mcall <- match.call()
-	# if (!missing(data)) {
-		# if (!deparse(substitute(data), width.cutoff=99) %in% search()) {
-			# on.exit(detach(data))
-			# attach(data)
-		# }
-	# }
 	data <- eval(mcall$data)
 	x <- eval(mcall$x, data)
 	y <- eval(mcall$y, data)

@@ -1,8 +1,9 @@
 \name{subsample}
 \alias{subsample}
-\title{Sample from a \code{sitar} dataset}
+\title{Sample from SITAR dataset}
 \description{
-A function to sample from a \code{sitar} dataset for experimental design purposes. Two different sampling schemes are offered, based on the values of \code{id} and \code{x}.}
+A function to sample from a SITAR dataset for experimental design purposes. Two different 
+sampling schemes are offered, based on the values of \code{id} and \code{x}.}
 \usage{
 subsample(x, id, data, prob = 1, xlim = NULL)
 }
@@ -19,35 +20,23 @@ scalar defining sampling probability. See Details.}
 length 2 vector defining range of \code{x} to be selected. See Details.}
 }
 \details{
-With the first sampling scheme \code{xlim} is set to \code{NULL} (default), and rows of \code{data} are sampled with probability \code{prob} without replacement. With the second sampling scheme \code{xlim} is set to a range within \code{range(x)}. Subjects \code{id} are then sampled with probability \code{prob} without replacement, and all their rows where \code{x} is within \code{xlim} are selected. The second scheme is useful for testing the power of the model to predict later growth when data only up to a certain age are available. Setting \code{xlim} to \code{range(x)} allows data to be sampled by subject. The returned value can be used as the \code{subset} argument in \code{sitar} or \code{update.sitar}.}
+With the first sampling scheme \code{xlim} is set to \code{NULL} (default), and rows of
+ \code{data} are sampled with probability \code{prob} without replacement.
+  With the second sampling scheme \code{xlim} is set to a range within \code{range(x)}.
+ Subjects \code{id} are then sampled with probability \code{prob} without replacement,
+ and all their rows where \code{x} is within \code{xlim} are selected. 
+ The second scheme is useful for testing the power of the model to predict later growth 
+ when data only up to a certain age are available. Setting \code{xlim} to \code{range(x)} 
+ allows data to be sampled by subject. The returned value can be used as the \code{subset} 
+ argument in \code{sitar} or \code{update.sitar}.}
 \value{
 Returns a logical the length of \code{x} where \code{TRUE} indicates a sampled value.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{sitar}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## draw 50% random sample
+s50 <- subsample(age, id, heights, prob=0.5)
 
-## The function is currently defined as
-function (x, id, data, prob = 1, xlim = NULL) 
-{
-    if (!missing(data)) {
-        on.exit(detach(data))
-        attach(data)
-    }
-    nx <- length(x)
-    subset <- rep(TRUE, nx)
-    if (is.null(xlim)) {
-        ss <- sample(nx, prob * nx)
-        subset[-ss] <- FALSE
-    }
-    else {
-        nid <- nlevels(factor(id))
-        lid <- levels(factor(id))
-        sid <- sample(lid, prob * nid)
-        subset[id \%in\% sid & (x < min(xlim) | x > max(xlim))] <- FALSE
-    }
-    subset
-  }
+## truncate age range to 7-12 for 50% of subjects
+t50 <- subsample(age, id, heights, prob=0.5, xlim=c(7, 12))
 }

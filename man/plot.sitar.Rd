@@ -1,7 +1,7 @@
 \name{plot.sitar}
 \alias{plot.sitar}
 \alias{lines.sitar}
-\title{plot.sitar}
+\title{Plot SITAR model}
 \description{
 \code{plot} and \code{lines} methods for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{

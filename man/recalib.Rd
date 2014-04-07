@@ -1,6 +1,6 @@
 \name{recalib}
 \alias{recalib}
-\title{recalib}
+\title{Recalibrate x, y data using SITAR random effects}
 \description{
 A function to recalibrate x,y data using SITAR random effects}
 \usage{

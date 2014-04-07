@@ -1,8 +1,9 @@
 \name{bupdate}
 \alias{bupdate}
-\title{bupdate}
+\title{Update the b fixed effect to minimise the b-c random effect correlation}
 \description{
-A function to update the value of \code{bstart}, the starting value for the b fixed effect, to minimise the correlation between the random effects b and c.}
+A function to update the value of \code{bstart}, the starting value for the b fixed effect,
+ to minimise the correlation between the random effects b and c.}
 \usage{bupdate(x)}
 \arguments{
   \item{x}{a \code{sitar} object.}

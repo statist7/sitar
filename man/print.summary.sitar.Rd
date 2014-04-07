@@ -1,6 +1,6 @@
 \name{print.summary.sitar}
 \alias{print.summary.sitar}
-\title{print.summary.sitar}
+\title{Print summary of SITAR model}
 \description{
 A \code{print.summary} method for \code{sitar} objects.}
 \usage{

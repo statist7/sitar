@@ -1,6 +1,6 @@
 \name{print.sitar}
 \alias{print.sitar}
-\title{print.sitar}
+\title{Print SITAR model}
 \description{
 Print method for \code{sitar} objects, based on \code{nlme:::print.lme}.}
 \usage{\method{print}{sitar}(x, ...)}

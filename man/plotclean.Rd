@@ -1,6 +1,6 @@
 \name{plotclean}
 \alias{plotclean}
-\title{plotclean}
+\title{Plot multiple growth curves to identify outliers}
 \description{
 A version of \code{mplot} to plot growth curves and identify outliers. When outliers are
  clicked on, and if id is specified, the corresponding growth curve is highlighted. 

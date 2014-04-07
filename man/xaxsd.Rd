@@ -1,7 +1,7 @@
 \name{xaxsd}
 \alias{xaxsd}
 \alias{yaxsd}
-\title{xaxsd and yaxsd}
+\title{Par args xaxs and yaxs option d}
 \description{
 Implements par('xaxs') and par('yaxs') option 'd'.
 }

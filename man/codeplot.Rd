@@ -1,7 +1,7 @@
 \name{codeplot}
 \alias{codeplot}
 \alias{zapvelout}
-\title{codeplot}
+\title{Plot and zap velocity outliers in growth curves}
 \description{
 Handles output from \code{velout} function to display growth curves with outlying points, either plotting or zapping the outliers.}
 \usage{

@@ -1,7 +1,7 @@
 \name{ukwhopt}
 \alias{ukwhopt}
 \docType{data}
-\title{UK 1990 growth reference}
+\title{UK-WHO growth reference including preterm}
 \description{
 The UK 1990 revised growth reference (Cole et al 2011) for birth length, weight
 and head circumference, fitted by the LMS method and summarised by values of L,
