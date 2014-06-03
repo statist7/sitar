@@ -38,7 +38,7 @@
 	} 
 	else {
 		mcall <- model$call.sitar
-		data <- eval(mcall$data)
+		data <- eval(mcall$data, parent.frame())
 #	subset used to fit model
 		subset <- eval(mcall$subset, data)
 		if (!is.null(subset)) data <- data[subset, ]
