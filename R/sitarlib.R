@@ -713,8 +713,16 @@
 #	xaxsd  yaxsd  #
 ###################
 
-	xaxsd <- function(usr=par()$usr[1:2]) (usr + mean(usr) * 0.08) / 1.08
-	yaxsd <- function(usr=par()$usr[3:4]) (usr + mean(usr) * 0.08) / 1.08
+xaxsd <- function(usr=par()$usr[1:2]) {
+	usr <- (usr + mean(usr) * 0.08) / 1.08
+	if (par('xlog')) 10 ^ usr else usr
+}
+
+yaxsd <- function(usr=par()$usr[3:4]) {
+	usr <- (usr + mean(usr) * 0.08) / 1.08
+	if (par('ylog')) 10 ^ usr else usr
+}
+
 #	implements xaxs/yaxs option 'd'
 #	by default returns xlim/ylim args to match current setting of par()$usr, i.e. previous plot scales
 #	e.g. plot(..., xlim=xaxsd(), ylim=yaxsd())
