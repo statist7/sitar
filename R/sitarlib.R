@@ -159,9 +159,10 @@
 
 	lines.sitar <- function (x, ...) 
 {
-	mcall <- match.call()[-1]
-	if (!"add" %in% names(mcall)) mcall <- c(as.list(mcall), list(add=TRUE))
-	do.call('plot.sitar', as.list(mcall))
+	mcall <- match.call()
+    mcall[[1]] <- as.name("plot.sitar")
+	if (!"add" %in% names(mcall)) mcall <- as.call(c(as.list(mcall), list(add=TRUE)))
+	eval(mcall, parent.frame())
 }
 		
 #############################
