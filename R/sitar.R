@@ -31,7 +31,7 @@
 		b
 	}
 	mcall <- match.call()
-	data <- eval(mcall$data)
+	data <- eval(mcall$data, parent.frame())
 	x <- eval(mcall$x, data)
 	y <- eval(mcall$y, data)
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
