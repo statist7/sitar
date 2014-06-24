@@ -1,0 +1,11 @@
+Changes in Version 1.0.1
+
+  o The environment for reading the call in sitar, plot.sitar and lines.sitar 
+  	was corrected.
+  	
+  o	The graphical options xaxsd and yaxsd were extended to deal with log scales.
+
+
+Changes in Version 1.0
+
+  o First CRAN release of package "sitar" for growth curve analysis.

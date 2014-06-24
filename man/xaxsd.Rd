@@ -16,7 +16,9 @@ yaxsd(usr = par()$usr[3:4])
 Implements par('xaxs') and par('yaxs') option 'd', i.e. uses previous axis scales in a new plot.
 }
 \value{
-By default returns xlim/ylim args to match current setting of par()$usr, i.e. previous plot scales. Specifying \code{usr} gives scales with the usr args at the extremes.
+By default returns xlim/ylim args to match current setting of par()$usr, i.e. previous plot scales. 
+Specifying \code{usr} gives scales with the usr args at the extremes.
+If par('xlog') or par('ylog') are set the returned limits are antilogged (to base 10). 
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
