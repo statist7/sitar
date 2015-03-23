@@ -14,3 +14,14 @@ other optional arguments, including \code{asList}, \code{na.action} and \code{na
 }
 \value{A vector of the predictions.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
+\examples{
+data(heights)
+## fit model
+m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+
+## predictions at level 0
+predict(m1, newdata=data.frame(age=9:16), level=0)
+
+## predictions at level 1 for subject 5
+predict(m1, newdata=data.frame(age=9:16, id=5), level=1)
+}
