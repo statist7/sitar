@@ -10,9 +10,9 @@
 #	bounds - span of ns, default x-range ±4%
 #	start - starting values - default estimated
 #			requires spline coefficients, any missing zeroes added
-#	bstart - starting value for b, default 'mean', or 'apv' or value 
+#	bstart - starting value for b, default 'mean', or 'apv' or value
 #		(subsumes xoffset)
-#	xoffset - offset for x, default 'mean', alternatives 'apv' or value 
+#	xoffset - offset for x, default 'mean', alternatives 'apv' or value
 #	returndata - if TRUE returns nlme data frame not nlme model
 #	verbose etc - arguments passed to nlme
 
@@ -36,26 +36,26 @@
 	y <- eval(mcall$y, data)
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
 	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
-	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df) 
+	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df)
 		else df <- length(knots) + 1
 	if (nrow(data) <= df) stop("too few data to fit spline curve")
-#	define bounds, default x range ±4% 
-	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x)) 
+#	define bounds, default x range ±4%
+	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
 	if (length(bounds) != 2) stop("bounds should be length 1 or 2")
 #	derive x variable offset
 	if (newform || !missing(bstart)) { # using bstart
 		newform <- TRUE
 		mcall$xoffset <- NULL
-		if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0 
+		if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0
 		else bstart <- b.origin(bstart)
 		knots <- knots - bstart
 		bounds <- bounds - bstart
 #	get spline start values
 		spline.lm <- lm(y ~ ns(x - bstart, knots=knots, Bound=bounds))
-	} 
+	}
 	else { # using xoffset
 		xoffset <- b.origin(xoffset)
-#	apply xoffset	
+#	apply xoffset
 		x <- x - xoffset
 		knots <- knots - xoffset
 		bounds <- bounds - xoffset
@@ -89,7 +89,7 @@
 		else {
 			if (formula != mm.formula) {
 				mm <- model.matrix(formula, data)
-				if (dim(mm)[[1]] < length(y)) 
+				if (dim(mm)[[1]] < length(y))
 					stop('Missing values in data')
 				mm.formula <- formula
 				#	convert spaces to underlines
@@ -116,15 +116,15 @@
 					fulldata <- cbind(fulldata, mm[,i])
 					names(fulldata)[dim(fulldata)[2]] <- var
 					# assign(var, mm[,i])
-				}					
-			}		
+				}
+			}
 		}
 		if (mm.intercept) {
 			fixed <- c(fixed, l)
 			if (!is.list(start)) {
 				if (newform) {
 					if (l == 'b') start <- c(start, bstart)
-					else if (l == 'c') start <- c(start, 0)					
+					else if (l == 'c') start <- c(start, 0)
 				}
 				else if (l != 'a') start <- c(start, 0)
 			}
@@ -134,13 +134,13 @@
 		pars <- paste(pars, collapse=',')
 		fixed <- paste(fixed, collapse='+')
 		sscomma <- paste(ss, collapse=',')
-	
+
 	#	combine model elements
 		nsd <- paste(model['a'], '+')
 		nsf <- paste('(x', ifelse(!is.na(model['b']), paste('- (', model['b'], '))'), ')'))
 		if (!is.na(model['c'])) nsf <- paste(nsf, '* exp(', model['c'], ')')
-	
-	#	code to parse		
+
+	#	code to parse
 		code <- c(
 	"	.fitnlme <<- function($pars) {",
 	"		splinecoefs <- as.matrix(cbind($sscomma))",
@@ -156,7 +156,7 @@
 	"	start = start, correlation = correlation,",
 	"	weights = weights, subset = subset, method = method,",
 	"	na.action = na.action, control = control, verbose = verbose)")
-	
+
 		for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf')) {
 			code <- gsub(paste('$', i, sep=''), get(i), code, fixed=TRUE)
 		}
@@ -166,7 +166,7 @@
 			cat('\nconstructed code', code, sep='\n')
 			cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
 			if (is.list(start)) {
-				cat('\nstarting values\n  fixed effects\n', start$fixed) 
+				cat('\nstarting values\n  fixed effects\n', start$fixed)
 				if (!is.null(start$random)) {
 					cat('\n  random effects\n')
 					print(start$random)
@@ -174,10 +174,12 @@
 			}
 			else cat('\nstarting values\n', start, '\n')
 		}
-	
+
 	#	save fitted model
-		nlme.out <- eval(parse(text=code), envir=sys.frame(sys.nframe()), enclos=sys.frame(-1))
+    on.exit(rm(.fitnlme, envir=globalenv()))
+    nlme.out <- eval(parse(text=code), envir=sys.frame(sys.nframe()), enclos=sys.frame(-1))
 		nlme.out$call.sitar <- mcall
+    nlme.out$.fitnlme <- .fitnlme
 		if (newform) nlme.out$bstart <- bstart
 			else nlme.out$xoffset <- xoffset
 		nlme.out$ns <- spline.lm
