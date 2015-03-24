@@ -7,7 +7,7 @@
  random effects (a, b and c) defining how individual growth curves differ from the mean curve.}
 \usage{sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c", a.formula = ~1,
  b.formula = ~1, c.formula = ~1, bounds = 0.04, start, bstart = "mean", xoffset = "mean",
- returndata = FALSE, verbose = FALSE, correlation = NULL,
+ returndata = FALSE, returnsub = FALSE, verbose = FALSE, correlation = NULL,
  weights = NULL, subset = NULL, method = "ML", na.action = na.fail,
  control = nlmeControl(returnObject = TRUE), newform = TRUE)
 \method{update}{sitar}(object, ..., evaluate = TRUE)
@@ -32,6 +32,7 @@
   \item{returndata}{logical which if TRUE causes the model matrix to be returned, or if FALSE (default)
   the fitted model. Setting returndata TRUE is useful in conjunction with \code{subset} and
   \code{\link{subsample}} for simulation purposes.}
+  \item{returnsub}{logical which if TRUE causes the function .fitnlme to be returned, or if FALSE (default) the fitted model.}
   \item{verbose}{optional logical value to print information on the evolution of the iterative algorithm (see \code{\link{nlme}}).}
   \item{correlation}{optional \code{corStruct} object describing the within-group correlation structure (see \code{\link{nlme}}).}
   \item{weights}{optional \code{varFunc} object or one-sided formula describing the within-group heteroscedasticity structure (see \code{\link{nlme}}).}

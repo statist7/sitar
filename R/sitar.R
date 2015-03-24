@@ -1,4 +1,4 @@
-	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c', a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean', returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML', na.action=na.fail, control = nlmeControl(returnObject=TRUE), newform=TRUE)
+	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c', a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean', returndata=FALSE, returnsub=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML', na.action=na.fail, control = nlmeControl(returnObject=TRUE), newform=TRUE)
 #
 #	fit growth curves of y ~ ns(f(x)) by id
 #	df - number of knots (or length of knots + 1)
@@ -13,7 +13,8 @@
 #	bstart - starting value for b, default 'mean', or 'apv' or value
 #		(subsumes xoffset)
 #	xoffset - offset for x, default 'mean', alternatives 'apv' or value
-#	returndata - if TRUE returns nlme data frame not nlme model
+#  returndata - if TRUE returns nlme data frame not nlme model
+#  returnsub - if TRUE returns .fitnlme not nlme model
 #	verbose etc - arguments passed to nlme
 
 #	newform - FALSE uses xoffset, TRUE uses bstart
@@ -148,7 +149,8 @@
 	"		(splinecoefs * as.matrix(ns($nsf,",
 	"			knots=knots, Boundary.knots=bounds))) %*% ",
 	"			matrix(rep(1,df), ncol=1))",
-	"	}",
+	"	}")
+  	code2 <- c(
 	"	nlme(y ~ .fitnlme($pars),",
 	"	fixed = $fixed ~ 1,",
 	"	random = $random ~ 1 | id,",
@@ -158,12 +160,13 @@
 	"	na.action = na.action, control = control, verbose = verbose)")
 
 		for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf')) {
-			code <- gsub(paste('$', i, sep=''), get(i), code, fixed=TRUE)
+  		code <- gsub(paste('$', i, sep=''), get(i), code, fixed=TRUE)
+  		code2 <- gsub(paste('$', i, sep=''), get(i), code2, fixed=TRUE)
 		}
 
 	#	print values
 		if (verbose) {
-			cat('\nconstructed code', code, sep='\n')
+			cat('\nconstructed code', code, code2, sep='\n')
 			cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
 			if (is.list(start)) {
 				cat('\nstarting values\n  fixed effects\n', start$fixed)
@@ -177,7 +180,9 @@
 
 	#	save fitted model
     on.exit(rm(.fitnlme, envir=globalenv()))
-    nlme.out <- eval(parse(text=code), envir=sys.frame(sys.nframe()), enclos=sys.frame(-1))
+    eval(parse(text=code), envir=sys.frame(sys.nframe()), enclos=sys.frame(-1))
+    if (returnsub) return(.fitnlme)
+    nlme.out <- eval(parse(text=code2), envir=sys.frame(sys.nframe()), enclos=sys.frame(-1))
 		nlme.out$call.sitar <- mcall
     nlme.out$.fitnlme <- .fitnlme
 		if (newform) nlme.out$bstart <- bstart
