@@ -7,20 +7,20 @@
 #
 #############################
 
-	print.sitar <- function (x, ...) 
+	print.sitar <- function (x, ...)
 {
     dd <- x$dims
     cat("SITAR nonlinear mixed-effects model fit by ")
     cat(ifelse(x$method == "REML", "REML\n", "maximum likelihood\n"))
     cat("  Call:", deparse(x$call.sitar), fill=TRUE)
-    cat("  Log-", ifelse(x$method == "REML", "restricted-", ""), 
+    cat("  Log-", ifelse(x$method == "REML", "restricted-", ""),
         "likelihood: ", format(x$logLik), "\n", sep = "")
     fixF <- x$call$fixed
     if (inherits(fixF, "formula") || is.call(fixF) || is.name(fixF)) {
         cat("  Fixed:", deparse(x$call$fixed), "\n")
     }
     else {
-        cat("  Fixed:", deparse(lapply(fixF, function(el) as.name(deparse(el)))), 
+        cat("  Fixed:", deparse(lapply(fixF, function(el) as.name(deparse(el)))),
             "\n")
     }
     print(fixef(x))
@@ -35,7 +35,7 @@
     else {
         sNgrps <- 1:lNgrps
         aux <- rep(names(Ngrps), sNgrps)
-        aux <- split(aux, array(rep(sNgrps, lNgrps), c(lNgrps, 
+        aux <- split(aux, array(rep(sNgrps, lNgrps), c(lNgrps,
             lNgrps))[!lower.tri(diag(lNgrps))])
         names(Ngrps) <- unlist(lapply(aux, paste, collapse = " %in% "))
         cat("\n")
@@ -50,11 +50,11 @@
 #
 #############################
 
-	summary.sitar <- function (object, adjustSigma = TRUE, verbose = FALSE, ...) 
+	summary.sitar <- function (object, adjustSigma = TRUE, verbose = FALSE, ...)
 {
     class(object) <- class(object)[-1]
     object <- summary(object, adjustSigma=adjustSigma, verbose=verbose, ...)
-    
+
 #	adjust x and y for random effects a, b and c
 	random <- as.character(object$call$random)[2]
 	mcall <- object$call.sitar
@@ -81,7 +81,7 @@
 
 #	save age at peak velocity
 	object$apv <- makess(x, fitted(object, level=0))$apv
-	
+
     class(object) <- c("summary.sitar", class(object))
     object
 }
@@ -92,18 +92,18 @@
 #
 #############################
 
-	print.summary.sitar <- function (x, verbose = FALSE, ...) 
+	print.summary.sitar <- function (x, verbose = FALSE, ...)
 {
     dd <- x$dims
     verbose <- verbose || attr(x, "verbose")
     cat("SITAR nonlinear mixed-effects model fit by ")
     cat(ifelse(x$method == "REML", "REML\n", "maximum likelihood\n"))
     cat("  Call:", deparse(x$call.sitar), fill=TRUE)
-    print(data.frame(AIC = x$AIC, BIC = x$BIC, logLik = c(x$logLik), 
+    print(data.frame(AIC = x$AIC, BIC = x$BIC, logLik = c(x$logLik),
         row.names = " "))
     if (verbose) cat("\nNumber of iterations:", x$numIter, "\n")
     cat("\n")
-    print(summary(x$modelStruct), sigma = x$sigma, reEstimates = x$coef$random, 
+    print(summary(x$modelStruct), sigma = x$sigma, reEstimates = x$coef$random,
         verbose = verbose)
     cat("Fixed effects: ")
     fixF <- x$call$fixed
@@ -111,7 +111,7 @@
         cat(deparse(x$call$fixed), "\n")
     }
     else {
-        cat(deparse(lapply(fixF, function(el) as.name(deparse(el)))), 
+        cat(deparse(lapply(fixF, function(el) as.name(deparse(el)))),
             "\n")
     }
     xtTab <- as.data.frame(x$tTable)
@@ -120,7 +120,7 @@
         xtTab[, i] <- format(zapsmall(xtTab[, i]))
     }
     xtTab[, wchPval] <- format(round(xtTab[, wchPval], 4))
-    if (any(wchLv <- (as.double(levels(xtTab[, wchPval])) == 
+    if (any(wchLv <- (as.double(levels(xtTab[, wchPval])) ==
         0))) {
         levels(xtTab[, wchPval])[wchLv] <- "<.0001"
     }
@@ -142,7 +142,7 @@
     else {
         sNgrps <- 1:lNgrps
         aux <- rep(names(Ngrps), sNgrps)
-        aux <- split(aux, array(rep(sNgrps, lNgrps), c(lNgrps, 
+        aux <- split(aux, array(rep(sNgrps, lNgrps), c(lNgrps,
             lNgrps))[!lower.tri(diag(lNgrps))])
         names(Ngrps) <- unlist(lapply(aux, paste, collapse = " %in% "))
         cat("\n")
@@ -157,29 +157,29 @@
 #
 #############################
 
-	lines.sitar <- function (x, ...) 
+	lines.sitar <- function (x, ...)
 {
 	mcall <- match.call()
     mcall[[1]] <- as.name("plot.sitar")
 	if (!"add" %in% names(mcall)) mcall <- as.call(c(as.list(mcall), list(add=TRUE)))
 	eval(mcall, parent.frame())
 }
-		
+
 #############################
 #
 #	update.sitar
 #
 #############################
 
-	update.sitar <- function (object, ..., evaluate = TRUE) 
+	update.sitar <- function (object, ..., evaluate = TRUE)
 {
 	mcall <- object$call.sitar
-	if (is.null(mcall)) 
+	if (is.null(mcall))
 		stop("need an object with call.sitar component")
 	extras <- as.list(match.call(expand.dots = FALSE)$...)
 #	drop null arguments
-	for (i in names(extras)) 
-		if (is.null(extras[[i]])) 
+	for (i in names(extras))
+		if (is.null(extras[[i]]))
 			mcall[[i]] <- extras[[i]] <- NULL
 	start. <- list(fixed=fixef(object), random=ranef(object))
 #	check if xoffset used
@@ -190,7 +190,7 @@
 		bstart <- bstart + object$xoffset
 		# bstart <- object$xoffset # alternative
 		if (is.null(extras$bstart)) extras$bstart <- bstart
-	}		
+	}
 	if (length(extras) > 0) {
 #	update formulae
 		all.pars <- c(as.list(mcall), formals(sitar))[-1]
@@ -204,7 +204,7 @@
 #	update existing arguments
 		existing <- pmatch(names(extras), names(mcall))
 		if (sum(existing, na.rm=TRUE))
-			for (a in 1:length(existing)) 
+			for (a in 1:length(existing))
 				mcall[existing[a]] <- extras[a]
 #	add new arguments
 		existing <- !is.na(existing)
@@ -230,7 +230,7 @@
 				start.$random <- rbind(start.$random, newre)
 				cat(sum(newid), 'subjects added\n')
 			}
-		}	
+		}
 #	update start fixed effects if df, knots, bounds or bstart updated
 		if (sum(pmatch(names(extras), c("df", "knots", "bounds", "bstart")), na.rm=TRUE) > 0) {
 			x <- eval(mcall$x, data)
@@ -266,11 +266,11 @@
 		}
 #	save start. object
 		assign('start.', start., parent.frame())
-		if (!'start' %in% names(mcall)) 
+		if (!'start' %in% names(mcall))
 			mcall <- as.call(c(as.list(mcall), start=quote(start.)))
 	}
 	else mcall$start <- NULL
-	if (evaluate) 
+	if (evaluate)
 		eval(mcall, parent.frame())
 	else mcall
 }
@@ -349,7 +349,7 @@
 			xy$usr2 <- par('usr')
 			eval(parse(text=".par.usr2 <<- par('usr')"))
 			# .par.usr2 <<- par('usr')
-#	add y2 axis 
+#	add y2 axis
 			if (par('mar')[4] >= 2) axis(4)
 #	unset col
 			y2par$col <- NULL
@@ -398,7 +398,7 @@
 	}
 	pc <- lapply(ARG, function(obj) {
 		if (!'ns' %in% names(obj)) NA else
-		100 * (1 - (obj$sigma / summary(obj$ns)$sigma)^2)		
+		100 * (1 - (obj$sigma / summary(obj$ns)$sigma)^2)
 	})
 	names(pc) <- c(match.call(expand.dots=FALSE)$..., pattern)
 	pc <- unlist(pc[!is.na(pc)])
@@ -419,7 +419,7 @@
 #	assumes name  of v is vcall or vcall[[2]]
 #		excludes e.g. log10
 #	if inverse TRUE vcall is inverted first
-{	
+{
 	if (length(vcall) == 1) vcall <- substitute(v) else {
 		if (inverse) {
 			fun <- vcall[[1]]
@@ -452,8 +452,8 @@
 #	returns smooth.spline including apv/pv (peak velocity)
 #		or amv/mv (max velocity)
 {
-	if(!missing(xfun)) x <- xfun(x)		
-	if(!missing(yfun)) y <- yfun(y)		
+	if(!missing(xfun)) x <- xfun(x)
+	if(!missing(yfun)) y <- yfun(y)
 	o <- order(x)
 	af <- unique(cbind(x[o], y[o]))
 	ss <- smooth.spline(af)
@@ -509,7 +509,7 @@
 #		default 0.5 is halfway between velocity and increment
 #	limit (default 5 SD) to identify outliers
 #	linearise straightens out growth curves first
-{	
+{
 	mcall <- match.call()
 	data <- eval(mcall$data)
 #	create data frame of x, y and id with no NAs
@@ -539,7 +539,7 @@
 #	standardise using robust SD
 	vel1 <- trunc(vel1 / mad(vel1, na.rm=TRUE)) # or IQR * 1.349
 	vel2 <- trunc(vel2 / mad(vel2, na.rm=TRUE))
-#	insert NAs to make up length 
+#	insert NAs to make up length
 	vel3 <- c(rep(NA, lag), vel2, rep(NA, lag))
 	vel2 <- c(vel1, rep(NA, lag))
 	vel1 <- c(rep(NA, lag), vel1)
@@ -550,10 +550,10 @@
 	code[dt2 | dt1] <- 8
 	code[dt2 & !dt1] <- 7
 	t <- is.na(vel3) & !(dt1 | dt2)
-	code[t] <- 
-		(as.numeric(!is.na(vel1[t]) & abs(vel1[t]) >= limit) + 
+	code[t] <-
+		(as.numeric(!is.na(vel1[t]) & abs(vel1[t]) >= limit) +
 		 as.numeric(!is.na(vel2[t]) & abs(vel2[t]) >= limit)) * 6
-	
+
 #  code	v1+v2	v3		interpretation
 #	0		0	0		no outlier
 #	0		0	NA		no outlier
@@ -588,12 +588,12 @@
 #
 #############################
 
-	codeplot <- function(outliers, icode=4, ..., print=TRUE) 
+	codeplot <- function(outliers, icode=4, ..., print=TRUE)
 {
 #	plots growth curves with outliers identified by velout
 #	outliers	data frame returned by velout
 #				id, x, y, code, vel1, vel2, vel3
-#	icode		type(s) of outlier, from velout 
+#	icode		type(s) of outlier, from velout
 #	...			for plot commands
 #	print		TRUE to print case summaries
 	cat('click or ESC in plot window to progress through cases', '\nESC in console then ESC in plot window to quit\n')
@@ -634,7 +634,7 @@
 		dots$type <- NULL
 		if (is.null(pcht)) pcht <- 8
 		do.call('points', c(list(inc[, 2], inc[, 3], pch=pcht), dots))
-		title(paste(id, z[1, 1], 'code', 
+		title(paste(id, z[1, 1], 'code',
 			paste(unique(inc$code), collapse=' ')))
 		locator(1)
 	} )
@@ -668,7 +668,7 @@
 	recalib <- function(xc, yc, id=NULL, data, xcnew=NULL, ycnew=NULL, model, from, to)
 #	xc - column names of x data to be recalibrated
 #	yc - column names of y data to be recalibrated
-#	id - column of data containing to/from 
+#	id - column of data containing to/from
 #	(default NULL means include all, else just 'from' rows)
 #	data - dataframe containing x and y data to be recalibrated
 #	xcnew - column names for replacement x (default NULL=xnew1...)
@@ -689,7 +689,7 @@
 	} )
 	nxc <- length(xc)
 	if (is.null(xcnew)) xcnew <- paste('xnew', 1:nxc, sep='')
-	for (i in 1:nxc) {	
+	for (i in 1:nxc) {
 		data[, xcnew[i]] <- data[, xc[i]]
 		x <- c(data[include, xcnew[i]])
 		x <-funcall(x, xcall)
@@ -700,7 +700,7 @@
 	}
 	nyc <- length(yc)
 	if (is.null(ycnew)) ycnew <- paste('ynew', 1:nyc, sep='')
-	for (i in 1:nyc) {	
+	for (i in 1:nyc) {
 		data[, ycnew[i]] <- data[, yc[i]]
 		y <- c(data[include, ycnew[i]])
 		y <-funcall(y, ycall)
@@ -715,11 +715,13 @@
 ###################
 
 xaxsd <- function(usr=par()$usr[1:2]) {
-	usr <- (usr + mean(usr) * 0.08) / 1.08
+  if (!missing(usr) && par('xlog')) usr <- log10(usr)
+  usr <- (usr + mean(usr) * 0.08) / 1.08
 	if (par('xlog')) 10 ^ usr else usr
 }
 
 yaxsd <- function(usr=par()$usr[3:4]) {
+  if (!missing(usr) && par('ylog')) usr <- log10(usr)
 	usr <- (usr + mean(usr) * 0.08) / 1.08
 	if (par('ylog')) 10 ^ usr else usr
 }
@@ -728,12 +730,13 @@ yaxsd <- function(usr=par()$usr[3:4]) {
 #	by default returns xlim/ylim args to match current setting of par()$usr, i.e. previous plot scales
 #	e.g. plot(..., xlim=xaxsd(), ylim=yaxsd())
 #	specifying usr gives scale with usr args at extremes
+# fails with plot.sitar: par([xy]log=TRUE) needed before plot(*, log='[xy]')
 
 ##########################
 #	sampling for subset  #
 ##########################
 
-	subsample <- function(x, id, data, prob = 1, xlim = NULL) 
+	subsample <- function(x, id, data, prob = 1, xlim = NULL)
 {
 #	selects subset for sitar model design
 #	x - age
@@ -753,7 +756,7 @@ yaxsd <- function(usr=par()$usr[3:4]) {
 	if (is.null(xlim)) {
 		ss <- sample(nx, prob * nx)
 		subset[-ss] <- FALSE
-	} 
+	}
 	else {
 #	sampling of individuals and restricting their age range to xlim
 		id <- eval(mcall$id, data)
