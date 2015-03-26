@@ -1,6 +1,6 @@
 	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun, yfun, subset=NULL, abc=c(a=0, b=0, c=0), add=FALSE, nlme=FALSE, ...)
 #	plot curves from sitar model
-#	opt: 
+#	opt:
 #		d = fitted distance curve (labels[1] = x, labels[2] = y)
 #		v = fitted velocity curve (labels[3] = y)
 #		e = fitted fixed effects distance curve (labels[1] = x, labels[2] = y)
@@ -8,7 +8,7 @@
 #		u = unadjusted y vs t curves by subject
 #		a = adjusted y vs adjusted t curves by subject
 #
-#		multiple options all plot on same graph 
+#		multiple options all plot on same graph
 #			(though axes not necessarily optimised)
 #
 #		labels are for opt dv - particularly v
@@ -29,13 +29,18 @@
 #
 #		nlme TRUE plots model as nlme object
 {
+  xseq <- function(x, nx=101) {
+    rx <- range(x, na.rm=TRUE)
+    seq(rx[1], rx[2], length.out=nx)
+  }
+
 	model <- x
 	rm(x)
 	if (nlme) {
 		mcall <- match.call()[-1]
 		names(mcall)[[1]] <- 'x'
 		do.call('plot.lme', as.list(mcall))
-	} 
+	}
 	else {
 		mcall <- model$call.sitar
 		data <- eval(mcall$data, parent.frame())
@@ -61,28 +66,28 @@
 		if (!"xlab" %in% names(ARG)) {
 			xl <- ifelse(missing(labels), deparse(mcall$x), labels[1])
 			ARG <- c(ARG, list(xlab=xl))
-		} 
+		}
 		else xl <- ARG$xlab
 #	if ylab not specified replace with label or else y name
 		if (!"ylab" %in% names(ARG)) {
 			yl <- ifelse(missing(labels), deparse(mcall$y), labels[2])
 			ARG <- c(ARG, list(ylab=yl))
-		} 
+		}
 		else yl <- ARG$ylab
 
 #	create output list
 		xy <- list()
-			
+
 #	plot fitted distance and velocity curves
 		if (grepl("d", opt) || grepl("v", opt) || apv) {
-			xt <- x[subset]
-			yt <- fitted(model, level=0)[subset]
+			xt <- xseq(x[subset])
+			yt <- predict(model, newdata=data.frame(x=xt), level=0)
 #	adjust for abc
 			if (!missing(abc)) {
 #	if abc is named ensure 3 values match model random effects
 				if (!is.null(names(abc))) {
 					random <- dimnames(ranef(model))[[2]]
-					for (l in letters[1:3]) 
+					for (l in letters[1:3])
 						if (is.na(abc[l]) || !l %in% random) abc[l] <- 0
 				}
 				else
@@ -119,7 +124,7 @@
 				add <- TRUE
 			}
 		}
-		
+
 #	plot fixed effects distance curve
 		if (grepl("e", opt)) {
 			xt <- x[subset]
@@ -138,7 +143,7 @@
 			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=quote(subset), add=add), ARG))
 			add <- TRUE
 		}
-	
+
 #	plot fitted curves by subject
 		if (grepl("f", opt)) {
 			y <- fitted(model, level=1)
@@ -147,7 +152,7 @@
 			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=quote(subset), add=add), ARG))
 			add <- TRUE
 		}
-	
+
 #	plot adjusted y vs adjusted t by subject
 		if (grepl("a", opt)) {
 			fred <- summary(model)
