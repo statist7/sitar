@@ -3,14 +3,10 @@
     if (!missing(newdata)) {
       on.exit(if (exists('.fitnlme')) rm(.fitnlme, envir=globalenv()))
       scall <- object$call.sitar
-      xname <- deparse(scall$x)
       if (!'x' %in% names(newdata)) stop('newdata lacks x variable')
-#       names(newdata)[match(xname, names(newdata), 0)] <- 'x'
-#       idname <- deparse(scall$id)
       if (!'id' %in% names(newdata)) {
         if (level != 0) stop('newdata lacks id variable')
         newdata <- data.frame(newdata, id=object$groups$id[1])
-#         names(newdata)[match('id', names(newdata), 0)] <- idname
       }
       fe <- fixef(object)
       fe <- fe[!match(names(fe), names(newdata), 0)]
@@ -19,7 +15,7 @@
       if (exists('object$.fitnlme')) .fitnlme <<- object$.fitnlme else
         .fitnlme <<- update(object, returnsub=TRUE)
     }
-    do.call(nlme:::predict.nlme, as.list(mcall))
+    do.call(nlme:::predict.nlme, list(object, newdata, level, ...))
   }
 
   getData.sitar <- function(object) {
