@@ -21,7 +21,7 @@
 #
 #		subset is subset of values
 #
-#		abc is a set of labelled sitar parameters for opt dv e.g.
+#		abc is a set of named sitar parameters for opt dv e.g.
 #			abc=list(a=1, b=0.1, c=-0.1)
 #		or a single id level whose abc values are to be used
 #
@@ -128,7 +128,7 @@
 #	plot fixed effects distance curve
 		if (grepl("e", opt)) {
 			xt <- x[subset]
-			yt <- model$ns$fitted[subset]
+      yt <- predict(model$ns, newdata=data.frame(x=xt))
 			if (!missing(xfun)) xt <- xfun(xt)
 			if (!missing(yfun)) yt <- yfun(yt)
 			ox <- order(xt)
@@ -140,7 +140,7 @@
 		if (grepl("u", opt)) {
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=quote(subset), add=add), ARG))
+  		do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG), quote=TRUE)
 			add <- TRUE
 		}
 
@@ -149,7 +149,7 @@
 			y <- fitted(model, level=1)
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=quote(subset), add=add), ARG))
+    	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG), quote=TRUE)
 			add <- TRUE
 		}
 
@@ -160,7 +160,7 @@
 			y <- fred$y.adj
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-			do.call("mplot", c(list(x=quote(x), y=quote(y), id=quote(id), subset=quote(subset), add=add), ARG))
+    	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG), quote=TRUE)
 			add <- TRUE
 		}
 #	plot vertical line at age of peak velocity
