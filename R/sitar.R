@@ -144,9 +144,8 @@
   	fitcode <- c(
 	"fitenv <- new.env()",
 	"fitenv$fitnlme <- function($pars) {",
-	"splinecoefs <- as.matrix(cbind($sscomma))",
 	"as.vector( $nsd",
-	"(splinecoefs * as.matrix(ns($nsf,",
+	"(as.matrix(cbind($sscomma)) * as.matrix(ns($nsf,",
 	"knots=knots, Boundary.knots=bounds))) %*%",
 	"matrix(rep(1,df), ncol=1))",
 	"}",
