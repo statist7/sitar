@@ -3,16 +3,18 @@
 \title{Predict SITAR model}
 \description{
 Predict method for \code{sitar} objects, based on \code{predict.lme}.}
-\usage{\method{predict}{sitar}(object, newdata, level, ...)}
+\usage{\method{predict}{sitar}(object, newdata, level=1, ...)}
 \arguments{
   \item{object}{
 an object inheriting from class \code{sitar}.}
   \item{newdata}{
-an optional data frame to be used for obtaining the predictions. At a minimum it requires a named column for \code{x}, and a named column for \code{id} if \code{level > 0}. Coefficients for the regression spline, \code{a}, \code{b}, \code{c} and any other relevant covariates are added internally, though their values will be overwritten by any values provided in \code{newdata}.}
+an optional data frame to be used for obtaining the predictions. It requires named columns for \code{x}, for \code{id} if \code{level=1}, and for any covariates in \code{a.formula}, \code{b.formula} or \code{c.formula}.}
+  \item{level}{
+an optional integer vector giving the level of grouping to be used in obtaining the predictions, level zero corresponding to the population predictions. Defaults to level 1.}
   \item{\dots}{
 other optional arguments, including \code{asList}, \code{na.action} and \code{naPattern}.}
 }
-\value{A vector of the predictions.}
+\value{A vector of the predictions, or a list of vectors if \code{asList = TRUE} or \code{length(level) > 1}.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
 data(heights)
