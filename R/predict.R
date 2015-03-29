@@ -1,7 +1,6 @@
-  predict.sitar <- function(object, newdata, level, ...) {
+  predict.sitar <- function(object, newdata, level=1, ...) {
     mcall <- match.call()[-1]
     if (!missing(newdata)) {
-      on.exit(if (exists('.fitnlme')) rm(.fitnlme, envir=globalenv()))
       scall <- object$call.sitar
       if (!'x' %in% names(newdata)) stop('newdata lacks x variable')
       if (!'id' %in% names(newdata)) {
@@ -9,13 +8,21 @@
         newdata <- data.frame(newdata, id=object$groups$id[1])
       }
       fe <- fixef(object)
+# omit fixed effects already in newdata
       fe <- fe[!match(names(fe), names(newdata), 0)]
       newdata <- data.frame(newdata, t(fe))
       mcall$newdata <- quote(newdata)
-      if (exists('object$.fitnlme')) .fitnlme <<- object$.fitnlme else
-        .fitnlme <<- update(object, returnsub=TRUE)
+# attach object for fitnlme
+      attach(object)
+      on.exit(detach(object))
     }
-    do.call(nlme:::predict.nlme, list(object, newdata, level, ...))
+    pred <- tryCatch(do.call(nlme:::predict.nlme, as.list(mcall)), error=function(e) {
+        print(e)
+        if ('could not find function "fitnlme"' %in% e)
+          return(paste('need to refit model', deparse(mcall[[1]])))
+    })
+    attributes(pred) <- NULL
+    pred
   }
 
   getData.sitar <- function(object) {
