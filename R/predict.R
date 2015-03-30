@@ -13,14 +13,12 @@
       newdata <- data.frame(newdata, t(fe))
       mcall$newdata <- quote(newdata)
 # attach object for fitnlme
-      attach(object)
       on.exit(detach(object))
+      attach(object)
+      if (!exists('fitnlme'))
+        stop('could not find function "fitnlme": please update model')
     }
-    pred <- tryCatch(do.call(nlme:::predict.nlme, as.list(mcall)), error=function(e) {
-        print(e)
-        if ('could not find function "fitnlme"' %in% e)
-          return(paste('need to refit model', deparse(mcall[[1]])))
-    })
+    pred <- do.call(nlme:::predict.nlme, as.list(mcall))
     attributes(pred) <- NULL
     pred
   }
