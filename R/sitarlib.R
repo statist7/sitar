@@ -410,8 +410,8 @@
 	dc <- dc[order(dc[,3], dc[,1]), ]
 	if (linearise) {
 #	fit spline curve to convert y to residual adjusted for x
-		require(quantreg)
-		spline.lm <- rq(dc[,2] ~ bs(dc[,1], df=5))
+# fails if package quantreg not available
+    spline.lm <- quantreg::rq(dc[,2] ~ bs(dc[,1], df=5))
 		dc[,2] <- residuals(spline.lm)
 	}
 #	calculate velocity between successive measurements
