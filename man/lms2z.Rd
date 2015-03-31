@@ -1,11 +1,11 @@
-\name{lms2z}
-\alias{lms2z}
+\name{LMS2z}
+\alias{LMS2z}
 \title{Convert to/from measurement from/to z-score with growth reference}
 \description{
 A function to convert between measurements and z-scores using a growth reference
 previously fitted by the LMS method.}
 \usage{
-lms2z(x, y, sex, data = parent.frame(), measure, ref, toz = TRUE)
+LMS2z(x, y, sex, data = parent.frame(), measure, ref, toz = TRUE)
 }
 \arguments{
   \item{x}{
@@ -36,14 +36,14 @@ passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{to
 ## convert girls' heights data to UK 90 z-scores
 data(heights)
 data(uk90)
-lms2z(age, height, sex = 2, heights, measure = 'ht', ref = 'uk90')
+LMS2z(age, height, sex = 2, heights, measure = 'ht', ref = 'uk90')
 
 ## construct table of boys weight centiles for WHO standard on 3-month age grid
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages
 v <- as.data.frame(lapply(as.list(zs), function(z) {
-  v <- lms2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
+  v <- LMS2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
 }))
 names(v) <- z2cent(zs)
 rownames(v) <- ages

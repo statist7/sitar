@@ -1,4 +1,4 @@
-	lms2z <- function(x, y, sex, data = parent.frame(), measure, ref, toz=TRUE) {
+	LMS2z <- function(x, y, sex, data = parent.frame(), measure, ref, toz=TRUE) {
 #	converts measurement y to/from z-score adjusted for x & sex
 #		using LMS reference 'ref' for 'measure'
 #	x		age
@@ -19,7 +19,7 @@
 		for (ix in 1:2) {
 			sexvar <- as.numeric(df[, 3]) == ix
 			sexref <- as.numeric(ref$sex) == ix
-			if (sum(sexvar) > 0) v[sexvar, i] <- spline(ref$years[sexref], 
+			if (sum(sexvar) > 0) v[sexvar, i] <- spline(ref$years[sexref],
 				ref[sexref, lms[i]], method='natural', xout=df[sexvar, 1])$y
 		}
 	}
@@ -31,12 +31,12 @@
 	L0 <- L + 1e-7 * (L == 0)
 	( (x / M) ^ L0 - 1) / L0 / S
 }
-	
+
 	cLMS <- function(z, L = 1, M, S) {
 	L0 <- L + 1e-7 * (L == 0)
 	M * (1 + L0 * S * z) ^ (1 / L0)
 }
-	
+
 	z2cent <- function(z) {
 #	z is z-score
 #	returns corresponding centile as label
