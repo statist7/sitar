@@ -18,7 +18,7 @@
       if (!exists('fitnlme'))
         stop('could not find function "fitnlme": please update model')
     }
-    pred <- do.call(nlme:::predict.nlme, as.list(mcall))
+    pred <- nlme:::predict.nlme(object=object, newdata=newdata, level=level, ...)
     attributes(pred) <- NULL
     pred
   }
