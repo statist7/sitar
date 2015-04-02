@@ -8,7 +8,7 @@ Predict method for \code{sitar} objects, based on \code{predict.lme}.}
   \item{object}{
 an object inheriting from class \code{sitar}.}
   \item{newdata}{
-an optional data frame to be used for obtaining the predictions. It requires named columns for \code{x}, and for \code{id} if \code{level = 1}. Any covariates in \code{a.formula}, \code{b.formula} or \code{c.formula} can also be included. By default their values are set to zero, so when \code{level = 0} the prediction represents the mean curve. Note that factors are coded as instrumental variables, so their names need the level appending, in the form they appear in coefficient names.}
+an optional data frame to be used for obtaining the predictions. It requires named columns for \code{x}, and for \code{id} if \code{level = 1}. Any covariates in \code{a.formula}, \code{b.formula} or \code{c.formula} can also be included. By default their values are set to zero, so when \code{level = 0} the prediction represents the mean curve. Note that factors are coded as instrumental variables, so their names need the level appending.}
   \item{level}{
 an optional integer vector giving the level of grouping to be used in obtaining the predictions, level zero corresponding to the population predictions. Defaults to level 1.}
   \item{\dots}{
