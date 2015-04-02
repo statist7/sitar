@@ -7,15 +7,16 @@
         if (level != 0) stop('newdata lacks id variable')
         newdata <- data.frame(newdata, id=object$groups$id[1])
       }
-      fe <- fixef(object)
-# omit fixed effects already in newdata
-      fe <- fe[!match(names(fe), names(newdata), 0)]
-      newdata <- data.frame(newdata, t(fe))
 # attach object for fitnlme
       on.exit(detach(object))
       attach(object)
       if (!exists('fitnlme'))
         stop('could not find function "fitnlme": please update model')
+# omit fitnlme args already in newdata
+  		argnames <- names(formals(fitnlme))
+			args <- setNames(vector('integer', length=length(argnames)), argnames)
+      args <- args[!match(argnames, names(newdata), 0)]
+      newdata <- data.frame(newdata, t(args))
     }
     pred <- nlme:::predict.nlme(object=object, newdata=newdata, level=level, ...)
     attributes(pred) <- NULL
