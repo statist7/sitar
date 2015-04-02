@@ -81,7 +81,15 @@
 #	plot fitted distance and velocity curves
 		if (grepl("d", opt) || grepl("v", opt) || apv) {
 			xt <- xseq(x[subset])
-			yt <- predict(model, newdata=data.frame(x=xt), level=0)
+			nam <- names(formals(model$fitnlme))
+			xtra <- nam[!nam %in% c('x', names(fixef(model)))]
+			xs <- setNames(vector('integer', length=length(xtra)), xtra)
+      if (!identical(subset, rep(TRUE, nf))) {
+        df <- update(model, returndata=TRUE)[subset, xtra]
+        xs <- unlist(lapply(df, mean, na.rm=TRUE))
+      }
+			newdata <- data.frame(x=xt, t(xs))
+			yt <- predict(object=model, newdata=newdata, level=0)
 #	adjust for abc
 			if (!missing(abc)) {
 #	if abc is named ensure 3 values match model random effects
