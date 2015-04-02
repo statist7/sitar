@@ -11,7 +11,6 @@
 # omit fixed effects already in newdata
       fe <- fe[!match(names(fe), names(newdata), 0)]
       newdata <- data.frame(newdata, t(fe))
-      mcall$newdata <- quote(newdata)
 # attach object for fitnlme
       on.exit(detach(object))
       attach(object)
