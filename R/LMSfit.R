@@ -1,9 +1,9 @@
-LMSfit <- function(x, y, sex, LMSdf = c(6,10,8), centiles = c(3,10,25,50,75,90,97), L1 = FALSE, plot=TRUE, ...) {
+LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,90,97), df = c(6,10,8), L1 = FALSE, plot=TRUE, ...) {
 #	x is a vector of ages, separately by sex
 #	y is a matrix, nrows = length(x), ncols = length(centiles)
 #	sex is a factor coded 1 for male, 2 for female, same length as x
 #	fits a cubic smoothing spline to the empirical L, M and S values
-#	LMSdf contains the cubic smoothing spline edf for L, M and S
+#	df contains the cubic smoothing spline edf for L, M and S
 #	L1 = True forces L to be 1
 #	... allows for par vars
 #	returns: LMS as data frame (L, M and S smoothed values)
@@ -32,14 +32,14 @@ LMSfit <- function(x, y, sex, LMSdf = c(6,10,8), centiles = c(3,10,25,50,75,90,9
 		LMSt <- cbind(Lopt, Mopt, Sopt)[sex == sx,]
 		xt <- x[sex == sx]
 		for (i in 1:3) {
-			sms <- smooth.spline(xt, LMSt[, i], df = LMSdf[i])
+			sms <- smooth.spline(xt, LMSt[, i], df = df[i])
 			if (i == 1 && !L1) L[sex == sx] <- sms$y else
 			  if (i == 2) M[sex == sx] <- sms$y else
 		    	if (i == 3) S[sex == sx] <- sms$y
       if (plot) {
   			plot(xt, LMSt[, i], xlab = "age", ylab = LMStitle[i], ...)
   			lines(sms, ...)
-  			title(main = paste(mf[sx], "sex   df =", LMSdf[i]))
+  			title(main = paste(mf[sx], "sex   df =", df[i]))
 			# x1 <- seq(min(xt), max(xt), length = 101)
 			# der1 <- predict(sms, x1, der = 1)
 			# plot(der1, type = "l", xlab = "age", ylab = "Velocity", ...)
