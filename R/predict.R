@@ -18,14 +18,16 @@
       args <- args[!match(argnames, names(newdata), 0)]
       newdata <- data.frame(newdata, t(args))
     }
-    pred <- nlme:::predict.nlme(object=object, newdata=newdata, level=level, ...)
+    class(object) <- class(object)[-1]
+    pred <- predict(object=object, newdata=newdata, level=level, ...)
     attributes(pred) <- NULL
     pred
   }
 
   getData.sitar <- function(object) {
     object$call <- object$call.sitar
-    nlme:::getData.nlme(object)
+    class(object) <- 'lme'
+    getData(object)
   }
 
   getVarCov.sitar <- function(obj, ...) {
