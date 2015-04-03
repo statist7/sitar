@@ -5,7 +5,7 @@
 A function to summarise an existing set of growth reference centiles as the L, M and S curves of the LMS method.}
 \usage{
 LMSfit(x, y, sex, data = parent.frame(), centiles = c(3, 10, 25, 50, 75, 90, 97),
-  LMSdf = c(6, 10, 8), L1 = FALSE, plot = TRUE, ...)}
+  df = c(6, 10, 8), L1 = FALSE, plot = TRUE, ...)}
 \arguments{
   \item{x}{
 vector of tabulated ages.}
@@ -17,7 +17,7 @@ two-level factor where level 1 corresponds to male and level 2 to female.}
 optional data frame containing \code{x}, \code{y} and \code{sex}.}
   \item{centiles}{
 vector of centiles corresponding to the columns of \code{y}, default c(3, 10, 25, 50, 75, 90, 97).}
-  \item{LMSdf}{
+  \item{df}{
 length-3 vector with the cubic smoothing spline equivalent degrees of freedom (edf) for the L, M and S curves, default c(6, 10, 8).}
   \item{L1}{
 logical constraining the L curve to 1, i.e. a Normal distribution, default FALSE.}

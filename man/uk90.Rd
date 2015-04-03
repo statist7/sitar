@@ -38,7 +38,7 @@ The UK 1990 growth reference (Freeman et al 1995, Cole et al 1998) for height, w
   }
 }
 \details{
-The L, M and S values for each measurement correspond respectively to the Box-Cox power, median and coefficient of variation of the distribution by age and sex (Cole & Green 1992). The short names for each measurement (see \code{\link{lms2z}}) are as follows: height (ht), weight (wt), body mass index (bmi), head circumference (head), sitting height (sitht), leg length (leglen), waist circumference (waist) and percent body fat (fat).
+The L, M and S values for each measurement correspond respectively to the Box-Cox power, median and coefficient of variation of the distribution by age and sex (Cole & Green 1992). The short names for each measurement (see \code{\link{LMS2z}}) are as follows: height (ht), weight (wt), body mass index (bmi), head circumference (head), sitting height (sitht), leg length (leglen), waist circumference (waist) and percent body fat (fat).
 }
 \source{
 The values are tabulated in the Excel spreadsheet British1990.xls provided with the Excel add-in LMSgrowth from \url{http://www.healthforallchildren.com/?product_cat=software}.
@@ -53,6 +53,6 @@ Freeman JV, Cole TJ, Chinn S, et al. Cross sectional stature and weight referenc
 \examples{
 data(uk90)
 ## calculate median BMI in girls from birth to 10 years
-lms2z(x = 0:10, y = 0, sex = 2, data = NULL, measure = 'bmi', ref = 'uk90', toz = FALSE)
+LMS2z(x = 0:10, y = 0, sex = 2, data = NULL, measure = 'bmi', ref = 'uk90', toz = FALSE)
 }
 \keyword{datasets}

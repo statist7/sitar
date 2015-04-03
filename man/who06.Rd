@@ -35,7 +35,7 @@ The WHO growth standard (WHO 2006) for height, weight, body mass index, circumfe
   }
 }
 \details{
-The L, M and S values for each measurement correspond respectively to the Box-Cox power, median and coefficient of variation of the distribution by age and sex (Cole & Green 1992). The short names for each measurement (see \code{\link{lms2z}}) are as follows: height (ht), weight (wt), body mass index (bmi), head circumference (head), arm circumference (arm), subscapular skinfold (subscap), and tricep skinfold (tricep).
+The L, M and S values for each measurement correspond respectively to the Box-Cox power, median and coefficient of variation of the distribution by age and sex (Cole & Green 1992). The short names for each measurement (see \code{\link{LMS2z}}) are as follows: height (ht), weight (wt), body mass index (bmi), head circumference (head), arm circumference (arm), subscapular skinfold (subscap), and tricep skinfold (tricep).
 }
 \source{
 \url{http://www.who.int/childgrowth/en/}
@@ -48,6 +48,6 @@ Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and penali
 \examples{
 data(who06)
 ## calculate z-score for length 60 cm in boys at age 0:12 months
-lms2z(x = 0:12/12, y = 60, sex = 1, data = NULL, measure = 'ht', ref = 'who06')
+LMS2z(x = 0:12/12, y = 60, sex = 1, data = NULL, measure = 'ht', ref = 'who06')
 }
 \keyword{datasets}
