@@ -30,7 +30,7 @@ where L has 10^-7 added if it is zero. The LMS method is the same as the BCCG fa
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{z2cent}}, \code{\link{LMS2z}}}
 \examples{
-cLMS(z = -2:2, L = 1:-1, M = 5:7, S = rep(0.1, 3))
+cLMS(z = 0:2, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 }
 \keyword{arith}
