@@ -9,7 +9,7 @@ LMS2z(x, y, sex, data = parent.frame(), measure, ref, toz = TRUE)
 }
 \arguments{
   \item{x}{
-vector of ages}
+vector of ages.}
   \item{y}{
 vector of either measurements or z-scores, depending on the value of \code{toz}.}
   \item{sex}{
