@@ -178,7 +178,7 @@
 
 	#	save fitted model
     nlme.out <- eval(parse(text=fitcode))
-    if (exists('start.')) rm(start., inherits=TRUE)
+#     if (exists('start.')) rm(start., inherits=TRUE)
     nlme.out$fitnlme <- fitenv$fitnlme
 		nlme.out$call.sitar <- mcall
 		if (newform) nlme.out$bstart <- bstart
