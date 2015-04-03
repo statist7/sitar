@@ -5,8 +5,9 @@
 \description{SITAR is a method of growth curve analysis, based on \pkg{nlme}, that summarises a set of growth
  curves with a mean growth curve as a regression spline, plus a set of up to three fixed and
  random effects (a, b and c) defining how individual growth curves differ from the mean curve.}
-\usage{sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c", a.formula = ~1,
- b.formula = ~1, c.formula = ~1, bounds = 0.04, start, bstart = "mean", xoffset = "mean",
+\usage{sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c",
+  a.formula = ~1, b.formula = ~1, c.formula = ~1, bounds = 0.04, start,
+  bstart = "mean", xoffset = "mean",
  returndata = FALSE, verbose = FALSE, correlation = NULL,
  weights = NULL, subset = NULL, method = "ML", na.action = na.fail,
  control = nlmeControl(returnObject = TRUE), newform = TRUE)

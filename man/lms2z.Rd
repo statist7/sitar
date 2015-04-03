@@ -38,7 +38,7 @@ data(heights)
 data(uk90)
 LMS2z(age, height, sex = 2, heights, measure = 'ht', ref = 'uk90')
 
-## construct table of boys weight centiles for WHO standard on 3-month age grid
+## construct table of boys weight centiles by age for WHO standard
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages

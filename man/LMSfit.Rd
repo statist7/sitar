@@ -4,7 +4,8 @@
 \description{
 A function to summarise an existing set of growth reference centiles as the L, M and S curves of the LMS method.}
 \usage{
-LMSfit(x, y, sex, data = parent.frame(), centiles = c(3, 10, 25, 50, 75, 90, 97),
+LMSfit(x, y, sex, data = parent.frame(),
+  centiles = c(3, 10, 25, 50, 75, 90, 97),
   df = c(6, 10, 8), L1 = FALSE, plot = TRUE, ...)}
 \arguments{
   \item{x}{
@@ -49,7 +50,7 @@ The three sets of values are then smoothed across age to give L, M and S.}
   correspond to L, M and S respectively.}
 
 \examples{
-## first construct table of boys weight centiles for WHO standard on 3-month age grid
+## first construct table of boys weight centiles by age for WHO standard
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # ages 0-3 years by 3 months

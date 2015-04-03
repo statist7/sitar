@@ -9,7 +9,8 @@ A \code{summary} method for \code{sitar} objects based on \code{\link{summary.lm
 \arguments{
   \item{object}{an object inheriting from class \code{sitar}.}
   \item{adjustSigma}{an optional logical value (see \code{\link{summary.lme}}.}
-  \item{verbose}{an optional logical value used to control the amount of output in the \code{print.summary.sitar} method.}
+  \item{verbose}{an optional logical value used to control the amount of output
+  in the \code{print.summary.sitar} method.}
   \item{\dots}{some methods for this generic require additional arguments. None are used in this method.}
 }
 \value{

@@ -18,8 +18,9 @@ recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model, from, to)
   \item{to}{level of \code{id} defining data to be recalibrated (must be a single row in \code{coef{model}}).}
 }
 \details{
-\code{recalib} recalibrates the values of \code{xc} and \code{yc} based on \code{model}. 
-\code{xc} values are changed to \code{(xc - c(coef[from, 'b'])) * exp(coef[from, 'c'] - coef[to, 'c']) + coef[to, 'b']}. 
+\code{recalib} recalibrates the values of \code{xc} and \code{yc} based on \code{model}.
+\code{xc} values are changed to
+  \code{(xc - c(coef[from, 'b'])) * exp(coef[from, 'c'] - coef[to, 'c']) + coef[to, 'b']}.
 \code{yc} values are changed to \code{yc - coef[from, 'a'] + coef[to, 'a']}.
 }
 \value{
