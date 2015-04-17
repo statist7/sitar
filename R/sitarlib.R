@@ -1,5 +1,5 @@
 #	global variables
-	if (getRversion() >= "3.0.0") utils::globalVariables('.par.usr2')
+	if (getRversion() >= "3.0.0") utils::globalVariables(c('.par.usr2', 'fitnlme', 'fitenv'))
 
 #############################
 #
