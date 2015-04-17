@@ -5,9 +5,7 @@ Version: 1.0.2
 Date: 2015-03-23
 Author: Tim Cole
 Maintainer: Tim Cole <tim.cole@ucl.ac.uk>
-Description: The package contains functions for fitting and plotting SITAR (SuperImposition by
- Translation And Rotation) growth curve models. SITAR is a shape-invariant model with a regression spline mean curve
- and subject-specific random effects on both the measurement and age scales.
+Description: The package contains functions for fitting and plotting SITAR (SuperImposition by Translation And Rotation) growth curve models. SITAR is a shape-invariant model with a regression B-spline mean curve and subject-specific random effects on both the measurement and age scales.
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
