@@ -5,14 +5,15 @@
 \description{
 \code{plot} and \code{lines} methods for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{
-\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, 
- abc = c(a = 0, b = 0, c = 0), add = FALSE, nlme = FALSE, ...)
+\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun,
+subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE,
+nlme = FALSE, ...)
 \method{lines}{sitar}(x, ...)
 }
 \arguments{
   \item{x}{object of class \code{sitar}.}
   \item{opt}{
-character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve, 
+character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve,
 'e' for fitted fixed Effects distance curve,
 'f' for individual Fitted growth curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dvef' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and a legend identifying the distance and velocity curves is provided.}
   \item{labels}{
@@ -28,7 +29,8 @@ optional logical vector of length \code{x} defining a subset of \code{data} rows
   \item{abc}{
 character string defining an \code{id} level, or a list of values labelled a, b and c, e.g. abc=list(a=1, b=0.1, c=-0.1), where the values of a, b and c are random effects defining an individual growth curve. If a, b or c are missing their values are treated as zero.}
   \item{add}{
-optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE). TRUE is equivalent to using \code{lines}.}
+optional logical defining if the plot is pre-existing (TRUE) or
+new (FALSE). TRUE is equivalent to using \code{lines}.}
   \item{nlme}{
 optional logical which set TRUE plots the model as an \code{nlme} object, using \code{plot.nlme} arguments.}
   \item{\dots}{
