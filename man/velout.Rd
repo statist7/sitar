@@ -4,7 +4,8 @@
 \description{
 Quickly identifies putative outliers in a large number of growth curves.}
 \usage{
-velout(x, y, id, data, lag = 1, velpower = 0.5, limit = 5, linearise = FALSE)
+velout(x, y, id, data, lag = 1, velpower = 0.5, limit = 5,
+ linearise = FALSE)
 }
 \arguments{
   \item{x}{age vector.}
@@ -21,7 +22,7 @@ velout(x, y, id, data, lag = 1, velpower = 0.5, limit = 5, linearise = FALSE)
 \details{
 The algorithm works by viewing serial measurements in each growth curve as
 triplets (A-B-C) and comparing the velocities between them. Velocity is
-calculated as 
+calculated as
 
 diff(y, lag = lag) / diff(x, lag = lag) ^ velpower
 
@@ -41,7 +42,7 @@ outliers, i.e. first or last for an individual, have just one velocity. Code 4
 indicates a conventional outlier, with both AB and BC abnormal and AC normal.
 Code 6 is an edge outlier. Other codes are not necessarily outliers, e.g. codes
 1 or 3 may be adjacent to a code 4. Use \code{codeplot} to look at individual
-curves, and \code{zapvelout} to delete outliers. 
+curves, and \code{zapvelout} to delete outliers.
 \tabular{cccl}{
 code \tab AB+BC \tab AC \tab interpretation\cr
 0 \tab 0 \tab 0 \tab no outlier\cr
