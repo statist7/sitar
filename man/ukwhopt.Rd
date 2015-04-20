@@ -50,13 +50,12 @@ Cole TJ, Williams AF, Wright CM, et al. Revised birth centiles for weight,
 length and head circumference in the UK-WHO growth charts. Ann Hum Biol
 2011;38:7-11.
 
-Wright CM, Williams AF, Elliman D, et al. Using the new UK-WHO growth charts.
-BMJ 2010;340:c1140.
+Wright CM, Williams AF, Elliman D, et al. Using the new UK-WHO growth charts. BMJ 2010;\-340:c1140.
 }
 \examples{
 data(ukwhopt)
 ## calculate median birth weight in girls from 23 to 42 weeks gestation
-LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, data = NULL, measure = 'wt',
-    ref = 'ukwhopt', toz = FALSE)
+LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, data = NULL,
+  measure = 'wt', ref = 'ukwhopt', toz = FALSE)
 }
 \keyword{datasets}
