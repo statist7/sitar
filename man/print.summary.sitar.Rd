@@ -8,7 +8,7 @@ A \code{print.summary} method for \code{sitar} objects.}
 }
 \arguments{
   \item{x}{
-an object inheriting class \code{nlme}.}
+an object inheriting from class \code{summary.sitar}.}
   \item{verbose}{
 a logical to control the amount of output.}
   \item{\dots}{
