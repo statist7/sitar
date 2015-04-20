@@ -4,7 +4,8 @@
 \description{
 A function to recalibrate x,y data using SITAR random effects}
 \usage{
-recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model, from, to)
+recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL,
+model, from, to)
 }
 \arguments{
   \item{xc}{character vector defining column name(s) of \code{x} data to be recalibrated.}
@@ -15,13 +16,16 @@ recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model, from, to)
   \item{ycnew}{column names for replacement columns \code{yc}. If default \code{NULL} then use names ycnew1... .}
   \item{model}{\code{sitar} model defining the random effects to be used for recalibration.}
   \item{from}{level of \code{id} defining existing data (must be a single row in \code{coef{model}}).}
-  \item{to}{level of \code{id} defining data to be recalibrated (must be a single row in \code{coef{model}}).}
+  \item{to}{level of \code{id} defining data to be recalibrated (a single row in \code{coef{model}}).}
 }
 \details{
 \code{recalib} recalibrates the values of \code{xc} and \code{yc} based on \code{model}.
-\code{xc} values are changed to
-  \code{(xc - c(coef[from, 'b'])) * exp(coef[from, 'c'] - coef[to, 'c']) + coef[to, 'b']}.
-\code{yc} values are changed to \code{yc - coef[from, 'a'] + coef[to, 'a']}.
+\code{xc} values are changed to:
+
+(xc-c(coef[from,'b']))*exp(coef[from,'c']-coef[to,'c'])+coef[to,'b'].
+
+\code{yc} values are changed to:
+\code{yc-coef[from,'a']+coef[to,'a']}.
 }
 \value{
 Returns the dataframe \code{data} with the \code{from} rows of \code{xc} and \code{yc} recalibrated.}
