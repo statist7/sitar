@@ -7,7 +7,7 @@
 #	random - random effects, default "a+b+c"
 #	a.formula etc -  fixed effect formulae, default ~ 1
 #			to omit fixed effects use ~ -1
-#	bounds - span of ns, default x-range ±4%
+#	bounds - span of ns, default x-range 4%
 #	start - starting values - default estimated
 #			requires spline coefficients, any missing zeroes added
 #	bstart - starting value for b, default 'mean', or 'apv' or value
@@ -39,7 +39,7 @@
 	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df)
 		else df <- length(knots) + 1
 	if (nrow(data) <= df) stop("too few data to fit spline curve")
-#	define bounds, default x range ±4%
+#	define bounds, default x range 4%
 	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
 	if (length(bounds) != 2) stop("bounds should be length 1 or 2")
 #	derive x variable offset
