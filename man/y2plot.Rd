@@ -5,8 +5,8 @@
 Function to plot two y variables, y1 and y2, against a single x variable, with the y1
  and y2 axes on the left and right of the plot respectively.}
 \usage{
-y2plot(x, y1, y2 = NULL, labels, y2par = list(), add = FALSE, xy = NULL, 
-xlegend = "topleft", inset = 0.04, ...)
+y2plot(x, y1, y2 = NULL, labels, y2par = list(), add = FALSE,
+  xy = NULL, xlegend = "topleft", inset = 0.04, ...)
 }
 \arguments{
   \item{x}{vector of ages.}
@@ -35,5 +35,7 @@ In addition the variable \code{.par.usr2}, equal to \code{usr2}, is created in g
 \seealso{\code{\link{plot.sitar}}}
 \examples{
 ## plot boys median height and weight on the UK 1990 reference
-with(uk90[uk90$sex == 1,], y2plot(x=years, y1=M.ht, y2=M.wt, y2par=list(col='red')))
+with(uk90[uk90$sex == 1,],
+  y2plot(x=years, y1=M.ht, y2=M.wt, y2par=list(col='red'))
+)
 }
