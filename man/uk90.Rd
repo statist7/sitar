@@ -41,18 +41,22 @@ The UK 1990 growth reference (Freeman et al 1995, Cole et al 1998) for height, w
 The L, M and S values for each measurement correspond respectively to the Box-Cox power, median and coefficient of variation of the distribution by age and sex (Cole & Green 1992). The short names for each measurement (see \code{\link{LMS2z}}) are as follows: height (ht), weight (wt), body mass index (bmi), head circumference (head), sitting height (sitht), leg length (leglen), waist circumference (waist) and percent body fat (fat).
 }
 \source{
-The values are tabulated in the Excel spreadsheet British1990.xls provided with the Excel add-in LMSgrowth from \url{http://www.healthforallchildren.com/?product_cat=software}.
+The values are tabulated in the spreadsheet British1990.xls provided with the Excel add-in LMSgrowth from:
+
+\url{http://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
 }
 \references{
 Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and penalized likelihood. Stat Med 1992;11:1305-19.
 
-Cole TJ, Freeman JV, Preece MA. British 1990 growth reference centiles for weight, height, body mass index and head circumference fitted by maximum penalized likelihood. Stat Med 1998;17:407-29.
+Cole TJ, Freeman JV, Preece MA. British 1990 growth reference centiles for weight, height, body mass index and head circumference
+fitted by maximum penalized likelihood. Stat Med 1998;\-17:407-29.
 
 Freeman JV, Cole TJ, Chinn S, et al. Cross sectional stature and weight reference curves for the UK, 1990. Arch Dis Child 1995;73:17-24.
 }
 \examples{
 data(uk90)
 ## calculate median BMI in girls from birth to 10 years
-LMS2z(x = 0:10, y = 0, sex = 2, data = NULL, measure = 'bmi', ref = 'uk90', toz = FALSE)
+LMS2z(x = 0:10, y = 0, sex = 2, data = NULL, measure = 'bmi',
+ ref = 'uk90', toz = FALSE)
 }
 \keyword{datasets}
