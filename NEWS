@@ -1,8 +1,34 @@
+Changes in Version 1.0.2
+
+  o The description in DESCRIPTION was extended as required, and Suggests
+    was changed to Imports.
+
+  o In NAMESPACE lines.sitar was added to S3 methods and splines was added
+    to import (both previously omitted in error).
+
+  o predict, getVarCov and getData methods for sitar were added.
+
+  o The sitar command was rewritten to save the function fitnlme, for use
+    with predict. As a result the hidden file .fitnlme is no longer created.
+
+  o The plot.sitar command now uses predict to draw the mean curve with 101
+    points, and any covariate values default to zero.
+
+  o LMSfit was added.
+
+  o lms2z was renamed LMS2z for consistency.
+
+  o	The changes in 1.0.1 to the graphical options xaxsd and yaxsd to deal
+    with log scales were corrected.
+
+  o The man files were updated.
+
+
 Changes in Version 1.0.1
 
-  o The environment for reading the call in sitar, plot.sitar and lines.sitar 
-  	was corrected.
-  	
+  o The environment for reading the call in sitar, plot.sitar and lines.sitar
+    was corrected.
+
   o	The graphical options xaxsd and yaxsd were extended to deal with log scales.
 
 
