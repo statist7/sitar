@@ -112,7 +112,7 @@
 				xoffset <- model$xoffset
 				if (is.null(xoffset)) xoffset <- 0
 				if (!is.na(fixef(model)['b'])) xoffset <- xoffset + fixef(model)['b']
-				xt <- (xt - xoffset + abc[['b']]) / exp(abc[['c']]) + xoffset
+				xt <- (xt - xoffset) / exp(abc[['c']]) + xoffset + abc[['b']]
 				yt <- yt + abc[['a']]
 			}
 #	derive cubic smoothing spline curve
@@ -126,24 +126,24 @@
 				add <- TRUE
 			} else
 			if (grepl("d", opt)) {
-				xy <- do.call("y2plot", c(list(x=quote(ss$x), y1=quote(ss$y), add=add, xy=xy), ARG))
+				xy <- do.call("y2plot", c(list(x=ss$x, y1=ss$y, add=add, xy=xy), ARG))
 				add <- TRUE
 			} else
 			if (grepl("v", opt)) {
 				ARG$ylab <- labels[3]
-				xy <- do.call("y2plot", c(list(x=quote(ss$x), y1=quote(ss1$y), add=add, xy=xy), ARG))
+				xy <- do.call("y2plot", c(list(x=ss$x, y1=ss1$y, add=add, xy=xy), ARG))
 				add <- TRUE
 			}
 		}
 
 #	plot fixed effects distance curve
 		if (grepl("e", opt)) {
-			xt <- x[subset]
+  		xt <- xseq(x[subset])
       yt <- predict(model$ns, newdata=data.frame(x=xt))
 			if (!missing(xfun)) xt <- xfun(xt)
 			if (!missing(yfun)) yt <- yfun(yt)
 			ox <- order(xt)
-			xy <- do.call("y2plot", c(list(x=quote(xt[ox]), y1=quote(yt[ox]), add=add, xy=xy), ARG))
+			xy <- do.call("y2plot", c(list(x=xt[ox], y1=yt[ox], add=add, xy=xy), ARG))
 			add <- TRUE
 		}
 
@@ -151,7 +151,7 @@
 		if (grepl("u", opt)) {
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-  		do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG), quote=TRUE)
+  		do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
 
@@ -160,7 +160,7 @@
 			y <- fitted(model, level=1)
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-    	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG), quote=TRUE)
+    	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
 
@@ -171,7 +171,7 @@
 			y <- fred$y.adj
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
-    	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG), quote=TRUE)
+    	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
 #	plot vertical line at age of peak velocity
