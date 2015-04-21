@@ -1,18 +1,18 @@
 Changes in Version 1.0.2
 
-  o The description in DESCRIPTION was extended as required, and Suggests
+  o In DESCRIPTION the title and description were corrected, and Suggests
     was changed to Imports.
 
-  o In NAMESPACE lines.sitar was added to S3 methods and splines was added
-    to import (both previously omitted in error).
+  o In NAMESPACE lines.sitar and print.summary.sitar were added to S3 methods
+    and splines was added to import (both previously omitted in error).
 
   o predict, getVarCov and getData methods for sitar were added.
 
   o The sitar command was rewritten to save the function fitnlme, for use
     with predict. As a result the hidden file .fitnlme is no longer created.
 
-  o The plot.sitar command now uses predict to draw the mean curve with 101
-    points, and any covariate values default to zero.
+  o The plot.sitar command now uses predict to control the number of points
+    when drawing spline curves, and any covariate values default to zero.
 
   o LMSfit was added.
 
