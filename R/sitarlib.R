@@ -68,13 +68,11 @@
 	if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
 	xoffset <- object$xoffset
 	if (is.null(xoffset)) xoffset <- 0
-	if (!is.na(fixef(object)['b'])) xoffset <- xoffset + fixef(object)['b'] # added 23/4/13
-	# if (is.null(xoffset)) xoffset <- fixef(object)['b'] # was mean(x) # commented out 23/4/13
-	# if (is.na(xoffset)) xoffset <- 0 # b not fixed effect # commented out 23/4/13
+	if (!is.na(fixef(object)['b'])) xoffset <- xoffset + fixef(object)['b']
 	x.adj <- x - xoffset
-	if (grepl('b', random)) x.adj <- x.adj - ranef(object)[factor(id),'b'] # changed from coef 1/8/12
+	if (grepl('b', random)) x.adj <- x.adj - ranef(object)[factor(id),'b']
 	if (grepl('c', random)) x.adj <- x.adj * exp(ranef(object)[factor(id),'c'])
-	object$x.adj <- x.adj + xoffset # + bfe removed 1/8/12
+	object$x.adj <- x.adj + xoffset
 	y.adj <- y
 	if (grepl('a', random)) y.adj <- y.adj - ranef(object)[factor(id),'a']
 	object$y.adj <- y.adj
