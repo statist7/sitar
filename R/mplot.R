@@ -5,15 +5,17 @@
 #	add TRUE suppresses plot axes
 #	... parameters where col, lty, lwd, pch can depend on id
 
-#	save x y id	
+#	save x y id
 	mcall <- match.call()[-1]
 	df <- as.data.frame(lapply(as.list(mcall[1:3]), function(z) {
 		if (is.character(z)) with(data,	get(z, inherits=TRUE))
 		else eval(z, envir = data, enclos = parent.frame())
 	}))
-	names(df) <- lapply(as.list(mcall[1:3]), function(z) {
-		if (is.character(z)) z else deparse(z)
-	})
+	if (length(deparse(mcall)) == 1) {
+    names(df) <- lapply(as.list(mcall[1:3]), function(z) {
+  		if (is.character(z)) z else deparse(z)
+  	})
+	}
 
 #	extract and save vector par args: col lty lwd pch
 	cnames <- names(mcall)
@@ -33,7 +35,7 @@
 	if (!is.null(subset)) {
 		if (length(subset) != nrow(df)) stop('subset wrong length for data')
 		subset <- ifelse(is.na(df[, 1]) | is.na(df[, 2]), FALSE, subset)
-		df <- df[subset, ]		
+		df <- df[subset, ]
 	}
 	if (nrow(df) == 0) stop("no data to plot")
 
@@ -42,7 +44,7 @@
 		if (!"xlab" %in% names(ARG)) ARG <- c(ARG, list(xlab=quote(names(df)[1])))
 		if (!"ylab" %in% names(ARG)) ARG <- c(ARG, list(ylab=quote(names(df)[2])))
 		type <- match(names(ARG), "type", 0)
-		do.call("plot", c(list(x=df[, 1], y=df[, 2], type='n'), ARG[!type]))	
+		do.call("plot", c(list(x=df[, 1], y=df[, 2], type='n'), ARG[!type]))
 	}
 
 #	draw growth curves
@@ -53,5 +55,5 @@
 		if (length(cnames) > 0) ARG[cnames] <- as.list(as.data.frame(z[ox, cnames], stringsAsFactors=FALSE))
 #	lines(x, y, ...)
 		do.call("lines", c(list(x=z[ox, 1], y=z[ox, 2]), ARG))
-	})		
+	})
 }
