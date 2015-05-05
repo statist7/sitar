@@ -87,7 +87,7 @@
   			argnames <- names(formals(model$fitnlme))
   			xtra <- argnames[!argnames %in% c('x', names(fixef(model)))]
         if (length(xtra) > 0) {
-          df <- update(model, returndata=TRUE)[subset, xtra]
+          df <- setNames(as.data.frame(update(model, returndata = TRUE)[subset, xtra]), xtra)
           xtra <- unlist(lapply(df, mean, na.rm=TRUE))
      			newdata <- data.frame(newdata, t(xtra))
         }
