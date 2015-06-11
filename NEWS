@@ -1,3 +1,12 @@
+Changes in Version 1.0.3
+
+  o In NAMESPACE anova.sitar was added to S3 methods.
+
+  o The anova method for sitar was added, with a NAMESPACE entry and man entry.
+
+  o	In plot.sitar returndata ensured the return of a data frame.
+
+
 Changes in Version 1.0.2
 
   o In DESCRIPTION the title and description were corrected, and Suggests
