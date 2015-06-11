@@ -2,7 +2,7 @@ Package: sitar
 Type: Package
 Title: Super Imposition by Translation and Rotation Growth Curve Analysis
 Version: 1.0.3
-Date: 2015-05-05
+Date: 2015-06-11
 Author: Tim Cole
 Maintainer: Tim Cole <tim.cole@ucl.ac.uk>
 Description: Functions for fitting and plotting SITAR (Super Imposition by Translation And Rotation) growth curve models. SITAR is a shape-invariant model with a regression B-spline mean curve and subject-specific random effects on both the measurement and age scales.
