@@ -130,6 +130,13 @@
 			}
 		}
 	}
+
+	if (!is.null(weights)) {
+    if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
+    else form <- attr(weights, 'formula')
+	  if (!is.null(form)) fulldata <- cbind(fulldata, model.frame(form, data))
+	}
+
 	if (returndata) invisible(fulldata) else {
 		pars <- paste(pars, collapse=',')
 		fixed <- paste(fixed, collapse='+')
