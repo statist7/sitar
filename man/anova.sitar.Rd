@@ -9,9 +9,9 @@ anova method for \code{sitar} objects, based on \code{anova.lme}.}
   \item{\dots}{other optional fitted model objects.}
   \item{test}{an optional logical value controlling whether likelihood ratio tests should be used.}
   \item{type}{an optional character string specifying the type of sum of squares to be used.}
-  \item{adjustSigma}{see \code{anova.lme}.}
-  \item{Terms}{see \code{anova.lme}.}
-  \item{L}{see \code{anova.lme}.}
+  \item{adjustSigma}{see \code{\link{anova.lme}}.}
+  \item{Terms}{see \code{\link{anova.lme}}.}
+  \item{L}{see \code{\link{anova.lme}}.}
   \item{verbose}{an optional logical value.}
 }
 \value{a data frame inheriting from class "anova.lme".}
