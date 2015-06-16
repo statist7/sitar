@@ -166,9 +166,9 @@
 
 #	plot adjusted y vs adjusted t by subject
 		if (grepl("a", opt)) {
-			fred <- summary(model)
-			x <- fred$x.adj
-			y <- fred$y.adj
+			y <- xyadj(model)
+			x <- y$x
+			y <- y$y
 			if (!missing(xfun)) x <- xfun(x)
 			if (!missing(yfun)) y <- yfun(y)
     	do.call("mplot", c(list(x=x, y=y, id=id, subset=subset, add=add), ARG))
