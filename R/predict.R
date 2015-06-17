@@ -3,7 +3,7 @@
     oc <- object$call.sitar
     if (missing(newdata)) newdata <- eval(oc$data)
     newdata$x <- x <- eval(oc$x, newdata)
-    newdata$id <- id <- if (level == 1) eval(oc$id, newdata) else
+    newdata$id <- id <- if (any(level == 1)) eval(oc$id, newdata) else
       rep.int(getGroups(object)[1], nrow(newdata))
 # attach object for fitnlme
     on.exit(detach(object))
@@ -38,4 +38,9 @@
     object$call <- object$call.sitar
     class(object) <- 'lme'
     getData(object)
+  }
+
+  getVarCov <- function(obj, ...) {
+    class(obj) <- 'lme'
+    getVarCov(obj)
   }
