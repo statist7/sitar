@@ -1,23 +1,23 @@
-xyadj <- function(object) {
-  #	returns x and y adjusted for random effects a, b and c
-  random <- as.character(object$call$random)[[2]]
+xyadj <- function(object, data) {
+
+#	returns x and y adjusted for random effects a, b and c
   mcall <- object$call.sitar
-  data <- eval(mcall$data)
-  subset <- eval(mcall$subset, data)
-  if (!is.null(subset)) data <- data[subset,]
-  x <- eval(mcall$x, data)
-  y <- eval(mcall$y, data)
-  id <- factor(eval(mcall$id, data))
-  nf <- length(fitted(object))
-  if (nf != length(y)) stop(paste('model (length=', nf, ') incompatible with data (rows=', length(y), ')', sep=''))
+  if (missing(data)) {
+    data <- eval(mcall$data)
+    subset <- eval(mcall$subset, data)
+    if (!is.null(subset)) data <- data[subset,]
+  }
   xoffset <- object$xoffset
   if (is.null(xoffset)) xoffset <- 0
   if (!is.na(fixef(object)['b'])) xoffset <- xoffset + fixef(object)['b']
-  x.adj <- x - xoffset
-  if (grepl('b', random)) x.adj <- x.adj - ranef(object)[id,'b']
-  if (grepl('c', random)) x.adj <- x.adj * exp(ranef(object)[id,'c'])
+  x.adj <- eval(mcall$x, data) - xoffset
+  id <- factor(eval(mcall$id, data))
+  re <- ranef(object)
+  if (!is.null(re$b)) x.adj <- x.adj - re$b[id]
+  if (!is.null(re$c)) x.adj <- x.adj * exp(re$c[id])
   x.adj <- x.adj + xoffset
-  y.adj <- y
-  if (grepl('a', random)) y.adj <- y.adj - ranef(object)[id,'a']
-  invisible(data.frame(x=x.adj, y=y.adj))
+  y.adj <- try(eval(mcall$y, data), silent=TRUE)
+  if (class(y.adj) == 'try-error') y.adj <- NULL else
+    if (!is.null(re$a)) y.adj <- y.adj - re$a[id]
+  return(list(x=x.adj, y=y.adj))
 }
