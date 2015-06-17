@@ -40,7 +40,7 @@
     getData(object)
   }
 
-  getVarCov <- function(obj, ...) {
+  getVarCov.sitar <- function(obj, ...) {
     class(obj) <- 'lme'
     getVarCov(obj)
   }
