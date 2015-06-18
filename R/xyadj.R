@@ -1,23 +1,15 @@
-xyadj <- function(object, data) {
-
+xyadj <- function(x, y=NULL, id, object, abc=ranef(object), tomean=TRUE) {
 #	returns x and y adjusted for random effects a, b and c
-  mcall <- object$call.sitar
-  if (missing(data)) {
-    data <- eval(mcall$data)
-    subset <- eval(mcall$subset, data)
-    if (!is.null(subset)) data <- data[subset,]
+  if (is.null(xoffset <- object$xoffset)) xoffset <- 0
+  if (!is.na(b0 <- fixef(object)['b'])) xoffset <- xoffset + b0
+  if (nrow(abc) > 1) abc <- abc[id, ]
+  abc[, letters[1:3][!letters[1:3] %in% names(abc)]] <- 0
+  if (tomean) {
+    x.adj <- (x - xoffset - abc$b) * exp(abc$c) + xoffset
+    y.adj <- y - abc$a
+  } else {
+    x.adj <- (x - xoffset) / exp(abc$c) + xoffset + abc$b
+    y.adj <- y + abc$a
   }
-  xoffset <- object$xoffset
-  if (is.null(xoffset)) xoffset <- 0
-  if (!is.na(fixef(object)['b'])) xoffset <- xoffset + fixef(object)['b']
-  x.adj <- eval(mcall$x, data) - xoffset
-  id <- factor(eval(mcall$id, data))
-  re <- ranef(object)
-  if (!is.null(re$b)) x.adj <- x.adj - re$b[id]
-  if (!is.null(re$c)) x.adj <- x.adj * exp(re$c[id])
-  x.adj <- x.adj + xoffset
-  y.adj <- try(eval(mcall$y, data), silent=TRUE)
-  if (class(y.adj) == 'try-error') y.adj <- NULL else
-    if (!is.null(re$a)) y.adj <- y.adj - re$a[id]
   return(list(x=x.adj, y=y.adj))
 }
