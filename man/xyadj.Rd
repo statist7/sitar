@@ -28,7 +28,7 @@ When tomean = FALSE they are adjusted to
 In each case missing values of \code{xoffset} or the fixed or random effects are treated as zero.
 
 When \code{abc} consists of a single row, it is applied to all \code{x,y} pairs
-irrespective of \code{id}.}
+irrespective of \code{id}.
 }
 \value{
 The list of adjusted values:
@@ -45,5 +45,5 @@ m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
 plot(m1, opt='u')
 
 ## overplot with adjusted data as points
-points(xyadj(m1), col='red', pch=19)
+with(heights, points(xyadj(age, height, id, m1), col='red', pch=19))
 }
