@@ -46,3 +46,8 @@
     class(obj) <- 'lme'
     getVarCov(obj)
   }
+
+  getCovariate.sitar <- function (object)
+  {
+    eval(object$call.sitar$x, getData(object))
+  }
