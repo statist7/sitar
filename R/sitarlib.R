@@ -52,13 +52,13 @@
 
 	summary.sitar <- function (object, adjustSigma = TRUE, verbose = FALSE, ...)
 {
-    class(object) <- class(object)[-1]
+#	save age at peak velocity
+	  apv <- makess(getCovariate(object), fitted(object, level=0))$apv
+
+	  class(object) <- class(object)[-1]
     object <- summary(object, adjustSigma=adjustSigma, verbose=verbose, ...)
 
-#	save age at peak velocity
-    mcall <- object$call.sitar
-    x <- eval(mcall$x, eval(mcall$data))
-    object$apv <- makess(x, fitted(object, level=0))$apv
+    object$apv <- apv
 
     class(object) <- c("summary.sitar", class(object))
     object
