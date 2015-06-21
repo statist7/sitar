@@ -1,15 +1,17 @@
-	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NULL, abc=c(a=0, b=0, c=0), add=FALSE, nlme=FALSE, ...)
+	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NULL,
+	                       abc=c(a=0, b=0, c=0), add=FALSE, nlme=FALSE, ...)
+{
 #	plot curves from sitar model
 #	opt:
 #		d = fitted distance curve (labels[1] = x, labels[2] = y)
 #		v = fitted velocity curve (labels[3] = y)
 #		e = fitted fixed effects distance curve (labels[1] = x, labels[2] = y)
-#		f = fitted distance curves by subject
+#		D = fitted distance curves by subject
+#		V = fitted velocity curves by subject
 #		u = unadjusted y vs t curves by subject
 #		a = adjusted y vs adjusted t curves by subject
 #
 #		multiple options all plot on same graph
-#			(though axes not necessarily optimised)
 #
 #		labels are for opt dv - particularly v
 #		or use xlab and ylab and y2par
@@ -28,17 +30,26 @@
 #		add TRUE overwrites previous graph (or use lines)
 #
 #		nlme TRUE plots model as nlme object
-{
-  xseq <- function(x, nx=101) {
-    rx <- range(x, na.rm=TRUE)
-    seq(rx[1], rx[2], length.out=nx)
-  }
 
 	if (nlme) {
-		do.call('plot.lme', as.list(match.call()[-1]))
+	  do.call('plot.lme', as.list(match.call()[-1]))
 	}
 	else {
-	  model <- x
+    options <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
+    optaxis <- c(1, 1, 1, 1, 1, 2, 2) # default y axis
+    optmult <- c(F, F, T, T, T, F, T) # multiple curves?
+    axismin <- 3; axismax <- 0
+    for (i in 1:nchar(opt)) {
+      no <- match(substr(opt, i, i), options, NA)
+      if (is.na(no)) next
+      if (optaxis[no] > axismax) axismax <- optaxis[no]
+      if (optaxis[no] < axismin) axismin <- optaxis[no]
+    }
+    if (axismin == 2) {
+      optaxis <- optaxis - 1
+      axismax <- axismin <- 1
+    }
+    model <- x
 		data <- getData(model)
 		mcall <- model$call.sitar
 		x <- eval(mcall$x, data)
@@ -85,14 +96,42 @@
 		  add <- TRUE
 		}
 
-		#	plot fitted curves by subject
-		if (grepl("f", opt)) {
-		  xt <- x
-		  yt <- fitted(model, level=1)
-		  if (!missing(xfun)) xt <- xfun(xt)
-		  if (!missing(yfun)) yt <- yfun(yt)
-		  do.call("mplot", c(list(x=xt, y=yt, id=id, subset=subset, add=add), ARG))
+		xseq <- function(x, n=101) {
+		  # n is the number of points across the x range
+		  rx <- range(x, na.rm=TRUE)
+		  seq(rx[1], rx[2], length.out=n)
+		}
+
+		stackage <- function(x, id, n=101) {
+		  # generate x and id values across the x range to plot spline curves
+		  npt <- n / diff(range(x))
+		  xid <- by(data.frame(x=x, id=id), id, function(z) {
+		    nt <- floor(npt * diff(range(z$x))) + 1
+		    data.frame(x=seq(min(z$x), to=max(z$x), length.out=nt), id=rep.int(z$id[[1]], nt))
+		  })
+		  df <- xid[[1]][FALSE, ]
+		  for (dft in xid) df <- rbind(df, dft)
+		  df
+		}
+
+#	plot fitted curves by subject
+		if (grepl("D", opt)) {
+		  newdata=stackage(x, id)
+		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, xfun=xfun, yfun=yfun))
+		  newdata[, 1] <- xfun(newdata[, 1])
+		  do.call("mplot", c(list(x=newdata[, 1], y=newdata[, 3], id=newdata[, 2],
+		                          data=newdata, add=add), ARG))
 		  add <- TRUE
+		}
+
+#	plot fitted velocity curves by subject
+		if (grepl("V", opt)) {
+		  newdata=stackage(x, id)
+		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun))
+      newdata[, 1] <- xfun(newdata[, 1])
+      do.call("mplot", c(list(x=newdata[, 1], y=newdata[, 3], id=newdata[, 2],
+                              data=newdata, add=add), ARG))
+      add <- TRUE
 		}
 
 		#	plot fitted distance and velocity curves
@@ -101,8 +140,8 @@
   		newdata <- data.frame(x=xt)
 # if subset, estimate mean values for covariates
       if (!identical(subset, rep(TRUE, nf))) {
-  			argnames <- names(formals(model$fitnlme))
-  			xtra <- argnames[!argnames %in% c('x', names(fixef(model)))]
+        argnames <- names(formals(model$fitnlme))
+        xtra <- argnames[!argnames %in% c('x', names(fixef(model)))]
         if (length(xtra) > 0) {
           df <- setNames(as.data.frame(update(model, returndata = TRUE)[subset, xtra]), xtra)
           xtra <- unlist(lapply(df, mean, na.rm=TRUE))
