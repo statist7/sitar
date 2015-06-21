@@ -15,7 +15,7 @@ nlme = FALSE, ...)
   \item{opt}{
 character string containing a subset of letters corresponding to the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve,
 'e' for fitted fixed Effects distance curve,
-'f' for individual Fitted growth curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dvef' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and a legend identifying the distance and velocity curves is provided.}
+'D' for individual fitted Distance curves, 'V' for individual fitted Velocity curves, 'u' for Unadjusted individual growth curves, and 'a' for Adjusted individual growth curves. Options 'dveDV' give spline curves, while 'ua' give curves made up as line segments. If both 'd' and 'v' are specified, the axis for the velocity curve appears on the right side of the plot (y2), and a legend identifying the distance and velocity curves is provided.}
   \item{labels}{
 optional character vector containing plot labels for \code{x}, \code{y} and \code{y} velocity from the original SITAR model. The first two elements can alternatively be provided via \code{\link{par}} parameters \code{xlab} and \code{ylab}, and the third element via \code{y2par} (see Details). Default labels are the names of \code{x} and \code{y}, and "\code{y} velocity".}
   \item{apv}{
