@@ -18,10 +18,8 @@
 	}
 
 #	extract and save vector par args: col lty lwd pch
-	cnames <- names(mcall)
-	dots <- !cnames %in% names(formals(mplot))
-	if (sum(dots) > 0) {
-		ARG <- lapply(as.list(mcall[dots]), eval, envir = data, enclos = parent.frame())
+	if (length(dots <- match.call(expand.dots=FALSE)$...) > 0) {
+		ARG <- lapply(as.list(dots), eval, envir = data, enclos = parent.frame())
 		cnames <- names(ARG)[lapply(ARG, length) == nrow(df)]
 		df[, cnames] <- ARG[cnames]
 		ARG[cnames] <- NULL
