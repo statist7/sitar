@@ -4,8 +4,8 @@
     oc <- object$call.sitar
     if (!is.null(newdata$x)) x <- newdata$x else
       newdata$x <- x <- eval(oc$x, newdata)
-    if (!is.null(newdata$id)) id <- newdata$id else
-      newdata$id <- id <- if (any(level == 1)) eval(oc$id, newdata) else
+    if (!is.null(newdata$id)) id <- factor(newdata$id) else
+      newdata$id <- id <- if (any(level == 1)) factor(eval(oc$id, newdata)) else
         rep.int(getGroups(object)[1], nrow(newdata))
 # attach object for fitnlme
     on.exit(detach(object))
