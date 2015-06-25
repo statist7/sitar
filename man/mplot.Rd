@@ -21,7 +21,7 @@ optional logical defining a subset of rows in \code{data}.}
 optional logical defining whether the plot is pre-existing (TRUE) or new (FALSE).}
   \item{\dots}{
 Further graphical parameters (see \code{\link{par}}) may also be supplied as arguments,
-  particularly line type \code{lty}, line width \code{lwd}, color \code{col} and character \code{pch}.}
+  particularly background colour \code{bg}, character expansion \code{cex}, colour \code{col}, line type \code{lty}, line width \code{lwd} and character \code{pch}.}
 }
 \details{
 The arguments \code{x}, \code{y} and \code{id} can be given as character strings. The
