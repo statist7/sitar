@@ -52,9 +52,9 @@
     model <- x
 		data <- getData(model)
 		mcall <- model$call.sitar
-		x <- eval(mcall$x, data)
-		y <- eval(mcall$y, data)
-		id <- factor(eval(mcall$id, data))
+		x <- getCovariate(model)
+		y <- getResponse(model)
+		id <- getGroups(model)
 		nf <- length(fitted(model))
 		if (nf != length(y)) stop(paste0('model (length=', nf, ') incompatible with data (rows=', length(y), ')'))
 
@@ -63,9 +63,8 @@
 #	subset to plot model
 		subset <- eval(ccall$subset, data, parent.frame())
 		if (is.null(subset)) subset <- rep(TRUE, nf)
-		cnames <- names(ccall)
-		dots <- cnames[!cnames %in% names(formals(plot.sitar))]
-		if (length(dots) > 0) ARG <- lapply(ccall[dots], eval, data, parent.frame())
+		dots <- match.call(expand.dots=FALSE)$...
+		if (length(dots) > 0) ARG <- lapply(as.list(dots), eval, data, parent.frame())
 			else ARG <- NULL
 #	if xlab not specified replace with label or else x name
 		if (!"xlab" %in% names(ARG)) {
@@ -81,7 +80,8 @@
 		else yl <- ARG$ylab
 # if labels not specified create it
 		if (missing(labels)) labels <- c(xl, yl, paste(yl, 'velocity'))
-		# if (missing(labels)) labels <- c(xl, yl, ifelse(typeof(yl) == 'expression', expression(paste(as.character(yl), '~~velocity')), paste(yl, 'velocity')))
+		# if (missing(labels)) labels <- c(xl, yl, ifelse(typeof(yl) == 'expression',
+		#   expression(paste(as.character(yl), '~~velocity')), paste(yl, 'velocity')))
 
 #	create output list
 		xy <- list()
