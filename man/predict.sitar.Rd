@@ -3,7 +3,7 @@
 \title{Predict SITAR model}
 \description{
 Predict method for \code{sitar} objects, based on \code{predict.lme}.}
-\usage{\method{predict}{sitar}(object, newdata, level=1, ..., deriv=0, xfun=I, yfun=I)}
+\usage{\method{predict}{sitar}(object, newdata, level=1, ..., deriv=0, abc=ranef(object), xfun=I, yfun=I)}
 \arguments{
   \item{object}{
 an object inheriting from class \code{sitar}.}
@@ -14,10 +14,11 @@ an optional integer giving the level of grouping to be used in obtaining the pre
   \item{\dots}{
 other optional arguments, including \code{na.action} and \code{naPattern}.}
   \item{deriv}{an optional integer specifying predictions corresponding to either the fitted curve or its first derivative (i.e. velocity), where \code{deriv = 0} (default) specifies the distance curve and \code{deriv = 1} the velocity curve.}
+  \item{abc}{an optional data frame containing values of a subset of \code{a}, \code{b} and \code{c}, default \code{ranef(object)}, and ignored if \code{level = 0}. If a single row it gives predictions with the specified values of \code{a}, \code{b} and \code{c}, where missing values are set to 0.}
   \item{xfun}{an optional function to apply to \code{x} to convert it back to the original scale, e.g. if x = log(age) then xfun = exp.}
   \item{yfun}{an optional function to apply to \code{y} to convert it back to the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
 }
-\details{When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)} per \code{xfun(x)}. So if \code{x} and/or \code{y} are transformed, velocity in the raw units can be obtained by specifying \code{xfun} and/or \code{yfun} appropriately.}
+\details{When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)} per \code{xfun(x)}. So if \code{x} and/or \code{y} are transformed, velocity in the raw units can be obtained by specifying \code{xfun} and/or \code{yfun} to back-transform them appropriately.}
 \value{A vector of the predictions, or a list of vectors if \code{asList = TRUE} or \code{length(level) > 1}.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
@@ -31,7 +32,9 @@ predict(m1, newdata=data.frame(age=9:16), level=0)
 ## predictions at level 1 for subject 5
 predict(m1, newdata=data.frame(age=9:16, id=5), level=1)
 
-## velocity predictions at level 1
-vel1 <- predict(m1, deriv=1)
+## velocity predictions for subjects with early and late puberty
+vel1 <- predict(m1, deriv=1, abc=data.frame(b=-1))
 mplot(age, vel1, id, heights, col=id)
+vel1 <- predict(m1, deriv=1, abc=data.frame(b=1))
+mplot(age, vel1, id, heights, col=id, add=TRUE)
 }
