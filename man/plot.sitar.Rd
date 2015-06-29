@@ -5,7 +5,8 @@
 \description{
 \code{plot} and \code{lines} methods for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{
-\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = NULL, add = FALSE, nlme = FALSE, ...)
+\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun,
+subset = NULL, abc = NULL, add = FALSE, nlme = FALSE, ...)
 \method{lines}{sitar}(x, ...)
 }
 \arguments{
