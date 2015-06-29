@@ -6,7 +6,7 @@
 random effects from a SITAR model.
 }
 \usage{
-xyadj(x, y=NULL, id, object, abc=ranef(object), tomean=TRUE)
+xyadj(x, y=NULL, id, object, abc=NULL, tomean=TRUE)
 }
 \arguments{
   \item{x}{a vector of x coordinates.}
