@@ -3,7 +3,7 @@
 \title{Predict SITAR model}
 \description{
 Predict method for \code{sitar} objects, based on \code{predict.lme}.}
-\usage{\method{predict}{sitar}(object, newdata, level=1, ..., deriv=0, abc=ranef(object), xfun=I, yfun=I)}
+\usage{\method{predict}{sitar}(object, newdata, level=1, ..., deriv=0, abc=NULL, xfun=I, yfun=I)}
 \arguments{
   \item{object}{
 an object inheriting from class \code{sitar}.}
@@ -14,7 +14,7 @@ an optional integer giving the level of grouping to be used in obtaining the pre
   \item{\dots}{
 other optional arguments, including \code{na.action} and \code{naPattern}.}
   \item{deriv}{an optional integer specifying predictions corresponding to either the fitted curve or its first derivative (i.e. velocity), where \code{deriv = 0} (default) specifies the distance curve and \code{deriv = 1} the velocity curve.}
-  \item{abc}{an optional data frame containing values of a subset of \code{a}, \code{b} and \code{c}, default \code{ranef(object)}, and ignored if \code{level = 0}. If a single row it gives predictions with the specified values of \code{a}, \code{b} and \code{c}, where missing values are set to 0.}
+  \item{abc}{an optional named vector or single-row data frame containing values of a subset of \code{a}, \code{b} and \code{c}, default \code{NULL}. If it is set, \code{level} is ignored. It gives predictions for a subject with the specified values of \code{a}, \code{b} and \code{c}, where missing values are set to 0.}
   \item{xfun}{an optional function to apply to \code{x} to convert it back to the original scale, e.g. if x = log(age) then xfun = exp.}
   \item{yfun}{an optional function to apply to \code{y} to convert it back to the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
 }
