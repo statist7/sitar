@@ -5,9 +5,7 @@
 \description{
 \code{plot} and \code{lines} methods for objects of class \code{sitar}, providing various flavours of plot of the fitted growth curves. }
 \usage{
-\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun,
-subset = NULL, abc = c(a = 0, b = 0, c = 0), add = FALSE,
-nlme = FALSE, ...)
+\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun, yfun, subset = NULL, abc = NULL, add = FALSE, nlme = FALSE, ...)
 \method{lines}{sitar}(x, ...)
 }
 \arguments{
@@ -27,7 +25,7 @@ optional function to be applied to \code{y} prior to plotting.}
   \item{subset}{
 optional logical vector of length \code{x} defining a subset of \code{data} rows to be plotted.}
   \item{abc}{
-character string defining an \code{id} level, or a list of values labelled a, b and c, e.g. abc=list(a=1, b=0.1, c=-0.1), where the values of a, b and c are random effects defining an individual growth curve. If a, b or c are missing their values are treated as zero.}
+vector of named values of random effects a, b and c used to define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a single character string defining an \code{id} level whose random effect values are used. If \code{abc} is set, \code{level} is ignored. If \code{abc} is NULL (default), or if a, b or c are missing, values of zero are assumed.}
   \item{add}{
 optional logical defining if the plot is pre-existing (TRUE) or
 new (FALSE). TRUE is equivalent to using \code{lines}.}
@@ -62,9 +60,12 @@ plot(m1, y2par=list(col='blue'), apv=TRUE)
 
 ## draw individually coloured growth curves adjusted for random effects
 ## using same x-axis limits as for previous plot
-plot(m1, opt='a', col=1 + as.integer(id) \%\% 5, xlim=xaxsd())
+plot(m1, opt='a', col=id, xlim=xaxsd())
 
 ## add mean curve in red
 lines(m1, opt='d', col='red', lwd=2)
+
+## add mean curve for a, b, c = -1 SD
+lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
 }
 \keyword{aplot}
