@@ -1,5 +1,5 @@
 	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NULL,
-	                       abc=c(a=0, b=0, c=0), add=FALSE, nlme=FALSE, ...)
+	                       abc=NULL, add=FALSE, nlme=FALSE, ...)
 {
 #	plot curves from sitar model
 #	opt:
@@ -148,19 +148,12 @@
      			newdata <- data.frame(newdata, t(xtra))
         }
      }
-			yt <- predict(object=model, newdata=newdata, level=0)
-			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, xfun=xfun, yfun=yfun)
-#	derive cubic smoothing spline curve
-			xy$ss <- ss <- makess(xt, yt, xfun=xfun, yfun=yfun)
 
 #	adjust for abc
-			if (!missing(abc)) {
-#	if abc is named ensure 3 values match model random effects
+			if (!is.null(abc)) {
+#	if abc is named convert to data frame
 				if (!is.null(names(abc))) {
-					random <- names(ranef(model))
-					for (l in letters[1:3])
-						if (is.na(abc[l]) || !l %in% random) abc[l] <- 0
-					abc <- data.frame(as.list(abc))
+					abc <- data.frame(t(abc))
 				}
 				else
 #	else abc is id level
@@ -170,10 +163,12 @@
 					abc <- ranef(model)[idabc, ]
 				}
 				else stop('abc should be either single id level or up to three named random effect values')
-			  yt <- xyadj(xt, yt, id, model, abc=abc, tomean=FALSE)
-			  xt <- yt$x
-			  yt <- yt$y
 			}
+
+			yt <- predict(object=model, newdata=newdata, level=0, abc=abc)
+			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
+#	derive cubic smoothing spline curve
+			xy$ss <- ss <- makess(xt, yt, xfun=xfun, yfun=yfun)
 
 			if (!missing(xfun)) xt <- xfun(xt)
 			if (!missing(yfun)) yt <- yfun(yt)
