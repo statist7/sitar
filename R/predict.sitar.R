@@ -1,15 +1,27 @@
   predict.sitar <- function(object, newdata, level=1, ..., deriv=0,
-                            abc=ranef(object), xfun=I, yfun=I) {
+                            abc=NULL, xfun=I, yfun=I) {
 # function expand
-    expand <- function(z) if (is.null(z)) 0 else if (nrow(abc) == 1) z else z[id]
+    expand <- function(z) if (is.null(z)) 0 else z[id]
 # create x and id variables in newdata
     if (missing(newdata)) newdata <- getData(object)
     oc <- object$call.sitar
     if (!is.null(newdata$x)) x <- newdata$x else
       newdata$x <- x <- eval(oc$x, newdata)
-    if (!is.null(newdata$id)) id <- factor(newdata$id) else
-      newdata$id <- id <- if (any(level == 1)) factor(eval(oc$id, newdata)) else
-        rep.int(getGroups(object)[1], nrow(newdata))
+# check abc
+    if (!is.null(abc)) {
+      abcset <- TRUE
+      if (!'data.frame' %in% class(abc)) abc <- data.frame(t(abc))
+      if (nrow(abc) == 1) level <- 0
+        else if (nrow(abc) == nrow(ranef(object))) abcset <- FALSE
+                                   else stop('abc not a variate of length up to 3')
+    }
+    else {
+      abcset <- FALSE
+      abc <- ranef(object)
+    }
+    if (abcset || level == 0) newdata$id <- id <- rep.int(getGroups(object)[1], nrow(newdata))
+      else if (!is.null(newdata$id)) id <- factor(newdata$id) else
+        newdata$id <- id <- factor(eval(oc$id, newdata))
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
@@ -24,7 +36,7 @@
 # set class to nlme
     class(object) <- class(object)[-1]
 # simple prediction
-    if (deriv == 0 && missing(abc)) {
+    if (deriv == 0 && !abcset) {
       pred <- yfun(predict(object=object, newdata=newdata, level=level, ...))
     }
 # complex prediction
@@ -34,7 +46,7 @@
 # DISTANCE
       if (deriv == 0) {
 # mean distance curve back-transformed
-        if (level == 0) pred <- yfun(pred)
+        if (level == 0 && !abcset) pred <- yfun(pred)
 # level 1 prediction based on x changed to reflect individual b and c
         else {
           pred <- spline(list(x=x, y=pred), method='natural',
@@ -47,7 +59,7 @@
       else {
 # mean velocity curve on back-transformed axes
         vel0 <- predict(makess(x, pred, xfun=xfun, yfun=yfun), xfun(x), deriv=1)
-        if (level == 0) pred <- vel0$y
+        if (level == 0 && !abcset) pred <- vel0$y
 # level 1 prediction based on x changed to reflect individual b and c
         else {
           pred <- spline(vel0, method='natural',
