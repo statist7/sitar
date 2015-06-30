@@ -19,7 +19,7 @@
       abcset <- FALSE
       abc <- ranef(object)
     }
-    if (abcset || level == 0) newdata$id <- id <- rep.int(getGroups(object)[1], nrow(newdata))
+    if (abcset || level == 0) newdata$id <- id <- factor(rep.int(getGroups(object)[1], nrow(newdata)))
       else if (!is.null(newdata$id)) id <- factor(newdata$id) else
         newdata$id <- id <- factor(eval(oc$id, newdata))
 # attach object for fitnlme
