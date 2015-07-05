@@ -359,7 +359,7 @@
 
 #	update value of bstart to minimise b-c correlation
 	bupdate <- function(x) {
-	cov <- as.matrix(x$modelStruct[[1]][[1]])
+	cov <- getVarCov(x)
 	fixef(x)['b'] + cov[2,3] / cov[3,3]
 	}
 
