@@ -12,8 +12,9 @@ ifun(fun)
   \item{fun}{a language object defining the expression to be inverted.}
 }
 \details{
-The expression \code{fun} involves a single variable named \code{varname} such that
+The expression \code{fun} involves a single mention of a single variable named \code{varname} such that
 \code{fun = f(g(h(...(get(varname)))))}. \code{ifun} returns \code{h^-1(g^-1(f^-1(...(fun))))}.
+Arithmetic, logarithmic, exponential and power functions are covered, but not trigonometry.
 }
 \value{
 A length 2 list:
@@ -33,5 +34,6 @@ fun <- quote(log(age + 0.75))
 
 ##  apply inverse function to transformed age
 age <- 1:10
-(results$fn(eval(fun)))
+(aget <- eval(fun))
+(results$fn(aget))
 }
