@@ -18,7 +18,7 @@ The expression \code{fun} involves a single mention of a single variable named \
 \code{ifun} then returns \code{h^-1(g^-1(f^-1(...(eval(fun)))))}.
 Invertible arithmetic, logarithmic, exponential and power functions are recognised, but not trigonometric or hyperbolic.
 
-When modelling with transformed variables, \code{ifun} enables the x and y variables to be automatically back-transformed to their original scales for plotting, simply by inverting the x and y transformations in the model call.
+When modelling with transformed variables, \code{ifun} enables the x and/or y variables to be automatically back-transformed to their original scales for plotting, simply by inverting the x and y transformations in the model call.
 }
 \value{
 A length 2 list:
@@ -30,7 +30,7 @@ A length 2 list:
 ## simple case
 ifun(quote(age))
 
-## more complex case - define age transformation
+## more complex case - transform age to log age since conception
 fun <- quote(log(age + 0.75))
 
 ## create inverse function
