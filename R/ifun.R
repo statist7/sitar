@@ -48,7 +48,9 @@ ifun <- function(fun) {
 ###########################
   fns <- quote(c(x+n, x-n, x*n, x/n, x^n, x^(1/n), sqrt(x), x^2, exp(x), log(x),
                  expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x),
-                 2^x, n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x))
+                 2^x, n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x,
+                 cos(x), acos(x), sin(x), asin(x), tan(x), atan(x),
+                 cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x)))
   fns[[1]] <- NULL
   fn <- function(x) {}
   results <- with(fns, recur(fun))
