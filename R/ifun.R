@@ -4,26 +4,21 @@ ifun <- function(fun) {
   recur <- function(fun, funinv=quote(x)) {
     fun <- as.expression(fun)[[1]]
 #   if bracketed drop brackets
-    if (length(fun) > 1 && identical(fun[[1]], as.name('('))) fun <- fun[[2]]
+    if (length(fun) > 1 && fun[[1]] == as.name('(')) fun <- fun[[2]]
     ne <- length(fun)
     if (ne > 1) {
-#     expression element containing language
-      x1 <- which(vapply(fun[2:ne], function(f) is.language(f), TRUE)) + 1
+#     expression element containing language (ignoring leading symbol)
+      x1 <- which(vapply(fun, is.language, TRUE))[[2]]
       if (length(x1) != 1) stop('there should be just one name in the expression')
 #     element containing numeric (may be absent)
       n1 <- which(vapply(fun, is.numeric, TRUE))
-#     expressions of same length matching leading symbol
-      nf <- which(vapply(fns, function(f) length(f) == length(fun) && f[[1]] == fun[[1]], TRUE))
+#     expressions of same length matching leading symbol and x arg position
+      nf <- which(vapply(fns, function(f) length(f) == length(fun) && f[[1]] == fun[[1]] && f[[x1]] == quote(x), TRUE))
       if (length(nf) == 0) stop (paste('unrecognised symbol:', deparse(fun[[1]])))
       if (length(nf) > 1) {
-#       multiple matches - check that positions of x args match
-        nft <- which(vapply(fns[nf], function(f) f[[x1]] == quote(x), TRUE))
-        nf <- nf[nft]
-        if (length(nf) > 1) {
-#         still multiple matches - check if numeric args are equal
-          nft <- which(vapply(fns[nf], function(f) length(n1) > 0 && f[[n1]] == fun[[n1]], TRUE))
-          if (length(nft)) nf <- nf[nft]
-        }
+#       multiple matches - check if numeric args are equal
+        nft <- which(vapply(fns[nf], function(f) length(n1) > 0 && f[[n1]] == fun[[n1]], TRUE))
+        if (length(nft)) nf <- nf[nft]
       }
 #     if more than one match use the first
       nf <- nf[[1]]
@@ -51,30 +46,12 @@ ifun <- function(fun) {
     return(list(fn=funinv, varname=fun))
   }
 ###########################
-  fns <- quote(c(x+n, x-n, x*n, x/n, x^n, x^(1/n),
-                 sqrt(x), x^2, exp(x), log(x), expm1(x), log1p(x), n^x, log(x,n),
-                 log10(x), 10^x, log2(x), 2^x, n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x))
+  fns <- quote(c(x+n, x-n, x*n, x/n, x^n, x^(1/n), sqrt(x), x^2, exp(x), log(x),
+                 expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x),
+                 2^x, n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x))
   fns[[1]] <- NULL
   fn <- function(x) {}
   results <- with(fns, recur(fun))
   body(fn) <- results$fn
   return(list(fn=fn, varname=deparse(results$varname)))
 }
-
-# recurd <- function(expr) {
-#   expr <- as.expression(expr)[[1]]
-#   ne <- length(expr)
-#   header <- paste(rep('   ', times=sys.nframe() - 1), collapse='')
-#   message(paste(header, as.expression(expr)))
-#   if (ne > 1) {
-#     for (i in 1:ne) recurd(expr[[i]])
-#   }
-#   else {
-#     ee <- try(eval(expr, baseenv(), baseenv()), silent=TRUE)
-#     if (inherits(ee, 'try-error')) message(paste(header, 'variable'))
-#     else message(paste(header, typeof(ee), mode(ee)))
-#   }
-#   invisible()
-# }
-#
-#   canonical <- function(x) ifun(match.call()$x)
