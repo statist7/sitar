@@ -1,4 +1,4 @@
-	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NULL,
+	plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
 	                       abc=NULL, add=FALSE, nlme=FALSE, ...)
 {
 #	plot curves from sitar model
@@ -66,15 +66,21 @@
 		dots <- match.call(expand.dots=FALSE)$...
 		if (length(dots) > 0) ARG <- lapply(as.list(dots), eval, data, parent.frame())
 			else ARG <- NULL
-#	if xlab not specified replace with label or else x name
+#	if xlab not specified replace with label or x name (depending on xfun)
 		if (!"xlab" %in% names(ARG)) {
-			xl <- ifelse(missing(labels), deparse(mcall$x), labels[1])
+		  if(!missing(labels)) xl <- labels[1] else {
+		    if(!is.null(xfun)) xl <- paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")") else
+		      xl <- ifun(mcall$x)$varname
+		  }
 			ARG <- c(ARG, list(xlab=xl))
 		}
 		else xl <- ARG$xlab
-#	if ylab not specified replace with label or else y name
+#	if ylab not specified replace with label or else y name (depending on yfun)
 		if (!"ylab" %in% names(ARG)) {
-			yl <- ifelse(missing(labels), deparse(mcall$y), labels[2])
+		  if(!missing(labels)) yl <- labels[2] else {
+		    if(!is.null(yfun)) yl <- paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")") else
+		      yl <- ifun(mcall$y)$varname
+		  }
 			ARG <- c(ARG, list(ylab=yl))
 		}
 		else yl <- ARG$ylab
@@ -86,7 +92,11 @@
 #	create output list
 		xy <- list()
 
-		#	plot y vs t by subject
+# derive xfun and yfun
+		if (is.null(xfun)) xfun <- ifun(mcall$x)$fn
+		if (is.null(yfun)) yfun <- ifun(mcall$y)$fn
+
+#	plot y vs t by subject
 		if (grepl("u", opt)) {
 		  xt <- x
 		  yt <- y
