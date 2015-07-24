@@ -4,17 +4,17 @@ ifun <- function(fun) {
   recur <- function(fun, funinv=quote(x)) {
     fun <- as.expression(fun)[[1]]
 #   if bracketed drop brackets
-    if (length(fun) > 1 && fun[[1]] == as.name('(')) fun <- fun[[2]]
+    while (length(fun) > 1 && fun[[1]] == as.name('(')) fun <- fun[[2]]
     ne <- length(fun)
     if (ne > 1) {
-#     expression element containing language (ignoring leading symbol)
-      x1 <- which(vapply(fun, is.language, TRUE))[[2]]
-      if (length(x1) != 1) stop('there should be just one name in the expression')
+#     element of expression containing language (ignoring leading symbol)
+      x1 <- which(vapply(fun, is.language, TRUE))[-1]
+      if (length(x1) != 1) stop('expression should contain just one name')
 #     element containing numeric (may be absent)
       n1 <- which(vapply(fun, is.numeric, TRUE))
-#     expressions of same length matching leading symbol and x arg position
-      nf <- which(vapply(fns, function(f) length(f) == length(fun) && f[[1]] == fun[[1]] && f[[x1]] == quote(x), TRUE))
-      if (length(nf) == 0) stop (paste('unrecognised symbol:', deparse(fun[[1]])))
+#     expressions matching leading symbol with same length and x arg position
+      nf <- which(vapply(fns, function(f) f[[1]] == fun[[1]] && length(f) == length(fun) && f[[x1]] == quote(x), TRUE))
+      if (length(nf) == 0) stop (paste('unrecognised name:', deparse(fun[[1]])))
       if (length(nf) > 1) {
 #       multiple matches - check if numeric args are equal
         nft <- which(vapply(fns[nf], function(f) length(n1) > 0 && f[[n1]] == fun[[n1]], TRUE))
