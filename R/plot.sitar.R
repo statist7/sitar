@@ -100,9 +100,7 @@
 		if (grepl("u", opt)) {
 		  xt <- x
 		  yt <- y
-		  if (!missing(xfun)) xt <- xfun(xt)
-		  if (!missing(yfun)) yt <- yfun(yt)
-		  do.call("mplot", c(list(x=xt, y=yt, id=id, subset=subset, add=add), ARG))
+		  do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))
 		  add <- TRUE
 		}
 
@@ -128,8 +126,7 @@
 		if (grepl("D", opt)) {
 		  newdata=stackage(x, id)
 		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, xfun=xfun, yfun=yfun))
-		  newdata[, 1] <- xfun(newdata[, 1])
-		  do.call("mplot", c(list(x=newdata[, 1], y=newdata[, 3], id=newdata[, 2],
+		  do.call("mplot", c(list(x=xfun(newdata[, 1]), y=newdata[, 3], id=newdata[, 2],
 		                          data=newdata, add=add), ARG))
 		  add <- TRUE
 		}
@@ -138,8 +135,8 @@
 		if (grepl("V", opt)) {
 		  newdata=stackage(x, id)
 		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun))
-      newdata[, 1] <- xfun(newdata[, 1])
-      do.call("mplot", c(list(x=newdata[, 1], y=newdata[, 3], id=newdata[, 2],
+		  ARG$ylab <- labels[3]
+		  do.call("mplot", c(list(x=xfun(newdata[, 1]), y=newdata[, 3], id=newdata[, 2],
                               data=newdata, add=add), ARG))
       add <- TRUE
 		}
@@ -175,13 +172,12 @@
 				else stop('abc should be either single id level or up to three named random effect values')
 			}
 
-			yt <- predict(object=model, newdata=newdata, level=0, abc=abc)
+			yt <- yfun(predict(object=model, newdata=newdata, level=0, abc=abc))
 			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
 #	derive cubic smoothing spline curve
-			xy$ss <- ss <- makess(xt, yt, xfun=xfun, yfun=yfun)
+			xt <- xfun(xt)
+			xy$ss <- ss <- makess(xt, yt)
 
-			if (!missing(xfun)) xt <- xfun(xt)
-			if (!missing(yfun)) yt <- yfun(yt)
 			if (grepl("d", opt) && grepl("v", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
 				add <- TRUE
@@ -192,7 +188,7 @@
 			} else
 			if (grepl("v", opt)) {
 				ARG$ylab <- labels[3]
-				xy <- do.call("y2plot", c(list(x=xt, y1=vt, add=add, xy=xy), ARG))
+				xy <- do.call("y2plot", c(list(x=xt, y1=vt, labels=labels[c(1,3)], add=add, xy=xy), ARG))
 				add <- TRUE
 			}
 		}
@@ -201,10 +197,8 @@
 		if (grepl("e", opt)) {
   		xt <- xseq(x[subset])
       yt <- predict(model$ns, newdata=data.frame(x=xt))
-			if (!missing(xfun)) xt <- xfun(xt)
-			if (!missing(yfun)) yt <- yfun(yt)
 			ox <- order(xt)
-			xy <- do.call("y2plot", c(list(x=xt[ox], y1=yt[ox], add=add, xy=xy), ARG))
+			xy <- do.call("y2plot", c(list(x=xfun(xt[ox]), y1=yfun(yt[ox]), add=add, xy=xy), ARG))
 			add <- TRUE
 		}
 
@@ -213,11 +207,10 @@
 			yt <- xyadj(x, y, id, model)
 			xt <- yt$x
 			yt <- yt$y
-			if (!missing(xfun)) xt <- xfun(xt)
-			if (!missing(yfun)) yt <- yfun(yt)
-    	do.call("mplot", c(list(x=xt, y=yt, id=id, subset=subset, add=add), ARG))
+    	do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))
 			add <- TRUE
 		}
+
 #	plot vertical line at age of peak velocity
 		if (apv) {
 			xy$apv <- ss$apv
