@@ -17,7 +17,11 @@ The expression \code{fun} involves a single mention of a single variable named \
 
 \code{ifun} then returns \code{h^-1(g^-1(f^-1(...(eval(fun)))))}.
 
-When modelling with transformed variables, \code{ifun} enables the x and/or y variables to be automatically back-transformed to their original scales for plotting, simply by inverting the x and y transformations in the model call.
+When modelling with transformed variables, \code{ifun} enables the \code{x} and/or
+\code{y} variables to be automatically back-transformed to their original scales
+for plotting, simply by inverting the \code{x} and \code{y} transformations in the
+model call. \code{\link{plot.sitar}} uses \code{ifun} for this purpose, via the
+functions \code{xfun} and \code{yfun}.
 }
 \value{
 A length 2 list:
@@ -25,18 +29,34 @@ A length 2 list:
   \item{varname}{the name of the variable extracted from \code{fun}.}
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
+\seealso{
+\code{\link{plot.sitar}}
+}
 \examples{
-## simple case
-ifun(quote(age))
+## simplest case
+(ifun(quote(age)))
 
-## more complex case - transform age to log age since conception
-fun <- quote(log(age + 0.75))
+(age <- 1:10)
+
+## more complex case
+## transform age to log age since conception
+(fun <- quote(log(age + 0.75)))
 
 ## create inverse function
-(results <- ifun(fun))
+(ifun(fun))
 
-##  apply inverse function to transformed age
-age <- 1:10
-(aget <- eval(fun))
-(results$fn(aget))
+##  transform age
+(transformed.age <- eval(fun))
+
+## ifun back-transforms transformed.age to age
+(ifun(fun)$fn(transformed.age))
+
+## ludicrously complex case
+## including trigonometry etc
+(fun <- quote((sqrt(sin(log1p(age+0.75)/2)+1)^4)))
+(ifun(fun))
+(transformed.age <- eval(fun))
+
+## ta da!
+(ifun(fun)$fn(transformed.age))
 }
