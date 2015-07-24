@@ -641,6 +641,5 @@ yaxsd <- function(usr=par()$usr[3:4]) {
 ################
 
 #	plot.sitar
-#		back-transform transformed x / y scales
 #		add acceleration curve option
 #		improve ylim for dau plots
