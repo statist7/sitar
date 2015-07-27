@@ -1,11 +1,23 @@
 Changes in Version 1.0.3
 
-  o In NAMESPACE anova.sitar was added to S3 methods.
+  o The heights database had age at menarche added.
 
-  o The anova method for sitar was added, with a NAMESPACE entry and man entry.
+  o In plot.sitar ifun was used to automatically back-transform transformations
+    of x and/or y in the sitar model.
 
-  o	In plot.sitar returndata ensured the return of a data frame.
+  o ifun (new) inverts an expression defining a data transformation.
 
+  o xyadj (new) adjusts x and y variables for SITAR random effects.
+
+  o predict.sitar was extended with a deriv argument to give predicted velocity.
+
+  o getCovariate and anova methods for sitar were added.
+
+  o	In plot.sitar new options D and V provide spline curves of individual
+    distance and velocity curves.
+
+  o	In sitar and plot.sitar bugs were fixed and code simplified by use of
+    predict.sitar, xyadj and ifun.
 
 Changes in Version 1.0.2
 
