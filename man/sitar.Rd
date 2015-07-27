@@ -63,18 +63,23 @@ An object inheriting from class \code{sitar} representing the nonlinear mixed-ef
 \item{fitnlme}{the function returning the predicted value of \code{y}.}
 \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
 
-Generic functions such as \code{print}, \code{plot} and \code{summary} have methods to show the results of the fit. The
+Generic functions such as \code{print}, \code{plot}, \code{anova} and \code{summary} have methods to show the results of the fit. The
  functions \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects}, \code{random.effects},
- \code{predict}, \code{getData} and \code{getVarCov} can be used to extract some of its components.
+ \code{predict}, \code{getData}, \code{getGroups}, \code{getCovariate} and \code{getVarCov} can be used to extract some of its components.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
 data(heights)
-## fit simple model
-m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+##  fit simple model
+(m1 <- sitar(x=age, y=height, id=id, data=heights, df=6))
 
-##	alternatively try sqrt transform for height and increase df
-m2 <- update(m1, x=age, y=sqrt(height), df=6)
+##  alternatively try log transform for age
+(m2 <- update(m1, x=log(age)))
+
+##  relate random effects to age at menarche (with censored values +ve)
+##  both a (size) and b (tempo) are positively associated with age at menarche
+amen <- abs(heights$men)
+(m3 <- update(m2, a.form=~amen, b.form=~amen, c.form=~amen))
 }
 \keyword{ package }
 \keyword{ nonlinear }
