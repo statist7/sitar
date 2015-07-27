@@ -1,7 +1,7 @@
 Package: sitar
 Type: Package
 Title: Super Imposition by Translation and Rotation Growth Curve Analysis
-Version: 1.0.3
+Version: 1.0.4
 Date: 2015-07-27
 Author: Tim Cole
 Maintainer: Tim Cole <tim.cole@ucl.ac.uk>
