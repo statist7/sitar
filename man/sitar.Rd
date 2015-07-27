@@ -71,15 +71,12 @@ Generic functions such as \code{print}, \code{plot}, \code{anova} and \code{summ
 \examples{
 data(heights)
 ##  fit simple model
-(m1 <- sitar(x=age, y=height, id=id, data=heights, df=6))
-
-##  alternatively try log transform for age
-(m2 <- update(m1, x=log(age)))
+(m1 <- sitar(x=age, y=height, id=id, data=heights, df=5))
 
 ##  relate random effects to age at menarche (with censored values +ve)
 ##  both a (size) and b (tempo) are positively associated with age at menarche
 amen <- abs(heights$men)
-(m3 <- update(m2, a.form=~amen, b.form=~amen, c.form=~amen))
+(m2 <- update(m1, a.form=~amen, b.form=~amen, c.form=~amen))
 }
 \keyword{ package }
 \keyword{ nonlinear }
