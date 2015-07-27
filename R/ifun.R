@@ -5,19 +5,18 @@ ifun <- function(fun) {
     fun <- as.expression(fun)[[1]]
 #   if bracketed drop brackets
     while (length(fun) > 1 && fun[[1]] == as.name('(')) fun <- fun[[2]]
-    ne <- length(fun)
-    if (ne > 1) {
-#     element of expression containing language (ignoring leading symbol)
-      x1 <- which(vapply(fun, is.language, TRUE))[-1]
+    if ((ne <- length(fun)) > 1) {
+#     element of expression containing language (either 2 or 3, ignoring leading symbol)
+      x1 <- which(vapply(fun, function(f) is.language(f) && f != as.name('pi'), TRUE))[-1]
       if (length(x1) != 1) stop('expression should contain just one name')
-#     element containing numeric (may be absent)
-      n1 <- which(vapply(fun, is.numeric, TRUE))
+#     element containing numeric (only relevant when ne == 3)
+      n1 <- 5 - x1
 #     expressions matching leading symbol with same length and x arg position
       nf <- which(vapply(fns, function(f) f[[1]] == fun[[1]] && length(f) == length(fun) && f[[x1]] == quote(x), TRUE))
       if (length(nf) == 0) stop (paste('unrecognised name:', deparse(fun[[1]])))
-      if (length(nf) > 1) {
-#       multiple matches - check if numeric args are equal
-        nft <- which(vapply(fns[nf], function(f) length(n1) > 0 && f[[n1]] == fun[[n1]], TRUE))
+#     if multiple matches check if numeric args are equal
+      if (length(nf) > 1 && ne == 3) {
+        nft <- which(vapply(fns[nf], function(f) f[[n1]] == fun[[n1]], TRUE))
         if (length(nft)) nf <- nf[nft]
       }
 #     if more than one match use the first
@@ -26,10 +25,10 @@ ifun <- function(fun) {
       fn2 <- if (nf %% 2) fns[[nf + 1]] else fns[[nf - 1]]
 #     identify position of x arg in inverse function
       x2 <- which(as.list(fn2) == quote(x))
-#     if length 3 then position of n arg is complement of 5
+#     if length 3 copy n arg
       if (length(fn2) == 3) {
         n2 <- 5 - x2
-#       function returns value for n
+#       function returns value for n arg
         f <- function(n) {}
         body(f) <- fn2[[n2]]
         fn2[[n2]] <- f(fun[[n1]])
@@ -50,7 +49,7 @@ ifun <- function(fun) {
                  expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x),
                  2^x, n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x,
                  cos(x), acos(x), sin(x), asin(x), tan(x), atan(x),
-                 cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x)))
+                 cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x), I(x), I(x)))
   fns[[1]] <- NULL
   fn <- function(x) {}
   results <- with(fns, recur(fun))
