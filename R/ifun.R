@@ -3,6 +3,7 @@ ifun <- function(fun) {
 ###########################
   recur <- function(fun, funinv=quote(x)) {
     fun <- as.expression(fun)[[1]]
+    if (is.numeric(fun)) stop('expression should contain just one name')
 #   if bracketed drop brackets
     while (length(fun) > 1 && fun[[1]] == as.name('(')) fun <- fun[[2]]
     if ((ne <- length(fun)) > 1) {
@@ -37,7 +38,7 @@ ifun <- function(fun) {
       fn2[[x2]] <- funinv
 #     update function and inverse function and repeat as necessary
       fun <- fun[[x1]]
-      if (is.symbol(fun)) funinv <- fn2 else {
+      if (is.name(fun)) funinv <- fn2 else {
         funinv <- (results <- recur(fun, fn2))$fn
         fun <- results$varname
       }
