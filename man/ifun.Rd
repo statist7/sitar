@@ -12,15 +12,21 @@ ifun(fun)
   \item{fun}{a language object defining the expression to be inverted.}
 }
 \details{
-The expression \code{fun} involves a single variable named \code{varname} such that \code{fun = f(g(h((get(varname)))))}, where each function \code{f(.)} involves up to one function of \code{varname} and up to one numerical constant (including \code{pi}). The number of such functions is in principle unlimited.
+The expression \code{fun} involves a single mention of a single variable named \code{varname}
+such that \code{fun = f(g(h((get(varname)))))}, where each function \code{f(.)}
+involves up to one function of \code{varname} and up to one numerical expression
+(possibly including \code{pi}). The number of such functions is in principle unlimited.
 
-\code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))}, which ensures that the expression is invertible if and only if the individual functions are invertible.
+\code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))}, with any numerical
+expressions evaluated, which ensures that the expression is invertible if and only
+if the individual functions are invertible.
 
-When modelling with transformed variables, \code{ifun} enables the \code{x} and/or
-\code{y} variables to be automatically back-transformed to their original scales
-for plotting, simply by inverting the \code{x} and \code{y} transformations in the
-model call. \code{\link{plot.sitar}} uses \code{ifun} for this purpose, via the
-arguments \code{xfun} and \code{yfun}.
+When modelling with transformed variables, with the transformations included in
+the model call, \code{ifun} enables the \code{x} and/or \code{y} variables to be
+automatically back-transformed to their original scales for plotting, simply by
+inverting the \code{x} and \code{y} transformations in the call.
+\code{\link{plot.sitar}} uses \code{ifun} for this purpose, via the arguments
+\code{xfun} and \code{yfun}.
 }
 \value{
 A list of length two:
@@ -50,8 +56,7 @@ A list of length two:
 ## ifun back-transforms transformed.age to age
 (ifun(fun)$fn(transformed.age))
 
-## ludicrously complex case
-## including trigonometry etc
+## ludicrously complex case including trigonometry etc
 (fun <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
 (ifun(fun))
 (transformed.age <- eval(fun))
