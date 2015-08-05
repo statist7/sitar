@@ -131,17 +131,17 @@
 		}
 	}
 
-	if (!is.null(weights)) {
-    if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
-      else form <- attr(weights, 'formula')
-    if (!is.null(form)) {
-      wt <- as.data.frame(model.frame(form, data))
-      wt.names <- names(wt)[!names(wt) %in% names(fulldata)]
-      wt <- as.data.frame(wt[, wt.names])
-      names(wt) <- wt.names
-      fulldata <- cbind(fulldata, wt)
-	  }
-	}
+# 	if (!is.null(weights)) {
+#     if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
+#       else form <- attr(weights, 'formula')
+#     if (!is.null(form)) {
+#       wt <- as.data.frame(model.frame(form, data))
+#       wt.names <- names(wt)[!names(wt) %in% names(fulldata)]
+#       wt <- as.data.frame(wt[, wt.names])
+#       names(wt) <- wt.names
+#       fulldata <- cbind(fulldata, wt)
+# 	  }
+# 	}
 
 	if (returndata) invisible(fulldata) else {
 		pars <- paste(pars, collapse=',')
