@@ -22,11 +22,14 @@
     if (abcset || level == 0) newdata$id <- id <- factor(rep.int(getGroups(object)[1], nrow(newdata)))
       else if (!is.null(newdata$id)) id <- factor(newdata$id) else
         newdata$id <- id <- factor(eval(oc$id, newdata))
+# check if old-style object lacking fitnlme
+    if(!'fitnlme' %in% names(object)) {
+      cat('need to update object to obtain fitnlme\n')
+      object <- update(object, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
+    }
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-    if (!exists('fitnlme'))
-      stop('could not find function "fitnlme": please update model')
 # omit fitnlme args already in newdata
 		argnames <- names(formals(fitnlme))
 		args <- setNames(vector('integer', length=length(argnames)), argnames)
