@@ -141,12 +141,17 @@
       add <- TRUE
 		}
 
-		#	plot fitted distance and velocity curves
+#	plot fitted distance and velocity curves
 		if (grepl("d", opt) || grepl("v", opt) || apv) {
 			xt <- xseq(x[subset])
   		newdata <- data.frame(x=xt)
 # if subset, estimate mean values for covariates
       if (!identical(subset, rep(TRUE, nf))) {
+# check if old-style object lacking fitnlme
+        if(!'fitnlme' %in% names(model)) {
+          cat('need to update object to obtain fitnlme\n')
+          model <- update(model, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
+        }
         argnames <- names(formals(model$fitnlme))
         xtra <- argnames[!argnames %in% c('x', names(fixef(model)))]
         if (length(xtra) > 0) {
