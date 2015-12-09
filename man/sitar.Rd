@@ -66,6 +66,10 @@ An object inheriting from class \code{sitar} representing the nonlinear mixed-ef
 Generic functions such as \code{print}, \code{plot}, \code{anova} and \code{summary} have methods to show the results of the fit. The
  functions \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects}, \code{random.effects},
  \code{predict}, \code{getData}, \code{getGroups}, \code{getCovariate} and \code{getVarCov} can be used to extract some of its components.
+
+Note that earlier versions of \code{sitar} did not return \code{fitnlme}.
+Both \code{plot} and \code{predict} may require it, in which case they \code{update}
+the SITAR object on the fly, with a message. This means the object also needs to be updated manually.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \examples{
