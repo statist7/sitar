@@ -54,11 +54,7 @@ The three sets of values are then smoothed across age to give L, M and S.}
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # ages 0-3 years by 3 months
-v <- as.data.frame(lapply(as.list(zs), function(z) {
-  v <- LMS2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
-}))
-names(v) <- z2cent(zs)
-rownames(v) <- ages
+v <- LMS2z(ages, zs, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
 round(v, 2)
 
 ## then back-calculate the original LMS curves
