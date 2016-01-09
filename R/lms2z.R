@@ -29,13 +29,15 @@
 
 	zLMS <- function(x, L = 1, M, S) {
 	L0 <- L + 1e-7 * (L == 0)
-	( (x / M) ^ L0 - 1) / L0 / S
+	LMS <- data.frame(cbind(L0, M, S))
+	drop(with(LMS, t((t(x %*% t(1/M)) ^ L0 - 1) / L0 / S)))
 }
 
 	cLMS <- function(z, L = 1, M, S) {
-	L0 <- L + 1e-7 * (L == 0)
-	M * (1 + L0 * S * z) ^ (1 / L0)
-}
+	  L0 <- L + 1e-7 * (L == 0)
+	  LMS <- data.frame(cbind(L0, M, S))
+	  drop(with(LMS, t(M * (1 + L0 * S %*% t(z)) ^ (1/L0))))
+	}
 
 	z2cent <- function(z) {
 #	z is z-score
