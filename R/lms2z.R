@@ -31,7 +31,8 @@
 		else cLMS(y, v[, 1], v[, 2], v[, 3])
 	if (!is.null(dim(cz))) {
 	  cz <- as.data.frame(cz)
-	  if (!toz) names(cz) <- z2cent(z)
+	  if (!toz) names(cz) <- z2cent(y)
+	  rownames(cz) <- x
 	}
 	cz
 }
