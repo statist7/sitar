@@ -23,7 +23,7 @@ z = ((x/M)^L - 1)/L/S}
 
 \deqn{x = M (1 + L S z)^{1/L})}{%
 x = M (1 + L S z)^(1/L)}
-where L has 10^-7 added if it is zero. The LMS method is the same as the BCCG family in
+where L is reset to 10^-7 if it is zero. The LMS method is the same as the BCCG family in
 the \code{gamlss} package, except that lambda in LMS is referred to as nu in BCCG.}
 \value{\code{zLMS} and \code{cLMS} each return a vector or matrix, respectively of z-scores
 and measurement centiles, with the number of rows matching the length of
