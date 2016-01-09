@@ -9,34 +9,49 @@
 #		'ht' 'wt' 'bmi' 'head' 'sitht' 'leglen' 'waist' 'bfat'
 #	ref		name of reference, one of: 'uk90' 'who06'
 #	toz		if TRUE returns measurement converted to z-score using ref
-#			if FALSE returns z-score converted to measurement using ref
-	mcall <- as.list(match.call()[c('x', 'y', 'sex')])
-	df <- as.data.frame(lapply(mcall, eval, envir = data, enclos = parent.frame()))
-	ref <- get(ref)
+#		  	if FALSE returns z-score converted to measurement using ref
+	if (!identical(data, parent.frame())) {
+	  on.exit(detach(data))
+	  attach(data)
+	}
+	if (!length(sex) %in% c(1, length(x))) stop('sex wrong length for x')
 	lms <- paste(c('L', 'M', 'S'), measure, sep='.')
-	v <- matrix(nrow=nrow(df), ncol=3)
+	v <- matrix(nrow=length(x), ncol=4)
+	v[, 4] <- sex
+	ref <- get(ref)
 	for (i in 1:3) {
 		for (ix in 1:2) {
-			sexvar <- as.numeric(df[, 3]) == ix
+			sexvar <- as.numeric(v[, 4]) == ix
 			sexref <- as.numeric(ref$sex) == ix
-			if (sum(sexvar) > 0) v[sexvar, i] <- spline(ref$years[sexref],
-				ref[sexref, lms[i]], method='natural', xout=df[sexvar, 1])$y
+			if (any(sexvar)) v[sexvar, i] <- spline(ref$years[sexref],
+				ref[sexref, lms[i]], method='natural', xout=x[sexvar])$y
 		}
 	}
-	if (toz) zLMS(df[, 2], v[, 1], v[, 2], v[, 3])
-		else cLMS(df[, 2], v[, 1], v[, 2], v[, 3])
+	cz <- if (toz) zLMS(y, v[, 1], v[, 2], v[, 3])
+		else cLMS(y, v[, 1], v[, 2], v[, 3])
+	if (!is.null(dim(cz))) {
+	  cz <- as.data.frame(cz)
+	  if (!toz) names(cz) <- z2cent(z)
+	}
+	cz
 }
 
 	zLMS <- function(x, L = 1, M, S) {
-	L0 <- L + 1e-7 * (L == 0)
-	LMS <- data.frame(cbind(L0, M, S))
-	drop(with(LMS, t((t(x %*% t(1/M)) ^ L0 - 1) / L0 / S)))
-}
+  	L0 <- L + 1e-7 * (L == 0)
+  	LMS <- data.frame(cbind(L0, M, S))
+  	if (length(x) == nrow(LMS) || min(length(x), nrow(LMS)) == 1)
+  	  drop(with(LMS, ((x / M) ^ L0 - 1) / L0 / S))
+  	else
+  	  drop(with(LMS, (t(x %*% t(1 / M)) ^ L0 - 1) / L0 / S))
+	}
 
 	cLMS <- function(z, L = 1, M, S) {
 	  L0 <- L + 1e-7 * (L == 0)
 	  LMS <- data.frame(cbind(L0, M, S))
-	  drop(with(LMS, t(M * (1 + L0 * S %*% t(z)) ^ (1/L0))))
+	  if (length(z) == nrow(LMS) || min(length(z), nrow(LMS)) == 1)
+	    drop(with(LMS, M * (1 + L0 * S * z) ^ (1/L0)))
+	  else
+	    drop(with(LMS, M * (1 + L0 * S %*% t(z)) ^ (1/L0)))
 	}
 
 	z2cent <- function(z) {
