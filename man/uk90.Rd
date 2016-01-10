@@ -49,7 +49,7 @@ The values are tabulated in the spreadsheet British1990.xls provided with the Ex
 Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and penalized likelihood. Stat Med 1992;11:1305-19.
 
 Cole TJ, Freeman JV, Preece MA. British 1990 growth reference centiles for weight, height, body mass index and head circumference
-fitted by maximum penalized likelihood. Stat Med 1998;\-17:407-29.
+fitted by maximum penalized likelihood. Stat Med 1998;17:407-29.
 
 Freeman JV, Cole TJ, Chinn S, et al. Cross sectional stature and weight reference curves for the UK, 1990. Arch Dis Child 1995;73:17-24.
 }
