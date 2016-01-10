@@ -5,7 +5,7 @@
 A function to convert between measurements and z-scores using a growth reference
 previously fitted by the LMS method.}
 \usage{
-LMS2z(x, y, sex, data = parent.frame(), measure, ref, toz = TRUE)
+LMS2z(x, y, sex, measure, ref, toz = TRUE)
 }
 \arguments{
   \item{x}{
@@ -14,8 +14,6 @@ vector of ages.}
 vector of either measurements or z-scores, depending on the value of \code{toz}.}
   \item{sex}{
 two-level factor with level 1 male and level 2 female, of length one or \code{length(x)}.}
-  \item{data}{
-optional data frame containing \code{x}, \code{y} and \code{sex}.}
   \item{measure}{
 character indicating the name of the measurement, depending on the choice of
 \code{ref} (see e.g. references \code{uk90}, \code{who06} and \code{ukwhopt}).}
@@ -36,7 +34,7 @@ passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{to
 ## convert girls' heights data to UK 90 z-scores
 data(heights)
 data(uk90)
-LMS2z(age, height, sex = 2, heights, measure = 'ht', ref = 'uk90')
+with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 
 ## construct table of boys weight centiles by age for WHO standard
 data(who06)
