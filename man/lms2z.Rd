@@ -13,7 +13,7 @@ vector of ages.}
   \item{y}{
 vector of either measurements or z-scores, depending on the value of \code{toz}.}
   \item{sex}{
-two-level factor with level 1 male and level 2 female.}
+two-level factor with level 1 male and level 2 female, of length one or \code{length(x)}.}
   \item{data}{
 optional data frame containing \code{x}, \code{y} and \code{sex}.}
   \item{measure}{
@@ -27,7 +27,7 @@ logical set to TRUE for conversion from measurement to z-score, or FALSE for the
 \details{
 Vectors of L, M and S corresponding to \code{x} and \code{sex} are extracted and
 passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{toz}.}
-\value{A vector of the same length as \code{y} containing the transformed values.}
+\value{A vector or matrix, depending on the lengths of \code{x} and \code{y}, containing the transformed values. If the two lengths are the same, or either is one, then a vector is returned. If they are different and not one, then a matrix with \code{length(x)} rows and \code{length(y)} columns is returned. In this latter case the row names are set to \code{x}, and if \code{toz} is false the column names are set using \code{z2cent}.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{z2cent}}. The LMS method can be fitted to data using the package
   \code{gamlss} with the \code{BCCG} family, where nu (originally lambda), mu and sigma
