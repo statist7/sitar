@@ -1,19 +1,14 @@
-	LMS2z <- function(x, y, sex, data = parent.frame(), measure, ref, toz=TRUE) {
+	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE) {
 #	converts measurement y to/from z-score adjusted for x & sex
 #		using LMS reference 'ref' for 'measure'
 #	x		age
 #	y		measurement (or z-score if toz FALSE)
 #	sex		sex variable (male=1, female=2)
-#	data	source of x, y and sex
 #	measure label for measurement, one of:
 #		'ht' 'wt' 'bmi' 'head' 'sitht' 'leglen' 'waist' 'bfat'
 #	ref		name of reference, one of: 'uk90' 'who06'
 #	toz		if TRUE returns measurement converted to z-score using ref
 #		  	if FALSE returns z-score converted to measurement using ref
-	if (!identical(data, parent.frame())) {
-	  on.exit(detach(data))
-	  attach(data)
-	}
 	if (!length(sex) %in% c(1, length(x))) stop('sex wrong length for x')
 	lms <- paste(c('L', 'M', 'S'), measure, sep='.')
 	v <- matrix(nrow=length(x), ncol=4)
