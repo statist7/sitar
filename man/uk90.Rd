@@ -56,7 +56,6 @@ Freeman JV, Cole TJ, Chinn S, et al. Cross sectional stature and weight referenc
 \examples{
 data(uk90)
 ## calculate median BMI in girls from birth to 10 years
-LMS2z(x = 0:10, y = 0, sex = 2, data = NULL, measure = 'bmi',
- ref = 'uk90', toz = FALSE)
+LMS2z(x = 0:10, y = 0, sex = 2, measure = 'bmi', ref = 'uk90', toz = FALSE)
 }
 \keyword{datasets}

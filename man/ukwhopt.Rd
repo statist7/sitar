@@ -55,7 +55,6 @@ Wright CM, Williams AF, Elliman D, et al. Using the new UK-WHO growth charts. BM
 \examples{
 data(ukwhopt)
 ## calculate median birth weight in girls from 23 to 42 weeks gestation
-LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, data = NULL,
-  measure = 'wt', ref = 'ukwhopt', toz = FALSE)
+LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt', ref = 'ukwhopt', toz = FALSE)
 }
 \keyword{datasets}

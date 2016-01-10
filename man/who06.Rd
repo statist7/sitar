@@ -48,6 +48,6 @@ Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and penali
 \examples{
 data(who06)
 ## calculate z-score for length 60 cm in boys at age 0:12 months
-LMS2z(x = 0:12/12, y = 60, sex = 1, data = NULL, measure = 'ht', ref = 'who06')
+LMS2z(x = 0:12/12, y = 60, sex = 1, measure = 'ht', ref = 'who06')
 }
 \keyword{datasets}
