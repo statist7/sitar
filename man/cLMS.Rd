@@ -23,12 +23,12 @@ z = ((x/M)^L - 1)/L/S}
 
 \deqn{x = M (1 + L S z)^{1/L})}{%
 x = M (1 + L S z)^(1/L)}
-where L is reset to 10^-7 if it is zero. The LMS method is the same as the BCCG family in
+where L is reset to 10^-7 if it is zero. \code{x} and \code{z} are usually the same length as L M and S, but can be different. The LMS method is the same as the BCCG family in
 the \code{gamlss} package, except that lambda in LMS is referred to as nu in BCCG.}
 \value{\code{zLMS} and \code{cLMS} each return a vector or matrix, respectively of z-scores
 and measurement centiles, with the number of rows matching the length of
 \code{x} or \code{z}, and the number of columns matching the length of L, M and S.
-If either dimension is 1 the vector is returned.
+If the two lengths are the same, or if either length is 1, a vector is returned.
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{\code{\link{z2cent}}, \code{\link{LMS2z}}}
