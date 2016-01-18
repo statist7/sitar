@@ -61,9 +61,9 @@
 #	update start fixed effects if df, knots, bounds or bstart updated
 		if (sum(pmatch(names(extras), c("df", "knots", "bounds", "bstart")), na.rm=TRUE) > 0) {
 			x <- eval(mcall$x, data)
-			if (!is.null(object$bstart)) bstart <- object$bstart
-			knots <- attr(object$ns$model$ns, 'knots') + bstart
-			bounds <- attr(object$ns$model$ns, 'Boundary.knots') + bstart
+			# if (!is.null(object$bstart)) bstart <- object$bstart
+			# knots <- attr(object$ns$model$ns, 'knots') + bstart
+			# bounds <- attr(object$ns$model$ns, 'Boundary.knots') + bstart
 			df <- object$ns$rank - 1
 			if (length(fixef(object)) > df + 1) fixed.extra <- (df+2):length(fixef(object))
 				else fixed.extra <- NULL
@@ -85,10 +85,12 @@
 				start.$fixed['b'] <- bstart
 			}
 			start.$fixed['c'] <- 0
-			knots <- knots - bstart
-			bounds <- bounds - bstart
+			knots <- attr(object$ns$model$ns, 'knots')
+			bounds <- attr(object$ns$model$ns, 'Boundary.knots')
+			# knots <- knots - bstart
+			# bounds <- bounds - bstart
 #	get spline start values
-			spline.lm <- lm(fitted(object, level=0) ~ ns(x - bstart, knots=knots, Bound=bounds))
+			spline.lm <- lm(fitted(object, level=0) ~ ns(x - mean(x), knots=knots, Bound=bounds))
 			start.$fixed <- c(coef(spline.lm)[c(2:(df+1), 1)], start.$fixed[fixed.extra])
 		}
 #	save start. object
