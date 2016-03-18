@@ -45,13 +45,14 @@
 		subset <- eval(mcall$subset, data)
 		if (!is.null(subset)) data <- data[subset, ]
 		id <- factor(eval(mcall$id, data))
-		if (nlevels(id) != dim(ranef(object))[1]) {
+		levels.obj <- levels(getGroups(object))
+		if (!identical(levels(id), levels.obj)) {
 #	omit random effects for missing levels in id
-			idcheck <- rownames(ranef(object)) %in% levels(id)
+			idcheck <- levels.obj %in% levels(id)
 			start.$random <- ranef(object)[idcheck,]
-			cat(dim(ranef(object))[1] - sum(idcheck), 'subjects omitted\n')
+			cat(length(levels.obj) - sum(idcheck), 'subjects omitted\n')
 #	add zero random effects for new levels in id
-			newid <-!levels(id) %in% rownames(ranef(object))
+			newid <- !levels(id) %in% levels.obj
 			if (sum(newid) > 0) {
 				newre <- matrix(0, nrow=sum(newid), ncol=dim(ranef(object))[2], dimnames=list(levels(id)[newid], dimnames(ranef(object))[[2]]))
 				start.$random <- rbind(start.$random, newre)
