@@ -8,18 +8,8 @@
 	for (i in names(extras))
 		if (is.null(extras[[i]]))
 			mcall[[i]] <- extras[[i]] <- NULL
-	start. <- list(fixed=fixef(object), random=ranef(object))
-#	check if xoffset used
-	bstart <- start.$fixed['b']
-	if (is.na(bstart)) bstart <- 0 else names(bstart) <- NULL
-	if (is.numeric(object$xoffset)) {
-		mcall$xoffset <- NULL
-		bstart <- bstart + object$xoffset
-		# bstart <- object$xoffset # alternative
-		if (is.null(extras$bstart)) extras$bstart <- bstart
-	}
-	if (length(extras) > 0) {
 #	update formulae
+	if (length(extras) > 0) {
 		all.pars <- c(as.list(mcall), formals(sitar))[-1]
 		for (a in letters[1:3]) {
 			pos.e <- pmatch(paste(a, 'form', sep='.'), names(extras), 0)
@@ -38,9 +28,10 @@
 		if (any(!existing))
 			mcall <- as.call(c(as.list(mcall), extras[!existing]))
 	}
-#	check if can use previous start values
-	if (sum(pmatch(names(extras), c("x", "y", "id", "data", "fixed", "random", "a.formula", "b.formula", "c.formula", "start", "subset", "returndata")), na.rm=TRUE) > 0) {
-#	update start random effects if dataframe changed
+#	check if can use start
+	if (sum(pmatch(names(extras), c("x", "y", "id", "fixed", "random", "a.formula", "b.formula", "c.formula", "start", "returndata")), na.rm=TRUE) == 0) {
+  	start. <- list(fixed=fixef(object), random=ranef(object))
+#	args data and subset
 		data <- eval(mcall$data)
 		subset <- eval(mcall$subset, data)
 		if (!is.null(subset)) data <- data[subset, ]
@@ -67,21 +58,25 @@
 			bounds <- attr(object$ns$model$ns, 'Boundary.knots')
 			if (length(fixef(object)) > df + 1) fixed.extra <- (df+2):length(fixef(object))
 				else fixed.extra <- NULL
+# arg knots
 			if (!is.null(extras$knots)) {
 				knots <- eval(extras$knots) - mean(x)
 				df <- length(knots) + 1
 				mcall$df <- NULL
 			}
+# arg df
 			else if (!is.null(extras$df)) {
 				df <- eval(extras$df)
 				knots <- quantile(x, (1:(df-1))/df) - mean(x)
 				mcall$knots <- NULL
 			}
+# arg bounds
 			if (!is.null(extras$bounds)) {
 				bounds <- eval(extras$bounds)
 				if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
 				bounds <- bounds - mean(x)
 			}
+# arg bstart
 			if (!is.null(extras$bstart)) {
 				bstart <- eval(extras$bstart)
 				if (is.character(bstart)) bstart <- mean(x)
@@ -93,10 +88,8 @@
 		}
 #	save start. object
 		assign('start.', start., parent.frame())
-		if (!'start' %in% names(mcall))
-			mcall <- as.call(c(as.list(mcall), start=quote(start.)))
+		mcall <- as.call(c(as.list(mcall), start=quote(start.)))
 	}
-	else mcall$start <- NULL
 	if (evaluate)
 		eval(mcall, parent.frame())
 	else mcall
