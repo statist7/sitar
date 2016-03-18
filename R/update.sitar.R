@@ -39,7 +39,7 @@
 			mcall <- as.call(c(as.list(mcall), extras[!existing]))
 	}
 #	check if can use previous start values
-	if (sum(pmatch(names(extras), c("x", "y", "id", "data", "fixed", "random", "a.formula", "b.formula", "c.formula", "start", "subset", "returndata")), na.rm=TRUE) == 0) {
+	if (sum(pmatch(names(extras), c("x", "y", "id", "data", "fixed", "random", "a.formula", "b.formula", "c.formula", "start", "subset", "returndata")), na.rm=TRUE) > 0) {
 #	update start random effects if dataframe changed
 		data <- eval(mcall$data)
 		subset <- eval(mcall$subset, data)
@@ -61,36 +61,33 @@
 #	update start fixed effects if df, knots, bounds or bstart updated
 		if (sum(pmatch(names(extras), c("df", "knots", "bounds", "bstart")), na.rm=TRUE) > 0) {
 			x <- eval(mcall$x, data)
-			# if (!is.null(object$bstart)) bstart <- object$bstart
-			# knots <- attr(object$ns$model$ns, 'knots') + bstart
-			# bounds <- attr(object$ns$model$ns, 'Boundary.knots') + bstart
 			df <- object$ns$rank - 1
+			knots <- attr(object$ns$model$ns, 'knots')
+			bounds <- attr(object$ns$model$ns, 'Boundary.knots')
 			if (length(fixef(object)) > df + 1) fixed.extra <- (df+2):length(fixef(object))
 				else fixed.extra <- NULL
 			if (!is.null(extras$knots)) {
-				knots <- eval(extras$knots)
+				knots <- eval(extras$knots) - mean(x)
 				df <- length(knots) + 1
+				mcall$df <- NULL
 			}
 			else if (!is.null(extras$df)) {
 				df <- eval(extras$df)
-				knots <- quantile(x, (1:(df-1))/df)
+				knots <- quantile(x, (1:(df-1))/df) - mean(x)
+				mcall$knots <- NULL
 			}
 			if (!is.null(extras$bounds)) {
 				bounds <- eval(extras$bounds)
 				if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
+				bounds <- bounds - mean(x)
 			}
 			if (!is.null(extras$bstart)) {
 				bstart <- eval(extras$bstart)
 				if (is.character(bstart)) bstart <- mean(x)
 				start.$fixed['b'] <- bstart
 			}
-			start.$fixed['c'] <- 0
-			knots <- attr(object$ns$model$ns, 'knots')
-			bounds <- attr(object$ns$model$ns, 'Boundary.knots')
-			# knots <- knots - bstart
-			# bounds <- bounds - bstart
 #	get spline start values
-			spline.lm <- lm(fitted(object, level=0) ~ ns(x - mean(x), knots=knots, Bound=bounds))
+			spline.lm <- lm(predict(object, data, level=0) ~ ns(x - mean(x), knots=knots, Bound=bounds))
 			start.$fixed <- c(coef(spline.lm)[c(2:(df+1), 1)], start.$fixed[fixed.extra])
 		}
 #	save start. object
