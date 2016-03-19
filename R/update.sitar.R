@@ -88,7 +88,7 @@
 		}
 #	save start. object
 		assign('start.', start., parent.frame())
-		mcall <- as.call(c(as.list(mcall), start=quote(start.)))
+		if (is.null(mcall$start)) mcall <- as.call(c(as.list(mcall), start=quote(start.)))
 	}
 	if (evaluate)
 		eval(mcall, parent.frame())
