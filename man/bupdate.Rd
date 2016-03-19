@@ -16,8 +16,8 @@ Returns an updated value of the b fixed effect, based on the random effect covar
 m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
 print(fixef(m1)['b'])
 
-## refit with starting value chosen to minimise b-c correlation
-m2 <- update(m1, bstart=bupdate(m1))
+## refit with starting value chosen to minimise b-c correlation and df increased
+m2 <- update(m1, bstart=bupdate(m1), df=6)
 print(fixef(m2)['b'])
 }
 \keyword{regression}
