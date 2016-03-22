@@ -1,3 +1,22 @@
+Changes in Version 1.0.4
+
+  o update.sitar code updated and simplfied.
+
+  o in sitar and update.sitar the offset for knots and bounds changed
+    from bstart to mean(x) (suggestion of Jeroen Sichien).
+
+  o LMS2z loses data argument.
+
+  o LMS2z, cLMS and zLMS now return a vector or a matrix.
+
+  o predict.sitar and plot.sitar now create function fitnlme on the fly when it's missing.
+
+  o sitar handling for weights commented out.
+
+  o ifun bugs fixed and code simplified.
+
+  o man pages updated.
+
 Changes in Version 1.0.3
 
   o The heights database had age at menarche added.
