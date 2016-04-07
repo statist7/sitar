@@ -1,6 +1,7 @@
-	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c', a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean', returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML', na.action=na.fail, control = nlmeControl(returnObject=TRUE), newform=TRUE)
-
-# branch develop
+	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
+	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean',
+	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
+	                  na.action=na.fail, control = nlmeControl(returnObject=TRUE))
 #
 #	fit growth curves of y ~ ns(f(x)) by id
 #	df - number of knots (or length of knots + 1)
@@ -18,8 +19,6 @@
 # returndata - if TRUE returns nlme data frame, not nlme model
 #	verbose etc - arguments passed to nlme
 
-#	newform - FALSE uses xoffset, TRUE uses bstart
-
 #	returns call, ns, nlme.out if returndata FALSE
 #			else fulldata
 {
@@ -32,45 +31,40 @@
 		if (!is.numeric(b)) stop('must be "mean" or "apv" or numeric')
 		b
 	}
+
+	# get data
 	mcall <- match.call()
 	data <- eval(mcall$data, parent.frame())
 	x <- eval(mcall$x, data)
 	y <- eval(mcall$y, data)
+	xoffset <- b.origin(xoffset)
+	x <- x - xoffset
+
+# get df, knots and bounds
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
 	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
 	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df)
 		else df <- length(knots) + 1
 	if (nrow(data) <= df) stop("too few data to fit spline curve")
-#	define bounds, default x range 4%
 	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
 	if (length(bounds) != 2) stop("bounds should be length 1 or 2")
-#	derive x variable offset
-	if (newform || !missing(bstart)) { # using bstart
-		newform <- TRUE
-		mcall$xoffset <- NULL
-		if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0
-		else bstart <- b.origin(bstart)
-		knots <- knots - mean(x)
-		bounds <- bounds - mean(x)
+
 #	get spline start values
-		spline.lm <- lm(y ~ ns(x - mean(x), knots=knots, Bound=bounds))
-	}
-	else { # using xoffset
-		xoffset <- b.origin(xoffset)
-#	apply xoffset
-		x <- x - xoffset
-		knots <- knots - xoffset
-		bounds <- bounds - xoffset
-#	get spline start values
-		spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-	}
-#	get starting values for ss and a
+	spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
+
+#	get starting values for ss, a and b
 	if (missing(start)) start <- coef(spline.lm)[c(2:(df+1), 1)]
+	if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0
+	else bstart <- b.origin(bstart)
+
 #	force fixed effect for a
 	fix <- fixed
 	if (!grepl('a', fix)) fix <- paste('a', fix, sep='+')
+
+# set up args for fitnlme
 	fixed <- ss <- paste('s', 1:df, sep='')
 	pars <- c('x', ss)
+
 #	set up model elements for a, b and c
 	names(model) <- model <- letters[1:3]
 	constant <- mm.formula <- as.formula('~ 1')
@@ -123,13 +117,7 @@
 		}
 		if (mm.intercept) {
 			fixed <- c(fixed, l)
-			if (!is.list(start)) {
-				if (newform) {
-					if (l == 'b') start <- c(start, bstart)
-					else if (l == 'c') start <- c(start, 0)
-				}
-				else if (l != 'a') start <- c(start, 0)
-			}
+			if (!is.list(start) && l != 'a') start <- c(start, 0)
 		}
 	}
 
@@ -196,8 +184,7 @@
 #     if (exists('start.')) rm(start., inherits=TRUE)
     nlme.out$fitnlme <- fitenv$fitnlme
 		nlme.out$call.sitar <- mcall
-		if (newform) nlme.out$bstart <- bstart
-			else nlme.out$xoffset <- xoffset
+		nlme.out$xoffset <- xoffset
 		nlme.out$ns <- spline.lm
 		if (!'sitar' %in% class(nlme.out)) class(nlme.out) <- c('sitar', class(nlme.out))
 		nlme.out
