@@ -1,4 +1,6 @@
 	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c', a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean', returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML', na.action=na.fail, control = nlmeControl(returnObject=TRUE), newform=TRUE)
+
+# branch develop
 #
 #	fit growth curves of y ~ ns(f(x)) by id
 #	df - number of knots (or length of knots + 1)
