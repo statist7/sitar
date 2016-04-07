@@ -1,5 +1,5 @@
 	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
-	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean',
+	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, xoffset='mean',
 	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
 	                  na.action=na.fail, control = nlmeControl(returnObject=TRUE))
 #
@@ -13,7 +13,6 @@
 #	bounds - span of ns, default x-range 4%
 #	start - starting values - default estimated
 #			requires spline coefficients, any missing zeroes added
-#	bstart - starting value for b, default 'mean', or 'apv' or value
 #		(subsumes xoffset)
 #	xoffset - offset for x, default 'mean', alternatives 'apv' or value
 # returndata - if TRUE returns nlme data frame, not nlme model
@@ -52,10 +51,8 @@
 #	get spline start values
 	spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
 
-#	get starting values for ss, a and b
+#	get starting values for ss and a
 	if (missing(start)) start <- coef(spline.lm)[c(2:(df+1), 1)]
-	if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0
-	else bstart <- b.origin(bstart)
 
 #	force fixed effect for a
 	fix <- fixed
@@ -138,12 +135,12 @@
 		fixed <- paste(fixed, collapse='+')
 		sscomma <- paste(ss, collapse=',')
 
-	#	combine model elements
+#	combine model elements
 		nsd <- paste(model['a'], '+')
 		nsf <- paste('(x', ifelse(!is.na(model['b']), paste('- (', model['b'], '))'), ')'))
 		if (!is.na(model['c'])) nsf <- paste(nsf, '* exp(', model['c'], ')')
 
-	#	code to parse
+#	code to parse
   	fitcode <- c(
 	"fitenv <- new.env()",
 	"fitenv$fitnlme <- function($pars) {",
@@ -165,10 +162,10 @@
 		for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf'))
   		fitcode <- gsub(paste('$', i, sep=''), get(i), fitcode, fixed=TRUE)
 
-	#	print values
+#	print values
 		if (verbose) {
 			cat('\nconstructed code', fitcode, sep='\n')
-			cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
+			cat('\ndf', df, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
 			if (is.list(start)) {
 				cat('\nstarting values\n  fixed effects\n', start$fixed)
 				if (!is.null(start$random)) {
@@ -179,7 +176,7 @@
 			else cat('\nstarting values\n', start, '\n')
 		}
 
-	#	save fitted model
+#	save fitted model
     nlme.out <- eval(parse(text=fitcode))
 #     if (exists('start.')) rm(start., inherits=TRUE)
     nlme.out$fitnlme <- fitenv$fitnlme
