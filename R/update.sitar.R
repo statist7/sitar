@@ -9,6 +9,14 @@
 	for (i in names(extras))
 		if (is.null(extras[[i]]))
 			mcall[[i]] <- extras[[i]] <- NULL
+#	expand formulae
+	if (any(grep('formula', names(extras)))) {
+    for (a in letters[1:3]) {
+      n <- paste(a, 'formula', sep='.')
+      if (!is.null(extras[[n]]) && !is.null(mcall[[n]]))
+        extras[[n]] <-  update.formula(mcall[[n]], extras[[n]])
+    }
+  }
 # update args
 	mcall[names(extras)] <- extras
 #	add start arg if none of these args specified
