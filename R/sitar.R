@@ -1,5 +1,5 @@
 	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
-	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, xoffset='mean',
+	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean',
 	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
 	                  na.action=na.fail, control = nlmeControl(returnObject=TRUE))
 #
@@ -13,6 +13,7 @@
 #	bounds - span of ns, default x-range 4%
 #	start - starting values - default estimated
 #			requires spline coefficients, any missing zeroes added
+#	bstart - starting value for b, default 'mean', or 'apv' or value
 #		(subsumes xoffset)
 #	xoffset - offset for x, default 'mean', alternatives 'apv' or value
 # returndata - if TRUE returns nlme data frame, not nlme model
@@ -31,7 +32,7 @@
 		b
 	}
 
-	# get data
+# get data
 	mcall <- match.call()
 	data <- eval(mcall$data, parent.frame())
 	x <- eval(mcall$x, data)
@@ -51,8 +52,10 @@
 #	get spline start values
 	spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
 
-#	get starting values for ss and a
+#	get starting values for ss, a and b
 	if (missing(start)) start <- coef(spline.lm)[c(2:(df+1), 1)]
+	if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0
+	else bstart <- b.origin(bstart)
 
 #	force fixed effect for a
 	fix <- fixed
@@ -165,7 +168,7 @@
 #	print values
 		if (verbose) {
 			cat('\nconstructed code', fitcode, sep='\n')
-			cat('\ndf', df, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
+			cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
 			if (is.list(start)) {
 				cat('\nstarting values\n  fixed effects\n', start$fixed)
 				if (!is.null(start$random)) {
