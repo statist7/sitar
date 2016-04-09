@@ -201,7 +201,7 @@
 #	plot fixed effects distance curve
 		if (grepl("e", opt)) {
   		xt <- xseq(x[subset])
-      yt <- predict(model$ns, newdata=data.frame(x=xt))
+      yt <- predict(model$ns, newdata=data.frame(x=xt - model$xoffset))
 			ox <- order(xt)
 			xy <- do.call("y2plot", c(list(x=xfun(xt[ox]), y1=yfun(yt[ox]), add=add, xy=xy), ARG))
 			add <- TRUE

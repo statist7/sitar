@@ -5,8 +5,11 @@
 # create x and id variables in newdata
     if (missing(newdata)) newdata <- getData(object)
     oc <- object$call.sitar
-    if (!is.null(newdata$x)) x <- newdata$x else
-      newdata$x <- x <- eval(oc$x, newdata)
+    if (is.null(newdata$x)) newdata$x <- eval(oc$x, newdata)
+    x <- newdata$x
+    xoffset <- object$xoffset
+    if (is.null(xoffset)) xoffset <- mean(getCovariate(object))
+    newdata$x <- newdata$x - xoffset
 # check abc
     if (!is.null(abc)) {
       abcset <- TRUE

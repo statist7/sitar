@@ -1,5 +1,5 @@
 	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
-	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart='mean', xoffset='mean',
+	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart=xoffset, xoffset='mean',
 	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
 	                  na.action=na.fail, control = nlmeControl(returnObject=TRUE))
 #
@@ -13,8 +13,7 @@
 #	bounds - span of ns, default x-range 4%
 #	start - starting values - default estimated
 #			requires spline coefficients, any missing zeroes added
-#	bstart - starting value for b, default 'mean', or 'apv' or value
-#		(subsumes xoffset)
+#	bstart - starting value for b, default xoffset
 #	xoffset - offset for x, default 'mean', alternatives 'apv' or value
 # returndata - if TRUE returns nlme data frame, not nlme model
 #	verbose etc - arguments passed to nlme
@@ -43,19 +42,20 @@
 # get df, knots and bounds
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
 	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
-	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df)
-		else df <- length(knots) + 1
+	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df) else {
+	  knots <- knots - xoffset
+	  df <- length(knots) + 1
+	}
 	if (nrow(data) <= df) stop("too few data to fit spline curve")
 	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
-	if (length(bounds) != 2) stop("bounds should be length 1 or 2")
+	else if (length(bounds) == 2) bounds <- bounds - xoffset
+	else stop("bounds should be length 1 or 2")
 
 #	get spline start values
 	spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
 
 #	get starting values for ss, a and b
 	if (missing(start)) start <- coef(spline.lm)[c(2:(df+1), 1)]
-	if (b.formula == as.formula('~ -1') || b.formula == as.formula('~ 1-1') || !grepl('b', fixed)) bstart <- 0
-	else bstart <- b.origin(bstart)
 
 #	force fixed effect for a
 	fix <- fixed
@@ -117,7 +117,10 @@
 		}
 		if (mm.intercept) {
 			fixed <- c(fixed, l)
-			if (!is.list(start) && l != 'a') start <- c(start, 0)
+			if (!is.list(start) && l != 'a') {
+			  if (l == 'b') start <- c(start, b.origin(bstart) - xoffset)
+			    else start <- c(start, 0)
+			}
 		}
 	}
 

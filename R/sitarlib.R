@@ -138,8 +138,8 @@
 	lines.sitar <- function (x, ...)
 {
 	mcall <- match.call()
-    mcall[[1]] <- as.name("plot.sitar")
-	if (!"add" %in% names(mcall)) mcall <- as.call(c(as.list(mcall), list(add=TRUE)))
+	mcall[[1]] <- as.name("plot.sitar")
+	mcall[['add']] <- TRUE
 	eval(mcall, parent.frame())
 }
 
@@ -360,7 +360,7 @@
 #	update value of bstart to minimise b-c correlation
 	bupdate <- function(x) {
 	cov <- getVarCov(x)
-	fixef(x)['b'] + cov[2,3] / cov[3,3]
+	fixef(x)['b'] + x$xoffset + cov[2,3] / cov[3,3]
 	}
 
 #############################
