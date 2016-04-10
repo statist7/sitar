@@ -1,3 +1,9 @@
+Changes in Version 1.0.5
+
+  o xoffset and bstart rationalised in model fitting. Now xoffset defaults to mean(x)
+    and bstart defaults to xoffset, leading to greater stability.
+    This is a more complete solution to issue 2 in 1.0.4.
+
 Changes in Version 1.0.4
 
   o update.sitar code updated and simplfied.
