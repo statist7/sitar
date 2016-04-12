@@ -5,13 +5,10 @@
 \description{SITAR is a method of growth curve analysis, based on \pkg{nlme}, that summarises a set of growth
  curves with a mean growth curve as a regression spline, plus a set of up to three fixed and
  random effects (a, b and c) defining how individual growth curves differ from the mean curve.}
-\usage{sitar(x, y, id, data, df, knots,
-fixed = random, random = "a+b+c",
-a.formula = ~1, b.formula = ~1, c.formula = ~1,
-bounds = 0.04, start, bstart = xoffset, xoffset = "mean",
-returndata = FALSE, verbose = FALSE, correlation = NULL,
-weights = NULL, subset = NULL, method = "ML",
-na.action = na.fail,
+\usage{sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c",
+a.formula = ~1, b.formula = ~1, c.formula = ~1, bounds = 0.04, start,
+bstart = xoffset, xoffset = "mean", returndata = FALSE, verbose = FALSE,
+correlation = NULL, weights = NULL, subset = NULL, method = "ML", na.action = na.fail,
 control = nlmeControl(returnObject = TRUE))
 \method{update}{sitar}(object, ..., evaluate = TRUE)
 }
@@ -48,16 +45,20 @@ control = nlmeControl(returnObject = TRUE))
   \code{update} call is passed to \code{sitar} for evaluation, while if FALSE the expanded call itself is returned.}
 }
 \details{
- \code{xoffset} allows the origin of b to be varied, while \code{bstart} specifies the
- starting value for \code{b}, both of which affect the model fit and the random effects
- particularly \code{b}. \code{update} updates the model by taking the \code{object} call,
+ \code{xoffset} allows the origin of \code{x} to be varied, while \code{bstart} specifies the
+ starting value for \code{b}, both of which can affect the model fit and particularly
+ \code{b}. The values of \code{bstart}, \code{knots} and \code{bounds} are offset by \code{xoffset}
+ for fitting purposes, and similarly for fixed effect \code{b}.
+
+ \code{update} updates the model by taking the \code{object} call,
  adding any new parameters and replacing changed ones. Where possible the fixed and random
  effects of the model being updated are suitably modified and passed via the \code{start} argument.
 }
 \value{
 An object inheriting from class \code{sitar} representing the nonlinear mixed-effects model fit, with all the components returned by \code{nlme}
 (see \code{\link{nlmeObject}} for a full description) plus the following components:
-\item{bstart}{the value of arg \code{bstart}.}
+\item{bstart}{the value of \code{bstart}.}
+\item{xoffset}{the value of \code{xoffset}.}
 \item{call.sitar}{the internal \code{sitar} call that produced the object.}
 \item{fitnlme}{the function returning the predicted value of \code{y}.}
 \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
