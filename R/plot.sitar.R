@@ -23,8 +23,8 @@
 #
 #		subset is subset of values
 #
-#		abc is a set of named sitar parameters for opt dv e.g.
-#			abc=list(a=1, b=0.1, c=-0.1)
+#		abc is a vector of named sitar parameters for opt dv e.g.
+#			abc=c(a=1, b=0.1, c=-0.1)
 #		or a single id level whose abc values are to be used
 #
 #		add TRUE overwrites previous graph (or use lines)
@@ -124,7 +124,7 @@
 
 #	plot fitted curves by subject
 		if (grepl("D", opt)) {
-		  newdata=stackage(x, id)
+		  newdata=stackage(x[subset], id[subset])
 		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, xfun=xfun, yfun=yfun))
 		  do.call("mplot", c(list(x=xfun(newdata[, 1]), y=newdata[, 3], id=newdata[, 2],
 		                          data=newdata, add=add), ARG))
@@ -133,7 +133,7 @@
 
 #	plot fitted velocity curves by subject
 		if (grepl("V", opt)) {
-		  newdata=stackage(x, id)
+		  newdata=stackage(x[subset], id[subset])
 		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun))
 		  ARG$ylab <- labels[3]
 		  do.call("mplot", c(list(x=xfun(newdata[, 1]), y=newdata[, 3], id=newdata[, 2],
@@ -153,9 +153,9 @@
           model <- update(model, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
         }
         argnames <- names(formals(model$fitnlme))
-        xtra <- argnames[!argnames %in% c('x', names(fixef(model)))]
+        xtra <- argnames[!match(argnames, names(fixef(model)), 0)][-1]
         if (length(xtra) > 0) {
-          df <- setNames(as.data.frame(update(model, returndata = TRUE)[subset, xtra]), xtra)
+          df <- setNames(data.frame(getData(model)[subset, xtra]), xtra)
           xtra <- unlist(lapply(df, mean, na.rm=TRUE))
      			newdata <- data.frame(newdata, t(xtra))
         }
