@@ -8,7 +8,10 @@
     if (is.null(newdata$x)) newdata$x <- eval(oc$x, newdata)
     x <- newdata$x
     xoffset <- object$xoffset
-    if (is.null(xoffset)) xoffset <- mean(getCovariate(object))
+    if (is.null(xoffset)) {
+      xoffset <- mean(getCovariate(object))
+      warning('xoffset set to mean(x) - best to refit model')
+    }
     newdata$x <- newdata$x - xoffset
 # check abc
     if (!is.null(abc)) {
@@ -22,9 +25,10 @@
       abcset <- FALSE
       abc <- ranef(object)
     }
-    if (abcset || level == 0) newdata$id <- id <- factor(rep.int(getGroups(object)[1], nrow(newdata)))
-      else if (!is.null(newdata$id)) id <- factor(newdata$id) else
-        newdata$id <- id <- factor(eval(oc$id, newdata))
+# check for id in newdata
+    if (id.ok <- deparse(oc$id) %in% names(newdata)) newdata$id <- factor(eval(oc$id, newdata))
+    else newdata$id <- factor(rep.int(getGroups(object)[1], nrow(newdata)))
+    id <- factor(newdata$id)
 # check if old-style object lacking fitnlme
     if(!'fitnlme' %in% names(object)) {
       cat('need to update object to obtain fitnlme\n')
@@ -33,12 +37,17 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-# omit fitnlme args already in newdata
+# identify extra covariates needed in newdata, omitting x and fixed effects
 		argnames <- names(formals(fitnlme))
-		args <- setNames(vector('integer', length=length(argnames)), argnames)
-    args <- args[!match(argnames, names(newdata), 0)]
-# add other fitnlme args to newdata
-    newdata <- data.frame(newdata, t(args))
+		argnames <- argnames[!match(argnames, names(fixef(object)), 0)][-1]
+# zero or centre each covariate
+		if (length(argnames) > 0) {
+		  if (any(match(argnames, names(newdata), 0))) gd <- getData(object)
+		  for (i in argnames) {
+		    if (match(i, names(newdata), 0)) newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
+		    else newdata[[i]] <- 0
+		  }
+		}
 # set class to nlme
     class(object) <- class(object)[-1]
 # simple prediction
@@ -75,7 +84,7 @@
         }
       }
     }
-    attributes(pred) <- NULL
+    if (id.ok && is.null(dim(pred))) names(pred) <- id
     return(pred)
   }
 
