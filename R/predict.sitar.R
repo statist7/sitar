@@ -20,7 +20,7 @@
       level <- 0
       id <- rep.int(1, length(x))
     }
-    abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # omit not in model
+    abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # zeros if not in model
     abc <- abc[id, ]
 # check if old-style object lacking fitnlme
     if(!'fitnlme' %in% names(object)) {
@@ -30,32 +30,41 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-# skip if newdata already subsetted (from plot)
-    if (is.null(attr(newdata, 'label'))) {
+# identify covariates needed in newdata, omitting fixed effects and x
+    argnames <- names(formals(fitnlme))
+    argnames <- argnames[!argnames %in% names(fixef(object))][-1]
+    if (length(argnames) > 0) {
+# check if newdata subsetted (from plot)
+      if (is.null(subset <- attr(newdata, 'subset'))) {
 # identify covariates in newdata other than x and id
-  		covnames <- names(newdata)
-  		covnames <- covnames[!covnames %in% c('x', 'id')]
-# identify covariates needed in newdata, omitting x and fixed effects, and set them to 0
-  		argnames <- names(formals(fitnlme))
-  		argnames <- argnames[!argnames %in% names(fixef(object))][-1]
-  		newdata[, argnames[!argnames %in% covnames]] <- 0
-# centre each named covariate
-  		covnames <- covnames[covnames %in% argnames]
-  		if (length(covnames) > 0) {
-  		  gd <- getData(object)
-  		  for (i in covnames) {
+    		covnames <- names(newdata)
+    		covnames <- covnames[!covnames %in% c('x', 'id')]
+# set to 0 covariates not in newdata
+    		newdata[, argnames[!argnames %in% covnames]] <- 0
+# centre each needed covariate in newdata
+    		covnames <- covnames[covnames %in% argnames]
+    		if (length(covnames) > 0) {
+    		  gd <- getData(object)
+    		  for (i in covnames) {
 # continuous variable
-  		    if (i %in% argnames) newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
-  	      else {
+    		    if (i %in% argnames) newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
+    	      else {
 # factor as instrumental variable(s)
-  	        lev <- levels(gd[[i]])
-  	        for (j in 2:length(lev)) {
-  	          k <- paste0(i, lev[j])
-  	          newdata[[k]] <- as.numeric(newdata[[i]] == lev[j]) - mean(gd[[i]] == lev[j])
-  	        }
-  	      }
-  		  }
-  		}
+    	        lev <- levels(gd[[i]])
+    	        for (j in 2:length(lev)) {
+    	          k <- paste0(i, lev[j])
+    	          newdata[[k]] <- as.numeric(newdata[[i]] == lev[j]) - mean(gd[[i]] == lev[j])
+    	        }
+    	      }
+    		  }
+    		}
+      }
+# newdata subsetted (in plot)
+      else {
+        gd <- update(object, returndata=TRUE)[subset, argnames]
+        argnames <- unlist(lapply(gd, mean))
+        newdata <- data.frame(newdata, t(argnames))
+      }
     }
 # set class to nlme
     class(object) <- class(object)[-1]

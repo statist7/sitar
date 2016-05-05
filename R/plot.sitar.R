@@ -145,17 +145,8 @@
 		if (grepl("d", opt) || grepl("v", opt) || apv) {
 			xt <- xseq(x[subset])
   		newdata <- data.frame(x=xt)
-# if subset, estimate mean values for covariates
-      if (!identical(subset, rep(TRUE, nf))) {
-        argnames <- names(formals(model$fitnlme))
-        xtra <- argnames[!argnames %in% names(fixef(model))][-1]
-        if (length(xtra) > 0) {
-          df <- update(model, returndata=TRUE)[subset, xtra]
-          xtra <- unlist(lapply(df, mean))
-     			newdata <- data.frame(newdata, t(xtra))
-     			attr(newdata, 'label') <- 'subset' # flag subset for predict
-        }
-     }
+# if subset, flag for predict
+      if (!identical(subset, rep(TRUE, nf))) attr(newdata, 'subset') <- subset
 
 #	adjust for abc
 			if (!is.null(abc)) {
