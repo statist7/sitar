@@ -71,6 +71,7 @@
 # simple prediction
     if (deriv == 0 && !abcset) {
       pred <- yfun(predict(object=object, newdata=newdata, level=level, ...))
+      return(pred)
     }
 # complex prediction
     else { # deriv == 1 || abcset
@@ -97,11 +98,14 @@
           if (!is.null(abc$c)) pred <- pred * exp(abc$c)
         }
       }
+# add names or split by id if level 1
+      if (level == 1) {
+        asList <- ifelse(is.null(asList <- list(...)$asList), FALSE, asList)
+        if (asList) pred <- split(pred, id) else names(pred) <- id
+      }
       attr(pred, 'label') <- 'Predicted values'
+      return(pred)
     }
-    asList <- list(...)$asList
-    if (level == 1 && !is.null(asList) && !asList) names(pred) <- id
-    return(pred)
   }
 
   getData.sitar <- function(object) {
