@@ -1,5 +1,6 @@
   predict.sitar <- function(object, newdata=getData(object), level=1, ...,
-                            deriv=0, abc=ranef(object), xfun=I, yfun=I) {
+                            deriv=0, abc=ranef(object),
+                            xfun=function(x) x, yfun=xfun) {
 # create x and id variables in newdata
     oc <- object$call.sitar
     if (is.null(newdata$x)) newdata$x <- eval(oc$x, newdata)
@@ -89,8 +90,8 @@
       else { # deriv == 1
 # mean velocity curve on back-transformed axes
         vel0 <- predict(makess(x, pred, xfun=xfun, yfun=yfun), xfun(x), deriv=1)
-        if (level == 0 && !abcset) pred <- vel0$y
-        else { # level == 1 || abcset
+        if (any(level == 0) && !abcset) pred0 <- pred <- vel0$y
+        if (any(level == 1) || abcset) {
 # level 1 prediction based on x changed to reflect individual b and c
           pred <- spline(vel0, method='natural',
                          xout=xfun(xyadj(x=x, id=id, object=object, abc=abc)$x))$y
@@ -98,6 +99,8 @@
           if (!is.null(abc$c)) pred <- pred * exp(abc$c)
         }
       }
+# return data frame if level 0:1
+      if (length(level) > 1) return(data.frame(id=id, predict.fixed=pred0, predict.id=pred))
 # add names or split by id if level 1
       if (level == 1) {
         asList <- ifelse(is.null(asList <- list(...)$asList), FALSE, asList)
