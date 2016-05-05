@@ -147,35 +147,29 @@
   		newdata <- data.frame(x=xt)
 # if subset, estimate mean values for covariates
       if (!identical(subset, rep(TRUE, nf))) {
-# check if old-style object lacking fitnlme
-        if(!'fitnlme' %in% names(model)) {
-          cat('need to update object to obtain fitnlme\n')
-          model <- update(model, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
-        }
         argnames <- names(formals(model$fitnlme))
-        xtra <- argnames[!match(argnames, names(fixef(model)), 0)][-1]
+        xtra <- argnames[!argnames %in% names(fixef(model))][-1]
         if (length(xtra) > 0) {
-          df <- setNames(data.frame(getData(model)[subset, xtra]), xtra)
-          xtra <- unlist(lapply(df, mean, na.rm=TRUE))
+          df <- update(model, returndata=TRUE)[subset, xtra]
+          xtra <- unlist(lapply(df, mean))
      			newdata <- data.frame(newdata, t(xtra))
+     			attr(newdata, 'label') <- 'subset' # flag subset for predict
         }
      }
 
 #	adjust for abc
 			if (!is.null(abc)) {
-#	if abc is named convert to data frame
-				if (!is.null(names(abc))) {
-					abc <- data.frame(t(abc))
-				}
-				else
-#	else abc is id level
+#	abc is id level
 				if (length(abc) == 1) {
 					idabc <- rownames(ranef(model)) %in% abc
 					if (sum(idabc) == 0) stop(paste('id', abc, 'not found'))
 					abc <- ranef(model)[idabc, ]
 				}
-				else stop('abc should be either single id level or up to three named random effect values')
+#	abc is named vector
+			  else if (length(abc) > 3 || is.null(names(abc)))
+			    stop('abc should be either single id level or up to three named random effect values')
 			}
+  		else abc <- ranef(model)
 
 			yt <- yfun(predict(object=model, newdata=newdata, level=0, abc=abc))
 			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)

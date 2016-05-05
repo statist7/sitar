@@ -30,30 +30,33 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
+# skip if newdata already subsetted (from plot)
+    if (is.null(attr(newdata, 'label'))) {
 # identify covariates in newdata other than x and id
-		covnames <- names(newdata)
-		covnames <- covnames[!covnames %in% c('x', 'id')]
+  		covnames <- names(newdata)
+  		covnames <- covnames[!covnames %in% c('x', 'id')]
 # identify covariates needed in newdata, omitting x and fixed effects, and set them to 0
-		argnames <- names(formals(fitnlme))
-		argnames <- argnames[!argnames %in% names(fixef(object))][-1]
-		newdata[, argnames] <- 0
+  		argnames <- names(formals(fitnlme))
+  		argnames <- argnames[!argnames %in% names(fixef(object))][-1]
+  		newdata[, argnames[!argnames %in% covnames]] <- 0
 # centre each named covariate
-		covnames <- covnames[covnames %in% argnames]
-		if (length(covnames) > 0) {
-		  gd <- getData(object)
-		  for (i in covnames) {
+  		covnames <- covnames[covnames %in% argnames]
+  		if (length(covnames) > 0) {
+  		  gd <- getData(object)
+  		  for (i in covnames) {
 # continuous variable
-		    if (i %in% argnames) newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
-	      else {
+  		    if (i %in% argnames) newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
+  	      else {
 # factor as instrumental variable(s)
-	        lev <- levels(gd[, i])
-	        for (j in 2:length(lev)) {
-	          k <- paste0(i, lev[j])
-	          newdata[[k]] <- as.numeric(newdata[[i]] == lev[j]) - mean(gd[[i]] == lev[j])
-	        }
-	      }
-		  }
-		}
+  	        lev <- levels(gd[[i]])
+  	        for (j in 2:length(lev)) {
+  	          k <- paste0(i, lev[j])
+  	          newdata[[k]] <- as.numeric(newdata[[i]] == lev[j]) - mean(gd[[i]] == lev[j])
+  	        }
+  	      }
+  		  }
+  		}
+    }
 # set class to nlme
     class(object) <- class(object)[-1]
 # simple prediction
