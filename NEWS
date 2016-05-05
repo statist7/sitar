@@ -1,8 +1,22 @@
+Changes in Version 1.0.6
+
+  o Tidied up code in predict.sitar and xyadj, altering the defaults for abc, xfun and yfun.
+    The asList argument in predict.nlme and level == 0:1 now work correctly.
+
+  o Fixed a bug in predict.sitar involving covariates in newdata (Costanza Pizzi).
+    Factors in newdata are now represented as <factor> = <level> rather than
+    <factor><level> = [01] as before.
+
+  o Fixed a bug in plot.sitar involving subset with options d and v (Costanza Pizzi).
+
+  o Fixed a bug in plot.sitar involving subset with options D and V.
+
 Changes in Version 1.0.5
 
   o xoffset and bstart rationalised in sitar and update.sitar. Now xoffset defaults to mean(x)
     and bstart defaults to xoffset, leading to greater stability in model fitting.
-    This is a more complete solution to issue 2 in 1.0.4.
+    This is a more complete solution to issue 2 in 1.0.4. Note that models fitted
+    in previous versions need to be refitted.
 
 Changes in Version 1.0.4
 
