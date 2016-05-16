@@ -62,7 +62,7 @@
       }
 # newdata subsetted (in plot)
       else {
-        gd <- update(object, returndata=TRUE)[subset, argnames]
+        gd <- update(object, returndata=TRUE)[subset, argnames, drop=FALSE]
         argnames <- unlist(lapply(gd, mean))
         newdata <- data.frame(newdata, t(argnames))
       }
