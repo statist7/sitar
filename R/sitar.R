@@ -68,7 +68,7 @@
 #	set up model elements for a, b and c
 	names(model) <- model <- letters[1:3]
 	constant <- mm.formula <- as.formula('~ 1')
-	# mm.intercept <- TRUE
+# mm.intercept <- TRUE
 	id <- eval(mcall$id, data)
 	subset <- eval(mcall$subset, data)
 	if (is.null(subset)) subset <- 1:length(x)
@@ -85,33 +85,33 @@
 		else {
 			if (formula != mm.formula) {
 				mm <- model.matrix(formula, data)
-				if (dim(mm)[[1]] < length(y))
+				if (nrow(mm) < length(y))
 					stop('Missing values in data')
 				mm.formula <- formula
-				#	convert spaces to underlines
-				colnames(mm) <- gsub(' ', '_', colnames(mm))
-				#	convert colons to dots (from interaction)
-				colnames(mm) <- gsub(':', '.', colnames(mm), fixed=TRUE)
 				mm.intercept <- colnames(mm)[1] == '(Intercept)'
-				# omit constant columns and centre others
-				cmm <- apply(mm, 2, function(x) sd(x, na.rm=TRUE) > 0)
-				mm.names <- colnames(mm)[cmm]
-				mm <- as.matrix(mm[, mm.names])
-				colnames(mm) <- mm.names
+# omit constant columns
+				cmm <- apply(mm, 2, function(x) max(x) > min(x))
+				mm <- mm[, colnames(mm)[cmm], drop=FALSE]
+# centre columns
 				mm <- scale(mm, scale=FALSE)
+#	convert column name spaces to underlines
+				colnames(mm) <- gsub(' ', '_', colnames(mm))
+#	convert column name colons to dots (from interaction)
+				colnames(mm) <- gsub(':', '.', colnames(mm), fixed=TRUE)
+#	omit column name brackets (from function)
+				colnames(mm) <- gsub('(', '', colnames(mm), fixed=TRUE)
+				colnames(mm) <- gsub(')', '', colnames(mm), fixed=TRUE)
 			}
-			if (exists('mm')) for (i in 1:dim(mm)[[2]]) {
+			if (exists('mm')) for (i in 1:ncol(mm)) {
 				var <- colnames(mm)[i]
 				rc <- paste(l, var, sep='.')
 				pars <- c(pars, rc)
 				fixed <- c(fixed, rc)
 				if (!is.list(start)) start <- c(start, 0)
-				model[l] <- paste(model[l], '+', rc, '*', var, sep='')
+				model[l] <- paste0(model[l], '+', rc, '*', var)
 				if (!var %in% pars) {
 					pars <- c(pars, var)
-					fulldata <- cbind(fulldata, mm[,i])
-					names(fulldata)[dim(fulldata)[2]] <- var
-					# assign(var, mm[,i])
+					fulldata <- cbind(fulldata, mm[, i, drop=FALSE])
 				}
 			}
 		}
