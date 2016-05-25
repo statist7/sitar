@@ -2,65 +2,97 @@
 \alias{ifun}
 \title{Invert an expression defining a data transformation}
 \description{
-Enables a transformed variable to be back-transformed, e.g. for plotting purposes,
-by inverting the transforming expression.
+Enables a transformed variable to be back-transformed to its original scale, e.g. for plotting purposes,
+by creating a function to invert the transforming expression.
 }
 \usage{
 ifun(fun)
 }
 \arguments{
-  \item{fun}{a language object defining the expression to be inverted.}
+  \item{fun}{a language object defining the expression to be inverted, best \code{quote}d to avoid evaluation.}
 }
 \details{
-The expression \code{fun} involves a single mention of a single variable named \code{varname}
-such that \code{fun = f(g(h((get(varname)))))}, where each function \code{f(.)}
-involves up to one function of \code{varname} and up to one numerical expression
-(possibly including \code{pi}). The number of such functions is in principle unlimited.
+To explain how \code{ifun} works, consider as an example variants of the
+\code{sitar} model \code{height ~ age} where \code{age} and/or \code{height}
+may be transformed, e.g. \code{height ~ log(age)} or \code{log(height) ~ sqrt(age)}.
+Thus each model is of the form \code{y ~ x} but the units of \code{x}
+and \code{y} vary.
 
-\code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))}, with any numerical
-expressions evaluated, which ensures that the expression is invertible if and only
-if the individual functions are invertible.
+It is useful to be able to compare the models by plotting the fitted curves in
+the original units. This is done by applying suitable functions
+to invert the transformed variables prior to plotting. For example the
+\code{function(x) exp(x)} back-transforms \code{log(age)} and \code{log(height)}.
+\code{ifun} automates this process by creating a function to back-transform the
+general expression \code{fun(x)} to \code{x}.
 
-When modelling with transformed variables, with the transformations included in
-the model call, \code{ifun} enables the \code{x} and/or \code{y} variables to be
-automatically back-transformed to their original scales for plotting, simply by
-inverting the \code{x} and \code{y} transformations in the call.
-\code{\link{plot.sitar}} uses \code{ifun} for this purpose, via the arguments
-\code{xfun} and \code{yfun}.
+Structuring \code{fun} suitably ensures it can be inverted. It should contain a
+single mention of a single variable (named \code{varname} here), and possibly
+functions such as \code{f(.)}, \code{g(.)}, \code{h(.)} etc, each of which
+involves (a function of) (a single mention of) \code{varname} and up to one
+numerical expression, such that \code{fun = f(g(h((varname))))}. The number of
+such functions is in principle unlimited.
+
+\code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))} as a function,
+with any numerical expressions evaluated, which means that \code{fun} is
+invertible if and only if each individual function is invertible.
+
+Note that \code{\link{plot.sitar}} uses \code{ifun} as the default for arguments
+\code{xfun} and \code{yfun}, where the corresponding values of \code{fun} are
+extracted from the model's \code{sitar} call.
 }
 \value{
 A list of length two:
-  \item{fn}{the inverse function with argument \code{x} which applied to \code{eval(fun)} returns \code{get(varname)}.}
-  \item{varname}{the name of the variable in \code{fun}.}
+  \item{fn}{the inverse function with argument \code{x} which applied to \code{eval(fun)} returns \code{varname}.}
+  \item{varname}{the name of the variable in \code{fun} (given as a character string).}
 }
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
 \seealso{
 \code{\link{plot.sitar}}
 }
 \examples{
-## simplest case
-(ifun(quote(age)))
+## define age
+age <- 1:9
 
-(age <- 1:9)
+## simple case - transform age to log(age)
+(fun <- quote(log(age)))
 
-## more complex case
-## transform age to log age since conception
-(fun <- quote(log(age + 0.75)))
-
-## create inverse function
-(ifun(fun))
-
-##  transform age
 (transformed.age <- eval(fun))
+(inverting.function <- ifun(fun)$fn)
+inverting.function(transformed.age)
 
-## ifun back-transforms transformed.age to age
-(ifun(fun)$fn(transformed.age))
+## back-transformed transformed age virtually identical to age
+summary(age - inverting.function(transformed.age))
+
+
+## more complex case - transform age to log age since conception
+fun <- quote(log(age + 0.75))
+
+(transformed.age <- eval(fun))
+(inverting.function <- ifun(fun)$fn)
+inverting.function(transformed.age)
+
+## virtually identical to original
+summary(age - inverting.function(transformed.age))
+
 
 ## ludicrously complex case including trigonometry etc
 (fun <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
-(ifun(fun))
-(transformed.age <- eval(fun))
 
-## ta da!
-(ifun(fun)$fn(transformed.age))
+(transformed.age <- eval(fun))
+(inverting.function <- ifun(fun)$fn)
+inverting.function(transformed.age)
+
+## virtually identical to original
+summary(age - inverting.function(transformed.age))
+
+
+## example of plot.sitar back-transforming transformed x and y in sitar models
+m1 <- sitar(x=age, y=height, id=id, data=heights, df=6)
+m2 <- update(m1, y=height^2)
+m3 <- update(m1, x=log(age+0.75))
+
+## default plot uses original x and y axes
+plot(m1, 'd')
+lines(m2, 'd', col=2)
+lines(m3, 'd', col=3)
 }
