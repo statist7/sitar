@@ -50,6 +50,11 @@ control = nlmeControl(returnObject = TRUE))
  \code{b}. The values of \code{bstart}, \code{knots} and \code{bounds} are offset by \code{xoffset}
  for fitting purposes, and similarly for fixed effect \code{b}.
 
+The formulae \code{a.formula}, \code{b.formula} and \code{c.formula} can include
+interactions and functions, but the corresponding names in the model matrix are
+changed to remain valid. Hence ':' changes to '.' while '(' and ')' are omitted.
+The modified not the original names need to be specified in \code{predict.sitar}.
+
  \code{update} updates the model by taking the \code{object} call,
  adding any new parameters and replacing changed ones. Where possible the fixed and random
  effects of the model being updated are suitably modified and passed via the \code{start} argument.
