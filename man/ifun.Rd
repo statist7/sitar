@@ -34,7 +34,7 @@ such functions is in principle unlimited.
 
 \code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))} as a function,
 with any numerical expressions evaluated, which means that \code{fun} is
-invertible if and only if each individual function is invertible.
+invertible so long as the individual functions are invertible.
 
 Note that \code{\link{plot.sitar}} uses \code{ifun} as the default for arguments
 \code{xfun} and \code{yfun}, where the corresponding values of \code{fun} are
@@ -58,10 +58,10 @@ age <- 1:9
 
 (transformed.age <- eval(fun))
 (inverting.function <- ifun(fun)$fn)
-inverting.function(transformed.age)
+(inverted.transformed.age <- inverting.function(transformed.age))
 
-## back-transformed transformed age virtually identical to age
-summary(age - inverting.function(transformed.age))
+## inverted transformed age identical to age
+all.equal(age, inverted.transformed.age)
 
 
 ## more complex case - transform age to log age since conception
@@ -69,21 +69,21 @@ fun <- quote(log(age + 0.75))
 
 (transformed.age <- eval(fun))
 (inverting.function <- ifun(fun)$fn)
-inverting.function(transformed.age)
+(inverted.transformed.age <- inverting.function(transformed.age))
 
-## virtually identical to original
-summary(age - inverting.function(transformed.age))
+## identical to original
+all.equal(age, inverted.transformed.age)
 
 
-## ludicrously complex case including trigonometry etc
+## ludicrously complex case involving exp, log10, ^, pi and trigonometry
 (fun <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
 
 (transformed.age <- eval(fun))
 (inverting.function <- ifun(fun)$fn)
-inverting.function(transformed.age)
+(inverted.transformed.age <- inverting.function(transformed.age))
 
-## virtually identical to original
-summary(age - inverting.function(transformed.age))
+## identical to original
+all.equal(age, inverted.transformed.age)
 
 
 ## example of plot.sitar back-transforming transformed x and y in sitar models
@@ -91,7 +91,7 @@ m1 <- sitar(x=age, y=height, id=id, data=heights, df=6)
 m2 <- update(m1, y=height^2)
 m3 <- update(m1, x=log(age+0.75))
 
-## default plot uses original x and y axes
+## default plot back-transforms x and y to original scales
 plot(m1, 'd')
 lines(m2, 'd', col=2)
 lines(m3, 'd', col=3)
