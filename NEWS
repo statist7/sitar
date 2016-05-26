@@ -1,3 +1,13 @@
+Changes in Version 1.0.7
+
+  o Improved documentation for function ifun.
+
+  o Extended sitar to allow functions in a.formula, b.formula and c.formula.
+    Improved documentation for this case.
+
+  o Fixed a bug in predict.sitar for when a.formula, b.formula and c.formula
+    involve a single variable.
+
 Changes in Version 1.0.6
 
   o Tidied up code in predict.sitar and xyadj, altering the defaults for abc, xfun and yfun.
