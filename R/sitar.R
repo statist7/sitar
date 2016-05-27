@@ -51,12 +51,11 @@
 	else if (length(bounds) == 2) bounds <- bounds - xoffset
 	else stop("bounds should be length 1 or 2")
 
+# get spline start values
+  spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
+
 #	if start missing get start values for ss and a
-  if (nostart <- missing(start)) {
-    spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-    start <- coef(spline.lm)[c(2:(df+1), 1)]
-  }
-	else spline.lm <- NULL
+  if (nostart <- missing(start)) start <- coef(spline.lm)[c(2:(df+1), 1)]
 
 #	force fixed effect for a
 	fix <- fixed
