@@ -12,6 +12,8 @@ ifun(fun)
   \item{fun}{a language object defining the expression to be inverted, best \code{quote}d to avoid evaluation.}
 }
 \details{
+\code{ifun} handles all the invertible functions in the 'Math' and 'Ops' groups.
+
 To explain how \code{ifun} works, consider as an example variants of the
 \code{sitar} model \code{height ~ age} where \code{age} and/or \code{height}
 may be transformed, e.g. \code{height ~ log(age)} or \code{log(height) ~ sqrt(age)}.
@@ -34,7 +36,9 @@ such functions is in principle unlimited.
 
 \code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))} as a function,
 with any numerical expressions evaluated, which means that \code{fun} is
-invertible so long as the individual functions are invertible.
+invertible so long as the individual functions are invertible. Note though
+that the function being invertible does not guarantee that variables can always
+be back-transformed, as for example the function may introduce \code{NaN}s.
 
 Note that \code{\link{plot.sitar}} uses \code{ifun} as the default for arguments
 \code{xfun} and \code{yfun}, where the corresponding values of \code{fun} are

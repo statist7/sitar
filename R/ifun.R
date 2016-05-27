@@ -22,7 +22,7 @@ ifun <- function(fun) {
 #     if more than one match use the first
       nf <- nf[[1]]
 #     use complement of pair as inverse function
-      fn2 <- if (nf %% 2) fns[[nf + 1]] else fns[[nf - 1]]
+      fn2 <- fns[[nf - 1 + 2 * (nf %% 2)]]
 #     identify position of x arg in inverse function
       x2 <- which(as.list(fn2) == 'x')
 #     if length 3 copy n arg
@@ -32,6 +32,13 @@ ifun <- function(fun) {
         f <- function(n) {}
         body(f) <- fn2[[n2]]
         fn2[[n2]] <- f(eval(fun[[n1]]))
+      }
+#     if [cospi, sinpi, tanpi] multiply x by pi
+      else if (length(x2) == 0) {
+        x2 <- 2
+        f <- body(ifun(fn2[[x2]])$fn)
+        f[[2]] <- fun[[x1]]
+        fun[[x1]] <- f
       }
 #     copy x from current inverse function
       fn2[[x2]] <- funinv
@@ -46,14 +53,15 @@ ifun <- function(fun) {
   }
 ###########################
 # number of names in function ignoring pi
-  nvars <- function(fun) length((av <- all.vars(fun, unique=FALSE))[grep('pi', av, invert=TRUE)])
+  nvars <- function(fun) length((av <- all.vars(fun, unique=FALSE))[grep('^pi$', av, invert=TRUE)])
 ###########################
   if (nvars(fun) != 1) stop('expression should contain just one instance of one name')
   fns <- quote(c(x+n, x-n, x*n, x/n, x^n, x^(1/n), sqrt(x), x^2, exp(x), log(x),
-                 expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x),
-                 2^x, n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x,
-                 cos(x), acos(x), sin(x), asin(x), tan(x), atan(x),
-                 cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x), I(x), I(x)))
+                 expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x), 2^x,
+                 n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x,
+                 I(x), I(x), cos(x), acos(x), sin(x), asin(x), tan(x), atan(x),
+                 cospi(x), acos(x/pi), sinpi(x), asin(x/pi), tanpi(x), atan(x/pi),
+                 cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x)))
   fns[[1]] <- NULL
   fn <- function(x) {}
   results <- with(fns, recur(fun))
