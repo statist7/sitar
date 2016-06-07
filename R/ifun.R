@@ -36,6 +36,7 @@ ifun <- function(fun) {
 #     if [cospi, sinpi, tanpi] multiply x by pi
       else if (length(x2) == 0) {
         x2 <- 2
+#       f <- quote(x * pi)
         f <- body(ifun(fn2[[x2]])$fn)
         f[[2]] <- fun[[x1]]
         fun[[x1]] <- f
@@ -63,8 +64,8 @@ ifun <- function(fun) {
                  cospi(x), acos(x/pi), sinpi(x), asin(x/pi), tanpi(x), atan(x/pi),
                  cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x)))
   fns[[1]] <- NULL
-  fn <- function(x) {}
   results <- with(fns, recur(fun))
+  fn <- function(x) {}
   body(fn) <- results$fn
   return(list(fn=fn, varname=deparse(results$varname)))
 }
