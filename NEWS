@@ -1,13 +1,15 @@
 Changes in Version 1.0.7
 
-  o Extended ifun to handle cospi, sinpi and tanpi, and improved the documentation.
+  o Extend ifun to handle cospi, sinpi and tanpi, and improve documentation.
 
-  o Extended sitar to allow functions in a.formula, b.formula and c.formula.
-    Improved the documentation for this case.
+  o Extend predict.sitar to handle deriv > 1.
 
-  o Fixed a bug in sitar where the start vector was the wrong length.
+  o Extend sitar to allow functions in a.formula, b.formula and c.formula.
+    Improve documentation for this case.
 
-  o Fixed a bug in predict.sitar for when a.formula, b.formula and c.formula
+  o Fix bug in sitar where the start vector is the wrong length.
+
+  o Fix bug in predict.sitar for when a.formula, b.formula and c.formula
     involve a single variable.
 
 Changes in Version 1.0.6
