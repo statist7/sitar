@@ -69,13 +69,15 @@
     }
 # set class to nlme
     class(object) <- class(object)[-1]
+# ensure deriv integral
+    deriv <- as.integer(deriv)
 # simple prediction
     if (deriv == 0 && !abcset) {
       pred <- yfun(predict(object=object, newdata=newdata, level=level, ...))
       return(pred)
     }
 # complex prediction
-    else { # deriv == 1 || abcset
+    else { # deriv != 0 || abcset
 # mean distance curve
       pred <- predict(object=object, newdata=newdata, level=0, ...)
 # DISTANCE
@@ -83,19 +85,19 @@
 # level 1 prediction based on x changed to reflect individual b and c
         pred <- spline(list(x=x, y=pred), method='natural',
                       xout=xyadj(x=x, id=id, object=object, abc=abc)$x)$y
-# add individual a to prediction
+# add individual a to prediction (inexact when yfun != y)
         if (!is.null(abc$a)) pred <- yfun(pred + abc$a)
       }
 # VELOCITY
-      else { # deriv == 1
+      else { # deriv != 0
 # mean velocity curve on back-transformed axes
-        vel0 <- predict(makess(x, pred, xfun=xfun, yfun=yfun), xfun(x), deriv=1)
+        vel0 <- predict(makess(x, pred, xfun=xfun, yfun=yfun), xfun(x), deriv=deriv)
         if (any(level == 0) && !abcset) pred0 <- pred <- vel0$y
         if (any(level == 1) || abcset) {
 # level 1 prediction based on x changed to reflect individual b and c
           pred <- spline(vel0, method='natural',
                          xout=xfun(xyadj(x=x, id=id, object=object, abc=abc)$x))$y
-# multiply velocity by individual c (inexact when xfun != I)
+# multiply velocity by individual c (inexact when xfun != x)
           if (!is.null(abc$c)) pred <- pred * exp(abc$c)
         }
       }

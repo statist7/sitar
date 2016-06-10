@@ -14,14 +14,18 @@ an optional data frame to be used for obtaining the predictions. It requires nam
 an optional integer giving the level(s) of grouping to be used in obtaining the predictions, level 0 corresponding to the population predictions. Defaults to level 1.}
   \item{\dots}{
 other optional arguments: \code{asList}, \code{na.action} and \code{naPattern}.}
-  \item{deriv}{an optional integer specifying predictions corresponding to either the fitted curve or its first derivative (i.e. velocity), where \code{deriv = 0} (default) specifies the distance curve and \code{deriv = 1} the velocity curve.}
+  \item{deriv}{an optional integer specifying predictions corresponding to either the fitted curve or its derivative. \code{deriv = 0} (default) specifies the distance curve, \code{deriv = 1} the velocity curve and \code{deriv = 2} the acceleration curve.}
   \item{abc}{an optional named vector containing values of a subset of \code{a}, \code{b} and \code{c}, default \code{NULL}. If \code{abc} is set, \code{level} is set to 0. It gives predictions for a single subject with the specified values of \code{a}, \code{b} and \code{c}, where missing values are set to 0.}
   \item{xfun}{an optional function to apply to \code{x} to convert it back to the original scale, e.g. if x = log(age) then xfun = exp.}
   \item{yfun}{an optional function to apply to \code{y} to convert it back to the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
 }
-\details{When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)} per \code{xfun(x)}. So if \code{x} and/or \code{y} are transformed, velocity in units of \code{y} per \code{x} can be obtained by specifying \code{xfun} and/or \code{yfun} to back-transform them appropriately.}
+\details{When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)} per \code{xfun(x)}. So if \code{x} and/or \code{y} are transformed, velocity in units of \code{y} per \code{x} can be obtained by specifying \code{xfun} and/or \code{yfun} to back-transform them appropriately.
+}
 \value{A vector of the predictions, or a list of vectors if \code{asList = TRUE} and \code{level == 1}, or a data frame if \code{length(level) > 1}.}
 \author{Tim Cole \email{tim.cole@ucl.ac.uk}}
+\seealso{
+\code{\link{ifun}} for a way to generate the functions \code{xfun} and \code{yfun} automatically from the \code{sitar} model call.
+}
 \examples{
 data(heights)
 ## fit model
