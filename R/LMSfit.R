@@ -1,3 +1,53 @@
+#' Estimate LMS curves from tabulated growth reference centiles
+#' 
+#' A function to summarise an existing set of growth reference centiles as the
+#' L, M and S curves of the LMS method.
+#' 
+#' At each age the optimal Box-Cox power Lopt is estimated to render the
+#' centiles closest to Normal, and the corresponding median Mopt and
+#' coefficient of variation Sopt are derived. The three sets of values are then
+#' smoothed across age to give L, M and S.
+#' 
+#' @param x vector of tabulated ages.
+#' @param y matrix of corresponding measurement centiles, e.g. of height or
+#' weight, with \code{nrows = length(x)} and \code{ncols = length(centiles)}.
+#' @param sex two-level factor where level 1 corresponds to male and level 2 to
+#' female.
+#' @param data optional data frame containing \code{x}, \code{y} and
+#' \code{sex}.
+#' @param centiles vector of centiles corresponding to the columns of \code{y},
+#' default c(3, 10, 25, 50, 75, 90, 97).
+#' @param df length-3 vector with the cubic smoothing spline equivalent degrees
+#' of freedom (edf) for the L, M and S curves, default c(6, 10, 8).
+#' @param L1 logical constraining the L curve to 1, i.e. a Normal distribution,
+#' default FALSE.
+#' @param plot logical to plot the estimated L, M and S curves, default TRUE.
+#' @param \dots optional graphical parameters for the plots.
+#' @return A list with the results: \describe{ \item{list("LMS")}{data frame of
+#' sex, x, L, M, S, Lopt, Mopt, Sopt.} \item{list("ey")}{matrix of predicted
+#' values of \code{y}.} \item{list("fit")}{matrix of summary statistics for
+#' \code{ey}, giving for each column \code{cmean} the mean centile, \code{zSD}
+#' the SD of the z-score difference between \code{ey} and \code{y}, and the
+#' minimum and maximum z-scores \code{zmin} and \code{zmax}.} }
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @seealso \code{\link{LMS2z}}, \code{\link{z2cent}}. The LMS method can be
+#' fitted to data using the package \code{gamlss} with the \code{BCCG} family,
+#' where nu (originally lambda), mu and sigma correspond to L, M and S
+#' respectively.
+#' @keywords arith
+#' @examples
+#' 
+#' ## first construct table of boys weight centiles by age for WHO standard
+#' data(who06)
+#' zs <- -4:4*2/3 # z-scores for centiles
+#' ages <- 0:12/4 # ages 0-3 years by 3 months
+#' v <- LMS2z(ages, zs, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
+#' round(v, 2)
+#' 
+#' ## then back-calculate the original LMS curves
+#' lms <- LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
+#' 
+#' @export LMSfit
 LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,90,97), df = c(6,10,8), L1 = FALSE, plot=TRUE, ...) {
 #	x is a vector of ages, separately by sex
 #	y is a matrix, nrows = length(x), ncols = length(centiles)

@@ -1,3 +1,100 @@
+#' Invert an expression defining a data transformation
+#' 
+#' Enables a transformed variable to be back-transformed to its original scale,
+#' e.g. for plotting purposes, by creating a function to invert the
+#' transforming expression.
+#' 
+#' \code{ifun} handles all the invertible functions in the 'Math' and 'Ops'
+#' groups.
+#' 
+#' To explain how \code{ifun} works, consider as an example variants of the
+#' \code{sitar} model \code{height ~ age} where \code{age} and/or \code{height}
+#' may be transformed, e.g. \code{height ~ log(age)} or \code{log(height) ~
+#' sqrt(age)}. Thus each model is of the form \code{y ~ x} but the units of
+#' \code{x} and \code{y} vary.
+#' 
+#' It is useful to be able to compare the models by plotting the fitted curves
+#' in the original units. This is done by applying suitable functions to invert
+#' the transformed variables prior to plotting. For example the
+#' \code{function(x) exp(x)} back-transforms \code{log(age)} and
+#' \code{log(height)}. \code{ifun} automates this process by creating a
+#' function to back-transform the general expression \code{fun(x)} to \code{x}.
+#' 
+#' Structuring \code{fun} suitably ensures it can be inverted. It should
+#' contain a single mention of a single variable (named \code{varname} here),
+#' and possibly functions such as \code{f(.)}, \code{g(.)}, \code{h(.)} etc,
+#' each of which involves (a function of) (a single mention of) \code{varname}
+#' and up to one numerical expression, such that \code{fun =
+#' f(g(h((varname))))}. The number of such functions is in principle unlimited.
+#' 
+#' \code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))} as a function,
+#' with any numerical expressions evaluated, which means that \code{fun} is
+#' invertible so long as the individual functions are invertible. Note though
+#' that the function being invertible does not guarantee that variables can
+#' always be back-transformed, as for example the function may introduce
+#' \code{NaN}s.
+#' 
+#' Note that \code{\link{plot.sitar}} uses \code{ifun} as the default for
+#' arguments \code{xfun} and \code{yfun}, where the corresponding values of
+#' \code{fun} are extracted from the model's \code{sitar} call.
+#' 
+#' @param fun a language object defining the expression to be inverted, best
+#' \code{quote}d to avoid evaluation.
+#' @return A list of length two: \item{fn}{the inverse function with argument
+#' \code{x} which applied to \code{eval(fun)} returns \code{varname}.}
+#' \item{varname}{the name of the variable in \code{fun} (given as a character
+#' string).}
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @seealso \code{\link{plot.sitar}}
+#' @examples
+#' 
+#' ## define age
+#' age <- 1:9
+#' 
+#' ## simple case - transform age to log(age)
+#' (fun <- quote(log(age)))
+#' 
+#' (transformed.age <- eval(fun))
+#' (inverting.function <- ifun(fun)$fn)
+#' (inverted.transformed.age <- inverting.function(transformed.age))
+#' 
+#' ## inverted transformed age identical to age
+#' all.equal(age, inverted.transformed.age)
+#' 
+#' 
+#' ## more complex case - transform age to log age since conception
+#' fun <- quote(log(age + 0.75))
+#' 
+#' (transformed.age <- eval(fun))
+#' (inverting.function <- ifun(fun)$fn)
+#' (inverted.transformed.age <- inverting.function(transformed.age))
+#' 
+#' ## identical to original
+#' all.equal(age, inverted.transformed.age)
+#' 
+#' 
+#' ## ludicrously complex case involving exp, log10, ^, pi and trigonometry
+#' (fun <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
+#' 
+#' (transformed.age <- eval(fun))
+#' (inverting.function <- ifun(fun)$fn)
+#' (inverted.transformed.age <- inverting.function(transformed.age))
+#' 
+#' ## identical to original
+#' all.equal(age, inverted.transformed.age)
+#' 
+#' 
+#' ## example of plot.sitar back-transforming transformed x and y in sitar models
+#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=6)
+#' m2 <- update(m1, y=height^2)
+#' m3 <- update(m1, x=log(age+0.75))
+#' 
+#' ## default plot back-transforms x and y to original scales
+#' plot(m1, 'd')
+#' lines(m2, 'd', col=2)
+#' lines(m3, 'd', col=3)
+#' 
+#' @export ifun
 ifun <- function(fun) {
 #	returns inverse of function fun
 ###########################

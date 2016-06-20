@@ -7,6 +7,19 @@
 #
 #############################
 
+
+
+
+
+#' Print SITAR model
+#'
+#' Print method for \code{sitar} objects, based on \code{print.lme}.
+#'
+#'
+#' @param x an object inheriting class \code{sitar}.
+#' @param \dots other optional arguments.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @export
 	print.sitar <- function (x, ...)
 {
     dd <- x$dims
@@ -50,6 +63,34 @@
 #
 #############################
 
+
+
+
+
+#' Create summary of SITAR model
+#'
+#' A \code{summary} method for \code{sitar} objects based on
+#' \code{\link{summary.lme}}.
+#'
+#'
+#' @param object object inheriting from class \code{sitar}.
+#' @param adjustSigma optional logical (see \code{\link{summary.lme}}).
+#' @param verbose optional logical to control the amount of output in
+#' \code{print.summary.sitar}.
+#' @param \dots some methods for this generic require additional arguments.
+#' None are used in this method.
+#' @return an object inheriting from class \code{summary.sitar} with all
+#' components included in \code{object} (see \code{\link{lmeObject}} for a full
+#' description of the components) plus the components for
+#' \code{\link{summary.lme}} and the following components: \item{x.adj}{vector
+#' of length \code{x} in \code{object} with \code{x} values adjusted for
+#' subject-specific random effects b and c.} \item{y.adj}{vector of length
+#' \code{y} in \code{object} with \code{y} values adjusted for subject-specific
+#' random effects a.} \item{apv}{length 2 vector giving respectively age at
+#' peak velocity and peak velocity based on the fitted distance curve (using
+#' transformed \code{x} and \code{y} where specified).}
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @export
 	summary.sitar <- function (object, adjustSigma = TRUE, verbose = FALSE, ...)
 {
 #	save age at peak velocity
@@ -70,6 +111,22 @@
 #
 #############################
 
+
+
+
+
+#' Print summary of SITAR model
+#'
+#' A \code{print.summary} method for \code{sitar} objects.
+#'
+#'
+#' @param x an object inheriting from class \code{summary.sitar}.
+#' @param verbose a logical to control the amount of output.
+#' @param \dots to specify extra arguments.
+#' @return A formatted summary of the object.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @method print summary.sitar
+#' @export
 	print.summary.sitar <- function (x, verbose = FALSE, ...)
 {
     dd <- x$dims
@@ -131,24 +188,48 @@
 
 #############################
 #
-#	lines.sitar
-#
-#############################
-
-	lines.sitar <- function (x, ...)
-{
-	mcall <- match.call()
-	mcall[[1]] <- as.name("plot.sitar")
-	mcall[['add']] <- TRUE
-	eval(mcall, parent.frame())
-}
-
-#############################
-#
 #	y2plot
 #
 #############################
 
+
+
+
+
+#' Plot with two y axes
+#'
+#' Function to plot two y variables, y1 and y2, against a single x variable,
+#' with the y1 and y2 axes on the left and right of the plot respectively.
+#'
+#' y2plot draws up to two superimposed plots, one with the y axis on the left
+#' and the other on the right, with suitable adjustment for \code{par('mar')}
+#' and including a legend.  The format for y1 is controlled by par arguments,
+#' and that for y2 by the list y2par.
+#'
+#' @param x vector of ages.
+#' @param y1 vector of measurements for plotting on left y axis.
+#' @param y2 optional vector of measurements for plotting on right y axis.
+#' @param labels character vector containing labels for x, y1 and y2.
+#' @param y2par optional named list of par arguments to format the y2 axis.
+#' @param add logical flag to specify if a new plot (with axes etc) is to be
+#' drawn (FALSE) or an existing plot is to be added to (TRUE).
+#' @param xy optional list to pass \code{usr} and \code{usr2} (see Value).
+#' @param xlegend position for legend.
+#' @param inset inset for legend.
+#' @param \dots optional \code{par} arguments.
+#' @return Returns the list \item{usr}{par('usr') for y1 axis}
+#' \item{usr2}{par('usr') for y2 axis} In addition the variable
+#' \code{.par.usr2}, equal to \code{usr2}, is created in globalenv().
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @seealso \code{\link{plot.sitar}}
+#' @examples
+#'
+#' ## plot boys median height and weight on the UK 1990 reference
+#' with(uk90[uk90$sex == 1,],
+#'   y2plot(x=years, y1=M.ht, y2=M.wt, y2par=list(col='red'))
+#' )
+#'
+#' @export y2plot
 	y2plot <- function(x, y1, y2=NULL, labels, y2par=list(), add=FALSE, xy=NULL, xlegend="topleft", inset=0.04, ...)
 #	plot x versus y1 and y2 using left/right axes for the two y's
 #	returns par() for y1 or list(par(), par("usr")) with y2
@@ -253,33 +334,28 @@
 
 #############################
 #
-#	varexp
-#
-#############################
-
-	varexp <- function(..., pattern=NULL)
-#	returns % of variance explained by sitar model(s)
-{	ARG <- list(...)
-	if (!is.null(pattern)) {
-		pattern <- ls(envir=parent.frame(), pattern=pattern)
-		ARG <- c(ARG, lapply(as.list(pattern), get))
-	}
-	pc <- lapply(ARG, function(obj) {
-		if (!'ns' %in% names(obj)) NA else
-		100 * (1 - (obj$sigma / summary(obj$ns)$sigma)^2)
-	})
-	names(pc) <- c(match.call(expand.dots=FALSE)$..., pattern)
-	pc <- unlist(pc[!is.na(pc)])
-	if (length(pc) == 0) return(invisible())
-	round(pc[rev(order(pc))], 2)
-}
-
-#############################
-#
 #	funcall
 #
 #############################
 
+
+
+
+
+#' Function call with optional inverse
+#'
+#' Applies an expression to vector v, optionally inverting the expression
+#' first. For example if the expression is log, funcall returns log(v) if
+#' inverse is FALSE, and exp(v) if inverse is TRUE.
+#'
+#' Inverse covers functions log, exp, sqrt, ^, *, /, +, -.
+#'
+#' @param v vector
+#' @param vcall expression
+#' @param inverse logical
+#' @return Returns a vector of length v.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @export funcall
 	funcall <- function(v, vcall, inverse=FALSE)
 #	returns v transformed according to vcall
 #	v - vector
@@ -315,6 +391,38 @@
 #
 #############################
 
+
+
+
+
+#' Create cubic smoothing spline from data
+#'
+#' A wrapper to fit a cubic smoothing spline to the supplied data, allowing
+#' derivatives to be calculated.
+#'
+#'
+#' @param x vector giving the values of the predictor variable.
+#' @param y vector of responses.
+#' @param xfun optional function to be applied to \code{x} prior to fitting.
+#' @param yfun optional function to be applied to \code{y} prior to fitting.
+#' @return An object of class \code{smooth.spline} with the extra component
+#' \code{apv}, a length-2 vector containing the age at peak velocity and peak
+#' velocity. If no peak is identified (based on the 2nd derivative changing
+#' sign) the values are for maximum rather than peak velocity.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @examples
+#'
+#' ## create smooth.spline mean height curve
+#' data(heights)
+#' ss <- with(heights, makess(age, height))
+#'
+#' ## and plot it
+#' plot(ss, type='l', xlab='age', ylab='height')
+#'
+#' ## age at peak velocity, and peak velocity
+#' print(ss$apv)
+#'
+#' @export makess
 	makess <- function(x, y, xfun, yfun)
 #	summarises y ~ x as smooth.spline
 #	returns smooth.spline including apv/pv (peak velocity)
@@ -358,6 +466,33 @@
 #############################
 
 #	update value of bstart to minimise b-c correlation
+
+
+
+
+#' Update the b fixed effect to minimise the b-c random effect correlation
+#'
+#' A function to update the value of \code{bstart}, the starting value for the
+#' b fixed effect, to minimise the correlation between the random effects b and
+#' c.
+#'
+#'
+#' @param x a \code{sitar} object.
+#' @return Returns an updated value of the b fixed effect, based on the random
+#' effect covariance matrix.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @keywords regression
+#' @examples
+#'
+#' ## fit sitar model with b fixed effect starting value defaulting to 'mean'
+#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+#' print(fixef(m1)['b'])
+#'
+#' ## refit with starting value chosen to minimise b-c correlation and df increased
+#' m2 <- update(m1, bstart=bupdate(m1), df=6)
+#' print(fixef(m2)['b'])
+#'
+#' @export bupdate
 	bupdate <- function(x) {
 	cov <- getVarCov(x)
 	fixef(x)['b'] + x$xoffset + cov[2,3] / cov[3,3]
@@ -369,6 +504,62 @@
 #
 #############################
 
+
+
+
+
+#' Identify outliers with abnormal velocity in growth curves
+#'
+#' Quickly identifies putative outliers in a large number of growth curves.
+#'
+#' The algorithm works by viewing serial measurements in each growth curve as
+#' triplets (A-B-C) and comparing the velocities between them. Velocity is
+#' calculated as
+#'
+#' diff(y, lag = lag) / diff(x, lag = lag) ^ velpower
+#'
+#' Missing values for x or y are ignored. If any of the AB, BC or AC velocities
+#' are abnormal (more than \code{limit} SDs in absolute value from the median
+#' for the dataset) the code for B is non-zero.
+#'
+#' @param x age vector.
+#' @param y outcome vector, typically weight or height.
+#' @param id factor identifying each subject.
+#' @param data data frame containing x, y and id.
+#' @param lag lag between measurements for defining growth velocity.
+#' @param velpower a value, typically between 0 and 1, defining the power of
+#' delta x to use when calculating velocity as delta(y)/delta(x)^velpower. The
+#' default of 0.5 is midway between velocity and increment.
+#' @param limit the number of standard deviations beyond which a velocity is
+#' deemed to be an outlier.
+#' @param linearise if TRUE y is converted to a residual about the median curve
+#' of y versus x.
+#' @return Returns a data frame with columns: id, x, y (from the call), code
+#' (as described below), vel1, vel2 and vel3 (corresponding to the velocities
+#' AB, BC and AC above). The 'data' attribute contains the name of 'data'.
+#'
+#' Code is a factor taking values between 0 and 8, with 0 normal (see table
+#' below). Values 1-6 depend on the pattern of abnormal velocities, while 7 and
+#' 8 indicate a duplicate age (7 for the first in an individual and 8 for later
+#' ones). Edge outliers, i.e. first or last for an individual, have just one
+#' velocity. Code 4 indicates a conventional outlier, with both AB and BC
+#' abnormal and AC normal. Code 6 is an edge outlier. Other codes are not
+#' necessarily outliers, e.g. codes 1 or 3 may be adjacent to a code 4. Use
+#' \code{codeplot} to look at individual curves, and \code{zapvelout} to delete
+#' outliers. \tabular{cccl}{ code \tab AB+BC \tab AC \tab interpretation\cr 0
+#' \tab 0 \tab 0 \tab no outlier\cr 0 \tab 0 \tab NA \tab no outlier\cr 1 \tab
+#' 0 \tab 1 \tab rare pattern\cr 2 \tab 1 \tab 0 \tab complicated - look at
+#' curve\cr 3 \tab 1 \tab 1 \tab adjacent to simple outlier\cr 4 \tab 2 \tab 0
+#' \tab single outlier\cr 5 \tab 2 \tab 1 \tab double outlier\cr 6 \tab 1 \tab
+#' NA \tab edge outlier\cr 7 \tab - \tab - \tab first duplicate age\cr 8 \tab -
+#' \tab - \tab later duplicate age }
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @seealso \code{\link{codeplot}}, \code{\link{zapvelout}}
+#' @examples
+#'
+#' outliers <- velout(age, height, id, heights, limit=3)
+#'
+#' @export velout
 	velout <- function(x, y, id, data, lag=1, velpower=0.5, limit=5, linearise=FALSE)
 #	identifies velocity patterns in growth curve outliers
 #	returns id, x and code for errors, plus coded velocities relative to neighbours
@@ -456,6 +647,44 @@
 #
 #############################
 
+
+
+
+
+#' Plot and zap velocity outliers in growth curves
+#'
+#' Handles output from \code{velout} function to display growth curves with
+#' outlying points, either plotting or zapping the outliers.
+#'
+#' The function \code{velout} identifies putative outliers for \code{y} in
+#' \code{data}, \code{codeplot} plots them, and \code{zapvelout} sets missing
+#' those confirmed as outliers.  Codes range from 0 (normal) to 8, where 4 and
+#' 6 are conventional outliers (see \code{\link{velout}}).
+#'
+#' @aliases codeplot zapvelout
+#' @param outliers Data frame returned from velout.
+#' @param icode The code number(s) defining the subset of curves to be
+#' displayed or zapped (between 1 and 6).
+#' @param \dots Optional plot parameters.
+#' @param print Option to print as well as plot information on each curve.
+#' @return \code{codeplot} returns summary information on each curve with an
+#' outlier of the relevant code, and optionally plots the curve.
+#' \code{zapvelout} sets to NA values of \code{y} whose code is contained in
+#' \code{icode}, and returns the modified data frame.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @seealso \code{\link{velout}}
+#' @examples
+#'
+#' ## identify outliers
+#' outliers <- velout(age, height, id, heights, limit=2)
+#'
+#' ## plot outliers with code 4 or 6
+#' codeplot(outliers, icode=c(4,6))
+#'
+#' ## set the 8 outliers missing
+#' newheights <- zapvelout(outliers, icode=6)
+#'
+#' @export codeplot
 	codeplot <- function(outliers, icode=4, ..., print=TRUE)
 {
 #	plots growth curves with outliers identified by velout
@@ -515,6 +744,8 @@
 #
 #############################
 
+#' @rdname codeplot
+#' @export
 	zapvelout <- function(outliers, icode)
 {
 #	set outliers missing for specified code(s)
@@ -533,6 +764,42 @@
 #
 ################################################################
 
+
+
+
+
+#' Recalibrate x, y data using SITAR random effects
+#'
+#' A function to recalibrate x,y data using SITAR random effects
+#'
+#' \code{recalib} recalibrates the values of \code{xc} and \code{yc} based on
+#' \code{model}. \code{xc} values are changed to:
+#'
+#' (xc-c(coef[from,'b']))*exp(coef[from,'c']-coef[to,'c'])+coef[to,'b'].
+#'
+#' \code{yc} values are changed to: \code{yc-coef[from,'a']+coef[to,'a']}.
+#'
+#' @param xc character vector defining column name(s) of \code{x} data to be
+#' recalibrated.
+#' @param yc character vector defining column name(s) of \code{y} data to be
+#' recalibrated.
+#' @param id factor defining \code{from} and \code{to} rows. If \code{NULL}
+#' then recalibrate all rows.
+#' @param data dataframe containing \code{xc}, \code{yc} and \code{id}.
+#' @param xcnew column names for replacement columns \code{xc}. If default
+#' \code{NULL} then use names xcnew1... .
+#' @param ycnew column names for replacement columns \code{yc}. If default
+#' \code{NULL} then use names ycnew1... .
+#' @param model \code{sitar} model defining the random effects to be used for
+#' recalibration.
+#' @param from level of \code{id} defining existing data (must be a single row
+#' in \code{coef{model}}).
+#' @param to level of \code{id} defining data to be recalibrated (a single row
+#' in \code{coef{model}}).
+#' @return Returns the dataframe \code{data} with the \code{from} rows of
+#' \code{xc} and \code{yc} recalibrated.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @export recalib
 	recalib <- function(xc, yc, id=NULL, data, xcnew=NULL, ycnew=NULL, model, from, to)
 #	xc - column names of x data to be recalibrated
 #	yc - column names of y data to be recalibrated
@@ -582,12 +849,48 @@
 #	xaxsd  yaxsd  #
 ###################
 
+
+
+
+
+#' Par args xaxs and yaxs option d
+#'
+#' Implements par('xaxs') and par('yaxs') option 'd'.
+#'
+#' Implements par('xaxs') and par('yaxs') option 'd', i.e. uses previous axis
+#' scales in a new plot.
+#'
+#' @aliases xaxsd yaxsd
+#' @param usr a length-2 vector defining the length of the x-axis or y-axis.
+#' @return By default returns xlim/ylim args to match current setting of
+#' par()$usr, i.e. previous plot scales.  Specifying \code{usr} gives scales
+#' with the usr args at the extremes. If par('xlog') or par('ylog') are set the
+#' returned limits are antilogged (to base 10).
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @examples
+#'
+#' ## generate and plot 100 data points
+#' x <- rnorm(100)
+#' y <- rnorm(100)
+#' plot(x, y, pch=19)
+#'
+#' ## generate and plot 10 more
+#' ## constraining axis scales to be as before
+#' x <- rnorm(10)
+#' y <- rnorm(10)
+#' plot(x, y, pch=19, xlim=xaxsd(), ylim=yaxsd())
+#'
+#' ## force axis extremes to be -3 and 3
+#' plot(x, y, pch=19, xlim=xaxsd(c(-3,3)), ylim=yaxsd(c(-3,3)))
+#'
+#' @export xaxsd
 xaxsd <- function(usr=par()$usr[1:2]) {
   if (!missing(usr) && par('xlog')) usr <- log10(usr)
   usr <- (usr + mean(usr) * 0.08) / 1.08
 	if (par('xlog')) 10 ^ usr else usr
 }
-
+#' @rdname xaxsd
+#' @export yaxsd
 yaxsd <- function(usr=par()$usr[3:4]) {
   if (!missing(usr) && par('ylog')) usr <- log10(usr)
 	usr <- (usr + mean(usr) * 0.08) / 1.08
@@ -604,6 +907,46 @@ yaxsd <- function(usr=par()$usr[3:4]) {
 #	sampling for subset  #
 ##########################
 
+
+
+
+
+#' Sample from SITAR dataset
+#'
+#' A function to sample from a SITAR dataset for experimental design purposes.
+#' Two different sampling schemes are offered, based on the values of \code{id}
+#' and \code{x}.
+#'
+#' With the first sampling scheme \code{xlim} is set to \code{NULL} (default),
+#' and rows of \code{data} are sampled with probability \code{prob} without
+#' replacement.  With the second sampling scheme \code{xlim} is set to a range
+#' within \code{range(x)}.  Subjects \code{id} are then sampled with
+#' probability \code{prob} without replacement, and all their rows where
+#' \code{x} is within \code{xlim} are selected.  The second scheme is useful
+#' for testing the power of the model to predict later growth when data only up
+#' to a certain age are available. Setting \code{xlim} to \code{range(x)}
+#' allows data to be sampled by subject. The returned value can be used as the
+#' \code{subset} argument in \code{sitar} or \code{update.sitar}.
+#'
+#' @param x vector of age.
+#' @param id factor of subject identifiers.
+#' @param data dataframe containing \code{x} and \code{id}.
+#' @param prob scalar defining sampling probability. See Details.
+#' @param xlim length 2 vector defining range of \code{x} to be selected. See
+#' Details.
+#' @return Returns a logical the length of \code{x} where \code{TRUE} indicates
+#' a sampled value.
+#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
+#' @seealso \code{\link{sitar}}
+#' @examples
+#'
+#' ## draw 50% random sample
+#' s50 <- subsample(age, id, heights, prob=0.5)
+#'
+#' ## truncate age range to 7-12 for 50% of subjects
+#' t50 <- subsample(age, id, heights, prob=0.5, xlim=c(7, 12))
+#'
+#' @export subsample
 	subsample <- function(x, id, data, prob = 1, xlim = NULL)
 {
 #	selects subset for sitar model design
