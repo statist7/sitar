@@ -48,11 +48,9 @@ index (bmi), head circumference (head), arm circumference (arm), subscapular
 skinfold (subscap), and tricep skinfold (tricep).
 }
 \examples{
-
 data(who06)
 ## calculate z-score for length 60 cm in boys at age 0:12 months
 LMS2z(x = 0:12/12, y = 60, sex = 1, measure = 'ht', ref = 'who06')
-
 }
 \references{
 World Health Organization. WHO Child Growth Standards: Methods

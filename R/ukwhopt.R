@@ -1,5 +1,3 @@
-
-
 #' UK-WHO growth reference including preterm
 #'
 #' The UK 1990 revised growth reference (Cole et al 2011) for birth length,
@@ -48,10 +46,7 @@
 #' \url{http://www.healthforallchildren.com/?product_cat=software}.
 #' @keywords datasets
 #' @examples
-#'
 #' data(ukwhopt)
 #' ## calculate median birth weight in girls from 23 to 42 weeks gestation
 #' LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt', ref = 'ukwhopt', toz = FALSE)
-#'
 "ukwhopt"
-

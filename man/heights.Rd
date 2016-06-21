@@ -19,12 +19,10 @@ Heights of 12 girls from the Chard Growth Study measured twice a year
 between 8 and 16 years of age.
 }
 \examples{
-
   require(graphics)
   data(heights)
   coplot(height ~ age | id, data = heights, panel=panel.smooth,
     show.given=FALSE, xlab='age (years)', ylab='height (cm)', pch=19)
-
 }
 \keyword{datasets}
 

@@ -1,5 +1,3 @@
-
-
 #' UK 1990 growth reference
 #'
 #' The UK 1990 growth reference (Freeman et al 1995, Cole et al 1998) for
@@ -59,11 +57,7 @@
 #' \url{http://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
 #' @keywords datasets
 #' @examples
-#'
 #' data(uk90)
 #' ## calculate median BMI in girls from birth to 10 years
 #' LMS2z(x = 0:10, y = 0, sex = 2, measure = 'bmi', ref = 'uk90', toz = FALSE)
-#'
 "uk90"
-
-

@@ -45,11 +45,9 @@ Age is measured in \code{weeks} gestation and \code{years} post-term, where
 0 years corresponds to 40 weeks gestation.
 }
 \examples{
-
 data(ukwhopt)
 ## calculate median birth weight in girls from 23 to 42 weeks gestation
 LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt', ref = 'ukwhopt', toz = FALSE)
-
 }
 \references{
 Cole TJ, Green PJ. Smoothing reference centile curves: the LMS

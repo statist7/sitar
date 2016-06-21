@@ -56,11 +56,9 @@ index (bmi), head circumference (head), sitting height (sitht), leg length
 (leglen), waist circumference (waist) and percent body fat (fat).
 }
 \examples{
-
 data(uk90)
 ## calculate median BMI in girls from birth to 10 years
 LMS2z(x = 0:10, y = 0, sex = 2, measure = 'bmi', ref = 'uk90', toz = FALSE)
-
 }
 \references{
 Cole TJ, Green PJ. Smoothing reference centile curves: the LMS
