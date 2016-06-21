@@ -10,12 +10,13 @@
 #' \deqn{adjusted deviance = deviance - 2n ( (\lambda-1) * log(gm) + %
 #' log(abs(\lambda)) )}{%
 #' deviance - 2n ( (lambda-1) * log(gm) + log(abs(lambda)) )}
-#' where lambda is the power transform, and n and gm are
-#' the length and geometric mean of y.
+#' where \eqn{\lambda}{lambda} is the power transform, and \eqn{n} and
+#' \eqn{gm} are the length and geometric mean of \code{y}.
 #'
 #' The variance explained is given by \deqn{\% explained = 100 * (1 -%
-#' (\sigma2/\sigma1)^2)}{% explained = 100 * (1 - (sigma2/sigma1)^2)} where
-#' sigma1 is the fixed effects RSD and sigma2 the SITAR random effects RSD.
+#' (\sigma_2/\sigma_1)^2)}{\% explained = 100 * (1 - (sigma2/sigma1)^2)} where
+#' \eqn{\sigma_1}{sigma1} is the fixed effects RSD and \eqn{\sigma_2}{sigma2}
+#' the SITAR random effects RSD.
 #'
 #' \code{BICadj} and \code{AICadj} accept non-\code{sitar} models with a
 #' \code{logLik} class. \code{varexp} ignores objects not of class

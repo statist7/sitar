@@ -40,12 +40,15 @@ function to back-transform the general expression \code{fun(x)} to \code{x}.
 
 Structuring \code{fun} suitably ensures it can be inverted. It should
 contain a single mention of a single variable (named \code{varname} here),
-and possibly functions such as \code{f(.)}, \code{g(.)}, \code{h(.)} etc,
+and possibly functions such as \eqn{f(.)}, \eqn{g(.)}, \eqn{h(.)} etc,
 each of which involves (a function of) (a single mention of) \code{varname}
-and up to one numerical expression, such that \code{fun =
-f(g(h((varname))))}. The number of such functions is in principle unlimited.
+and up to one numerical expression, such that \code{fun} =
+\eqn{f(g(h((varname))))}. The number of such functions is in principle
+unlimited.
 
-\code{ifun} then returns \code{h^-1(g^-1(f^-1((eval(fun)))))} as a function,
+\code{ifun} then returns
+\eqn{h^{-1}(g^{-1}(f^{-1}((eval(fun)))))}{h^-1(g^-1(f^-1((eval(fun)))))}
+as a function,
 with any numerical expressions evaluated, which means that \code{fun} is
 invertible so long as the individual functions are invertible. Note though
 that the function being invertible does not guarantee that variables can
