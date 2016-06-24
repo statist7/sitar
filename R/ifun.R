@@ -110,6 +110,13 @@ ifun <- function(fun) {
       x1 <- which(vapply(fun, function(f) nvars(f) == 1, TRUE))[-1]
 #     element not containing varname (only relevant when ne == 3)
       n1 <- 5 - x1
+#     if [cospi, sinpi, tanpi] drop 'pi' and multiply x by pi
+      if (grepl('pi', fname <- as.name(fun[[1]]))) {
+        fun[[1]] <- as.name(sub('pi', '', fname))
+        f <- quote(x * pi)
+        f[[2]] <- fun[[2]]
+        fun[[2]] <- f
+      }
 #     expressions matching leading symbol with same length and x arg position
       nf <- which(vapply(fns, function(f)
         f[[1]] == fun[[1]] && length(f) == length(fun) && f[[x1]] == 'x', TRUE))
@@ -133,14 +140,6 @@ ifun <- function(fun) {
         body(f) <- fn2[[n2]]
         fn2[[n2]] <- f(eval(fun[[n1]]))
       }
-#     if [cospi, sinpi, tanpi] multiply x by pi
-      else if (length(x2) == 0) {
-        x2 <- 2
-#       f <- quote(x * pi)
-        f <- body(ifun(fn2[[x2]])$fn)
-        f[[2]] <- fun[[x1]]
-        fun[[x1]] <- f
-      }
 #     copy x from current inverse function
       fn2[[x2]] <- funinv
 #     update function and inverse function and repeat as necessary
@@ -161,7 +160,6 @@ ifun <- function(fun) {
                  expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x), 2^x,
                  n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x,
                  I(x), I(x), cos(x), acos(x), sin(x), asin(x), tan(x), atan(x),
-                 cospi(x), acos(x/pi), sinpi(x), asin(x/pi), tanpi(x), atan(x/pi),
                  cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x)))
   fns[[1]] <- NULL
   results <- with(fns, recur(fun))
