@@ -29,7 +29,8 @@
 #' specified values of \code{a}, \code{b} and \code{c}, where missing values
 #' are set to 0.
 #' @param xfun an optional function to apply to \code{x} to convert it back to
-#' the original scale, e.g. if x = log(age) then xfun = exp.
+#' the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
+#' \code{deriv > 0} - see Details.
 #' @param yfun an optional function to apply to \code{y} to convert it back to
 #' the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.
 #' @return A vector of the predictions, or a list of vectors if \code{asList =
@@ -58,7 +59,7 @@
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1, ...,
                             deriv=0, abc=ranef(object),
-                            xfun=function(x) x, yfun=xfun) {
+                            xfun=function(x) x, yfun=function(y) y) {
 # create x and id variables in newdata
     oc <- object$call.sitar
     if (is.null(newdata$x)) newdata$x <- eval(oc$x, newdata)

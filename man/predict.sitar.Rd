@@ -5,7 +5,8 @@
 \title{Predict SITAR model}
 \usage{
 \method{predict}{sitar}(object, newdata = getData(object), level = 1, ...,
-  deriv = 0, abc = ranef(object), xfun = function(x) x, yfun = xfun)
+  deriv = 0, abc = ranef(object), xfun = function(x) x,
+  yfun = function(y) y)
 }
 \arguments{
 \item{object}{an object inheriting from class \code{sitar}.}
@@ -33,7 +34,8 @@ specified values of \code{a}, \code{b} and \code{c}, where missing values
 are set to 0.}
 
 \item{xfun}{an optional function to apply to \code{x} to convert it back to
-the original scale, e.g. if x = log(age) then xfun = exp.}
+the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
+\code{deriv > 0} - see Details.}
 
 \item{yfun}{an optional function to apply to \code{y} to convert it back to
 the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
