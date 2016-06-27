@@ -12,6 +12,8 @@ Changes in Version 1.0.7
 
   o Fix bug in sitar where the start vector is the wrong length.
 
+  o Fix bug in predict.sitar involving default value of yfun argument.
+
   o Fix bug in predict.sitar for when a.formula, b.formula and c.formula
     involve a single variable.
 
