@@ -90,38 +90,7 @@
 #' @importFrom graphics axis identify legend lines locator par text title
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
-	                       abc=NULL, add=FALSE, nlme=FALSE, ...)
-{
-#	plot curves from sitar model
-#	opt:
-#		d = fitted distance curve (labels[1] = x, labels[2] = y)
-#		v = fitted velocity curve (labels[3] = y)
-#		e = fitted fixed effects distance curve (labels[1] = x, labels[2] = y)
-#		D = fitted distance curves by subject
-#		V = fitted velocity curves by subject
-#		u = unadjusted y vs t curves by subject
-#		a = adjusted y vs adjusted t curves by subject
-#
-#		multiple options all plot on same graph
-#
-#		labels are for opt dv - particularly v
-#		or use xlab and ylab and y2par
-#
-#		apv TRUE draws vertical line at age of peak velocity
-#		and returns apv/pv (respecting xfun/yfun settings)
-#
-#		xfun/yfun are functions to apply to x/y before plotting
-#
-#		subset is subset of values
-#
-#		abc is a vector of named sitar parameters for opt dv e.g.
-#			abc=c(a=1, b=0.1, c=-0.1)
-#		or a single id level whose abc values are to be used
-#
-#		add TRUE overwrites previous graph (or use lines)
-#
-#		nlme TRUE plots model as nlme object
-
+	                       abc=NULL, add=FALSE, nlme=FALSE, ...) {
 	if (nlme) {
 	  do.call('plot.lme', as.list(match.call()[-1]))
 	}
@@ -152,40 +121,50 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 #	extract list(...)
 		ccall <- match.call()[-1]
 #	subset to plot model
-		subset <- eval(ccall$subset, data, parent.frame())
-		if (is.null(subset)) subset <- rep(TRUE, nf)
+		subset <- if (is.null(subset))
+		  rep_len(TRUE, nf)
+		else
+		  eval(ccall$subset, data, parent.frame())
+# ... args
 		dots <- match.call(expand.dots=FALSE)$...
-		if (length(dots) > 0) ARG <- lapply(as.list(dots), eval, data, parent.frame())
-			else ARG <- NULL
+		ARG <- if(!is.null(dots))
+		  lapply(as.list(dots), eval, data, parent.frame())
+		else
+		  NULL
 #	if xlab not specified replace with label or x name (depending on xfun)
-		if (!"xlab" %in% names(ARG)) {
-		  if(!missing(labels)) xl <- labels[1] else {
-		    if(!is.null(xfun)) xl <- paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")") else
-		      xl <- ifun(mcall$x)$varname
+		if (is.null(ARG$xlab)) {
+		  ARG$xlab <- if(!missing(labels))
+		    labels[1]
+		  else {
+		    if(!is.null(xfun))
+		      paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
+		    else
+		      ifun(mcall$x)$varname
 		  }
-			ARG <- c(ARG, list(xlab=xl))
 		}
-		else xl <- ARG$xlab
-#	if ylab not specified replace with label or else y name (depending on yfun)
-		if (!"ylab" %in% names(ARG)) {
-		  if(!missing(labels)) yl <- labels[2] else {
-		    if(!is.null(yfun)) yl <- paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")") else
-		      yl <- ifun(mcall$y)$varname
+#	if ylab not specified replace with label or y name (depending on yfun)
+		if (is.null(ARG$ylab)) {
+		  ARG$ylab <- if(!missing(labels))
+		    labels[2]
+		  else {
+		    if(!is.null(yfun))
+		      paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
+		    else
+		      ifun(mcall$y)$varname
 		  }
-			ARG <- c(ARG, list(ylab=yl))
 		}
-		else yl <- ARG$ylab
 # if labels not specified create it
-		if (missing(labels)) labels <- c(xl, yl, paste(yl, 'velocity'))
-		# if (missing(labels)) labels <- c(xl, yl, ifelse(typeof(yl) == 'expression',
-		#   expression(paste(as.character(yl), '~~velocity')), paste(yl, 'velocity')))
+		if (missing(labels))
+		  labels <- c(ARG$xlab, ARG$ylab, paste(ARG$ylab, 'velocity'))
 
 #	create output list
 		xy <- list()
 
 # derive xfun and yfun
-		if (is.null(xfun)) xfun <- ifun(mcall$x)$fn
-		if (is.null(yfun)) yfun <- ifun(mcall$y)$fn
+		if (is.null(xfun))
+		  xfun <- ifun(mcall$x)$fn
+		if (is.null(yfun))
+		  yfun <- ifun(mcall$y)$fn
 
 #	plot y vs t by subject
 		if (grepl("u", opt)) {
