@@ -71,7 +71,7 @@ age <- 1:9
 (inverting.function <- ifun(fun)$fn)
 (inverted.transformed.age <- inverting.function(transformed.age))
 
-## inverted transformed age identical to age
+## is inverted transformed age identical to age?
 all.equal(age, inverted.transformed.age)
 
 
@@ -82,7 +82,7 @@ fun <- quote(log(age + 0.75))
 (inverting.function <- ifun(fun)$fn)
 (inverted.transformed.age <- inverting.function(transformed.age))
 
-## identical to original
+## identical to original?
 all.equal(age, inverted.transformed.age)
 
 
@@ -93,7 +93,7 @@ all.equal(age, inverted.transformed.age)
 (inverting.function <- ifun(fun)$fn)
 (inverted.transformed.age <- inverting.function(transformed.age))
 
-## identical to original
+## identical to original?
 all.equal(age, inverted.transformed.age)
 
 
@@ -102,7 +102,7 @@ m1 <- sitar(x=age, y=height, id=id, data=heights, df=6)
 m2 <- update(m1, y=height^2)
 m3 <- update(m1, x=log(age+0.75))
 
-## default plot back-transforms x and y to original scales
+## default plot settings back-transform x and y to original scales
 plot(m1, 'd')
 lines(m2, 'd', col=2)
 lines(m3, 'd', col=3)

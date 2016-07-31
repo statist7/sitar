@@ -61,7 +61,7 @@
 #' (inverting.function <- ifun(fun)$fn)
 #' (inverted.transformed.age <- inverting.function(transformed.age))
 #'
-#' ## inverted transformed age identical to age
+#' ## is inverted transformed age identical to age?
 #' all.equal(age, inverted.transformed.age)
 #'
 #'
@@ -72,7 +72,7 @@
 #' (inverting.function <- ifun(fun)$fn)
 #' (inverted.transformed.age <- inverting.function(transformed.age))
 #'
-#' ## identical to original
+#' ## identical to original?
 #' all.equal(age, inverted.transformed.age)
 #'
 #'
@@ -83,7 +83,7 @@
 #' (inverting.function <- ifun(fun)$fn)
 #' (inverted.transformed.age <- inverting.function(transformed.age))
 #'
-#' ## identical to original
+#' ## identical to original?
 #' all.equal(age, inverted.transformed.age)
 #'
 #'
@@ -92,19 +92,54 @@
 #' m2 <- update(m1, y=height^2)
 #' m3 <- update(m1, x=log(age+0.75))
 #'
-#' ## default plot back-transforms x and y to original scales
+#' ## default plot settings back-transform x and y to original scales
 #' plot(m1, 'd')
 #' lines(m2, 'd', col=2)
 #' lines(m3, 'd', col=3)
 #'
 #' @export ifun
 ifun <- function(fun) {
-#	returns inverse of function fun
-###########################
+
+# returns number of names in function ignoring pi
+  nvars <- function(fun) {
+    length((av <- all.vars(fun, unique=FALSE))[grep('^pi$', av, invert=TRUE)])
+  }
+
+  if (nvars(fun) != 1)
+    stop('expression should contain just one instance of one name')
+# inverse function pairs
+  fns <- quote(c(
+    x+n, x-n,
+    x*n, x/n,
+    x^n, x^(1/n),
+    sqrt(x), x^2,
+    exp(x), log(x),
+    expm1(x), log1p(x),
+    n^x, log(x,n),
+    log10(x), 10^x,
+    log2(x), 2^x,
+    n+x, x-n,
+    n-x, n-x,
+    n*x, x/n,
+    n/x, n/x,
+    +x, +x,
+    -x, -x,
+    I(x), I(x),
+    cos(x), acos(x),
+    sin(x), asin(x),
+    tan(x), atan(x),
+    cosh(x), acosh(x),
+    sinh(x), asinh(x),
+    tanh(x), atanh(x)
+    ))
+  fns[[1]] <- NULL
+
+# returns inverse function
   recur <- function(fun, funinv=quote(x)) {
     fun <- as.expression(fun)[[1]]
 #   if bracketed drop brackets
-    while (length(fun) > 1 && fun[[1]] == as.name('(')) fun <- fun[[2]]
+    while (length(fun) > 1 && fun[[1]] == as.name('('))
+      fun <- fun[[2]]
     if ((ne <- length(fun)) > 1) {
 #     element of expression containing varname (either 2 or 3, ignoring leading symbol)
       x1 <- which(vapply(fun, function(f) nvars(f) == 1, TRUE))[-1]
@@ -120,7 +155,8 @@ ifun <- function(fun) {
 #     expressions matching leading symbol with same length and x arg position
       nf <- which(vapply(fns, function(f)
         f[[1]] == fun[[1]] && length(f) == length(fun) && f[[x1]] == 'x', TRUE))
-      if (length(nf) == 0) stop (paste('unrecognised name:', deparse(fun[[1]])))
+      if (length(nf) == 0)
+        stop (paste('unrecognised name:', deparse(fun[[1]])))
 #     if multiple matches check if numeric args are equal
       if (length(nf) > 1 && ne == 3) {
         nft <- which(vapply(fns[nf], function(f) f[[n1]] == fun[[n1]], TRUE))
@@ -135,7 +171,7 @@ ifun <- function(fun) {
 #     if length 3 copy n arg
       if (length(fn2) == 3) {
         n2 <- 5 - x2
-#       function returns value for n arg
+  #       function returns value for n arg
         f <- function(n) {}
         body(f) <- fn2[[n2]]
         fn2[[n2]] <- f(eval(fun[[n1]]))
@@ -144,24 +180,16 @@ ifun <- function(fun) {
       fn2[[x2]] <- funinv
 #     update function and inverse function and repeat as necessary
       fun <- fun[[x1]]
-      if (is.name(fun)) funinv <- fn2 else {
+      if (is.name(fun))
+        funinv <- fn2
+      else {
         funinv <- (results <- recur(fun, fn2))$fn
         fun <- results$varname
       }
     }
     return(list(fn=funinv, varname=fun))
   }
-###########################
-# number of names in function ignoring pi
-  nvars <- function(fun) length((av <- all.vars(fun, unique=FALSE))[grep('^pi$', av, invert=TRUE)])
-###########################
-  if (nvars(fun) != 1) stop('expression should contain just one instance of one name')
-  fns <- quote(c(x+n, x-n, x*n, x/n, x^n, x^(1/n), sqrt(x), x^2, exp(x), log(x),
-                 expm1(x), log1p(x), n^x, log(x,n), log10(x), 10^x, log2(x), 2^x,
-                 n+x, x-n, n-x, n-x, n*x, x/n, n/x, n/x, +x, +x, -x, -x,
-                 I(x), I(x), cos(x), acos(x), sin(x), asin(x), tan(x), atan(x),
-                 cosh(x), acosh(x), sinh(x), asinh(x), tanh(x), atanh(x)))
-  fns[[1]] <- NULL
+
   results <- with(fns, recur(fun))
   fn <- function(x) {}
   body(fn) <- results$fn
