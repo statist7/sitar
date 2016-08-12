@@ -42,6 +42,8 @@
 #' call. To plot on the transformed scale set \code{yfun} to \code{I}.
 #' @param subset optional logical vector of length \code{x} defining a subset
 #' of \code{data} rows to be plotted.
+#' @param ns scalar defining the number of points for spline curves
+#' (default 101).
 #' @param abc vector of named values of random effects a, b and c used to
 #' define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
 #' single character string defining an \code{id} level whose random effect
@@ -90,25 +92,30 @@
 #' @importFrom graphics axis identify legend lines locator par text title
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
-	                       abc=NULL, add=FALSE, nlme=FALSE, ...) {
+	                     ns=101, abc=NULL, add=FALSE, nlme=FALSE, ...) {
 	if (nlme) {
 	  do.call('plot.lme', as.list(match.call()[-1]))
 	}
 	else {
     options <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
-    optaxis <- c(1, 1, 1, 1, 1, 2, 2) # default y axis
-    optmult <- c(F, F, T, T, T, F, T) # multiple curves?
-    axismin <- 3; axismax <- 0
-    for (i in 1:nchar(opt)) {
-      no <- match(substr(opt, i, i), options, NA)
-      if (is.na(no)) next
-      if (optaxis[no] > axismax) axismax <- optaxis[no]
-      if (optaxis[no] < axismin) axismin <- optaxis[no]
-    }
-    if (axismin == 2) {
-      optaxis <- optaxis - 1
-      axismax <- axismin <- 1
-    }
+    optaxis <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
+    optmult <- c( F,   F,   T,   T,   T,   F,   T ) # multiple curves
+    opts <- na.omit(match(unlist(strsplit(opt, '')), options))
+    if (length(opts) == 0) stop('option(s) not recognised')
+    y2 <- diff(range(optaxis[opts])) == 1 # need both y1 and y2
+    mult <- any(optmult[opts]) # multiple curves
+# identify axis ranges then draw axes
+    # axismin <- 3; axismax <- 0
+    # for (i in 1:nchar(opt)) {
+    #   no <- match(substr(opt, i, i), options, NA)
+    #   if (is.na(no)) next
+    #   if (optaxis[no] > axismax) axismax <- optaxis[no]
+    #   if (optaxis[no] < axismin) axismin <- optaxis[no]
+    # }
+    # if (axismin == 2) {
+    #   optaxis <- optaxis - 1
+    #   axismax <- axismin <- 1
+    # }
     model <- x
 		data <- getData(model)
 		mcall <- model$call.sitar
@@ -116,17 +123,15 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		y <- getResponse(model)
 		id <- getGroups(model)
 		nf <- length(fitted(model))
-		if (nf != length(y)) stop(paste0('model (length=', nf, ') incompatible with data (rows=', length(y), ')'))
-
+		if (nf != length(y))
+		  stop(paste0('model (length=', nf, ') incompatible with data (nrows=', length(y), ')'))
 #	extract list(...)
-		ccall <- match.call()[-1]
+		ccall <- match.call(expand.dots=FALSE)
 #	subset to plot model
-		subset <- if (is.null(subset))
-		  rep_len(TRUE, nf)
-		else
-		  eval(ccall$subset, data, parent.frame())
+		subset <- eval(ccall$subset, data, parent.frame())
+		if (is.null(subset)) subset <- rep_len(TRUE, nf)
 # ... args
-		dots <- match.call(expand.dots=FALSE)$...
+		dots <- ccall$...
 		ARG <- if(!is.null(dots))
 		  lapply(as.list(dots), eval, data, parent.frame())
 		else
@@ -174,13 +179,13 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		  add <- TRUE
 		}
 
-		xseq <- function(x, n=101) {
+		xseq <- function(x, n=ns) {
 		  # n is the number of points across the x range
 		  rx <- range(x, na.rm=TRUE)
 		  seq(rx[1], rx[2], length.out=n)
 		}
 
-		stackage <- function(x, id, n=101) {
+		stackage <- function(x, id, n=ns) {
 		  # generate x and id values across the x range to plot spline curves
 		  npt <- n / diff(range(x))
 		  xid <- by(data.frame(x=x, id=id), id, function(z) {
@@ -216,7 +221,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			xt <- xseq(x[subset])
   		newdata <- data.frame(x=xt)
 # if subset, flag for predict
-      if (!identical(subset, rep(TRUE, nf))) attr(newdata, 'subset') <- subset
+      if (!identical(subset, rep_len(TRUE, nf))) attr(newdata, 'subset') <- subset
 
 #	adjust for abc
 			if (!is.null(abc)) {

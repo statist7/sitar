@@ -6,8 +6,8 @@
 \title{Plot SITAR model}
 \usage{
 \method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun = NULL,
-  yfun = NULL, subset = NULL, abc = NULL, add = FALSE, nlme = FALSE,
-  ...)
+  yfun = NULL, subset = NULL, ns = 101, abc = NULL, add = FALSE,
+  nlme = FALSE, ...)
 
 \method{lines}{sitar}(x, ...)
 }
@@ -51,6 +51,9 @@ call. To plot on the transformed scale set \code{yfun} to \code{I}.}
 
 \item{subset}{optional logical vector of length \code{x} defining a subset
 of \code{data} rows to be plotted.}
+
+\item{ns}{scalar defining the number of points for spline curves
+(default 101).}
 
 \item{abc}{vector of named values of random effects a, b and c used to
 define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
