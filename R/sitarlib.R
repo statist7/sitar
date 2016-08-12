@@ -239,51 +239,32 @@
 #	xy set uses par() from previous call
 #	xlegend and inset place legend (NULL suppresses)
 {
-# get axis labels
-	if (missing(labels)) labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
-#	plot y1
+#	save par args
+	opar <- par(no.readonly=TRUE)
+#	args for y1 and y2
 	ypar <- list(...)
 	y2par <- as.list(y2par)
-#	save y1 par args
-	opar <- par(no.readonly=TRUE)
-	lty <- 1:2
-	lwd <- rep(par('lwd'), 2)
-	col <- rep(par('col'), 2)
-	for (i in c('lty', 'lwd', 'col')) {
-		j <- get(i)
-		if (i %in% names(ypar)) {
-			j[1] <- ypar[i]
-			assign(i, unlist(j))
-		}
-		else ypar[i] <- j[1]
-	}
-#	save y2 par args
-	if (!missing(y2)) {
-		for (i in c('lty', 'lwd', 'col')) {
-			j <- get(i)
-			if (i %in% names(y2par)) {
-				j[2] <- y2par[i]
-				assign(i, unlist(j))
-			}
-			else y2par[i] <- j[2]
-		}
-	}
 #	if a new plot draw axes
 	if (!add) {
 #	if mar specified then set it
 		if (!is.null(ypar$mar)) {
 			mar <- ypar$mar
 		}
-		else {
 #	otherwise reset mar
+		else {
 			mar <- c(5,4,4,2) + 0.1
 #	if y2 set increase mar[4]
 			if (!missing(y2)) mar[4] <- 4.1
 		}
 		par(mar=mar)
+# get axis labels
+  	if (missing(labels))
+  	  labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
+		if (is.null(ypar$xlab))
+		  ypar$xlab <- labels[1]
+		if (is.null(ypar$ylab))
+		  ypar$ylab <- labels[2]
 #	plot x & y1 axes and y1 ~ x
-		if (is.null(ypar$xlab)) ypar$xlab <- labels[1]
-		if (is.null(ypar$ylab)) ypar$ylab <- labels[2]
 		do.call('plot', c(list(x=quote(x), y=quote(y1), type='l'), ypar))
 #	save x & y1 axis limits
 		xy$usr <- par('usr')
@@ -291,21 +272,50 @@
 		if (!missing(y2)) {
 			par(new=TRUE)
 #	ensure x axis same for y2 as y1
-			if (!is.null(ypar$xlim) && is.null(y2par$xlim)) y2par$xlim <- ypar$xlim
-			if (is.null(y2par$ylab)) y2par$ylab <- labels[3]
-			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, bty="n", xaxt="n", yaxt="n", type="l"), y2par))
+		  if (!is.null(ypar$xlim) && is.null(y2par$xlim)) y2par$xlim <- ypar$xlim
+# default dotted line for velocity curve
+		  if (is.null(y2par$lty)) y2par$lty <- 2
+			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, axes=FALSE, type="l"), y2par))
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
 			eval(parse(text=".par.usr2 <<- par('usr')"))
-			# .par.usr2 <<- par('usr')
 #	add y2 axis
-			if (par('mar')[4] >= 2) axis(4)
-#	unset col
-			y2par$col <- NULL
+			localdots <- function(..., col, bg, pch, cex, lty, lwd) list(...)
+			localaxis <- function(..., col, bg, pch, cex, lty, lwd) axis(...)
+			localmtext <- function(text, ..., col, bg, pch, cex, lty, lwd, las) mtext(text, ...)
+			mgp <-  if (!is.null(ypar$mgp))
+			  ypar$mgp
+			else
+			  par('mgp')
+			do.call('localaxis', c(list(side=4), y2par))
 #	add y2 axis label
-			if (par('mar')[4] >= 3) do.call('mtext', c(list(text=labels[3], side=4, line=3, cex=par()$cex), y2par))
+			do.call('localmtext', c(list(text=labels[3], side=4, line=mgp[1], cex=par()$cex), y2par))
 #	add legend
-			if (!is.null(xlegend) && !is.null(inset)) legend(xlegend, legend=labels[2:3], bty="o", lty=lty, lwd=lwd, col=col, inset=inset)
+			lty <- 1:2
+			lwd <- rep(par('lwd'), 2)
+			col <- rep(par('col'), 2)
+			for (i in c('lty', 'lwd', 'col')) {
+				j <- get(i)
+				if (i %in% names(ypar)) {
+					j[1] <- ypar[i]
+					assign(i, unlist(j))
+				}
+				else ypar[i] <- j[1]
+			}
+		#	save y2 par args
+			if (!missing(y2)) {
+				for (i in c('lty', 'lwd', 'col')) {
+					j <- get(i)
+					if (i %in% names(y2par)) {
+						j[2] <- y2par[i]
+						assign(i, unlist(j))
+					}
+					else y2par[i] <- j[2]
+				}
+			}
+			if (!is.null(xlegend) && !is.null(inset))
+			  legend(xlegend, legend=labels[2:3], bty="o",
+			         lty=lty, lwd=lwd, col=col, inset=inset)
 #	reset axis limits
 			par(usr=xy$usr)
 		}
@@ -318,7 +328,6 @@
 			if (exists('xy$usr2')) {
 				par(usr=xy$usr2)
 				eval(parse(text=".par.usr2 <<- par('usr')"))
-				# .par.usr2 <<- par('usr')
 			}
 			else if (exists('.par.usr2')) {
 				par(usr=.par.usr2)
