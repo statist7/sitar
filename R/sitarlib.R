@@ -283,6 +283,7 @@
 			localdots <- function(..., col, bg, pch, cex, lty, lwd) list(...)
 			localaxis <- function(..., col, bg, pch, cex, lty, lwd) axis(...)
 			localmtext <- function(text, ..., col, bg, pch, cex, lty, lwd, las) mtext(text, ...)
+			y2par <- c(y2par, do.call('localdots', c(ypar)))
 			mgp <-  if (!is.null(ypar$mgp))
 			  ypar$mgp
 			else
