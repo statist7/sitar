@@ -292,31 +292,19 @@
 #	add y2 axis label
 			do.call('localmtext', c(list(text=labels[3], side=4, line=mgp[1], cex=par()$cex), y2par))
 #	add legend
-			lty <- 1:2
-			lwd <- rep(par('lwd'), 2)
-			col <- rep(par('col'), 2)
-			for (i in c('lty', 'lwd', 'col')) {
-				j <- get(i)
-				if (i %in% names(ypar)) {
-					j[1] <- ypar[i]
-					assign(i, unlist(j))
-				}
-				else ypar[i] <- j[1]
-			}
-		#	save y2 par args
-			if (!missing(y2)) {
-				for (i in c('lty', 'lwd', 'col')) {
-					j <- get(i)
-					if (i %in% names(y2par)) {
-						j[2] <- y2par[i]
-						assign(i, unlist(j))
-					}
-					else y2par[i] <- j[2]
-				}
-			}
-			if (!is.null(xlegend) && !is.null(inset))
+			if (!is.null(xlegend) && !is.null(inset)) {
+  			parlu <- function(...) par(do.call('par', list(...)))
+  			llc <- sapply(c('lty', 'lwd', 'col'), function(i) {
+  			  p12 <- rep(par()[[i]], 2)
+  			  if (!is.null(ypar[[i]]))
+  			    p12[1] <- do.call('parlu', as.list(ypar[i]))[[i]]
+  			  if (!is.null(y2par[[i]]))
+  			    p12[2] <- do.call('parlu', as.list(y2par[i]))[[i]]
+  			  p12
+  			})
 			  legend(xlegend, legend=labels[2:3], bty="o",
-			         lty=lty, lwd=lwd, col=col, inset=inset)
+			         lty=llc[, 'lty'], lwd=llc[, 'lwd'], col=llc[, 'col'], inset=inset)
+			}
 #	reset axis limits
 			par(usr=xy$usr)
 		}
