@@ -89,7 +89,7 @@
 #' lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
 #'
 #' @importFrom grDevices xy.coords
-#' @importFrom graphics axis identify legend lines locator par text title
+#' @importFrom graphics axis identify legend lines locator par text title mtext
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
 	                     ns=101, abc=NULL, add=FALSE, nlme=FALSE, ...) {
