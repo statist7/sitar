@@ -279,18 +279,19 @@
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
 			eval(parse(text=".par.usr2 <<- par('usr')"))
-#	add y2 axis
+# local functions
 			localdots <- function(..., col, bg, pch, lty, lwd) list(...)
 			localaxis <- function(..., col, bg, pch, lty, lwd) axis(...)
-			localmtext <- function(text, ..., col, bg, pch, lty, lwd, las) mtext(text, ...)
-# copy relevant args to y2 axis
+			localmtext <- function(..., col, bg, pch, lty, lwd, las) mtext(...)
+# copy relevant args for y2 axis
 			y2par <- c(y2par, do.call('localdots', c(ypar)))
+#	add y2 axis
+			do.call('localaxis', c(list(side=4), y2par))
+#	add y2 axis label
 			mgp <-  if (!is.null(ypar$mgp))
 			  ypar$mgp
 			else
 			  par('mgp')
-			do.call('localaxis', c(list(side=4), y2par))
-#	add y2 axis label
 			do.call('localmtext', c(list(text=labels[3], side=4, line=mgp[1]), y2par))
 #	add legend
 			if (!is.null(xlegend) && !is.null(inset)) {
