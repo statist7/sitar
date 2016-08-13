@@ -254,7 +254,7 @@
 		else {
 			mar <- c(5,4,4,2) + 0.1
 #	if y2 set increase mar[4]
-			if (!missing(y2)) mar[4] <- 4.1
+			if (!missing(y2)) mar[4] <- mar[2]
 		}
 		par(mar=mar)
 # get axis labels
@@ -280,9 +280,10 @@
 			xy$usr2 <- par('usr')
 			eval(parse(text=".par.usr2 <<- par('usr')"))
 #	add y2 axis
-			localdots <- function(..., col, bg, pch, cex, lty, lwd) list(...)
-			localaxis <- function(..., col, bg, pch, cex, lty, lwd) axis(...)
-			localmtext <- function(text, ..., col, bg, pch, cex, lty, lwd, las) mtext(text, ...)
+			localdots <- function(..., col, bg, pch, lty, lwd) list(...)
+			localaxis <- function(..., col, bg, pch, lty, lwd) axis(...)
+			localmtext <- function(text, ..., col, bg, pch, lty, lwd, las) mtext(text, ...)
+# copy relevant args to y2 axis
 			y2par <- c(y2par, do.call('localdots', c(ypar)))
 			mgp <-  if (!is.null(ypar$mgp))
 			  ypar$mgp
@@ -290,16 +291,16 @@
 			  par('mgp')
 			do.call('localaxis', c(list(side=4), y2par))
 #	add y2 axis label
-			do.call('localmtext', c(list(text=labels[3], side=4, line=mgp[1], cex=par()$cex), y2par))
+			do.call('localmtext', c(list(text=labels[3], side=4, line=mgp[1]), y2par))
 #	add legend
 			if (!is.null(xlegend) && !is.null(inset)) {
   			parlu <- function(...) par(do.call('par', list(...)))
   			llc <- sapply(c('lty', 'lwd', 'col'), function(i) {
   			  p12 <- rep(par()[[i]], 2)
   			  if (!is.null(ypar[[i]]))
-  			    p12[1] <- do.call('parlu', as.list(ypar[i]))[[i]]
+  			    p12[1] <- parlu(ypar[i])[[1]]
   			  if (!is.null(y2par[[i]]))
-  			    p12[2] <- do.call('parlu', as.list(y2par[i]))[[i]]
+  			    p12[2] <- parlu(y2par[i])[[1]]
   			  p12
   			})
 			  legend(xlegend, legend=labels[2:3], bty="o",
