@@ -57,7 +57,7 @@
 	if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
 	ARG <- unique(c(unlist(sapply(ARG, deparse)), pattern))
 	dev <- sapply(ARG, function(obj) {
-		obj <- get(obj)
+		obj <- dynGet(obj, minframe=0)
 		if (is.character(try(ll <- logLik(obj), TRUE))) return(NA)
 #	check for call.sitar$y or else call$y or else call$formula
 		if (!is.null(obj$call.sitar)) obj$call <- obj$call.sitar
@@ -93,7 +93,7 @@
 	if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
 	ARG <- unique(c(unlist(sapply(ARG, deparse)), pattern))
 	dev <- sapply(ARG, function(obj) {
-		obj <- get(obj)
+	  obj <- dynGet(obj, minframe=0)
 		if (is.character(try(ll <- logLik(obj), TRUE))) return(NA)
 #	check for call.sitar$y or else call$y or else call$formula
 		if (!is.null(obj$call.sitar)) obj$call <- obj$call.sitar
