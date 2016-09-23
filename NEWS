@@ -1,3 +1,11 @@
+Changes in Version 1.0.8
+
+  o Use dynGet instead of get in BICadj.
+
+  o Improve handling of y2 axis in y2plot.
+
+  o Fix bug in plot.sitar introduced in 1.0.7.
+
 Changes in Version 1.0.7
 
   o Add github URL to DESCRIPTION.
