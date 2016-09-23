@@ -244,6 +244,8 @@
 #	args for y1 and y2
 	ypar <- list(...)
 	y2par <- as.list(y2par)
+# default dotted line for velocity curve
+	if (is.null(y2par$lty)) y2par$lty <- 2
 #	if a new plot draw axes
 	if (!add) {
 #	if mar specified then set it
@@ -273,8 +275,6 @@
 			par(new=TRUE)
 #	ensure x axis same for y2 as y1
 		  if (!is.null(ypar$xlim) && is.null(y2par$xlim)) y2par$xlim <- ypar$xlim
-# default dotted line for velocity curve
-		  if (is.null(y2par$lty)) y2par$lty <- 2
 			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, axes=FALSE, type="l"), y2par))
 #	save y2 axis limits
 			xy$usr2 <- par('usr')
