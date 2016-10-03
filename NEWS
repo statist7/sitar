@@ -1,5 +1,8 @@
 Changes in Version 1.0.8
 
+  o timegap (new) indexes equally spaced ages, to simplify binning age
+    into age groups.
+
   o Use dynGet instead of get in BICadj.
 
   o Improve handling of y2 axis in y2plot.
