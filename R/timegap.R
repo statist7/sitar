@@ -4,39 +4,48 @@
 #' ages are spaced integer multiples of a time interval apart, to within a given
 #' tolerance. \code{timegap.id} is a wrapper to apply \code{timegap} within levels
 #' of factor \code{id}. The selected ages can then be split into age groups the
-#' specified interval wide, ensuring that each subject has just one measurement
-#' per interval.
+#' specified time interval wide, ensuring that (virtually) every subject
+#' has just one measurement per interval.
 #'
 #' \code{timegap} calculates all possible differences between pairs of ages,
 #' expresses them as integer multiples of \code{gap}, restricts them to
-#' those within tolerance and identifies those providing the longest sequence.
+#' those within tolerance and identifies those providing the longest sequences.
 #' For solutions of the same length, those with the smallest standard deviation
 #' of successive differences are selected.
 #'
-#' With \code{timegap}, for unique solutions, or multiple solutions with
-#' \code{multiple FALSE},
-#' a vector of indices the same length as, and named with, \code{age}.
-#' Where there are multiple solutions with \code{multiple TRUE},
-#' they are returned as a named matrix. With \code{timegap.id} the subject
-#' vectors are returned invisibly, concatenated into a single vector.
-#'
-#' @aliases timegap timegap.id diff.id
+#' @aliases timegap timegap.id diffid
 #' @param age vector of ages.
 #' @param id factor of subject ids.
-#' @param data frame optionally containing \code{age} and \code{id}.
-#' @param gap numeric, the required time gap between selected ages.
-#' @param tol numeric, the tolerance around the gap (default \code{0.1 * gap}).
+#' @param data data frame optionally containing \code{age} and \code{id}.
+#' @param gap numeric, the required positive time gap between selected ages.
+#' @param tol numeric, the positive tolerance around the gap (default \code{0.1 * gap}).
 #' @param multiple logical, whether or not to return multiple solutions
 #' when found (default FALSE).
-#' @return index of selected ages, named by value of \code{age}.
+#' @return With \code{timegap}, for unique solutions, or multiple solutions with
+#' \code{multiple FALSE}, a vector of indices named with \code{age}. With
+#' \code{timegap.id} the subject vectors are returned invisibly, concatenated.
+#'
+#' With \code{multiple TRUE}, where there are multiple solutions
+#' they are returned as a named matrix.
+#'
+#' \code{diffid} returns \code{diff(age)} applied within \code{id} and with
+#' \code{NA} added at the end.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
 #' data(heights)
-#' ## select heights measured multiples of 1 year apart
-#' (timegap.id(age, id, heights, 1))
 #'
-#' ## select heights measured multiples of 4 months apart
-#' (timegap.id(age, id, heights, 1/3))
+#' ## bin age into 1-year groups by id
+#' ## gives multiple measurements per id per year
+#' with(heights, table(floor(age), id))
+#'
+#' ## now select heights measured multiples of 1 year apart
+#' (tg1 <- timegap.id(age, id, heights, 1))
+#'
+#' ## only one measurement per id per year
+#' with(heights[tg1, ], table(floor(age), id))
+#'
+#' ## most time intervals close to 1 year
+#' summary(diffid(age, id, heights[tg1, ]))
 #' @export timegap
 timegap <- function(age, gap, tol=0.1*gap, multiple=FALSE) {
 # age, a vector of ages
@@ -100,7 +109,7 @@ timegap <- function(age, gap, tol=0.1*gap, multiple=FALSE) {
   return(which((resmat[, which.max(margin)] == 1)[to]))
 }
 
-#' @rdname timegap.id
+#' @rdname timegap
 #' @export
 timegap.id <- function(age, id, data=parent.frame(), gap, tol=0.1*gap, multiple=FALSE) {
   bylist <- with(data, by(data, id, function(z)
@@ -115,9 +124,9 @@ timegap.id <- function(age, id, data=parent.frame(), gap, tol=0.1*gap, multiple=
   invisible(subset)
 }
 
-#' @rdname diff.id
+#' @rdname timegap
 #' @export
-diff.id <- function(age, id, data=parent.frame()) {
+diffid <- function(age, id, data=parent.frame()) {
   on.exit(detach(data))
   eval(parse(text='attach(data)'))
   age <- setNames(age, id)
