@@ -65,7 +65,7 @@
 #' @param na.action function for when the data contain NAs (see
 #' \code{\link{nlme}}).
 #' @param control list of control values for the estimation algorithm (see
-#' \code{\link{nlme}}).
+#' \code{\link{nlme}}). By default returnObject is set TRUE to return unconverged models.
 #' @param object object of class \code{sitar}.
 #' @param \dots further parameters for \code{update} consisting of any of the
 #' above \code{sitar} parameters.
@@ -317,17 +317,12 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   if (is.null(mcall))
     stop("need an object with call.sitar component")
   extras <- as.list(match.call(expand.dots = FALSE)$...)
-  #	drop null args
   mcall$start <- NULL
-  for (i in names(extras))
-    if (is.null(extras[[i]]))
-      mcall[[i]] <- extras[[i]] <- NULL
   #	expand formulae
   if (any(grep('formula', names(extras)))) {
-    for (a in letters[1:3]) {
-      n <- paste(a, 'formula', sep='.')
+    for (n in paste0(letters[1:3], '.formula')) {
       if (!is.null(extras[[n]]) && !is.null(mcall[[n]]))
-        extras[[n]] <-  update.formula(mcall[[n]], extras[[n]])
+        extras[[n]] <- update.formula(mcall[[n]], extras[[n]])
     }
   }
   # update args
