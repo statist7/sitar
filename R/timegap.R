@@ -5,13 +5,13 @@
 #' tolerance. \code{timegap.id} is a wrapper to apply \code{timegap} within levels
 #' of factor \code{id}. The selected ages can then be split into age groups the
 #' specified time interval wide, ensuring that (virtually) every subject
-#' has just one measurement per interval.
+#' has at most one measurement per interval.
 #'
 #' \code{timegap} calculates all possible differences between pairs of ages,
 #' expresses them as integer multiples of \code{gap}, restricts them to
 #' those within tolerance and identifies those providing the longest sequences.
-#' For solutions of the same length, those with the smallest standard deviation
-#' of successive differences are selected.
+#' For sequences of the same length, those with the smallest standard deviation
+#' of successive differences (modulo the time interval) are selected.
 #'
 #' @aliases timegap timegap.id diffid
 #' @param age vector of ages.
