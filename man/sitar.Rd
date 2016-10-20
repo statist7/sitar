@@ -79,7 +79,7 @@ that should be used in the fit (see \code{\link{nlme}}).}
 \code{\link{nlme}}).}
 
 \item{control}{list of control values for the estimation algorithm (see
-\code{\link{nlme}}).}
+\code{\link{nlme}}) (default {nlmeControl(returnObject=TRUE)}).}
 
 \item{object}{object of class \code{sitar}.}
 
