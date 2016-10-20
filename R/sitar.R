@@ -65,7 +65,7 @@
 #' @param na.action function for when the data contain NAs (see
 #' \code{\link{nlme}}).
 #' @param control list of control values for the estimation algorithm (see
-#' \code{\link{nlme}}). By default returnObject is set TRUE to return unconverged models.
+#' \code{\link{nlme}}) (default {nlmeControl(returnObject=TRUE)}).
 #' @param object object of class \code{sitar}.
 #' @param \dots further parameters for \code{update} consisting of any of the
 #' above \code{sitar} parameters.
