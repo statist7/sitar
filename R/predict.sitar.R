@@ -70,8 +70,10 @@
     }
     newdata$x <- newdata$x - xoffset
 # create id in newdata
-    if (any(level == 1)) newdata$id <- eval(oc$id, newdata)
-    else newdata$id <- rep.int(getGroups(object)[1], nrow(newdata))
+    if (is.null(newdata$id)) {
+      if (any(level == 1)) newdata$id <- eval(oc$id, newdata)
+      else newdata$id <- rep.int(getGroups(object)[1], nrow(newdata))
+    }
     id <- newdata$id <- factor(newdata$id)
 # check abc
     if (abcset <- !is.data.frame(abc)) {
