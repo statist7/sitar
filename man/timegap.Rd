@@ -11,7 +11,8 @@ timegap(age, gap, tol = 0.1 * gap, multiple = FALSE)
 timegap.id(age, id, data = parent.frame(), gap, tol = 0.1 * gap,
   multiple = FALSE)
 
-diffid(age, id, data = parent.frame())
+diffid(age, id, data = parent.frame(), lag = 1, differences = 1,
+  sort = FALSE, keepNA = FALSE)
 }
 \arguments{
 \item{age}{vector of ages.}
@@ -26,6 +27,14 @@ when found (default FALSE).}
 \item{id}{factor of subject ids.}
 
 \item{data}{data frame optionally containing \code{age} and \code{id}.}
+
+\item{lag}{an integer indicating which lag to use.}
+
+\item{differences}{an integer indicating the order of the difference.}
+
+\item{sort}{a logical indicating whether to first sort by id and age.}
+
+\item{keepNA}{a logical indicating whether to keep generated NAs.}
 }
 \value{
 With \code{timegap}, for unique solutions, or multiple solutions with
@@ -35,8 +44,9 @@ With \code{timegap}, for unique solutions, or multiple solutions with
 With \code{multiple TRUE}, where there are multiple solutions
 they are returned as a named matrix.
 
-\code{diffid} returns \code{diff(age)} applied within \code{id} and with
-\code{NA} added at the end.
+\code{diffid} returns \code{diff(age)} applied within \code{id}.
+With \code{keepNA} TRUE a suitable number of \code{NA}s are added at the end,
+while if FALSE all \code{NA}s are omitted.
 }
 \description{
 \code{timegap} indexes elements in a vector of ages such that the indexed
@@ -63,11 +73,11 @@ with(heights, table(floor(age), id))
 ## now select heights measured multiples of 1 year apart
 (tg1 <- timegap.id(age, id, heights, 1))
 
-## only one measurement per id per year
+## no more than one measurement per id per year
 with(heights[tg1, ], table(floor(age), id))
 
 ## most time intervals close to 1 year
-summary(diffid(age, id, heights[tg1, ]))
+summary(diffid(age, id, heights[tg1, ], lag=1))
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
