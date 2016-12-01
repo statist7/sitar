@@ -254,7 +254,7 @@
 		}
 #	otherwise reset mar
 		else {
-			mar <- c(5,4,4,2) + 0.1
+			mar <- opar$mar
 #	if y2 set increase mar[4]
 			if (!missing(y2)) mar[4] <- mar[2]
 		}
