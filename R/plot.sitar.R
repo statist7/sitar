@@ -270,7 +270,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
 #	plot adjusted y vs adjusted t by subject
 		if (grepl("a", opt)) {
-			yt <- xyadj(x, y, id, model)
+			yt <- xyadj(model, x, y, id)
 			xt <- yt$x
 			yt <- yt$y
     	do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))

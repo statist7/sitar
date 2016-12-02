@@ -145,7 +145,7 @@
       if (deriv == 0) { # abcset
 # level 1 prediction based on x changed to reflect individual b and c
         pred <- spline(list(x=x, y=pred), method='natural',
-                      xout=xyadj(x=x, id=id, object=object, abc=abc)$x)$y
+                      xout=xyadj(object=object, x=x, id=id, abc=abc)$x)$y
 # add individual a to prediction (inexact when yfun != y)
         if (!is.null(abc$a)) pred <- yfun(pred + abc$a)
       }
@@ -157,7 +157,7 @@
         if (any(level == 1) || abcset) {
 # level 1 prediction based on x changed to reflect individual b and c
           pred <- spline(vel0, method='natural',
-                         xout=xfun(xyadj(x=x, id=id, object=object, abc=abc)$x))$y
+                         xout=xfun(xyadj(object=object, x=x, id=id, abc=abc)$x))$y
 # multiply velocity by individual c (inexact when xfun != x)
           if (!is.null(abc$c)) pred <- pred * exp(abc$c)
         }
