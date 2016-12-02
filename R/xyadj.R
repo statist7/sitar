@@ -11,7 +11,8 @@
 #' set to zero.
 #'
 #' @param object a SITAR model.
-#' @param x a vector of x coordinates.
+#' @param x a vector of x coordinates. If missing, \code{x} and
+#' \code{y} and \code{id} are obtained from \code{object}.
 #' @param y a vector of y coordinates (default NULL).
 #' @param id a factor denoting the subject levels corresponding to \code{x} and
 #' \code{y}.
@@ -34,11 +35,16 @@
 #' plot(m1, opt='u')
 #'
 #' ## overplot with adjusted data as points
-#' with(heights, points(xyadj(m1, age, height, id), col='red', pch=19))
+#' with(heights, points(xyadj(m1), col='red', pch=19))
 #'
 #' @export xyadj
 xyadj <- function(object, x, y=NULL, id, abc=ranef(object)[id, ], tomean=TRUE) {
 #	returns x and y adjusted for random effects a, b and c
+  if (missing(x)) {
+    x <- getCovariate(object)
+    y <- getResponse(object)
+    id <- getGroups(object)
+  }
   abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # omit not in model
   xoffset <- object$xoffset
   if (!is.na(b0 <- fixef(object)['b'])) xoffset <- xoffset + b0

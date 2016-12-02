@@ -4,17 +4,18 @@
 \alias{xyadj}
 \title{Adjust x and y variables for SITAR random effects}
 \usage{
-xyadj(x, y = NULL, id, object, abc = ranef(object)[id, ], tomean = TRUE)
+xyadj(object, x, y = NULL, id, abc = ranef(object)[id, ], tomean = TRUE)
 }
 \arguments{
-\item{x}{a vector of x coordinates.}
+\item{object}{a SITAR model.}
+
+\item{x}{a vector of x coordinates. If missing, \code{x} and
+\code{y} and \code{id} are obtained from \code{object}.}
 
 \item{y}{a vector of y coordinates (default NULL).}
 
 \item{id}{a factor denoting the subject levels corresponding to \code{x} and
 \code{y}.}
-
-\item{object}{a SITAR model.}
 
 \item{abc}{a data frame containing random effects for a, b and c (default
 \code{ranef(object)[id, ]}).}
@@ -50,7 +51,7 @@ m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
 plot(m1, opt='u')
 
 ## overplot with adjusted data as points
-with(heights, points(xyadj(age, height, id, m1), col='red', pch=19))
+with(heights, points(xyadj(m1), col='red', pch=19))
 
 }
 \author{
