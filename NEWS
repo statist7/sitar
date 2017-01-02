@@ -1,3 +1,17 @@
+Changes in Version 1.0.9
+
+  o return varname as attribute in ifun.
+
+  o Reorder args in xyadj.
+
+  o Fix bug in y2plot with par(mar).
+
+  o Add lag, differences, sort and keepNA to diffid args.
+
+  o Fix bug in predict.sitar concerning id in newdata.
+
+  o Improve handling of ... args in plot.sitar with D and V options.
+
 Changes in Version 1.0.8
 
   o timegap (new) indexes equally spaced ages, to simplify binning age
