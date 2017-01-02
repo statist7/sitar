@@ -140,11 +140,9 @@ ifun <- function(fun) {
 #   if bracketed drop brackets
     while (length(fun) > 1 && fun[[1]] == as.name('('))
       fun <- fun[[2]]
-    if ((ne <- length(fun)) > 1) {
+    if (!is.name(fun)) {
 #     element of expression containing varname (either 2 or 3, ignoring leading symbol)
       x1 <- which(vapply(fun, function(f) nvars(f) == 1, TRUE))[-1]
-#     element not containing varname (only relevant when ne == 3)
-      n1 <- 5 - x1
 #     if [cospi, sinpi, tanpi] drop 'pi' and multiply x by pi
       if (grepl('pi', fname <- as.name(fun[[1]]))) {
         fun[[1]] <- as.name(sub('pi', '', fname))
@@ -158,34 +156,33 @@ ifun <- function(fun) {
       if (length(nf) == 0)
         stop (paste('unrecognised name:', deparse(fun[[1]])))
 #     if multiple matches check if numeric args are equal
-      if (length(nf) > 1 && ne == 3) {
-        nft <- which(vapply(fns[nf], function(f) f[[n1]] == fun[[n1]], TRUE))
+      if (length(nf) > 1 && length(fun) == 3) {
+#     compare elements not containing varname
+        nft <- which(vapply(fns[nf], function(f) f[[5 - x1]] == fun[[5 - x1]], TRUE))
         if (length(nft)) nf <- nf[nft]
       }
 #     if more than one match use the first
       nf <- nf[[1]]
 #     use complement of pair as inverse function
       fn2 <- fns[[nf - 1 + 2 * (nf %% 2)]]
-#     identify position of x arg in inverse function
+#     element containing x arg in inverse function
       x2 <- which(as.list(fn2) == 'x')
 #     if length 3 copy n arg
       if (length(fn2) == 3) {
-        n2 <- 5 - x2
-  #       function returns value for n arg
+#     function returns value for n arg
         f <- function(n) {}
-        body(f) <- fn2[[n2]]
-        fn2[[n2]] <- f(eval(fun[[n1]]))
+        body(f) <- fn2[[5 - x2]]
+        fn2[[5 - x2]] <- f(eval(fun[[5 - x1]]))
       }
 #     copy x from current inverse function
       fn2[[x2]] <- funinv
 #     update function and inverse function and repeat as necessary
       fun <- fun[[x1]]
-      if (is.name(fun))
-        funinv <- fn2
-      else {
+      if (!is.name(fun)) {
         funinv <- (results <- recur(fun, fn2))$fn
         fun <- results$varname
-      }
+      } else
+        funinv <- fn2
     }
     return(list(fn=funinv, varname=fun))
   }
@@ -193,5 +190,6 @@ ifun <- function(fun) {
   results <- with(fns, recur(fun))
   fn <- function(x) {}
   body(fn) <- results$fn
+  attr(fn, 'varname') <- deparse(results$varname) # varname added as attribute
   return(list(fn=fn, varname=deparse(results$varname)))
 }
