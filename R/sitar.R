@@ -12,13 +12,12 @@
 #' purposes, and similarly for fixed effect \code{b}.
 #'
 #' The formulae \code{a.formula}, \code{b.formula} and \code{c.formula} can
-#' include interactions and functions, but the corresponding names in the model
-#' matrix are changed to remain valid. Hence ':' changes to '.' while '(' and
-#' ')' are omitted. The modified not the original names need to be specified in
-#' \code{predict.sitar}.
+#' include functions and interactions, but \code{\link{make.names}} is used to
+#' ensure that the names of the corresponding model terms are valid. The
+#' modified not the original names need to be specified in \code{predict.sitar}.
 #'
 #' \code{update} updates the model by taking the \code{object} call, adding any
-#' new parameters and replacing changed ones. Where possible the fixed and
+#' new parameters and replacing changed ones. Where feasible the fixed and
 #' random effects of the model being updated are suitably modified and passed
 #' via the \code{start} argument.
 #'
@@ -43,10 +42,10 @@
 #' @param start optional numeric vector of initial estimates for the fixed
 #' effects, or list of initial estimates for the fixed and random effects (see
 #' \code{\link{nlme}}).
-#' @param bstart optional starting value for fixed effect \code{b} (either
-#' "mean", "apv" or value (default \code{xoffset})).
 #' @param xoffset optional value of offset for \code{x} (either "mean"
 #' (default), "apv" or value).
+#' @param bstart optional starting value for fixed effect \code{b} (either
+#' "mean", "apv" or value (default \code{xoffset})).
 #' @param returndata logical which if TRUE causes the model matrix to be
 #' returned, or if FALSE (default) the fitted model. Setting returndata TRUE is
 #' useful in conjunction with \code{subset} and \code{\link{subsample}} for
@@ -75,11 +74,11 @@
 #' @return An object inheriting from class \code{sitar} representing the
 #' nonlinear mixed-effects model fit, with all the components returned by
 #' \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
-#' following components: \item{bstart}{the value of \code{bstart}.}
-#' \item{xoffset}{the value of \code{xoffset}.} \item{call.sitar}{the internal
-#' \code{sitar} call that produced the object.} \item{fitnlme}{the function
-#' returning the predicted value of \code{y}.} \item{ns}{the \code{lm} object
-#' providing starting values for the B-spline curve.}
+#' following components:
+#' \item{fitnlme}{the function returning the predicted value of \code{y}.}
+#' \item{call.sitar}{the internal \code{sitar} call that produced the object.}
+#' \item{xoffset}{the value of \code{xoffset}.}
+#' \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
 #'
 #' Generic functions such as \code{print}, \code{plot}, \code{anova} and
 #' \code{summary} have methods to show the results of the fit. The functions
@@ -111,27 +110,9 @@
 #' residuals sd setNames smooth.spline spline update update.formula
 #' @export sitar
 	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
-	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, bstart=xoffset, xoffset='mean',
+	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, xoffset='mean', bstart=xoffset,
 	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
 	                  na.action=na.fail, control = nlmeControl(returnObject=TRUE))
-#
-#	fit growth curves of y ~ ns(f(x)) by id
-#	df - number of knots (or length of knots + 1)
-#	knots - default x quantiles
-#	fixed - default random
-#	random - random effects, default "a+b+c"
-#	a.formula etc -  fixed effect formulae, default ~ 1
-#			to omit fixed effects use ~ -1
-#	bounds - span of ns, default x-range 4%
-#	start - starting values - default estimated
-#			requires spline coefficients, any missing zeroes added
-#	bstart - starting value for b, default xoffset
-#	xoffset - offset for x, default 'mean', alternatives 'apv' or value
-# returndata - if TRUE returns nlme data frame, not nlme model
-#	verbose etc - arguments passed to nlme
-
-#	returns call, ns, nlme.out if returndata FALSE
-#			else fulldata
 {
 	b.origin <- function(b) {
 		if (b == 'mean') return(mean(x))
@@ -174,7 +155,7 @@
 	if (!grepl('a', fix)) fix <- paste('a', fix, sep='+')
 
 # set up args for fitnlme
-	fixed <- ss <- paste('s', 1:df, sep='')
+	fixed <- ss <- paste0('s', 1:df)
 	pars <- c('x', ss)
 
 #	set up model elements for a, b and c
@@ -202,17 +183,9 @@
 				mm.formula <- formula
 				mm.intercept <- colnames(mm)[1] == '(Intercept)'
 # omit constant columns
-				cmm <- apply(mm, 2, function(x) max(x) > min(x))
-				mm <- mm[, colnames(mm)[cmm], drop=FALSE]
+				mm <- mm[, apply(mm, 2, function(x) max(x) > min(x)), drop=FALSE]
 # centre columns
 				mm <- scale(mm, scale=FALSE)
-#	convert column name spaces to underlines
-				colnames(mm) <- gsub(' ', '_', colnames(mm))
-#	convert column name colons to dots (from interaction)
-				colnames(mm) <- gsub(':', '.', colnames(mm), fixed=TRUE)
-#	omit column name brackets (from function)
-				colnames(mm) <- gsub('(', '', colnames(mm), fixed=TRUE)
-				colnames(mm) <- gsub(')', '', colnames(mm), fixed=TRUE)
 			}
 			if (exists('mm')) for (i in 1:ncol(mm)) {
 				var <- colnames(mm)[i]
@@ -235,6 +208,8 @@
 			}
 		}
 	}
+# ensure names are valid
+	names(fulldata) <- make.names(names(fulldata), unique=TRUE)
 
 # 	if (!is.null(weights)) {
 #     if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
@@ -278,7 +253,7 @@
 	"na.action = na.action, control = control, verbose = verbose)")
 
 		for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf'))
-  		fitcode <- gsub(paste('$', i, sep=''), get(i), fitcode, fixed=TRUE)
+  		fitcode <- gsub(paste0('$', i), get(i), fitcode, fixed=TRUE)
 
 #	print values
 		if (verbose) {
@@ -305,8 +280,6 @@
 		nlme.out
 	}
 }
-
-
 
 #' @rdname sitar
 #' @method update sitar

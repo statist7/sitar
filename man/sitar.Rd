@@ -7,7 +7,7 @@
 \usage{
 sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c",
   a.formula = ~1, b.formula = ~1, c.formula = ~1, bounds = 0.04, start,
-  bstart = xoffset, xoffset = "mean", returndata = FALSE,
+  xoffset = "mean", bstart = xoffset, returndata = FALSE,
   verbose = FALSE, correlation = NULL, weights = NULL, subset = NULL,
   method = "ML", na.action = na.fail, control = nlmeControl(returnObject =
   TRUE))
@@ -48,11 +48,11 @@ extension of range (default 0.04).}
 effects, or list of initial estimates for the fixed and random effects (see
 \code{\link{nlme}}).}
 
-\item{bstart}{optional starting value for fixed effect \code{b} (either
-"mean", "apv" or value (default \code{xoffset})).}
-
 \item{xoffset}{optional value of offset for \code{x} (either "mean"
 (default), "apv" or value).}
+
+\item{bstart}{optional starting value for fixed effect \code{b} (either
+"mean", "apv" or value (default \code{xoffset})).}
 
 \item{returndata}{logical which if TRUE causes the model matrix to be
 returned, or if FALSE (default) the fitted model. Setting returndata TRUE is
@@ -94,11 +94,11 @@ above \code{sitar} parameters.}
 An object inheriting from class \code{sitar} representing the
 nonlinear mixed-effects model fit, with all the components returned by
 \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
-following components: \item{bstart}{the value of \code{bstart}.}
-\item{xoffset}{the value of \code{xoffset}.} \item{call.sitar}{the internal
-\code{sitar} call that produced the object.} \item{fitnlme}{the function
-returning the predicted value of \code{y}.} \item{ns}{the \code{lm} object
-providing starting values for the B-spline curve.}
+following components:
+\item{fitnlme}{the function returning the predicted value of \code{y}.}
+\item{call.sitar}{the internal \code{sitar} call that produced the object.}
+\item{xoffset}{the value of \code{xoffset}.}
+\item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
 
 Generic functions such as \code{print}, \code{plot}, \code{anova} and
 \code{summary} have methods to show the results of the fit. The functions
@@ -127,13 +127,12 @@ affect the model fit and particularly \code{b}. The values of \code{bstart},
 purposes, and similarly for fixed effect \code{b}.
 
 The formulae \code{a.formula}, \code{b.formula} and \code{c.formula} can
-include interactions and functions, but the corresponding names in the model
-matrix are changed to remain valid. Hence ':' changes to '.' while '(' and
-')' are omitted. The modified not the original names need to be specified in
-\code{predict.sitar}.
+include functions and interactions, but \code{\link{make.names}} is used to
+ensure that the names of the corresponding model terms are valid. The
+modified not the original names need to be specified in \code{predict.sitar}.
 
 \code{update} updates the model by taking the \code{object} call, adding any
-new parameters and replacing changed ones. Where possible the fixed and
+new parameters and replacing changed ones. Where feasible the fixed and
 random effects of the model being updated are suitably modified and passed
 via the \code{start} argument.
 }
