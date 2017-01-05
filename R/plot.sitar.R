@@ -144,7 +144,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		    if(!is.null(xfun))
 		      paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
 		    else
-		      ifun(mcall$x)$varname
+		      attr(ifun(mcall$x), 'varname')
 		  }
 		}
 #	if ylab not specified replace with label or y name (depending on yfun)
@@ -155,7 +155,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		    if(!is.null(yfun))
 		      paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
 		    else
-		      ifun(mcall$y)$varname
+		      attr(ifun(mcall$y), 'varname')
 		  }
 		}
 # if labels not specified create it
@@ -167,9 +167,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
 # derive xfun and yfun
 		if (is.null(xfun))
-		  xfun <- ifun(mcall$x)$fn
+		  xfun <- ifun(mcall$x)
 		if (is.null(yfun))
-		  yfun <- ifun(mcall$y)$fn
+		  yfun <- ifun(mcall$y)
 
 #	plot y vs t by subject
 		if (grepl("u", opt)) {
