@@ -1,6 +1,7 @@
 Changes in Version 1.0.9
 
-  o return varname as attribute in ifun.
+  o Improve ifun call, code and documentation, adding verbose arg and
+    returning varname as attribute.
 
   o Reorder args in xyadj.
 

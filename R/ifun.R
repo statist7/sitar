@@ -1,112 +1,159 @@
 #' Invert an expression defining a data transformation
 #'
-#' Enables a transformed variable to be back-transformed to its original scale,
-#' e.g. for plotting purposes, by creating a function to invert the
-#' transforming expression.
+#' Given a transformed variable and the expression used to transform it, \code{ifun} creates
+#' a function containing the inverse expression that will back-transform the variable.
 #'
-#' \code{ifun} handles all the invertible functions in the 'Math' and 'Ops'
+#' \code{ifun} returns the inverting function such that
+#' \code{ifun(expr)(eval(expr)) = varname}, where
+#' \code{expr} can include any of the invertible functions in the 'Math' and 'Ops'
 #' groups.
 #'
-#' To explain how \code{ifun} works, consider as an example variants of the
-#' \code{sitar} model \code{height ~ age} where \code{age} and/or \code{height}
-#' may be transformed, e.g. \code{height ~ log(age)} or \code{log(height) ~
-#' sqrt(age)}. Thus each model is of the form \code{y ~ x} but the units of
-#' \code{x} and \code{y} vary.
+#' To illustrate its use, consider variants of the \code{sitar} model
+#' \code{height ~ age} where \code{age} and/or \code{height} are transformed,
+#' e.g. \code{height ~ log(age)} or \code{log(height) ~ sqrt(age)}. Each model
+#' is of the form \code{y ~ x} but the units of \code{x} and \code{y} vary.
 #'
-#' It is useful to be able to compare the models by plotting the fitted curves
-#' in the original units. This is done by applying suitable functions to invert
-#' the transformed variables prior to plotting. For example the
-#' \code{function(x) exp(x)} back-transforms \code{log(age)} and
-#' \code{log(height)}. \code{ifun} automates this process by creating a
-#' function to back-transform the general expression \code{fun(x)} to \code{x}.
+#' The models are compared by plotting the fitted curves in their original units,
+#' by first applying suitable functions to back-transform \code{x} and \code{y}.
+#' For example with \code{log(age)}, where \code{expr = quote(log(age))},
+#' the function \code{ifun = function(x) exp(x)} back-transforms
+#' \code{eval(expr)} to give \code{age}. See the first example.
 #'
-#' Structuring \code{fun} suitably ensures it can be inverted. It should
-#' contain a single mention of a single variable (named \code{varname} here),
-#' and possibly functions such as \eqn{f(.)}, \eqn{g(.)}, \eqn{h(.)} etc,
-#' each of which involves (a function of) (a single mention of) \code{varname}
-#' and up to one numerical expression, such that \code{fun} =
-#' \eqn{f(g(h((varname))))}. The number of such functions is in principle
-#' unlimited.
+#' \code{ifun} generalises this process for increasingly complex \code{expr}, as
+#' the next two examples show.
 #'
-#' \code{ifun} then returns
-#' \eqn{h^{-1}(g^{-1}(f^{-1}((eval(fun)))))}{h^-1(g^-1(f^-1((eval(fun)))))}
-#' as a function,
-#' with any numerical expressions evaluated, which means that \code{fun} is
-#' invertible so long as the individual functions are invertible. Note though
-#' that the function being invertible does not guarantee that variables can
-#' always be back-transformed, as for example the function may introduce
-#' \code{NaN}s.
+#' The final example shows \code{ifun} in action with \code{\link{plot.sitar}},
+#' which uses \code{ifun} as the default function for arguments \code{xfun} and
+#' \code{yfun} - they are used to back-transform \code{x} and \code{y} using the
+#' values of \code{expr} for \code{x} and \code{y} extracted from the model's
+#' \code{sitar} call.
 #'
-#' Note that \code{\link{plot.sitar}} uses \code{ifun} as the default for
-#' arguments \code{xfun} and \code{yfun}, where the corresponding values of
-#' \code{fun} are extracted from the model's \code{sitar} call.
+#' Structuring \code{expr} suitably ensures it can be inverted - it should
+#' contain a single mention of a single variable (\code{varname} here),
+#' and possibly functions such as \eqn{f(.)}, \eqn{g(.)}, \eqn{h(.)} etc
+#' such that \code{expr} = \eqn{f(g(h((varname))))}. The number of such functions
+#' is in principle unlimited. \code{ifun} returns \code{function(x)}
+#' \eqn{h^{-1}(g^{-1}(f^{-1}((x))))}{h^-1(g^-1(f^-1((x))))},
+#' which ensures that
+#' \code{expr} is invertible so long as the individual functions are invertible.
 #'
-#' @param fun a language object defining the expression to be inverted, best
-#' \code{quote}d to avoid evaluation.
-#' @return A list of length two: \item{fn}{the inverse function with argument
-#' \code{x} which applied to \code{eval(fun)} returns \code{varname}.}
-#' \item{varname}{the name of the variable in \code{fun} (given as a character
-#' string).}
+#' @param expr a single-variable call or quoted expression to be inverted.
+#' The variable's name in \code{expr} is referred to here as \code{varname}.
+#' @param verbose a logical controlling printing of the intermediate functions
+#' \eqn{f(.)}, \eqn{g(.)}, \eqn{h(.)} etc (see 'Details').
+#' @return The required inverting function, with single argument \code{x}. Its
+#' \code{"varname"} attribute contains \code{varname} as a character string.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{plot.sitar}}
 #' @examples
-#'
-#' ## define age
+#' ## define varname variable
 #' age <- 1:9
 #'
-#' ## simple case - transform age to log(age)
-#' (fun <- quote(log(age)))
+#' ## simple case - age transformed to log(age)
+#' (expr <- quote(log(age)))
+#' ## transformed age
+#' eval(expr)
+#' ## inverting function, with "varname" attribute set to "age"
+#' ifun(expr)
+#' ## inverted transformed age identical to age
+#' all.equal(age, ifun(expr)(eval(expr)))
 #'
-#' (transformed.age <- eval(fun))
-#' (inverting.function <- ifun(fun)$fn)
-#' (inverted.transformed.age <- inverting.function(transformed.age))
-#'
-#' ## is inverted transformed age identical to age?
-#' all.equal(age, inverted.transformed.age)
-#'
-#'
-#' ## more complex case - transform age to log age since conception
-#' fun <- quote(log(age + 0.75))
-#'
-#' (transformed.age <- eval(fun))
-#' (inverting.function <- ifun(fun)$fn)
-#' (inverted.transformed.age <- inverting.function(transformed.age))
-#'
-#' ## identical to original?
-#' all.equal(age, inverted.transformed.age)
-#'
+#' ## more complex case - age transformed to log age since conception
+#' expr <- quote(log(age + 0.75))
+#' ## inverting function
+#' ifun(expr)
+#' ## inverted transformed age identical to age
+#' all.equal(age, ifun(expr)(eval(expr)))
 #'
 #' ## ludicrously complex case involving exp, log10, ^, pi and trigonometry
-#' (fun <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
-#'
-#' (transformed.age <- eval(fun))
-#' (inverting.function <- ifun(fun)$fn)
-#' (inverted.transformed.age <- inverting.function(transformed.age))
-#'
-#' ## identical to original?
-#' all.equal(age, inverted.transformed.age)
-#'
+#' (expr <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
+#' ## inverting function
+#' ifun(expr, verbose=TRUE)
+#' ## identical to original
+#' all.equal(age, ifun(expr)(eval(expr)))
 #'
 #' ## example of plot.sitar back-transforming transformed x and y in sitar models
+#' ## fit sitar models
 #' m1 <- sitar(x=age, y=height, id=id, data=heights, df=6)
 #' m2 <- update(m1, y=height^2)
 #' m3 <- update(m1, x=log(age+0.75))
+#' ## compare model fit
+#' BICadj(m1, m2, m3)
 #'
-#' ## default plot settings back-transform x and y to original scales
-#' plot(m1, 'd')
+#' ## default plot options for xfun & yfun back-transform x & y to original scales
+#' ## xfun=ifun(x$call.sitar$x)
+#' ## yfun=ifun(x$call.sitar$y)
+#' ## compare mean curves for the three models with x & y on the original scales
+#' plot(m1, 'd', las=1)
 #' lines(m2, 'd', col=2)
 #' lines(m3, 'd', col=3)
-#'
 #' @export ifun
-ifun <- function(fun) {
+ifun <- function(expr, verbose=FALSE) {
 
-# returns number of names in function ignoring pi
-  nvars <- function(fun) {
-    length((av <- all.vars(fun, unique=FALSE))[grep('^pi$', av, invert=TRUE)])
+# returns number of names in expression ignoring pi
+  vars <- function(expr) {
+    (av <- all.vars(expr, unique=FALSE))[grep('^pi$', av, invert=TRUE)]
   }
 
-  if (nvars(fun) != 1)
-    stop('expression should contain just one instance of one name')
+# returns inverse function
+  recur <- function(fun, funinv=quote(x), verbose=verbose) {
+    fun <- as.expression(fun)[[1]]
+#   if verbose print intermediate functions
+    if (verbose) {
+      print(fun)
+      print(funinv)
+      cat('---\n')
+    }
+#   if bracketed drop brackets
+    while (length(fun) > 1 && fun[[1]] == as.name('('))
+      fun <- fun[[2]]
+    if (!is.name(fun)) {
+#     element of expression containing x (either 2 or 3, ignoring leading symbol)
+      x1 <- which(vapply(fun, function(f) length(vars(f)) == 1, TRUE))[-1]
+#     if [cospi, sinpi, tanpi] drop 'pi' and multiply x by pi
+      if (grepl('pi', fname <- as.name(fun[[1]]))) {
+        fun[[1]] <- as.name(sub('pi', '', fname))
+        f <- quote(x * pi)
+        f[[2]] <- fun[[2]]
+        fun[[2]] <- f
+      }
+#     expressions matching leading symbol with same length and x position
+      nf <- which(vapply(fns, function(f)
+        f[[1]] == fun[[1]] && length(f) == length(fun) && f[[x1]] == 'x', TRUE))
+      if (length(nf) == 0)
+        stop (paste('unrecognised name:', deparse(fun[[1]])))
+#     if multiple matches check if numeric args are equal
+      if (length(nf) > 1 && length(fun) == 3) {
+#     compare elements not containing x
+        nft <- which(vapply(fns[nf], function(f) f[[5 - x1]] == fun[[5 - x1]], TRUE))
+        if (length(nft)) nf <- nf[nft]
+      }
+#     if more than one match use the first
+      nf <- nf[[1]]
+#     use complement of pair as inverse function
+      fn2 <- fns[[nf - 1 + 2 * (nf %% 2)]]
+#     element containing x in inverse function
+      x2 <- which(as.list(fn2) == 'x')
+#     if length 3 copy n
+      if (length(fn2) == 3) {
+#     function returns value for n
+        f <- function(n) {}
+        body(f) <- fn2[[5 - x2]]
+        fn2[[5 - x2]] <- f(eval(fun[[5 - x1]]))
+      }
+#     update function and inverse function and repeat as necessary
+      fun <- fun[[x1]]
+      fn2[[x2]] <- funinv
+      funinv <- fn2
+      if (!is.name(fun)) {
+        results <- recur(fun, funinv, verbose=verbose)
+        fun <- results$fun
+        funinv <- results$funinv
+      }
+    }
+    return(list(funinv=funinv, fun=fun))
+  }
+
 # inverse function pairs
   fns <- quote(c(
     x+n, x-n,
@@ -134,62 +181,11 @@ ifun <- function(fun) {
     ))
   fns[[1]] <- NULL
 
-# returns inverse function
-  recur <- function(fun, funinv=quote(x)) {
-    fun <- as.expression(fun)[[1]]
-#   if bracketed drop brackets
-    while (length(fun) > 1 && fun[[1]] == as.name('('))
-      fun <- fun[[2]]
-    if (!is.name(fun)) {
-#     element of expression containing varname (either 2 or 3, ignoring leading symbol)
-      x1 <- which(vapply(fun, function(f) nvars(f) == 1, TRUE))[-1]
-#     if [cospi, sinpi, tanpi] drop 'pi' and multiply x by pi
-      if (grepl('pi', fname <- as.name(fun[[1]]))) {
-        fun[[1]] <- as.name(sub('pi', '', fname))
-        f <- quote(x * pi)
-        f[[2]] <- fun[[2]]
-        fun[[2]] <- f
-      }
-#     expressions matching leading symbol with same length and x arg position
-      nf <- which(vapply(fns, function(f)
-        f[[1]] == fun[[1]] && length(f) == length(fun) && f[[x1]] == 'x', TRUE))
-      if (length(nf) == 0)
-        stop (paste('unrecognised name:', deparse(fun[[1]])))
-#     if multiple matches check if numeric args are equal
-      if (length(nf) > 1 && length(fun) == 3) {
-#     compare elements not containing varname
-        nft <- which(vapply(fns[nf], function(f) f[[5 - x1]] == fun[[5 - x1]], TRUE))
-        if (length(nft)) nf <- nf[nft]
-      }
-#     if more than one match use the first
-      nf <- nf[[1]]
-#     use complement of pair as inverse function
-      fn2 <- fns[[nf - 1 + 2 * (nf %% 2)]]
-#     element containing x arg in inverse function
-      x2 <- which(as.list(fn2) == 'x')
-#     if length 3 copy n arg
-      if (length(fn2) == 3) {
-#     function returns value for n arg
-        f <- function(n) {}
-        body(f) <- fn2[[5 - x2]]
-        fn2[[5 - x2]] <- f(eval(fun[[5 - x1]]))
-      }
-#     copy x from current inverse function
-      fn2[[x2]] <- funinv
-#     update function and inverse function and repeat as necessary
-      fun <- fun[[x1]]
-      if (!is.name(fun)) {
-        funinv <- (results <- recur(fun, fn2))$fn
-        fun <- results$varname
-      } else
-        funinv <- fn2
-    }
-    return(list(fn=funinv, varname=fun))
-  }
-
-  results <- with(fns, recur(fun))
+  varname <- vars(expr)
+  if (length(varname) != 1)
+    stop('expression should contain just one instance of one name')
   fn <- function(x) {}
-  body(fn) <- results$fn
-  attr(fn, 'varname') <- deparse(results$varname) # varname added as attribute
-  return(list(fn=fn, varname=deparse(results$varname)))
+  body(fn) <- with(fns, recur(expr, verbose=verbose))$funinv
+  attr(fn, 'varname') <- varname
+  fn
 }
