@@ -127,6 +127,9 @@
 # get data
 	mcall <- match.call()
 	data <- eval(mcall$data, parent.frame())
+	subset <- eval(mcall$subset, data)
+	if (!is.null(subset))
+	  data <- data[subset, ]
 	x <- eval(mcall$x, data)
 	y <- eval(mcall$y, data)
 	xoffset <- b.origin(xoffset)
@@ -158,14 +161,20 @@
 	fixed <- ss <- paste0('s', 1:df)
 	pars <- c('x', ss)
 
+# if subsetted restore data
+  if (!is.null(subset)) {
+    data <- eval(mcall$data, parent.frame())
+    x <- eval(mcall$x, data) - xoffset
+    y <- eval(mcall$y, data)
+  } else {
+    subset <- 1:length(x)
+  }
+  id <- eval(mcall$id, data)
+  fulldata <- data.frame(x, y, id, subset)
+
 #	set up model elements for a, b and c
 	names(model) <- model <- letters[1:3]
 	constant <- mm.formula <- as.formula('~ 1')
-# mm.intercept <- TRUE
-	id <- eval(mcall$id, data)
-	subset <- eval(mcall$subset, data)
-	if (is.null(subset)) subset <- 1:length(x)
-	fulldata <- data.frame(x, y, id, subset)
 	for (l in model) {
 		if (!grepl(l, fix) && !grepl(l, random)) {
 			model[l] <- NA
