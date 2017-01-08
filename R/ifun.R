@@ -74,9 +74,8 @@
 #'
 #' ## example of plot.sitar back-transforming transformed x and y in sitar models
 #' ## fit sitar models
-#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=6)
-#' m2 <- update(m1, y=height^2)
-#' m3 <- update(m1, x=log(age+0.75))
+#' m1 <- sitar(x=age, y=height^2, id=id, data=heights, df=6)
+#' m2 <- update(m1, x=log(age+0.75), y=height)
 #' ## compare model fit
 #' BICadj(m1, m2, m3)
 #'
@@ -86,7 +85,6 @@
 #' ## compare mean curves for the three models with x & y on the original scales
 #' plot(m1, 'd', las=1)
 #' lines(m2, 'd', col=2)
-#' lines(m3, 'd', col=3)
 #' @export ifun
 ifun <- function(expr, verbose=FALSE) {
 
