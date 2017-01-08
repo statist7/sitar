@@ -76,8 +76,6 @@
 #' ## fit sitar models
 #' m1 <- sitar(x=age, y=height^2, id=id, data=heights, df=6)
 #' m2 <- update(m1, x=log(age+0.75), y=height)
-#' ## compare model fit
-#' BICadj(m1, m2, m3)
 #'
 #' ## default plot options for xfun & yfun back-transform x & y to original scales
 #' ## xfun=ifun(x$call.sitar$x)
