@@ -18,7 +18,6 @@
 #' setdf(age, height, heights, FUN=function(a) AIC(a, k=1))
 #' @export setdf
   setdf <- function(x, y, data=parent.frame(), FUN=BIC, df=1:15, plot=FALSE, ...) {
-    require(splines)
     mc <- match.call()
     x <- eval(mc$x, data)
     y <- eval(mc$y, data)
