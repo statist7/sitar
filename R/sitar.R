@@ -27,7 +27,7 @@
 #' @param id factor of subject identifiers.
 #' @param data data frame containing variables \code{x}, \code{y} and
 #' \code{id}.
-#' @param df degrees of freedom for cubic regression spline.
+#' @param df degrees of freedom for cubic regression spline (2 or more).
 #' @param knots vector of values for knots (default \code{df} quantiles of
 #' \code{x} distribution).
 #' @param fixed character string specifying a, b, c fixed effects (default
@@ -138,7 +138,10 @@
 # get df, knots and bounds
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
 	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
-	if (missing(knots)) knots <- quantile(x, (1:(df-1))/df) else {
+	if (missing(knots)) {
+	  if (df < 2) stop("df must be 2 or more")
+	  knots <- quantile(x, (1:(df-1))/df)
+	} else {
 	  knots <- knots - xoffset
 	  df <- length(knots) + 1
 	}
@@ -191,6 +194,8 @@
 					stop('Missing values in data')
 				mm.formula <- formula
 				mm.intercept <- colnames(mm)[1] == '(Intercept)'
+# ensure names are valid
+      	colnames(mm) <- make.names(colnames(mm), unique=TRUE)
 # omit constant columns
 				mm <- mm[, apply(mm, 2, function(x) max(x) > min(x)), drop=FALSE]
 # centre columns
@@ -217,8 +222,6 @@
 			}
 		}
 	}
-# ensure names are valid
-	names(fulldata) <- make.names(names(fulldata), unique=TRUE)
 
 # 	if (!is.null(weights)) {
 #     if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
