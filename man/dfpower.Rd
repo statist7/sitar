@@ -4,7 +4,7 @@
 \alias{dfpower}
 \title{Tabulate BIC of SITAR models by degrees of freedom and xy power transformations}
 \usage{
-dfpower(model, df, xpowers = 1, ypowers = xpowers,
+dfpower(model, df, xpowers = 1, ypowers = xpowers, FUN = BICadj,
   maxIter = nlmeControl()$maxIter, verbose = FALSE)
 }
 \arguments{
@@ -15,6 +15,8 @@ dfpower(model, df, xpowers = 1, ypowers = xpowers,
 \item{xpowers}{vector of powers to apply to x.}
 
 \item{ypowers}{vector of powers to apply to y.}
+
+\item{FUN}{function to be tabulated (e.g. BICadj or AICadj).}
 
 \item{maxIter}{maxium number of iterations.}
 
@@ -38,7 +40,7 @@ The returned table can be rearranged using \code{\link{aperm}}.
 \examples{
 data(heights)
 m1 <- sitar(log(age), height, id, heights, 4)
-dfpower(m1, 4:6, 1:0)
+dfpower(m1, 4:5)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}

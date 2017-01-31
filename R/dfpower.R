@@ -14,6 +14,7 @@
 #' @param df vector of degrees of freedom to be fitted.
 #' @param xpowers vector of powers to apply to x.
 #' @param ypowers vector of powers to apply to y.
+#' @param FUN function to be tabulated (e.g. BICadj or AICadj).
 #' @param maxIter maxium number of iterations.
 #' @param verbose logical controlling monitoring.
 #' @return 3-way table of BIC by df, x and y powers.
@@ -21,9 +22,9 @@
 #' @examples
 #' data(heights)
 #' m1 <- sitar(log(age), height, id, heights, 4)
-#' dfpower(m1, 4:6, 1:0)
+#' dfpower(m1, 4:5)
 #' @export dfpower
-  dfpower <- function(model, df, xpowers=1, ypowers=xpowers,
+  dfpower <- function(model, df, xpowers=1, ypowers=xpowers, FUN=BICadj,
                       maxIter=nlmeControl()$maxIter, verbose=FALSE) {
     vars <- function(expr) {
       (av <- all.vars(expr, unique=FALSE))[grep('^pi$', av, invert=TRUE)]
@@ -61,7 +62,7 @@
                                    df[idf], ", y=", yp, ", x=", xp, control, "))")))
           }
           . <- get(.)
-          B <- BICadj(.)
+          B <- FUN(.)
           if (.$numIter >= maxIter) B <- -B
           mat[idf, ix, iy] <- B
           if (verbose) cat(df[idf], .$numIter, yp, '~', xp, B, '\n')
