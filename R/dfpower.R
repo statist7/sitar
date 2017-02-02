@@ -58,14 +58,16 @@
           . <- 'obj'
           if (df[idf] == df0 && yp == ylab0 && xp == xlab0) . <- lab
           else {
-            eval(parse(text=paste0("assign('", ., "', update(", lab, ", df=",
-                                   df[idf], ", y=", yp, ", x=", xp, control, "))")))
+            eval(parse(text=paste0("assign('", ., "', try(update(", lab, ", df=", df[idf],
+                                   ", y=", yp, ", x=", xp, control, "), silent=TRUE))")))
           }
           . <- get(.)
-          B <- FUN(.)
-          if (.$numIter >= maxIter) B <- -B
-          mat[idf, ix, iy] <- B
-          if (verbose) cat(df[idf], .$numIter, yp, '~', xp, B, '\n')
+          if (!inherits(., 'try-error')) {
+            B <- FUN(.)
+            if (.$numIter >= maxIter) B <- -B
+            mat[idf, ix, iy] <- B
+            if (verbose) cat(df[idf], .$numIter, yp, '~', xp, B, '\n')
+          }
         }
       }
     }
