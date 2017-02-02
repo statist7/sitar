@@ -95,10 +95,9 @@ m2 <- update(m1, x=log(age+0.75), y=height)
 plot(m1, 'd', las=1)
 lines(m2, 'd', col=2)
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \seealso{
 \code{\link{plot.sitar}}
 }
-
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}

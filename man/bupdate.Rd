@@ -33,4 +33,3 @@ print(fixef(m2)['b'])
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
 \keyword{regression}
-

@@ -45,4 +45,3 @@ dfpower(m1, 4:5)
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

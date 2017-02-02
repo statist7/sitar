@@ -25,4 +25,3 @@ between 8 and 16 years of age.
     show.given=FALSE, xlab='age (years)', ylab='height (cm)', pch=19)
 }
 \keyword{datasets}
-

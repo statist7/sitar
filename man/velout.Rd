@@ -68,10 +68,9 @@ for the dataset) the code for B is non-zero.
 outliers <- velout(age, height, id, heights, limit=3)
 
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \seealso{
 \code{\link{codeplot}}, \code{\link{zapvelout}}
 }
-
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}

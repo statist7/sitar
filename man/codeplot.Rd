@@ -3,6 +3,7 @@
 \name{codeplot}
 \alias{codeplot}
 \alias{zapvelout}
+\alias{zapvelout}
 \title{Plot and zap velocity outliers in growth curves}
 \usage{
 codeplot(outliers, icode = 4, ..., print = TRUE)
@@ -15,9 +16,9 @@ zapvelout(outliers, icode)
 \item{icode}{The code number(s) defining the subset of curves to be
 displayed or zapped (between 1 and 6).}
 
-\item{print}{Option to print as well as plot information on each curve.}
-
 \item{\dots}{Optional plot parameters.}
+
+\item{print}{Option to print as well as plot information on each curve.}
 }
 \value{
 \code{codeplot} returns summary information on each curve with an
@@ -47,10 +48,9 @@ codeplot(outliers, icode=c(4,6))
 newheights <- zapvelout(outliers, icode=6)
 
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \seealso{
 \code{\link{velout}}
 }
-
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}

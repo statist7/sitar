@@ -3,6 +3,7 @@
 \name{xaxsd}
 \alias{xaxsd}
 \alias{yaxsd}
+\alias{yaxsd}
 \title{Par args xaxs and yaxs option d}
 \usage{
 xaxsd(usr = par()$usr[1:2])
@@ -45,4 +46,3 @@ plot(x, y, pch=19, xlim=xaxsd(c(-3,3)), ylim=yaxsd(c(-3,3)))
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

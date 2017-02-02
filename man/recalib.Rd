@@ -52,4 +52,3 @@ A function to recalibrate x,y data using SITAR random effects
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

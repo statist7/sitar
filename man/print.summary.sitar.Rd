@@ -22,4 +22,3 @@ A \code{print.summary} method for \code{sitar} objects.
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

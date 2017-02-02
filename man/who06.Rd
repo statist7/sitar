@@ -61,4 +61,3 @@ Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and
 penalized likelihood. Stat Med 1992;11:1305-19.
 }
 \keyword{datasets}
-

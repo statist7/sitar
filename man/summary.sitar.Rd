@@ -36,4 +36,3 @@ A \code{summary} method for \code{sitar} objects based on
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

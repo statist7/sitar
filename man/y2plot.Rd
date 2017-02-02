@@ -52,10 +52,9 @@ with(uk90[uk90$sex == 1,],
 )
 
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \seealso{
 \code{\link{plot.sitar}}
 }
-
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}

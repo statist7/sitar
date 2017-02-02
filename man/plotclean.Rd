@@ -45,4 +45,3 @@ if (interactive()) plotclean(age, height, id, heights)
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

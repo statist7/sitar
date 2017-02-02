@@ -36,9 +36,6 @@ models, taking into account any transformations of the y variable. Functions
 \code{plotclean}, \code{velout}, \code{codeplot} and \code{zapvelout} are
 useful to clean the data file.
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \references{
 The idea of SITAR growth curve analysis arose from the paper by
 Beath (2007) and was first described in Cole et al (2010). The other
@@ -94,5 +91,7 @@ Ward KA, Cole TJ, Laskey MA, et al. The Effect of Prepubertal Calcium
 Carbonate Supplementation on Skeletal Development in Gambian Boys-A 12-Year
 Follow-Up Study. J C E M 2014;99:3169-76.
 }
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}
 \keyword{package}
-

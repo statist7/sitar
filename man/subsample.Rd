@@ -48,10 +48,9 @@ s50 <- subsample(age, id, heights, prob=0.5)
 t50 <- subsample(age, id, heights, prob=0.5, xlim=c(7, 12))
 
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \seealso{
 \code{\link{sitar}}
 }
-
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}

@@ -57,4 +57,3 @@ with(heights, points(xyadj(m1), col='red', pch=19))
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

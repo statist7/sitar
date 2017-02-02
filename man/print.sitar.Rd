@@ -17,4 +17,3 @@ Print method for \code{sitar} objects, based on \code{print.lme}.
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

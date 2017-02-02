@@ -10,6 +10,8 @@
 \arguments{
 \item{object}{an object inheriting from class \code{sitar}.}
 
+\item{\dots}{other optional fitted model objects.}
+
 \item{test}{an optional logical value controlling whether likelihood ratio
 tests should be used.}
 
@@ -23,8 +25,6 @@ squares to be used.}
 \item{L}{see \code{\link{anova.lme}}.}
 
 \item{verbose}{an optional logical value.}
-
-\item{\dots}{other optional fitted model objects.}
 }
 \value{
 a data frame inheriting from class "anova.lme".
@@ -35,4 +35,3 @@ anova method for \code{sitar} objects, based on \code{anova.lme}.
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
-

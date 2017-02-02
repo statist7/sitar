@@ -63,14 +63,13 @@ round(v, 2)
 lms <- LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
 
 }
-\author{
-Tim Cole \email{tim.cole@ucl.ac.uk}
-}
 \seealso{
 \code{\link{LMS2z}}, \code{\link{z2cent}}. The LMS method can be
 fitted to data using the package \code{gamlss} with the \code{BCCG} family,
 where nu (originally lambda), mu and sigma correspond to L, M and S
 respectively.
 }
+\author{
+Tim Cole \email{tim.cole@ucl.ac.uk}
+}
 \keyword{arith}
-

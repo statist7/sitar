@@ -3,6 +3,7 @@
 \name{sitar}
 \alias{sitar}
 \alias{update.sitar}
+\alias{update.sitar}
 \title{Fit SITAR growth curve model}
 \usage{
 sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c",
@@ -83,12 +84,12 @@ that should be used in the fit (see \code{\link{nlme}}).}
 
 \item{object}{object of class \code{sitar}.}
 
+\item{\dots}{further parameters for \code{update} consisting of any of the
+above \code{sitar} parameters.}
+
 \item{evaluate}{logical to control evaluation.  If TRUE (default) the
 expanded \code{update} call is passed to \code{sitar} for evaluation, while
 if FALSE the expanded call itself is returned.}
-
-\item{\dots}{further parameters for \code{update} consisting of any of the
-above \code{sitar} parameters.}
 }
 \value{
 An object inheriting from class \code{sitar} representing the
@@ -154,4 +155,3 @@ Tim Cole \email{tim.cole@ucl.ac.uk}
 \keyword{nonlinear}
 \keyword{package}
 \keyword{regression}
-

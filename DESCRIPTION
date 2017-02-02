@@ -18,5 +18,5 @@ Depends:
     splines
 Imports:
     quantreg
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.0
 URL: https://github.com/statist7/sitar
