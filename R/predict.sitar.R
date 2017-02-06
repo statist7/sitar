@@ -75,14 +75,16 @@
       else newdata$id <- rep.int(getGroups(object)[1], nrow(newdata))
     }
     id <- newdata$id <- factor(newdata$id)
-# check abc
-    if (abcset <- !is.data.frame(abc)) {
+# check abc as length-3 vector or 1-row data frame
+    if (!is.data.frame(abc)) {
       abc <- data.frame(t(abc))
       abc[, letters[1:3][!letters[1:3] %in% names(abc)]] <- 0 # fill with zeros
+      abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # zeros if not in model
+    }
+    if (abcset <- nrow(abc) == 1) {
       level <- 0
       id <- rep.int(1, length(x))
     }
-    abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # zeros if not in model
     abc <- abc[id, ]
 # check if old-style object lacking fitnlme
     if(!'fitnlme' %in% names(object)) {

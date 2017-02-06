@@ -1,4 +1,4 @@
-Changes in Version 1.0.9
+Changes in Version 1.0.10
 
   o dfpower (new) tabulates BIC/AIC for SITAR models by degrees of freedom
     and/or xy power transformations.
@@ -6,9 +6,13 @@ Changes in Version 1.0.9
   o setdf (new) identifies optimal degrees of freedom for a natural
     spline curve.
 
+  o Fix bug in predict.sitar with abc.
+
   o Constrain df to be >1 in sitar.
 
   o Fix bug in sitar with make.names.
+
+Changes in Version 1.0.9
 
   o Fix bug in sitar with subset.
 
