@@ -242,21 +242,25 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
 #	derive cubic smoothing spline curve
 			xt <- xfun(xt)
-			xy$ss <- ss <- makess(xt, yt)
 
 			if (grepl("d", opt) && grepl("v", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
-				add <- TRUE
 			} else
 			if (grepl("d", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG))
-				add <- TRUE
 			} else
 			if (grepl("v", opt)) {
 				ARG$ylab <- labels[3]
 				xy <- do.call("y2plot", c(list(x=xt, y1=vt, labels=labels[c(1,3)], add=add, xy=xy), ARG))
-				add <- TRUE
 			}
+#	plot vertical line at age of peak velocity
+  		if (apv) {
+  			xy$apv <- getPeakTrough(xt, vt)
+  			if (!is.na(opt)) print(signif(xy$apv, 4))
+				if (is.null(ARG$y2par$lty)) ARG$y2par$lty <- 3
+				do.call('abline', c(list(v=xy$apv[1]), ARG$y2par))
+  		}
+			add <- TRUE
 		}
 
 #	plot fixed effects distance curve
@@ -275,16 +279,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			yt <- yt$y
     	do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))
 			add <- TRUE
-		}
-
-#	plot vertical line at age of peak velocity
-		if (apv) {
-			xy$apv <- ss$apv
-			if (!is.na(opt)) print(signif(xy$apv, 4))
-			if (add) {
-				if (is.null(ARG$y2par$lty)) ARG$y2par$lty <- 3
-				do.call('abline', c(list(v=xy$apv[1]), ARG$y2par))
-			}
 		}
 		invisible(xy)
 	}

@@ -1,5 +1,10 @@
 Changes in Version 1.0.10
 
+  o getPeakTrough (new) identifies peaks and troughs of a curve
+    (used to improve code for age at peak velocity - replaces makess).
+
+  o adjust for subset to AICadj and BICadj.
+
   o dfpower (new) tabulates BIC/AIC for SITAR models by degrees of freedom
     and/or xy power transformations.
 

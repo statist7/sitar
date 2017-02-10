@@ -118,7 +118,7 @@
 		if (b == 'mean') return(mean(x))
 		if (b == 'apv') {
 			spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-			return(makess(x, fitted(spline.lm))$apv[1])
+			return(getPeakTrough(x, predict(smooth.spline(x, fitted(spline.lm)), x, deriv=1)$y)[1])
 		}
 		if (!is.numeric(b)) stop('must be "mean" or "apv" or numeric')
 		b
@@ -132,8 +132,6 @@
 	  data <- data[subset, ]
 	x <- eval(mcall$x, data)
 	y <- eval(mcall$y, data)
-	xoffset <- b.origin(xoffset)
-	x <- x - xoffset
 
 # get df, knots and bounds
 	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
@@ -142,13 +140,16 @@
 	  if (df < 2) stop("df must be 2 or more")
 	  knots <- quantile(x, (1:(df-1))/df)
 	} else {
-	  knots <- knots - xoffset
 	  df <- length(knots) + 1
 	}
 	if (nrow(data) <= df) stop("too few data to fit spline curve")
 	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
-	else if (length(bounds) == 2) bounds <- bounds - xoffset
-	else stop("bounds should be length 1 or 2")
+	else if (length(bounds) != 2) stop("bounds should be length 1 or 2")
+
+	xoffset <- b.origin(xoffset)
+	x <- x - xoffset
+	knots <- knots - xoffset
+	bounds <- bounds - xoffset
 
 # get spline start values
   spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))

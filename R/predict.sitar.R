@@ -155,7 +155,7 @@
 # VELOCITY
       else { # deriv != 0
 # mean velocity curve on back-transformed axes
-        vel0 <- predict(makess(x, pred, xfun=xfun, yfun=yfun), xfun(x), deriv=deriv)
+        vel0 <- predict(smooth.spline(xfun(x), yfun(pred)), xfun(x), deriv=deriv)
         if (any(level == 0) && !abcset) pred0 <- pred <- vel0$y
         if (any(level == 1) || abcset) {
 # level 1 prediction

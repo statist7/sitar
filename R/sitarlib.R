@@ -93,13 +93,14 @@
 #' @export
 	summary.sitar <- function (object, adjustSigma = TRUE, verbose = FALSE, ...)
 {
-#	save age at peak velocity
-	  apv <- makess(getCovariate(object), fitted(object, level=0))$apv
-
 	  class(object) <- class(object)[-1]
     object <- summary(object, adjustSigma=adjustSigma, verbose=verbose, ...)
 
-    object$apv <- apv
+#	save age at peak velocity
+    x <- getCovariate(object)
+    y <- fitted(object, level=0)
+    y <- predict(smooth.spline(unique(cbind(x, y))), x, deriv=1)$y
+    object$apv <- getPeakTrough(x, y)
 
     class(object) <- c("summary.sitar", class(object))
     object
@@ -385,79 +386,6 @@
 	eval(vcall)
 }
 
-#############################
-#
-#	makess
-#
-#############################
-
-
-
-
-
-#' Create cubic smoothing spline from data
-#'
-#' A wrapper to fit a cubic smoothing spline to the supplied data, allowing
-#' derivatives to be calculated.
-#'
-#'
-#' @param x vector giving the values of the predictor variable.
-#' @param y vector of responses.
-#' @param xfun optional function to be applied to \code{x} prior to fitting.
-#' @param yfun optional function to be applied to \code{y} prior to fitting.
-#' @return An object of class \code{smooth.spline} with the extra component
-#' \code{apv}, a length-2 vector containing the age at peak velocity and peak
-#' velocity. If no peak is identified (based on the 2nd derivative changing
-#' sign) the values are for maximum rather than peak velocity.
-#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @examples
-#'
-#' ## create smooth.spline mean height curve
-#' data(heights)
-#' ss <- with(heights, makess(age, height))
-#'
-#' ## and plot it
-#' plot(ss, type='l', xlab='age', ylab='height')
-#'
-#' ## age at peak velocity, and peak velocity
-#' print(ss$apv)
-#'
-#' @export makess
-	makess <- function(x, y, xfun, yfun)
-#	summarises y ~ x as smooth.spline
-#	returns smooth.spline including apv/pv (peak velocity)
-#		or amv/mv (max velocity)
-{
-	if(!missing(xfun)) x <- xfun(x)
-	if(!missing(yfun)) y <- yfun(y)
-	o <- order(x)
-	af <- unique(cbind(x[o], y[o]))
-	ss <- smooth.spline(af)
-	ss1 <- predict(ss, deriv=1) # 1st derivative
-	ss2 <- predict(ss, deriv=2) # 2nd derivative
-	apv <- vector(length=2)
-	ts <- as.ts(ss2$y) # 2nd derivative as time series
-	ts <- ts * lag(ts) < 0 # 2nd derivative changes sign
-	if (any(ts, na.rm=TRUE)) { # turning point(s) found
-		ts <- c(NA, ts) # expand
-		iapv <- which.max(ss1$y * ts) # point of peak velocity
-		o <- max(1, iapv-2):min(iapv+2, length(ss$x)) # region of peak
-		mn <- mean(ss$x[o])
-		mc <- lm(ss1$y[o] ~ poly(ss$x[o] - mn, 2, raw=TRUE))$coef # velocity as quadratic in age
-		apv[1] <- - mc[2] / 2 / mc[3] + mn # age at peak velocity
-		apv[2] <- mc[1] - mc[2]^2 / 4 / mc[3] # peak velocity
-		names(apv) <- c('apv', 'pv')
-		if (any(is.na(apv))) warning('apv undefined')
-	}
-	else {
-		iapv <- which.max(ss1$y) # max not peak velocity
-		apv[1] <- ss$x[iapv] # age at max velocity
-		apv[2] <- ss1$y[iapv] # max velocity
-		names(apv) <- c('amv', 'mv')
-	}
-	ss$apv <- apv
-	invisible(ss)
-}
 
 #############################
 #
