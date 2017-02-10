@@ -50,9 +50,6 @@
 #'
 #' @export BICadj
 	BICadj <- function(..., pattern=NULL)
-#	input SITAR model(s)
-#	returns BIC for power transformed y
-#	looks for log, sqrt or ^ - assumes no multipliers
 {	ARG <- match.call(expand.dots=FALSE)$...
 	if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
 	ARG <- unique(c(unlist(sapply(ARG, deparse)), pattern))
@@ -74,7 +71,11 @@
 			if (fun == "sqrt()") lambda <- 0.5 else
 			if (fun == "`^`()") lambda <- eval(ycall[[3]])
 		}
-		y <- eval(yt, eval(obj$call$data, sys.parent()))
+		data <- eval(obj$call$data, sys.parent())
+		y <- eval(yt, data)
+		if (!is.null(obj$call$subset)) {
+		  y <- y[eval(obj$call$subset, data)]
+		}
 		sly <- ifelse(lambda == 1, 0, sum(log(y)))
 		BIC(ll) - 2 * ((lambda - 1) * sly + length(y) * log(abs(lambda) + (lambda == 0)))
 	})
@@ -86,9 +87,6 @@
 #' @rdname BICadj
 #' @export
 	AICadj <- function(..., k=2, pattern=NULL)
-#	input SITAR model(s)
-#	returns AIC for power transformed y
-#	looks for log, sqrt or ^ - assumes no multipliers
 {	ARG <- match.call(expand.dots=FALSE)$...
 	if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
 	ARG <- unique(c(unlist(sapply(ARG, deparse)), pattern))
@@ -110,7 +108,11 @@
 			if (fun == "sqrt()") lambda <- 0.5 else
 			if (fun == "`^`()") lambda <- eval(ycall[[3]])
 		}
-		y <- eval(yt, eval(obj$call$data, sys.parent()))
+		data <- eval(obj$call$data, sys.parent())
+		y <- eval(yt, data)
+		if (!is.null(obj$call$subset)) {
+		  y <- y[eval(obj$call$subset, data)]
+		}
 		sly <- ifelse(lambda == 1, 0, sum(log(y)))
 		AIC(ll, k=k) - 2 * ((lambda - 1) * sly + length(y) * log(abs(lambda) + (lambda == 0)))
 	})
