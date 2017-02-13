@@ -5,8 +5,7 @@
 \title{Predict SITAR model}
 \usage{
 \method{predict}{sitar}(object, newdata = getData(object), level = 1, ...,
-  deriv = 0, abc = ranef(object), xfun = function(x) x,
-  yfun = function(y) y)
+  deriv = 0, abc = NULL, xfun = function(x) x, yfun = function(y) y)
 }
 \arguments{
 \item{object}{an object inheriting from class \code{sitar}.}

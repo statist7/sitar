@@ -58,7 +58,7 @@
 #'
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1, ...,
-                            deriv=0, abc=ranef(object),
+                            deriv=0, abc=NULL,
                             xfun=function(x) x, yfun=function(y) y) {
 # create x and id variables in newdata
     oc <- object$call.sitar
@@ -76,16 +76,26 @@
     }
     id <- newdata$id <- factor(newdata$id)
 # check abc as length-3 vector or 1-row data frame
-    if (!is.data.frame(abc)) {
-      abc <- data.frame(t(abc))
-      abc[, letters[1:3][!letters[1:3] %in% names(abc)]] <- 0 # fill with zeros
-      abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # zeros if not in model
+    if (is.null(abc)) abc <- ranef(object)
+    else if (is.vector(abc)) {
+#	abc is named vector
+      if (!is.null(names(abc)) && all(unique(names(abc)) %in% letters[1:3])) {
+        abc <- data.frame(t(abc))
+        abc[, letters[1:3][!letters[1:3] %in% names(abc)]] <- 0 # fill with zeros
+      } else
+#	abc is id level
+      if (length(abc) == 1) {
+        . <- rownames(ranef(object)) %in% abc
+        if (!any(.)) stop(paste('id', abc, 'not found'))
+        abc <- ranef(object)[., ]
+      }
     }
-    if (abcset <- nrow(abc) == 1) {
+    if (is.null(nrow(abc)))
+      stop('abc should be either a single id level or up to three named random effect values')
+    else if (abcset <- nrow(abc) == 1) {
       level <- 0
-      id <- rep.int(1, length(x))
-    }
-    abc <- abc[id, ]
+    } else
+      abc <- abc[id, ]
 # check if old-style object lacking fitnlme
     if(!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')

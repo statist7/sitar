@@ -224,25 +224,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # if subset, flag for predict
       if (!identical(subset, rep_len(TRUE, nf))) attr(newdata, 'subset') <- subset
 
-#	adjust for abc
-			if (!is.null(abc)) {
-#	abc is id level
-				if (length(abc) == 1) {
-					idabc <- rownames(ranef(model)) %in% abc
-					if (sum(idabc) == 0) stop(paste('id', abc, 'not found'))
-					abc <- ranef(model)[idabc, ]
-				}
-#	abc is named vector
-			  else if (length(abc) > 3 || is.null(names(abc)))
-			    stop('abc should be either single id level or up to three named random effect values')
-			}
-  		else abc <- ranef(model)
-
+# distance and velocity
+			xt <- xfun(xt)
 			yt <- yfun(predict(object=model, newdata=newdata, level=0, abc=abc))
 			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
-#	derive cubic smoothing spline curve
-			xt <- xfun(xt)
 
+# plot curve(s)
 			if (grepl("d", opt) && grepl("v", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
 			} else
