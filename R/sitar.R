@@ -147,6 +147,7 @@
 	else if (length(bounds) != 2) stop("bounds should be length 1 or 2")
 
 	xoffset <- b.origin(xoffset)
+	bstart <- b.origin(bstart) - xoffset
 	x <- x - xoffset
 	knots <- knots - xoffset
 	bounds <- bounds - xoffset
@@ -218,7 +219,7 @@
 		if (mm.intercept) {
 			fixed <- c(fixed, l)
 			if (nostart) {
-			  if (l == 'b') start <- c(start, b.origin(bstart) - xoffset)
+			  if (l == 'b') start <- c(start, bstart)
 			    else if (l == 'c') start <- c(start, 0)
 			}
 		}
