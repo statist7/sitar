@@ -9,7 +9,7 @@
 #' @return A length-2 vector containing the values of \code{x} and  \code{y}
 #' at the peak or trough. For the peak they are labelled 'apv' and 'pv'
 #' (for age at peak velocity and peak velocity) or 'atv' and 'tv' for the trough,
-#' reflecting the common case where \code{y} is th2e first derivative
+#' reflecting the common case where \code{y} is the first derivative
 #' of a function. If no peak/trough is identified NULL is returned invisibly.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples

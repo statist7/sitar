@@ -18,7 +18,7 @@ A length-2 vector containing the values of \code{x} and  \code{y}
 at the peak or trough. For the peak they are labelled 'apv' and 'pv'
 (for age at peak velocity and peak velocity) or 'atv' and 'tv' for the trough,
 reflecting the common case where \code{y} is the first derivative
-of a function. If no peak is identified NULL is returned invisibly.
+of a function. If no peak/trough is identified NULL is returned invisibly.
 }
 \description{
 Given vectors \code{x} and  \code{y}, returns their values at the peak or
