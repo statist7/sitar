@@ -23,7 +23,7 @@
 #' \code{y} and \code{y} velocity from the original SITAR model. The first two
 #' elements can alternatively be provided via \code{\link{par}} parameters
 #' \code{xlab} and \code{ylab}, and the third element via \code{y2par} (see
-#' Details). Default labels are the names of \code{x} and \code{y}, and
+#' Details). The latter take precedence. Default labels are the names of \code{x} and \code{y}, and
 #' "\code{y} velocity", suitably adjusted to reflect any back-transformation
 #' via \code{xfun} and \code{yfun}.
 #' @param apv optional logical specifying whether or not to calculate the age
@@ -136,31 +136,52 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		  lapply(as.list(dots), eval, data, parent.frame())
 		else
 		  NULL
+# create missing labels
+		if (missing(labels))
+		  labels <- vector('character', 3)
+		else if (length(labels) < 3)
+		  labels <- c(labels, '', '')
+# test for velocity plot
+		optv <- all(unique(strsplit(tolower(opt), '')[[1]]) == 'v')
+# test for velocity plot label via y2par
+		if (!is.null(ARG$y2par$ylab)) {
+		  labels[3] <- ARG$y2par$ylab
+		  if (optv)
+		    ARG$ylab <- labels[2] <- ARG$y2par$ylab
+		}
 #	if xlab not specified replace with label or x name (depending on xfun)
 		if (is.null(ARG$xlab)) {
-		  ARG$xlab <- if(!missing(labels))
+		  ARG$xlab <- if(labels[1] != '')
 		    labels[1]
 		  else {
-		    if(!is.null(xfun))
+		    if (!is.null(xfun))
 		      paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
 		    else
 		      attr(ifun(mcall$x), 'varname')
 		  }
-		}
+		} else
+		  labels[1] <- ARG$xlab
 #	if ylab not specified replace with label or y name (depending on yfun)
 		if (is.null(ARG$ylab)) {
-		  ARG$ylab <- if(!missing(labels))
-		    labels[2]
+		  if(labels[2] != '')
+		    ARG$ylab <- labels[2]
 		  else {
-		    if(!is.null(yfun))
+		    ARG$ylab <- if (!is.null(yfun))
 		      paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
 		    else
 		      attr(ifun(mcall$y), 'varname')
+	      labels[2] <- ARG$ylab
 		  }
-		}
-# if labels not specified create it
-		if (missing(labels))
-		  labels <- c(ARG$xlab, ARG$ylab, paste(ARG$ylab, 'velocity'))
+	    if (labels[3] == '')
+	      labels[3] <- paste(ARG$ylab, 'velocity')
+		} else {
+   	  labels[2] <- ARG$ylab
+   	  if (optv)
+   	    labels[3] <- ARG$ylab
+  		else
+  		  if (labels[3] == '')
+  		    labels[3] <- paste(ARG$ylab, 'velocity')
+   	}
 
 #	create output list
 		xy <- list()

@@ -29,7 +29,7 @@ a legend identifying the distance and velocity curves is provided.}
 \code{y} and \code{y} velocity from the original SITAR model. The first two
 elements can alternatively be provided via \code{\link{par}} parameters
 \code{xlab} and \code{ylab}, and the third element via \code{y2par} (see
-Details). Default labels are the names of \code{x} and \code{y}, and
+Details). The latter take precedence. Default labels are the names of \code{x} and \code{y}, and
 "\code{y} velocity", suitably adjusted to reflect any back-transformation
 via \code{xfun} and \code{yfun}.}
 
