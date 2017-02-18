@@ -54,25 +54,25 @@
 	if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
 	ARG <- unique(c(unlist(sapply(ARG, deparse)), pattern))
 	dev <- sapply(ARG, function(obj) {
-		obj <- dynGet(obj, minframe=0)
+		obj <- eval(parse(text=obj))
 		if (is.character(try(ll <- logLik(obj), TRUE))) return(NA)
 #	check for call.sitar$y or else call$y or else call$formula
 		if (!is.null(obj$call.sitar)) obj$call <- obj$call.sitar
 #	check for call$y or call$model
 		if (!is.null(obj$call$y)) ycall <- obj$call$y
 			else if (!is.null(obj$call$model)) ycall <- obj$call$model[[2]]
-			else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
-			else return(NA)
-		lambda <- 1
-		if (length(ycall) == 1) yt <- ycall else {
-			yt <- ycall[[2]]
+			  else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
+			    else return(NA)
+		if (length(ycall) == 1) lambda <- 1 else {
 			fun <- ycall[1]
 			if (fun == "log()") lambda <- 0 else
-			if (fun == "sqrt()") lambda <- 0.5 else
-			if (fun == "`^`()") lambda <- eval(ycall[[3]])
+			  if (fun == "sqrt()") lambda <- 0.5 else
+			    if (fun == "`/`()") lambda <- -1 else
+			      if (fun == "`^`()") lambda <- eval(ycall[[3]]) else
+			        return(NA)
 		}
-		data <- eval(obj$call$data, sys.parent())
-		y <- eval(yt, data)
+		data <- eval(obj$call$data)
+		y <- eval(parse(text=all.vars(ycall)), data)
 		if (!is.null(obj$call$subset)) {
 		  y <- y[eval(obj$call$subset, data)]
 		}
@@ -91,26 +91,26 @@
 	if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
 	ARG <- unique(c(unlist(sapply(ARG, deparse)), pattern))
 	dev <- sapply(ARG, function(obj) {
-	  obj <- dynGet(obj, minframe=0)
-		if (is.character(try(ll <- logLik(obj), TRUE))) return(NA)
+	  obj <- eval(parse(text=obj))
+	  if (is.character(try(ll <- logLik(obj), TRUE))) return(NA)
 #	check for call.sitar$y or else call$y or else call$formula
 		if (!is.null(obj$call.sitar)) obj$call <- obj$call.sitar
 #	check for call$y or call$model
 		if (!is.null(obj$call$y)) ycall <- obj$call$y
 			else if (!is.null(obj$call$model)) ycall <- obj$call$model[[2]]
-			else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
-			else return(NA)
-		lambda <- 1
-		if (length(ycall) == 1) yt <- ycall else {
-			yt <- ycall[[2]]
-			fun <- ycall[1]
-			if (fun == "log()") lambda <- 0 else
-			if (fun == "sqrt()") lambda <- 0.5 else
-			if (fun == "`^`()") lambda <- eval(ycall[[3]])
-		}
-		data <- eval(obj$call$data, sys.parent())
-		y <- eval(yt, data)
-		if (!is.null(obj$call$subset)) {
+			  else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
+			    else return(NA)
+	  if (length(ycall) == 1) lambda <- 1 else {
+	    fun <- ycall[1]
+	    if (fun == "log()") lambda <- 0 else
+	      if (fun == "sqrt()") lambda <- 0.5 else
+	        if (fun == "`/`()") lambda <- -1 else
+	          if (fun == "`^`()") lambda <- eval(ycall[[3]]) else
+	            return(NA)
+	  }
+	  data <- eval(obj$call$data)
+	  y <- eval(parse(text=all.vars(ycall)), data)
+	  if (!is.null(obj$call$subset)) {
 		  y <- y[eval(obj$call$subset, data)]
 		}
 		sly <- ifelse(lambda == 1, 0, sum(log(y)))
