@@ -355,7 +355,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       # new arg xoffset
       if (!is.null(extras$xoffset)) {
         xoffset.t <- xoffset
-        xoffset <- extras$xoffset
+        xoffset <- eval(extras$xoffset)
         xoffset.t <- xoffset - xoffset.t
         x <- x - xoffset.t
         knots <- knots - xoffset.t
@@ -369,7 +369,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       }
       # new arg df
       else if (!is.null(extras$df)) {
-        df <- extras$df
+        df <- eval(extras$df)
         knots <- quantile(x, (1:(df-1))/df)
         mcall$knots <- NULL
       }
