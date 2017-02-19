@@ -4,8 +4,10 @@
 \alias{BICadj}
 \alias{AICadj}
 \alias{varexp}
+\alias{getL}
 \alias{AICadj}
 \alias{varexp}
+\alias{getL}
 \title{Ways to compare SITAR models for fit}
 \usage{
 BICadj(..., pattern = NULL)
@@ -13,25 +15,33 @@ BICadj(..., pattern = NULL)
 AICadj(..., k = 2, pattern = NULL)
 
 varexp(..., pattern = NULL)
+
+getL(expr, data = parent.frame())
 }
 \arguments{
 \item{\dots}{one or more SITAR models.}
 
-\item{pattern}{regular expression defining names of SITAR models.}
+\item{pattern}{regular expression defining names of models.}
 
 \item{k}{numeric, the penalty per parameter to be used; the default k = 2 is
 the classical AIC.}
+
+\item{expr}{quoted or unquoted expression containing a single variable name.}
+
+\item{data}{data frame to evaluate \code{expr}.}
 }
 \value{
 For \code{BICadj} and \code{AICadj} a named vector of deviances in
 increasing order.  For \code{varexp} a named vector of percentages in
-decreasing order.
+decreasing order. For \code{getL} the power the variable in \code{expr}
+is raised to.
 }
 \description{
 \code{BICadj} and \code{AICadj} calculate the BIC and AIC for SITAR models,
 adjusting the likelihood for Box-Cox transformed y variables. \code{varexp}
 calculates the variance explained by SITAR models, compared to the
-corresponding fixed effect models.
+corresponding fixed effect models. \code{getL} is used by \code{[AB]ICadj} to
+find the power that the y variable is raised to.
 }
 \details{
 The deviance is adjusted if the y variable is power-transformed, using the
@@ -66,6 +76,8 @@ varexp(m1, m2)
 ## the pattern matches names starting with "m" followed by a digit
 BICadj(pattern="^m[0-9]")
 
+## find which power height is raised to
+getL(quote(sqrt(sqrt(height))), heights)
 }
 \seealso{
 \code{\link{BIC}}, \code{\link{AIC}}

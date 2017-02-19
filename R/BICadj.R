@@ -3,7 +3,8 @@
 #' \code{BICadj} and \code{AICadj} calculate the BIC and AIC for SITAR models,
 #' adjusting the likelihood for Box-Cox transformed y variables. \code{varexp}
 #' calculates the variance explained by SITAR models, compared to the
-#' corresponding fixed effect models.
+#' corresponding fixed effect models. \code{getL} is used by \code{[AB]ICadj} to
+#' find the power that the y variable is raised to.
 #'
 #' The deviance is adjusted if the y variable is power-transformed, using the
 #' formula
@@ -22,14 +23,17 @@
 #' \code{logLik} class. \code{varexp} ignores objects not of class
 #' \code{sitar}.
 #'
-#' @aliases BICadj AICadj varexp
+#' @aliases BICadj AICadj varexp getL
 #' @param \dots one or more SITAR models.
 #' @param k numeric, the penalty per parameter to be used; the default k = 2 is
 #' the classical AIC.
-#' @param pattern regular expression defining names of SITAR models.
+#' @param pattern regular expression defining names of models.
+#' @param expr quoted or unquoted expression containing a single variable name.
+#' @param data data frame to evaluate \code{expr}.
 #' @return For \code{BICadj} and \code{AICadj} a named vector of deviances in
 #' increasing order.  For \code{varexp} a named vector of percentages in
-#' decreasing order.
+#' decreasing order. For \code{getL} the power the variable in \code{expr}
+#' is raised to.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{BIC}}, \code{\link{AIC}}
 #' @keywords regression
@@ -48,6 +52,8 @@
 #' ## the pattern matches names starting with "m" followed by a digit
 #' BICadj(pattern="^m[0-9]")
 #'
+#' ## find which power height is raised to
+#' getL(quote(sqrt(sqrt(height))), heights)
 #' @export BICadj
 	BICadj <- function(..., pattern=NULL)
 {	ARG <- match.call(expand.dots=FALSE)$...
@@ -63,19 +69,11 @@
 			else if (!is.null(obj$call$model)) ycall <- obj$call$model[[2]]
 			  else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
 			    else return(NA)
-		if (length(ycall) == 1) lambda <- 1 else {
-			fun <- ycall[1]
-			if (fun == "log()") lambda <- 0 else
-			  if (fun == "sqrt()") lambda <- 0.5 else
-			    if (fun == "`/`()") lambda <- -1 else
-			      if (fun == "`^`()") lambda <- eval(ycall[[3]]) else
-			        return(NA)
-		}
 		data <- eval(obj$call$data)
+		if (!is.null(obj$call$subset))
+		  data <- data[eval(obj$call$subset, data), ]
 		y <- eval(parse(text=all.vars(ycall)), data)
-		if (!is.null(obj$call$subset)) {
-		  y <- y[eval(obj$call$subset, data)]
-		}
+		lambda <- getL(ycall, data)
 		sly <- ifelse(lambda == 1, 0, sum(log(y)))
 		BIC(ll) - 2 * ((lambda - 1) * sly + length(y) * log(abs(lambda) + (lambda == 0)))
 	})
@@ -100,19 +98,11 @@
 			else if (!is.null(obj$call$model)) ycall <- obj$call$model[[2]]
 			  else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
 			    else return(NA)
-	  if (length(ycall) == 1) lambda <- 1 else {
-	    fun <- ycall[1]
-	    if (fun == "log()") lambda <- 0 else
-	      if (fun == "sqrt()") lambda <- 0.5 else
-	        if (fun == "`/`()") lambda <- -1 else
-	          if (fun == "`^`()") lambda <- eval(ycall[[3]]) else
-	            return(NA)
-	  }
 	  data <- eval(obj$call$data)
+	  if (!is.null(obj$call$subset))
+	    data <- data[eval(obj$call$subset, data), ]
 	  y <- eval(parse(text=all.vars(ycall)), data)
-	  if (!is.null(obj$call$subset)) {
-		  y <- y[eval(obj$call$subset, data)]
-		}
+	  lambda <- getL(ycall, data)
 		sly <- ifelse(lambda == 1, 0, sum(log(y)))
 		AIC(ll, k=k) - 2 * ((lambda - 1) * sly + length(y) * log(abs(lambda) + (lambda == 0)))
 	})
@@ -131,18 +121,44 @@
 #' @export
 	varexp <- function(..., pattern=NULL)
 	  #	returns % of variance explained by sitar model(s)
-	{	ARG <- list(...)
+{	ARG <- list(...)
 	if (!is.null(pattern)) {
 	  pattern <- ls(envir=parent.frame(), pattern=pattern)
 	  ARG <- c(ARG, lapply(as.list(pattern), get))
 	}
 	pc <- lapply(ARG, function(obj) {
-	  if (!'ns' %in% names(obj)) NA else
+	  if (!'ns' %in% names(obj))
+	    NA
+	  else
 	    100 * (1 - (obj$sigma / summary(obj$ns)$sigma)^2)
 	})
 	names(pc) <- c(match.call(expand.dots=FALSE)$..., pattern)
 	pc <- unlist(pc[!is.na(pc)])
-	if (length(pc) == 0) return(invisible())
+	if (length(pc) == 0)
+	  return(invisible())
 	round(pc[rev(order(pc))], 2)
-	}
+}
 
+#############################
+#
+#	getL
+#
+#############################
+
+#' @rdname BICadj
+#' @export
+	getL <- function(expr, data=parent.frame()) {
+	  y <- all.vars(expr)
+	  if (length(y) != 1) {
+	    warning('y involves more than one variable')
+	    return(NA)
+	  }
+	  . <- eval(expr, data)
+	  . <- (eval(D(expr, y), data) * eval(parse(text=y), data) / .)[. != 0]
+	  if (isTRUE(all.equal(min(.), max(.))))
+	    median(.)
+	  else	if ('log' %in% all.names(expr))
+	    0
+	  else
+	    NA
+	}
