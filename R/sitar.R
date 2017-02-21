@@ -105,7 +105,7 @@
 #' amen <- abs(heights$men)
 #' (m2 <- update(m1, a.form=~amen, b.form=~amen, c.form=~amen))
 #' @import nlme splines
-#' @importFrom stats AIC BIC as.formula as.ts coef cor fitted lag lm logLik
+#' @importFrom stats AIC BIC as.formula coef cor fitted lag lm logLik
 #' mad model.frame model.matrix na.fail na.omit pnorm predict qnorm quantile
 #' residuals sd setNames smooth.spline spline update update.formula
 #' @export sitar
