@@ -16,7 +16,7 @@ AICadj(..., k = 2, pattern = NULL)
 
 varexp(..., pattern = NULL)
 
-getL(expr, data = parent.frame())
+getL(expr)
 }
 \arguments{
 \item{\dots}{one or more SITAR models.}
@@ -27,21 +27,20 @@ getL(expr, data = parent.frame())
 the classical AIC.}
 
 \item{expr}{quoted or unquoted expression containing a single variable name.}
-
-\item{data}{data frame to evaluate \code{expr}.}
 }
 \value{
 For \code{BICadj} and \code{AICadj} a named vector of deviances in
 increasing order.  For \code{varexp} a named vector of percentages in
 decreasing order. For \code{getL} the power the variable in \code{expr}
-is raised to.
+is raised to, or \code{NA} if \code{expr} is not a power of (a multiple of)
+the variable.
 }
 \description{
 \code{BICadj} and \code{AICadj} calculate the BIC and AIC for SITAR models,
 adjusting the likelihood for Box-Cox transformed y variables. \code{varexp}
 calculates the variance explained by SITAR models, compared to the
 corresponding fixed effect models. \code{getL} is used by \code{[AB]ICadj} to
-find the power that the y variable is raised to.
+find what power the y variable is raised to.
 }
 \details{
 The deviance is adjusted if the y variable is power-transformed, using the
@@ -60,6 +59,9 @@ the SITAR random effects RSD.
 \code{BICadj} and \code{AICadj} accept non-\code{sitar} models with a
 \code{logLik} class. \code{varexp} ignores objects not of class
 \code{sitar}.
+
+\code{getL} does not detect if \code{expr} contains a multiplying constant,
+so \code{expression(x)} and \code{expression(3 * x)} both return 1.
 }
 \examples{
 data(heights)
@@ -76,8 +78,8 @@ varexp(m1, m2)
 ## the pattern matches names starting with "m" followed by a digit
 BICadj(pattern="^m[0-9]")
 
-## find which power height is raised to
-getL(quote(sqrt(sqrt(height))), heights)
+## find what power height is raised to
+getL(quote(sqrt(sqrt(height))))
 }
 \seealso{
 \code{\link{BIC}}, \code{\link{AIC}}

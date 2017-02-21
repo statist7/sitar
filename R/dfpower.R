@@ -1,3 +1,4 @@
+
 #' Tabulate BIC of SITAR models by degrees of freedom and xy power transformations
 #'
 #' \code{dfpower} fits a series of SITAR models for specified degrees of freedom
@@ -49,24 +50,26 @@
     mat <- array(dim=c(length(df), length(xpowers), length(ypowers)),
                  dimnames=list(df, tidy(xlab, xpowers), tidy(ylab, ypowers)))
     control <- paste0(', control=nlmeControl(maxIter=', maxIter, ', returnObject=TRUE)')
-    if (verbose) cat('df', 'iter', 'y ~ x', 'BIC\n')
+    if (verbose)
+      cat('df', 'iter', 'y ~ x', 'BIC\n')
     for (idf in 1:length(df)) {
       for (iy in 1:length(ypowers)) {
         yp <- dimnames(mat)[[3]][iy]
         for (ix in 1:length(xpowers)) {
           xp <- dimnames(mat)[[2]][ix]
-          . <- 'obj'
-          if (df[idf] == df0 && yp == ylab0 && xp == xlab0) . <- lab
+          if (df[idf] == df0 && yp == ylab0 && xp == xlab0)
+            . <- model
           else {
-            eval(parse(text=paste0("assign('", ., "', try(update(", lab, ", df=", df[idf],
-                                   ", y=", yp, ", x=", xp, control, "), silent=TRUE))")))
+            expr <- quote(try(update(model, df=df, y=y, x=x, control=control), silent=TRUE))
+            . <- eval(do.call('substitute', list(expr, list(df=df[idf], y=as.name(yp), x=as.name(xp)))))
           }
-          . <- get(.)
           if (!inherits(., 'try-error')) {
             B <- FUN(.)
-            if (.$numIter >= maxIter) B <- -B
+            if (.$numIter >= maxIter)
+              B <- -B
             mat[idf, ix, iy] <- B
-            if (verbose) cat(df[idf], .$numIter, yp, '~', xp, B, '\n')
+            if (verbose)
+              cat(df[idf], .$numIter, yp, '~', xp, B, '\n')
           }
         }
       }

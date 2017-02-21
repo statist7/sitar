@@ -3,13 +3,19 @@ Changes in Version 1.0.10
   o getPeakTrough (new) identifies peaks and troughs of a curve
     (used to improve code for age at peak velocity - replaces makess).
 
-  o adjust for subset to AICadj and BICadj.
+  o AICadj and BICadj now adjust for subset, and code improved.
 
   o dfpower (new) tabulates BIC/AIC for SITAR models by degrees of freedom
     and/or xy power transformations.
 
-  o setdf (new) identifies optimal degrees of freedom for a natural
+  o getL (new) extracts the power transform of a variable in an expression.
+
+  o dfset (new) identifies optimal degrees of freedom for a natural
     spline curve.
+
+  o Improve label handling in plot.sitar.
+
+  o Fix bug in update.sitar with df and xoffset.
 
   o Fix bug in predict.sitar with abc.
 
