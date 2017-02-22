@@ -153,8 +153,6 @@ round(pc[rev(order(pc))], 2)
 #' @importFrom stats D
 #' @export
 getL <- function(expr) {
-  if (length(expr) == 2 && length(expr[[2]]) == 1 && expr[[1]] == as.name('log'))
-    return(0)
   varname <- all.vars(expr)
   if (length(varname) != 1) {
     warning('expr does not contain a sole variable')
@@ -162,14 +160,16 @@ getL <- function(expr) {
   }
   x <- exp(c(-1, 1)*11) # two arbitrary positive numbers
   assign(varname, x)
-  x <- eval(D(expr, varname)) * x / eval(expr)
-  if (isTRUE(all.equal(diff(x), 0))) {
-    x <- mean(x)
-    if (x > -8)
-      x
-    else
-      0
+  dydx <- eval(D(expr, varname))
+  if ('log' %in% all.names(expr)) {
+    x <- 1 / x / dydx
+    lambda <- 0
+  } else {
+    x <- x * dydx / eval(expr)
+    lambda <- mean(x)
   }
+  if (isTRUE(all.equal(diff(x), 0)))
+    lambda
   else
     NA
 }
