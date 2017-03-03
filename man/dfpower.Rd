@@ -4,26 +4,26 @@
 \alias{dfpower}
 \title{Tabulate BIC of SITAR models by degrees of freedom and xy power transformations}
 \usage{
-dfpower(model, df, xpowers = 1, ypowers = xpowers, FUN = BICadj,
+dfpower(model, df, xpowers, ypowers, FUN = BICadj,
   maxIter = nlmeControl()$maxIter, verbose = FALSE)
 }
 \arguments{
 \item{model}{fitted \pkg{sitar} model to be updated.}
 
-\item{df}{vector of degrees of freedom to be fitted.}
+\item{df}{vector of degrees of freedom to be fitted (defaults to df in \code{model}).}
 
-\item{xpowers}{vector of powers to apply to x.}
+\item{xpowers}{vector of powers to apply to x (defaults to x power in \code{model}).}
 
-\item{ypowers}{vector of powers to apply to y.}
+\item{ypowers}{vector of powers to apply to y (defaults to y power in \code{model}).}
 
 \item{FUN}{function to be tabulated (e.g. BICadj or AICadj).}
 
-\item{maxIter}{maxium number of iterations.}
+\item{maxIter}{maximum number of iterations per fit.}
 
 \item{verbose}{logical controlling monitoring.}
 }
 \value{
-3-way table of BIC by df, x and y powers.
+3-way table of returned values by df, x and y powers.
 }
 \description{
 \code{dfpower} fits a series of SITAR models for specified degrees of freedom
@@ -34,7 +34,11 @@ The function provides a convenient way to optimise the model's degrees of freedo
 and explore transformations of x and y.
 Adjusted BIC is obtained using \code{\link{BICadj}}, and
 is set negative for models failing to converge; the
-run-time can be shortened by reducing \code{maxIter} appropriately.
+run-time can be shortened by reducing \code{maxIter} appropriately. For models
+failing to fit it returns NA.
+
+\code{FUN} can be any function returning a single numerical value.
+
 The returned table can be rearranged using \code{\link{aperm}}.
 }
 \examples{
