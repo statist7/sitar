@@ -60,8 +60,8 @@ the SITAR random effects RSD.
 \code{logLik} class. \code{varexp} ignores objects not of class
 \code{sitar}.
 
-\code{getL} does not detect if \code{expr} contains a multiplying constant,
-so \code{expression(x)} and \code{expression(3 * x)} both return 1.
+\code{getL} does not detect if the variable in \code{expr}, or its log, contains a multiplying constant,
+so that the expressions \code{log(x)} and \code{1 + 2 * log(3 * x)} both return 0.
 }
 \examples{
 data(heights)
