@@ -10,15 +10,15 @@
 #' @param x vector of ages.
 #' @param y vector of either measurements or z-scores, depending on the value
 #' of \code{toz}.
-#' @param sex two-level factor with level 1 male and level 2 female, of length
-#' one or \code{length(x)}.
-#' @param measure character indicating the name of the measurement, depending
-#' on the choice of \code{ref} (see e.g. references \code{uk90}, \code{who06}
-#' and \code{ukwhopt}).
-#' @param ref character indicating the name of the growth reference, available
-#' as a \code{data} object.
+#' @param sex factor where males = 1 and females = 2.
+#' @param measure measurement, either as name or character string, the choice
+#' depending on the choice of \code{ref} (see e.g. references \code{uk90},
+#' \code{who06} and \code{ukwhopt}).
+#' @param ref growth reference, either as name or character string, available
+#' as a \code{data} object or data frame.
 #' @param toz logical set to TRUE for conversion from measurement to z-score,
 #' or FALSE for the reverse.
+#' @param verbose logical set to TRUE to print the associated LMS table.
 #' @return A vector or matrix, depending on the lengths of \code{x} and
 #' \code{y}, containing the transformed values. If the two lengths are the
 #' same, or either is one, then a vector is returned. If they are different and
@@ -41,48 +41,46 @@
 #' data(who06)
 #' zs <- -4:4*2/3 # z-scores for centiles
 #' ages <- 0:12/4 # 3-month ages
-#' v <- as.data.frame(lapply(as.list(zs), function(z) {
-#'   v <- LMS2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
-#' }))
-#' names(v) <- z2cent(zs)
-#' rownames(v) <- ages
+#' v <- vapply(as.list(zs), function(z)
+#'  LMS2z(ages, z, sex = 1, measure = wt, ref = who06, toz = FALSE),
+#'   rep(0, length(ages)))
+#' dimnames(v) <- list(ages, z2cent(zs))
 #' round(v, 2)
 #'
 #' @export LMS2z
-	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE) {
-#	converts measurement y to/from z-score adjusted for x & sex
-#		using LMS reference 'ref' for 'measure'
-#	x		age
-#	y		measurement (or z-score if toz FALSE)
-#	sex		sex variable (male=1, female=2)
-#	measure label for measurement, one of:
-#		'ht' 'wt' 'bmi' 'head' 'sitht' 'leglen' 'waist' 'bfat'
-#	ref		name of reference, one of: 'uk90' 'who06'
-#	toz		if TRUE returns measurement converted to z-score using ref
-#		  	if FALSE returns z-score converted to measurement using ref
-	if (!length(sex) %in% c(1, length(x))) stop('sex wrong length for x')
-	lms <- paste(c('L', 'M', 'S'), measure, sep='.')
-	v <- matrix(nrow=length(x), ncol=4)
-	v[, 4] <- sex
-	ref <- get(ref)
-	for (i in 1:3) {
-		for (ix in 1:2) {
-			sexvar <- as.numeric(v[, 4]) == ix
-			sexref <- as.numeric(ref$sex) == ix
-			if (any(sexvar)) v[sexvar, i] <- spline(ref$years[sexref],
-				ref[sexref, lms[i]], method='natural', xout=x[sexvar])$y
+	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, verbose=FALSE) {
+# fails for sex = 'female' by itself - consider using malesex instead
+	xy <- data.frame(cbind(x, y, sex=as.integer(as.factor(sex))))
+	x <- xy$x
+	y <- xy$y
+	sex <- xy$sex
+	v <- matrix(nrow=length(x), ncol=3)
+  colnames(v) <- c('L', 'M', 'S')
+  mc <- match.call()[['measure']]
+  if (!is.character(mc))
+    measure <- deparse(substitute(mc))
+  if (is.character(ref))
+    ref <- get(ref)
+  x[x < min(ref$years) | x > max(ref$years)] <- NA
+	for (ix in 1:2) {
+		sexvar <- sex == ix
+		if (any(sexvar)) {
+		  v[sexvar, ] <- vapply(colnames(v), function(j) {
+		    with(ref[ref$sex == ix, ],
+		         spline(years, get(paste(j, measure, sep='.')),
+		                method='natural', xout=x[sexvar])$y)
+		  }, rep(0, sum(sexvar)))
 		}
 	}
-	cz <- if (toz) zLMS(y, v[, 1], v[, 2], v[, 3])
-		else cLMS(y, v[, 1], v[, 2], v[, 3])
+  cz <- do.call(ifelse(toz, 'zLMS', 'cLMS'), list(y, v[, 1], v[, 2], v[, 3]))
 	if (!is.null(dim(cz))) {
 	  cz <- as.data.frame(cz)
 	  if (!toz) names(cz) <- z2cent(y)
-	  rownames(cz) <- x
 	}
+	if (verbose)
+  	print(cbind(y, cz, sex, v), digits=6)
 	cz
 }
-
 
 #' LMS conversion to and from z-scores
 #'
@@ -123,32 +121,29 @@
 #'
 #' @export cLMS
 	cLMS <- function(z, L = 1, M, S) {
-	  L0 <- L + 1e-7 * (L == 0)
-	  LMS <- data.frame(cbind(L0, M, S))
+	  L <- L + 1e-7 * (L == 0)
+	  LMS <- data.frame(cbind(L, M, S))
 	  if (length(z) == nrow(LMS) || min(length(z), nrow(LMS)) == 1)
-	    drop(with(LMS, M * (1 + L0 * S * z) ^ (1/L0)))
+	    drop(with(LMS, M * (1 + L * S * z) ^ (1/L)))
 	  else
-	    drop(with(LMS, M * (1 + L0 * S %*% t(z)) ^ (1/L0)))
+	    drop(with(LMS, M * (1 + L * S %*% t(z)) ^ (1/L)))
 	}
 
 #' @rdname cLMS
 #' @export
 	zLMS <- function(x, L = 1, M, S) {
-	  L0 <- L + 1e-7 * (L == 0)
-	  LMS <- data.frame(cbind(L0, M, S))
+	  L <- L + 1e-7 * (L == 0)
+	  LMS <- data.frame(cbind(L, M, S))
 	  if (length(x) == nrow(LMS) || min(length(x), nrow(LMS)) == 1)
-	    drop(with(LMS, ((x / M) ^ L0 - 1) / L0 / S))
+	    drop(with(LMS, ((x / M) ^ L - 1) / L / S))
 	  else
-	    drop(with(LMS, (t(x %*% t(1 / M)) ^ L0 - 1) / L0 / S))
+	    drop(with(LMS, (t(x %*% t(1 / M)) ^ L - 1) / L / S))
 	}
-
-
 
 #' Express z-scores as centile character strings for plotting
 #'
 #' Converts z-scores, typically defining centiles in a growth chart, to
 #' character strings that can be used to label the centile curves.
-#'
 #'
 #' @param z a scalar or vector of z-scores.
 #' @return A character string is returned, the same length as z. Z-scores in
@@ -165,8 +160,6 @@
 #'
 #' @export z2cent
 	z2cent <- function(z) {
-#	z is z-score
-#	returns corresponding centile as label
 	np <- ifelse(abs(z) < 2.33, 0, 1)
 	ct <- round(pnorm(z) * 100, np)
 	mod10 <- ifelse(np == 1, 0, floor(ct %% 10))

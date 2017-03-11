@@ -4,7 +4,7 @@
 \alias{LMS2z}
 \title{Convert to/from measurement from/to z-score with growth reference}
 \usage{
-LMS2z(x, y, sex, measure, ref, toz = TRUE)
+LMS2z(x, y, sex, measure, ref, toz = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{x}{vector of ages.}
@@ -12,18 +12,19 @@ LMS2z(x, y, sex, measure, ref, toz = TRUE)
 \item{y}{vector of either measurements or z-scores, depending on the value
 of \code{toz}.}
 
-\item{sex}{two-level factor with level 1 male and level 2 female, of length
-one or \code{length(x)}.}
+\item{sex}{factor where males = 1 and females = 2.}
 
-\item{measure}{character indicating the name of the measurement, depending
-on the choice of \code{ref} (see e.g. references \code{uk90}, \code{who06}
-and \code{ukwhopt}).}
+\item{measure}{measurement, either as name or character string, the choice
+depending on the choice of \code{ref} (see e.g. references \code{uk90},
+\code{who06} and \code{ukwhopt}).}
 
-\item{ref}{character indicating the name of the growth reference, available
-as a \code{data} object.}
+\item{ref}{growth reference, either as name or character string, available
+as a \code{data} object or data frame.}
 
 \item{toz}{logical set to TRUE for conversion from measurement to z-score,
 or FALSE for the reverse.}
+
+\item{verbose}{logical set to TRUE to print the associated LMS table.}
 }
 \value{
 A vector or matrix, depending on the lengths of \code{x} and
@@ -53,11 +54,10 @@ with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages
-v <- as.data.frame(lapply(as.list(zs), function(z) {
-  v <- LMS2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
-}))
-names(v) <- z2cent(zs)
-rownames(v) <- ages
+v <- vapply(as.list(zs), function(z)
+ LMS2z(ages, z, sex = 1, measure = wt, ref = who06, toz = FALSE),
+  rep(0, length(ages)))
+dimnames(v) <- list(ages, z2cent(zs))
 round(v, 2)
 
 }
