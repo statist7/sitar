@@ -35,10 +35,11 @@ default FALSE.}
 \value{
 A list with the results: \describe{ \item{list("LMS")}{data frame of
 sex, x, L, M, S, Lopt, Mopt, Sopt.} \item{list("ey")}{matrix of predicted
-values of \code{y}.} \item{list("fit")}{matrix of summary statistics for
-\code{ey}, giving for each column \code{cmean} the mean centile, \code{zSD}
-the SD of the z-score difference between \code{ey} and \code{y}, and the
-minimum and maximum z-scores \code{zmin} and \code{zmax}.} }
+values of \code{y}.} \item{list("ez")}{matrix of predicted
+values of \code{z}.} \item{list("fit")}{matrix of summary statistics for
+\code{ey}, giving for each column \code{cmean} the mean centile, \code{zmean}
+the mean z-score, \code{zSD} the SD of the z-score, and \code{zmin} and
+\code{zmax} the minimum and maximum z-scores.} }
 }
 \description{
 A function to summarise an existing set of growth reference centiles as the
@@ -56,11 +57,13 @@ smoothed across age to give L, M and S.
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # ages 0-3 years by 3 months
-v <- LMS2z(ages, zs, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
+v <- vapply(as.list(zs), function(z)
+ LMS2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE),
+  rep(0, length(ages)))
 round(v, 2)
 
-## then back-calculate the original LMS curves
-lms <- LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
+## then back-calculate the original LMS curves and display summary statistics
+LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
 
 }
 \seealso{

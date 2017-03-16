@@ -1,13 +1,13 @@
 #' Estimate LMS curves from tabulated growth reference centiles
-#' 
+#'
 #' A function to summarise an existing set of growth reference centiles as the
 #' L, M and S curves of the LMS method.
-#' 
+#'
 #' At each age the optimal Box-Cox power Lopt is estimated to render the
 #' centiles closest to Normal, and the corresponding median Mopt and
 #' coefficient of variation Sopt are derived. The three sets of values are then
 #' smoothed across age to give L, M and S.
-#' 
+#'
 #' @param x vector of tabulated ages.
 #' @param y matrix of corresponding measurement centiles, e.g. of height or
 #' weight, with \code{nrows = length(x)} and \code{ncols = length(centiles)}.
@@ -25,10 +25,11 @@
 #' @param \dots optional graphical parameters for the plots.
 #' @return A list with the results: \describe{ \item{list("LMS")}{data frame of
 #' sex, x, L, M, S, Lopt, Mopt, Sopt.} \item{list("ey")}{matrix of predicted
-#' values of \code{y}.} \item{list("fit")}{matrix of summary statistics for
-#' \code{ey}, giving for each column \code{cmean} the mean centile, \code{zSD}
-#' the SD of the z-score difference between \code{ey} and \code{y}, and the
-#' minimum and maximum z-scores \code{zmin} and \code{zmax}.} }
+#' values of \code{y}.} \item{list("ez")}{matrix of predicted
+#' values of \code{z}.} \item{list("fit")}{matrix of summary statistics for
+#' \code{ey}, giving for each column \code{cmean} the mean centile, \code{zmean}
+#' the mean z-score, \code{zSD} the SD of the z-score, and \code{zmin} and
+#' \code{zmax} the minimum and maximum z-scores.} }
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{LMS2z}}, \code{\link{z2cent}}. The LMS method can be
 #' fitted to data using the package \code{gamlss} with the \code{BCCG} family,
@@ -36,17 +37,19 @@
 #' respectively.
 #' @keywords arith
 #' @examples
-#' 
+#'
 #' ## first construct table of boys weight centiles by age for WHO standard
 #' data(who06)
 #' zs <- -4:4*2/3 # z-scores for centiles
 #' ages <- 0:12/4 # ages 0-3 years by 3 months
-#' v <- LMS2z(ages, zs, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE)
+#' v <- vapply(as.list(zs), function(z)
+#'  LMS2z(ages, z, sex = 1, measure = 'wt', ref = 'who06', toz = FALSE),
+#'   rep(0, length(ages)))
 #' round(v, 2)
-#' 
-#' ## then back-calculate the original LMS curves
-#' lms <- LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
-#' 
+#'
+#' ## then back-calculate the original LMS curves and display summary statistics
+#' LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
+#'
 #' @export LMSfit
 LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,90,97), df = c(6,10,8), L1 = FALSE, plot=TRUE, ...) {
 #	x is a vector of ages, separately by sex
@@ -62,28 +65,31 @@ LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,
 
 	z <- qnorm(centiles/100)
 	ez <- ey <- y
-	SD <- matrix(nrow = 4, ncol = length(z))
-	rownames(SD) <- c("cmean", "zSD", "zmin", "zmax")
-	colnames(SD) <- colnames(ey) <- z2cent(z)
+	SD <- matrix(nrow = 5, ncol = length(z))
+	rownames(SD) <- c("cmean", "zmean", "zSD", "zmin", "zmax")
+	colnames(SD) <- colnames(ey) <- colnames(ez) <- z2cent(z)
 	Lopt <- Mopt <- Sopt <- L <- M <- S <- rep(1, length(x))
 	for (i in 1:length(x)) {
-		c1 <- cor(z, as.numeric(y[i,]))
-		c2 <- cor(z, as.numeric(log(y[i,])))
-		c3 <- cor(z, as.numeric(-1/y[i,]))
-		if (!L1) Lopt[i] <- (c3 - c1) / 2 / (c1 - 2 * c2 + c3)
-		res <- lm(I(as.numeric(y[i,])) ^ Lopt[i] ~ z)
-		Mopt[i] <- res$coef[1] ^ (1/Lopt[i])
-		Sopt[i] <- res$coef[2] / res$coef[1] / Lopt[i]
+	  if (!L1) {
+  		c1 <- cor(z, as.numeric(y[i,]))
+  		c2 <- cor(z, as.numeric(log(y[i,])))
+  		c3 <- cor(z, as.numeric(-1/y[i,]))
+  		Lopt[i] <- (c3 - c1) / 2 / (c1 - 2 * c2 + c3)
+	  }
+		. <- lm(I(as.numeric(y[i,])) ^ Lopt[i] ~ z)$coef
+		Mopt[i] <- .[1] ^ (1/Lopt[i])
+		Sopt[i] <- .[2] / .[1] / Lopt[i]
 	}
 	mf <- c("Male", "Female")
 	LMStitle <- c("L", "M", "S")
 	for (sx in 1:2) {
 		if (!any(sex == sx)) next
-		LMSt <- cbind(Lopt, Mopt, Sopt)[sex == sx,]
+		LMSt <- cbind(Lopt, Mopt, Sopt)[sex == sx, ]
 		xt <- x[sex == sx]
 		for (i in 1:3) {
-			sms <- smooth.spline(xt, LMSt[, i], df = df[i])
-			if (i == 1 && !L1) L[sex == sx] <- sms$y else
+		  if (i == 1 && L1) next
+		  sms <- smooth.spline(xt, LMSt[, i], df = df[i])
+			if (i == 1) L[sex == sx] <- sms$y else
 			  if (i == 2) M[sex == sx] <- sms$y else
 		    	if (i == 3) S[sex == sx] <- sms$y
       if (plot) {
@@ -101,11 +107,12 @@ LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,
 			ey[, j] <- M * (1 + L * S * z[j]) ^ (1/L)
 			ez[, j] <- ((y[, j] / M) ^ L - 1) / L / S
 			SD[1, j] <- pnorm(mean(ez[, j])) * 100
-			SD[2, j] <- sd(ez[, j])
-			SD[3, j] <- min(ez[, j])
-			SD[4, j] <- max(ez[, j])
+			SD[2, j] <- mean(ez[, j])
+			SD[3, j] <- sd(ez[, j])
+			SD[4, j] <- min(ez[, j])
+			SD[5, j] <- max(ez[, j])
 		}
 	}
 	return(list(LMS = data.frame(sex, x, L, M, S, Lopt, Mopt, Sopt),
-	ey = ey, fit = SD))
+	ey = ey, ez = ez, fit = SD))
 }
