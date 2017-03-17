@@ -87,7 +87,7 @@
       if (length(abc) == 1) {
         . <- rownames(ranef(object)) %in% abc
         if (!any(.)) stop(paste('id', abc, 'not found'))
-        abc <- ranef(object)[., ]
+        abc <- ranef(object)[., , drop=FALSE]
       }
     }
     if (is.null(nrow(abc)))
@@ -95,7 +95,7 @@
     else if (abcset <- nrow(abc) == 1) {
       level <- 0
     } else
-      abc <- abc[id, ]
+      abc <- abc[id, , drop=FALSE]
 # check if old-style object lacking fitnlme
     if(!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')
