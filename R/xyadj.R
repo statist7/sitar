@@ -38,7 +38,7 @@
 #' with(heights, points(xyadj(m1), col='red', pch=19))
 #'
 #' @export xyadj
-xyadj <- function(object, x, y=NULL, id, abc=ranef(object)[id, ], tomean=TRUE) {
+xyadj <- function(object, x, y=NULL, id, abc=ranef(object)[id, , drop=FALSE], tomean=TRUE) {
 #	returns x and y adjusted for random effects a, b and c
   if (missing(x)) {
     x <- getCovariate(object)
