@@ -95,14 +95,12 @@
 {
 	  class(object) <- class(object)[-1]
     object <- summary(object, adjustSigma=adjustSigma, verbose=verbose, ...)
-
+    class(object) <- c("summary.sitar", "sitar", class(object))
 #	save age at peak velocity
     x <- getCovariate(object)
     y <- fitted(object, level=0)
     y <- predict(smooth.spline(unique(cbind(x, y))), x, deriv=1)$y
     object$apv <- getPeakTrough(x, y)
-
-    class(object) <- c("summary.sitar", class(object))
     object
 }
 
