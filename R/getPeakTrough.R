@@ -7,10 +7,7 @@
 #' @param y vector.
 #' @param peak logical determining whether peak or trough is returned.
 #' @return A length-2 vector containing the values of \code{x} and  \code{y}
-#' at the peak or trough. For the peak they are labelled 'apv' and 'pv'
-#' (for age at peak velocity and peak velocity) or 'atv' and 'tv' for the trough,
-#' reflecting the common case where \code{y} is the first derivative
-#' of a function. If no peak/trough is identified NULL is returned invisibly.
+#' at the peak or trough. If no peak/trough is identified NULL is returned invisibly.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
 #' ## create mean height velocity curve
@@ -43,8 +40,7 @@
 		. <- lm(y ~ poly(x, 2, raw=TRUE)) # quadratic in x
 		x <- - .$coef[2] / .$coef[3] / 2 # x at tp
 		y <- predict(., data.frame(x=x)) # y at tp
-		. <- if (peak) c('apv', 'pv') else c('atv', 'tv')
-		setNames(c(x, y), .)
+		setNames(c(x, y), c('x', 'y'))
 	} else
 	  invisible(NULL)
 }
