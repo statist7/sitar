@@ -4,7 +4,8 @@
 \alias{xyadj}
 \title{Adjust x and y variables for SITAR random effects}
 \usage{
-xyadj(object, x, y = NULL, id, abc = ranef(object)[id, ], tomean = TRUE)
+xyadj(object, x, y = NULL, id, abc = ranef(object)[id, , drop = FALSE],
+  tomean = TRUE)
 }
 \arguments{
 \item{object}{a SITAR model.}
