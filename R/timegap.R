@@ -117,7 +117,9 @@ timegap <- function(age, gap, tol=0.1*gap, multiple=FALSE) {
 #' @rdname timegap
 #' @export
 timegap.id <- function(age, id, data=parent.frame(), gap, tol=0.1*gap, multiple=FALSE) {
-  bylist <- with(data, by(data, id, function(z)
+  xd <- data.frame(lapply(match.call()[3:2], eval, data))
+  xd$id <- factor(xd$id)
+  bylist <- with(xd, by(xd, id, function(z)
     list(timegap(z$age, gap=gap, tol=tol, multiple=multiple), nrow(z))
   ))
   count <- 0
@@ -132,7 +134,8 @@ timegap.id <- function(age, id, data=parent.frame(), gap, tol=0.1*gap, multiple=
 #' @rdname timegap
 #' @export
 diffid <- function(age, id, data=parent.frame(), lag=1, differences=1, sort=FALSE, keepNA=FALSE) {
-  xd <- with(data, cbind(id, age))
+  mc <- match.call()
+  xd <- cbind(as.integer(factor(eval(mc$id, data))), eval(mc$age, data))
   if (sort) xd <- xd[order(xd[, 1], xd[, 2]), ]
   xd <- diff(xd, lag=lag, differences=differences)
   xd[xd[, 1] != 0, 2] <- NA
