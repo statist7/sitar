@@ -104,9 +104,10 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-# identify covariates needed in newdata, omitting fixed effects and x
+# identify covariates needed in newdata, omitting x, fixed effects and random effects
     argnames <- names(formals(fitnlme))
     argnames <- argnames[!argnames %in% names(fixef(object))][-1]
+    argnames <- argnames[!argnames %in% names(ranef(object))]
     if (length(argnames) > 0) {
 # check if newdata subsetted (from plot)
       if (is.null(subset <- attr(newdata, 'subset'))) {

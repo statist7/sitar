@@ -17,6 +17,8 @@ Changes in Version 1.0.10
 
   o Fix bug in update.sitar with df and xoffset.
 
+  o Fix bug in predict.sitar when b.formula = ~covariate - 1.
+
   o Fix bug in predict.sitar with abc.
 
   o Constrain df to be >1 in sitar.
