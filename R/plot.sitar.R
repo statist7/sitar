@@ -100,22 +100,11 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     options <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
     optaxis <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
     optmult <- c( F,   F,   T,   F,   T,   F,   T ) # multiple curves
-    opts <- na.omit(match(unlist(strsplit(opt, '')), options))
+    opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
     if (length(opts) == 0) stop('option(s) not recognised')
-    y2 <- diff(range(optaxis[opts])) == 1 # need both y1 and y2
+    dv <- range(optaxis[opts])
+    dv <- min(dv) + diff(dv) * 2 # 1=d, 2=v, 3=dv
     mult <- any(optmult[opts]) # multiple curves
-# identify axis ranges then draw axes
-    # axismin <- 3; axismax <- 0
-    # for (i in 1:nchar(opt)) {
-    #   no <- match(substr(opt, i, i), options, NA)
-    #   if (is.na(no)) next
-    #   if (optaxis[no] > axismax) axismax <- optaxis[no]
-    #   if (optaxis[no] < axismin) axismin <- optaxis[no]
-    # }
-    # if (axismin == 2) {
-    #   optaxis <- optaxis - 1
-    #   axismax <- axismin <- 1
-    # }
     model <- x
 		data <- getData(model)
 		mcall <- model$call.sitar
@@ -141,20 +130,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		  labels <- vector('character', 3)
 		else if (length(labels) < 3)
 		  labels <- c(labels, '', '')
-# test for velocity plot
-		optv <- all(unique(strsplit(tolower(opt), '')[[1]]) == 'v')
-# test for velocity plot label via y2par
-		if (!is.null(ARG$y2par$ylab)) {
-		  labels[3] <- ARG$y2par$ylab
-		  if (optv)
-		    ARG$ylab <- labels[2] <- ARG$y2par$ylab
-		}
 #	if xlab not specified replace with label or x name (depending on xfun)
 		if (is.null(ARG$xlab)) {
-		  ARG$xlab <- if(labels[1] != '')
-		    labels[1]
+		  if(labels[1] != '')
+		    ARG$xlab <- labels[1]
 		  else {
-		    if (!is.null(xfun))
+		    labels[1] <- ARG$xlab <- if (!is.null(xfun))
 		      paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
 		    else
 		      attr(ifun(mcall$x), 'varname')
@@ -162,26 +143,31 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		} else
 		  labels[1] <- ARG$xlab
 #	if ylab not specified replace with label or y name (depending on yfun)
-		if (is.null(ARG$ylab)) {
-		  if(labels[2] != '')
-		    ARG$ylab <- labels[2]
+		y1label <- 3 - dv %% 2 # 2=d, 3=v
+# set up labels[2]
+		if (labels[2] == '') {
+		  if (y1label == 2 && !is.null(ARG$ylab))
+		      labels[2] <- ARG$ylab
 		  else {
-		    ARG$ylab <- if (!is.null(yfun))
+		    labels[2] <- if (!is.null(yfun))
 		      paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
 		    else
 		      attr(ifun(mcall$y), 'varname')
-	      labels[2] <- ARG$ylab
 		  }
-	    if (labels[3] == '')
-	      labels[3] <- paste(ARG$ylab, 'velocity')
-		} else {
-   	  labels[2] <- ARG$ylab
-   	  if (optv)
-   	    labels[3] <- ARG$ylab
-  		else
-  		  if (labels[3] == '')
-  		    labels[3] <- paste(ARG$ylab, 'velocity')
-   	}
+		}
+# set up velocity
+		if (dv > 1) {
+		  if (labels[3] == '') {
+		    if (y1label == 3 && !is.null(ARG$ylab))
+		      labels[3] <- ARG$ylab
+		    else if (y1label == 2 && !is.null(ARG$y2par$ylab))
+		      labels[3] <- ARG$y2par$ylab
+  		  else
+  		    labels[3] <- paste(labels[2], 'velocity')
+		  }
+		}
+# set up ylab
+	  ARG$ylab <- labels[y1label]
 
 #	create output list
 		xy <- list()
@@ -256,19 +242,18 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			  print(signif(xy$apv, 4))
 			}
 
-# plot curve(s)
+# plot d &| v curve(s)
 			if (grepl("d", opt) && grepl("v", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
 				add <- TRUE
 			} else
-			if (grepl("d", opt)) {
-				xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG))
-				add <- TRUE
-			} else
+		  if (grepl("d", opt)) {
+		    xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG))
+		    add <- TRUE
+		  }
 			if (grepl("v", opt)) {
-				ARG$ylab <- labels[3]
-				xy <- do.call("y2plot", c(list(x=xt, y1=vt, labels=labels[c(1,3)], add=add, xy=xy), ARG))
-				add <- TRUE
+			  xy <- do.call("y2plot", c(list(x=xt, y1=vt, add=add, xy=xy), ARG))
+			  add <- TRUE
 			}
 		}
 
@@ -290,15 +275,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			add <- TRUE
 		}
 
-# plot vertical line at age of peak velocity
+# plot vertical line(s) at age of peak velocity
 		if (apv) {
-		  if (is.null(ARG$y2par$lty)) ARG$y2par$lty <- 3
-# single curve case
-		  if (!mult) {
-		    if (add) do.call('abline', c(list(v=xy$apv[1]), ARG$y2par))
-		  }
-# multiple curve case
-		  else {
+# multiple curves
+		  if (mult) {
 		    if (sum(x - xfun(x)) == 0 && sum(y - yfun(y)) == 0) {
   		    apv1 <- xyadj(model, xy$apv[1], tomean=FALSE)$x # subject-specific APHVs
   		    pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PHVs
@@ -315,8 +295,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		      }, c(0, 0))
 		      xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
 		    }
-		    if (add) do.call('abline', c(list(v=xy$apv$apv), ARG$y2par))
 		  }
+		  if (is.null(ARG$y2par$lty)) ARG$y2par$lty <- 3
+	    if (add) do.call('abline', c(list(v=unlist(xy$apv['apv'])), ARG$y2par))
 		}
 		invisible(xy)
 	}
