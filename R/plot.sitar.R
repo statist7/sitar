@@ -99,7 +99,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 	else {
     options <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
     optaxis <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
-    optmult <- c( F,   F,   T,   T,   T,   F,   T ) # multiple curves
+    optmult <- c( F,   F,   T,   F,   T,   F,   T ) # multiple curves
     opts <- na.omit(match(unlist(strsplit(opt, '')), options))
     if (length(opts) == 0) stop('option(s) not recognised')
     y2 <- diff(range(optaxis[opts])) == 1 # need both y1 and y2
@@ -250,25 +250,26 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			yt <- yfun(predict(object=model, newdata=newdata, level=0, abc=abc))
 			vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
 
+# save and print apv
+			if (apv) {
+			  xy$apv <- setNames(getPeakTrough(xt, vt), c('apv', 'pv'))
+			  print(signif(xy$apv, 4))
+			}
+
 # plot curve(s)
 			if (grepl("d", opt) && grepl("v", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
+				add <- TRUE
 			} else
 			if (grepl("d", opt)) {
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG))
+				add <- TRUE
 			} else
 			if (grepl("v", opt)) {
 				ARG$ylab <- labels[3]
 				xy <- do.call("y2plot", c(list(x=xt, y1=vt, labels=labels[c(1,3)], add=add, xy=xy), ARG))
+				add <- TRUE
 			}
-#	plot vertical line at age of peak velocity
-  		if (apv) {
-  			xy$apv <- getPeakTrough(xt, vt)
-  			if (!is.na(opt)) print(signif(xy$apv, 4))
-				if (is.null(ARG$y2par$lty)) ARG$y2par$lty <- 3
-				do.call('abline', c(list(v=xy$apv[1]), ARG$y2par))
-  		}
-			add <- TRUE
 		}
 
 #	plot fixed effects distance curve
@@ -287,6 +288,35 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			yt <- yt$y
     	do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))
 			add <- TRUE
+		}
+
+# plot vertical line at age of peak velocity
+		if (apv) {
+		  if (is.null(ARG$y2par$lty)) ARG$y2par$lty <- 3
+# single curve case
+		  if (!mult) {
+		    if (add) do.call('abline', c(list(v=xy$apv[1]), ARG$y2par))
+		  }
+# multiple curve case
+		  else {
+		    if (sum(x - xfun(x)) == 0 && sum(y - yfun(y)) == 0) {
+  		    apv1 <- xyadj(model, xy$apv[1], tomean=FALSE)$x # subject-specific APHVs
+  		    pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PHVs
+  		    xy$apv <- data.frame(apv=apv1, pv=pv1)
+		    }
+# xfun or yfun set
+		    else {
+		      xt <- xseq(x[subset])
+		      newdata <- data.frame(x=xt)
+		      . <- vapply(levels(factor(id[subset])), function(z) {
+		        newdata$id <- z
+  		      vt <- predict(object=model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun)
+  		      getPeakTrough(xfun(xt), vt)
+		      }, c(0, 0))
+		      xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
+		    }
+		    if (add) do.call('abline', c(list(v=xy$apv$apv), ARG$y2par))
+		  }
 		}
 		invisible(xy)
 	}
