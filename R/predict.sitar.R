@@ -74,7 +74,9 @@
       if (any(level == 1)) newdata$id <- eval(oc$id, newdata)
       else newdata$id <- rep.int(getGroups(object)[1], nrow(newdata))
     }
-    id <- newdata$id <- factor(newdata$id)
+    if (!is.factor(newdata$id))
+      newdata$id <- factor(newdata$id, levels(getGroups(object)))
+    id <- newdata$id
 # check abc as length-3 vector or 1-row data frame
     if (is.null(abc)) abc <- ranef(object)
     else if (is.vector(abc)) {
