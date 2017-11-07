@@ -130,44 +130,47 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		  labels <- vector('character', 3)
 		else if (length(labels) < 3)
 		  labels <- c(labels, '', '')
+		if (labels[3] == '' && labels[2] != '')
+		  labels[3] <- paste(labels[2], 'velocity')
+		y1label <- 3 - dv %% 2 # 2=d, 3=v
+
 #	if xlab not specified replace with label or x name (depending on xfun)
 		if (is.null(ARG$xlab)) {
-		  if(labels[1] != '')
-		    ARG$xlab <- labels[1]
-		  else {
-		    labels[1] <- ARG$xlab <- if (!is.null(xfun))
+		  if(labels[1] == '') {
+		    ARG$xlab <- if (!is.null(xfun))
 		      paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
 		    else
 		      attr(ifun(mcall$x), 'varname')
+		    labels[1] <- ARG$xlab
 		  }
-		} else
-		  labels[1] <- ARG$xlab
+		  else
+		    ARG$xlab <- labels[1]
+		}
+
 #	if ylab not specified replace with label or y name (depending on yfun)
-		y1label <- 3 - dv %% 2 # 2=d, 3=v
-# set up labels[2]
-		if (labels[2] == '') {
-		  if (y1label == 2 && !is.null(ARG$ylab))
-		      labels[2] <- ARG$ylab
-		  else {
-		    labels[2] <- if (!is.null(yfun))
+		if (is.null(ARG$ylab)) {
+		  if(labels[y1label] == '') {
+		    ARG$ylab <- if (!is.null(yfun))
 		      paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
 		    else
 		      attr(ifun(mcall$y), 'varname')
+		    if (y1label == 3) ARG$ylab <- paste(ARG$ylab, 'velocity')
+		    labels[y1label] <- ARG$ylab
 		  }
+		  else
+  		  ARG$ylab <- labels[y1label]
 		}
+
 # set up velocity
-		if (dv > 1) {
-		  if (labels[3] == '') {
-		    if (y1label == 3 && !is.null(ARG$ylab))
-		      labels[3] <- ARG$ylab
-		    else if (y1label == 2 && !is.null(ARG$y2par$ylab))
-		      labels[3] <- ARG$y2par$ylab
-  		  else
-  		    labels[3] <- paste(labels[2], 'velocity')
+		if (dv == 3) {
+	    if (is.null(ARG$y2par$ylab)) {
+	      if (labels[3] == '')
+	        labels[3] <- paste(labels[2], 'velocity')
+	      ARG$y2par$ylab <- labels[3]
 		  }
+		  else
+		    labels[3] <- ARG$y2par$ylab
 		}
-# set up ylab
-	  ARG$ylab <- labels[y1label]
 
 #	create output list
 		xy <- list()
@@ -279,9 +282,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		if (apv) {
 # multiple curves
 		  if (mult) {
+# x and y untransformed
 		    if (sum(x - xfun(x)) == 0 && sum(y - yfun(y)) == 0) {
-  		    apv1 <- xyadj(model, xy$apv[1], tomean=FALSE)$x # subject-specific APHVs
-  		    pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PHVs
+  		    apv1 <- xyadj(model, xy$apv[1], tomean=FALSE)$x # subject-specific APVs
+  		    pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
   		    xy$apv <- data.frame(apv=apv1, pv=pv1)
 		    }
 # xfun or yfun set
