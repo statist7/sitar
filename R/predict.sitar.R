@@ -13,7 +13,10 @@
 #' \code{level = 1}, matching the names in \code{object}. Any covariates in
 #' \code{a.formula}, \code{b.formula} or \code{c.formula} can also be included.
 #' By default their values are set to the mean, so when \code{level = 0} the
-#' prediction represents the mean curve.
+#' prediction represents the mean curve. Variables with the reserved names
+#' \code{x=.x} or \code{id=.id} take precedence over the model \code{x} and
+#' \code{id} variables.
+
 #' @param level an optional integer giving the level(s) of grouping to be used
 #' in obtaining the predictions, level 0 corresponding to the population
 #' predictions. Defaults to level 1.
@@ -60,23 +63,27 @@
   predict.sitar <- function(object, newdata=getData(object), level=1, ...,
                             deriv=0, abc=NULL,
                             xfun=function(x) x, yfun=function(y) y) {
-# create x and id variables in newdata
+# create x in newdata
     oc <- object$call.sitar
-    if (is.null(newdata$x)) newdata$x <- eval(oc$x, newdata)
-    x <- newdata$x
+    x <- if (is.null(newdata$.x))
+      eval(oc$x, newdata)
+    else
+      newdata$.x
     if (is.null(xoffset <- object$xoffset)) {
       xoffset <- mean(getCovariate(object))
       warning('xoffset set to mean(x) - best to refit model')
     }
-    newdata$x <- newdata$x - xoffset
+    newdata$x <- x - xoffset
 # create id in newdata
-    if (is.null(newdata$id)) {
-      if (any(level == 1)) newdata$id <- eval(oc$id, newdata)
-      else newdata$id <- rep.int(getGroups(object)[1], nrow(newdata))
+    id <- if (is.null(newdata$.id)) {
+      if (any(level == 1))
+        eval(oc$id, newdata)
+      else
+        rep.int(getGroups(object)[1], nrow(newdata))
     }
-    if (!is.factor(newdata$id))
-      newdata$id <- factor(newdata$id, levels(getGroups(object)))
-    id <- newdata$id
+    else
+      newdata$.id
+    newdata$id <- id
 # check abc as length-3 vector or 1-row data frame
     if (is.null(abc)) abc <- ranef(object)
     else if (is.vector(abc)) {

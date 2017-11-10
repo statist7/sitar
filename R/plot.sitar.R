@@ -211,7 +211,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		for (o in c('D', 'V')) {
 		  oV <- as.numeric(o == 'V')
   		if (grepl(o, opt)) {
-  		  newdata <- stackage(x[subset], id[subset])
+  		  newdata <- setNames(stackage(x[subset], id[subset]), c('.x', '.id'))
   		  newdata <- cbind(newdata, y=predict(model, newdata=newdata, xfun=xfun, yfun=yfun, deriv=oV))
   		  ARG$ylab <- labels[2 + oV]
 # adjust ARG=id to ARG=newid
@@ -230,7 +230,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 #	plot fitted distance and velocity curves
 		if (grepl("d", opt) || grepl("v", opt) || apv) {
 			xt <- xseq(x[subset])
-  		newdata <- data.frame(x=xt)
+  		newdata <- data.frame(.x=xt)
 # if subset, flag for predict
       if (!identical(subset, rep_len(TRUE, nf))) attr(newdata, 'subset') <- subset
 
@@ -291,9 +291,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # xfun or yfun set
 		    else {
 		      xt <- xseq(x[subset])
-		      newdata <- data.frame(x=xt)
+		      newdata <- data.frame(.x=xt)
 		      . <- vapply(levels(factor(id[subset])), function(z) {
-		        newdata$id <- z
+		        newdata$.id <- z
   		      vt <- predict(object=model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun)
   		      getPeakTrough(xfun(xt), vt)
 		      }, c(0, 0))
