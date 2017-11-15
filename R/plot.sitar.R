@@ -172,6 +172,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		    labels[3] <- ARG$y2par$ylab
 		}
 
+# set up ARG for left and right axes
+		ARG1 <- ARG[names(ARG) != 'y2par']
+		ARG2 <- ARG[['y2par']]
+
 #	create output list
 		xy <- list()
 
@@ -185,7 +189,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 		if (grepl("u", opt)) {
 		  xt <- x
 		  yt <- y
-		  do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))
+		  do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG1))
 		  add <- TRUE
 		}
 
@@ -246,18 +250,13 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			}
 
 # plot d &| v curve(s)
-			if (grepl("d", opt) && grepl("v", opt)) {
+			if (grepl("d", opt) && grepl("v", opt))
 				xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
-				add <- TRUE
-			} else
-		  if (grepl("d", opt)) {
-		    xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG))
-		    add <- TRUE
-		  }
-			if (grepl("v", opt)) {
-			  xy <- do.call("y2plot", c(list(x=xt, y1=vt, add=add, xy=xy), ARG))
-			  add <- TRUE
+			else {
+			  if (grepl("v", opt)) yt <- vt
+		    xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG1))
 			}
+		  add <- TRUE
 		}
 
 #	plot fixed effects distance curve
@@ -265,7 +264,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
   		xt <- xseq(x[subset])
       yt <- predict(model$ns, newdata=data.frame(x=xt - model$xoffset))
 			ox <- order(xt)
-			xy <- do.call("y2plot", c(list(x=xfun(xt[ox]), y1=yfun(yt[ox]), add=add, xy=xy), ARG))
+			xy <- do.call("y2plot", c(list(x=xfun(xt[ox]), y1=yfun(yt[ox]), add=add, xy=xy), ARG1))
 			add <- TRUE
 		}
 
@@ -274,7 +273,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 			yt <- xyadj(model)
 			xt <- yt$x
 			yt <- yt$y
-    	do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG))
+    	do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG1))
 			add <- TRUE
 		}
 
