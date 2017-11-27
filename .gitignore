@@ -1,5 +1,4 @@
 .Rproj.user
 .Rhistory
 .DS_Store
-NAMESPACE.old
-man.old
+inst/doc

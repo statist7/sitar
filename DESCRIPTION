@@ -10,7 +10,7 @@ Description: Functions for fitting and plotting SITAR (Super Imposition by
     with a regression B-spline mean curve and subject-specific random effects on
     both the measurement and age scales. 
     The model was first described by Lindstrom (1995) <doi: 10.1002/sim.4780141807> 
-    and developed as the SITAR method by Cole et al (2010) SITAR <doi: 10.1093/ije/dyq115>.
+    and developed as the SITAR method by Cole et al (2010) <doi: 10.1093/ije/dyq115>.
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
@@ -22,3 +22,6 @@ Imports:
     quantreg
 RoxygenNote: 6.0.1
 URL: https://github.com/statist7/sitar
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
