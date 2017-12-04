@@ -1,3 +1,19 @@
+Changes in Version 1.0.11
+
+  o Add vignette Fitting models in SITAR.
+
+  o Add berkeley dataset.
+
+  o predict.sitar now recognises special case of .x and .id in newdata.
+
+  o plot.sitar now applies apv to multiple curves (options D and V).
+
+  o mplot now ignores rows with missing data.
+
+  o plot.sitar tidies label handling.
+
+  o Fix bug in plot.sitar with options dv.
+
 Changes in Version 1.0.10
 
   o getPeakTrough (new) identifies peaks and troughs of a curve
