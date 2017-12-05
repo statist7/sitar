@@ -65,24 +65,24 @@
                             xfun=function(x) x, yfun=function(y) y) {
 # create x in newdata
     oc <- object$call.sitar
-    x <- if (is.null(newdata$.x))
-      eval(oc$x, newdata)
-    else
+    x <- if ('.x' %in% names(newdata))
       newdata$.x
+    else
+      eval(oc$x, newdata)
     if (is.null(xoffset <- object$xoffset)) {
       xoffset <- mean(getCovariate(object))
       warning('xoffset set to mean(x) - best to refit model')
     }
     newdata$x <- x - xoffset
 # create id in newdata
-    id <- if (is.null(newdata$.id)) {
+    id <- if ('.id' %in% names(newdata))
+      newdata$.id
+    else {
       if (any(level == 1))
         eval(oc$id, newdata)
       else
         rep.int(getGroups(object)[1], nrow(newdata))
     }
-    else
-      newdata$.id
     newdata$id <- id
 # check abc as length-3 vector or 1-row data frame
     if (is.null(abc)) abc <- ranef(object)
