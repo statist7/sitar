@@ -43,7 +43,7 @@
 		  eval(z, data, parent.frame())
 	}))
   names(df) <- lapply(as.list(mcall[1:3]), function(z) {
-	  if (is.numeric(z))
+	  if (is.numeric(z) || is.factor(z))
 	    NULL
   	else if (is.character(z))
   		  z
