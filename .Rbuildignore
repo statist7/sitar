@@ -1,4 +1,3 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-NAMESPACE.old
-man.old
+.DS_Store
