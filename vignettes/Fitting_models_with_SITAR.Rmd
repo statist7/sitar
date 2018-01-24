@@ -17,22 +17,25 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-SITAR is a form of growth curve analysis that models the biology of growth. To illustrate this we use the berkeley dataset to explore the growth of height in girls during puberty. First we load the sitar library and the berkeley dataset, and then fit a SITAR model to the data.
-```{r}
-suppressPackageStartupMessages(library(sitar))
-data(berkeley)
+SITAR is a form of growth curve analysis that models the biology of growth. To illustrate this we use the berkeley dataset to explore the growth of height in girls during puberty. If necessary, first install the sitar library.
+```{r, eval=FALSE}
+install.packages('sitar')
+```
+Next load the sitar library, which contains the berkeley dataset, and then fit a SITAR model to the heights of girls from 8 to 18 years.
+```{r, results='hide'}
+library(sitar)
 ff <- na.omit(berkeley[berkeley$sex == 2 & berkeley$age >= 8 & berkeley$age <= 18, 
                        c('id', 'age', 'height')])
 fh1 <- sitar(x = age, y = height, id = id, data = ff, df = 5)
 ```
-Then we plot the data, before and after SITAR adjustment.
+Next plot the data, before and after SITAR adjustment.
 ```{r, fig.show='hold'}
 par(mar = c(4,4,1,1) + 0.1, cex = 0.8)
 mplot(x = age, y = height, id = id, data = ff, col = id, las = 1)
 plot(fh1, opt = 'a', col = id, las = 1, xlim = xaxsd(), ylim = yaxsd())
 ```
 
-The girls were measured every six months, and their heights are shown (left) plotted as growth curves using different colours to separate them. The curves after SITAR adjustment are also shown (right - discussed below).
+The girls were measured every six months, and their heights are shown (left) plotted as growth curves using different colours to separate them. The curves after SITAR adjustment are also shown (right, as discussed below).
 
 ## Patterns of growth
 
@@ -44,7 +47,7 @@ These are the three growth patterns that SITAR focuses on, which are labelled si
 - Timing is the individual's age at peak height velocity (i.e. the age when they are growing fastest) compared to the average (measured in years)
 - Intensity is their growth rate compared to the average (measured as a fraction or percentage)
 
-The SITAR model estimates size, timing and intensity for each individual as random effects, and then uses the values to adjust individual curves to the average. The graph (above right) shows the girls' curves after they have been SITAR-adjusted, and they are now all superimposed - most of the inter-individual variability has gone.
+The SITAR model estimates size, timing and intensity for each individual as random effects, and then uses the values to adjust individual curves to the average. The graph (above right) shows the girls' curves after they have been SITAR-adjusted, and they are now all superimposed - most of the inter-individual variability has been removed.
 
 This explains the name SITAR - SuperImposition by Translation And Rotation. The curve adjustment involves translatiion (shifting the curves up/down and left/right) and rotation (making them steeper or shallower), and the effect is to superimpose the curves.
 
@@ -62,7 +65,7 @@ plot(fh1, opt = 'v', las = 1, apv = TRUE, lty = 2)
 
 ## Size, timing and intensity
 
-To see the effect of SITAR adjustment in individual curves, the plot (below left) shows curves for tall and short girls before and after adjustment, along with the mean curve (shown dashed). For the tall girl (id 310 in blue), her mean height is estimated as 14.8 cm greater than average (size), her age at peak height velocity is 1.4 years earlier than average (timing), and her mean growth rate is 25% faster than average (intensity). Her adjusted curve, which incorporates these differences, appears as the blue curve close to the mean curve. 
+To see the effect of SITAR adjustment in individual curves, the plot (below left) shows all the curves in gray as background, plus curves for the tallest and shortest girls before and after adjustment, along with the mean curve (shown dashed). For the tall girl (id 310 in blue), her mean height is estimated as 14.8 cm greater than average (size), her age at peak height velocity is 1.4 years earlier than average (timing), and her mean growth rate is 25% faster than average (intensity). Her adjusted curve, which incorporates these differences, appears as the blue curve close to the mean curve. 
 
 ```{r, fig.show='hold'}
 par(mar = c(4,4,1,1) + 0.1, cex = 0.8)
@@ -73,9 +76,9 @@ legend('bottomright', c('id 310', 'mean', 'id 355'), lty = c(1, 2, 1), col = c(4
 pairs(ranef(fh1), labels = c('size', 'timing', 'intensity'), pch=20)
 ```
 
-Correspondingly the short girl (id 355 in red) is 9.5 cm shorter, 1.4 years later and 15% slower growing than average. Her adjusted curve is the upper red curve. Note that the two adjusted curves are very close to the mean curve, showing how successfully SITAR superimposes the curves.
+Correspondingly the short girl (id 355 in red) is 9.5 cm shorter, 1.4 years later and 15% slower growing than average. Her adjusted curve is the upper red curve. Note that the two adjusted curves are very close to the mean curve, showing how effectively SITAR superimposes the curves.
 
-The random effects of size, timing and intensity are accessed using the random.effects() or ranef() function. The associations between the random effects are shown in the scatterplot (above right), where timing is negatively correlated with intensity, but size is uncorrelated with either. The corresponding correlation matrix is shown below, with the random effects labelled a, b and c respectively. So early puberty is associated with faster growth -- and hence a shorter growth spurt.
+The random effects of size, timing and intensity are accessed using the random.effects() or ranef() function. The associations between the random effects are shown in the scatterplot (above right), where timing is negatively correlated with intensity, but size is uncorrelated with timing and intensity. The corresponding correlation matrix is shown below, with the random effects labelled a, b and c respectively. So early puberty is associated with faster growth -- and hence a shorter growth spurt.
 
 ```{r, echo=FALSE, results='asis'}
 knitr::kable(cor(ranef(fh1)), digits = 2)
@@ -89,7 +92,7 @@ knitr::kable(ranef(fh1)[1:10, ], digits = 2)
 
 ## Biology of SITAR
 
-The SITAR model relies on the concept of developmental age, and it assumes that chronological age and developmental age in individual children are linearly related. An individual may be advanced or delayed in age terms, which is reflected in their timing parameter, and they may be becoming more or less advanced over time, as flagged by their intensity parameter. Thus the analysis models on both the height scale (i.e. the size parameter) and the age scale, and this makes it more biologically relevant than most growth models.
+The SITAR model relies on the concept of developmental age, and it assumes that chronological age and developmental age in individual children are linearly related. An individual may be advanced or delayed in age terms, which is reflected in their timing parameter, and they may be becoming more or less advanced over time, as flagged by their intensity parameter. Thus the analysis models on both the height scale (i.e. the size parameter) and the age scale, and in this sense it mimics biology as the appropriate age scale is developmental age not chronological age.
 
 ## Algebra of SITAR
 
