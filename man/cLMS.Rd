@@ -6,9 +6,9 @@
 \alias{zLMS}
 \title{LMS conversion to and from z-scores}
 \usage{
-cLMS(z, L = 1, M, S)
+cLMS(z, L = 1, M, S, square = FALSE)
 
-zLMS(x, L = 1, M, S)
+zLMS(x, L = 1, M, S, square = FALSE)
 }
 \arguments{
 \item{z}{vector of z-scores to be converted to measurements.}
@@ -20,14 +20,18 @@ method.}
 
 \item{S}{vector of coefficients of variation (sigma), S in the LMS method.}
 
+\item{square}{logical if \code{x} or \code{z} are non-scalar and equal in
+length to L, M and S, FALSE (default) returns a vector and TRUE a square matrix.}
+
 \item{x}{vector of measurements to be converted to z-scores.}
 }
 \value{
 \code{zLMS} and \code{cLMS} each return a vector or matrix,
 respectively of z-scores and measurement centiles, with the number of rows
 matching the length of \code{x} or \code{z}, and the number of columns
-matching the length of L, M and S. If the two lengths are the same, or if
-either length is 1, a vector is returned.
+matching the length of (the longest of) L, M and S. If the two lengths are
+the same, or if either length is 1, a vector is returned, unless \code{square}
+is TRUE in which case a square matrix is returned.
 }
 \description{
 Routines to handle references constructed with the LMS method. Given a set
@@ -53,7 +57,7 @@ zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 
 }
 \seealso{
-\code{\link{z2cent}}, \code{\link{LMS2z}}
+\code{\link{z2cent}}, \code{\link{LMS2z}}, \code{\link{pdLMS}}
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
