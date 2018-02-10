@@ -36,6 +36,7 @@
 #' ## with centiles corresponding to -3, 0 and 3 z-scores
 #' pdLMS(L=0:2, zcent=-1:1*3)
 #'
+#' @importFrom graphics matplot matpoints
 #' @export pdLMS
 pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
                   N = 1000, plot = TRUE, ...) {
