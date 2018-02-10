@@ -24,6 +24,10 @@ scale under each distribution.}
 \item{N}{number of points per distribution curve (default 1000).}
 
 \item{plot}{logical for plotting (default TRUE).}
+
+\item{\dots}{Further graphical parameters (see \code{\link{par}}) may also
+be supplied as arguments, particularly colour \code{col}, line type \code{lty},
+line width \code{lwd} and character \code{pch}.}
 }
 \value{
 An invisible list with the following components:
@@ -46,7 +50,7 @@ L, M and S should all be the same length, recycled if necessary.
 ## plot normal distribution
 pdLMS()
 ## compare log, normal and square distributions
-## with centiles at the median and ±3 z-scores
+## with centiles corresponding to -3, 0 and 3 z-scores
 pdLMS(L=0:2, zcent=-1:1*3)
 
 }

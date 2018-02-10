@@ -16,6 +16,9 @@
 #' @param zlim scalar defining z-score limits underlying x-axis (default 3.5).
 #' @param N number of points per distribution curve (default 1000).
 #' @param plot logical for plotting (default TRUE).
+#' @param \dots Further graphical parameters (see \code{\link{par}}) may also
+#' be supplied as arguments, particularly colour \code{col}, line type \code{lty},
+#' line width \code{lwd} and character \code{pch}.
 #' @return An invisible list with the following components:
 #' \item{x}{vector of x values for plotting.}
 #' \item{density}{matrix of densities for each distribution.}
@@ -30,7 +33,7 @@
 #' ## plot normal distribution
 #' pdLMS()
 #' ## compare log, normal and square distributions
-#' ## with centiles at the median and ±3 z-scores
+#' ## with centiles corresponding to -3, 0 and 3 z-scores
 #' pdLMS(L=0:2, zcent=-1:1*3)
 #'
 #' @export pdLMS
