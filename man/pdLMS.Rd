@@ -49,9 +49,9 @@ L, M and S should all be the same length, recycled if necessary.
 
 ## plot normal distribution
 pdLMS()
-## compare log, normal and square distributions
-## with centiles corresponding to -3, 0 and 3 z-scores
-pdLMS(L=0:2, zcent=-1:1*3)
+## compare variety of distributions
+## with centiles corresponding to +3 z-scores
+pdLMS(L=-2:3, M=2:3, S=1:3/10, zcent=3, lty=1)
 
 }
 \seealso{

@@ -32,9 +32,9 @@
 #'
 #' ## plot normal distribution
 #' pdLMS()
-#' ## compare log, normal and square distributions
-#' ## with centiles corresponding to -3, 0 and 3 z-scores
-#' pdLMS(L=0:2, zcent=-1:1*3)
+#' ## compare variety of distributions
+#' ## with centiles corresponding to +3 z-scores
+#' pdLMS(L=-2:3, M=2:3, S=1:3/10, zcent=3, lty=1)
 #'
 #' @importFrom graphics matplot matpoints
 #' @export pdLMS
@@ -42,9 +42,6 @@ pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
                   N = 1000, plot = TRUE, ...) {
   L[L == 0] <- 1e-7
   LMS <- data.frame(L, M, S)
-  L <- LMS$L
-  M <- LMS$M
-  S <- LMS$S
 	LSz <- L * S * abs(zlim)
 	xr <- 0:1
   if (min(1 - LSz) > 0)
@@ -66,7 +63,7 @@ pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
 	if (!is.null(zcent)) {
 	  centile <- as.matrix(cLMS(zcent, L, M, S, square=TRUE))
 	  if (length(zcent) == 1) centile <- t(centile)
-	  dimnames(centile) <- list(zcent, L)
+	  dimnames(centile) <- list(zcent, seq(nrow(LMS)))
   }
 	else
 	  centile <- NULL
