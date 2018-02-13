@@ -42,36 +42,37 @@ pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
                   N = 1000, plot = TRUE, ...) {
   L[L == 0] <- 1e-7
   LMS <- data.frame(L, M, S)
-	LSz <- L * S * abs(zlim)
-	xr <- 0:1
+  LSz <- L * S * abs(zlim)
+  xr <- 0:1
   if (min(1 - LSz) > 0)
-    xr[1] <- min(M * (1 - LSz) ^ (1/L))
-	x <- cLMS(abs(zlim), L, M, S)
-	xr[2] <- if (length(which.max(x)) > 0)
-  	x[which.max(x)]
-	else
+    xr[1] <- min(M * (1 - LSz) ^ (1 / L))
+  x <- cLMS(abs(zlim), L, M, S)
+  xr[2] <- if (length(which.max(x)) > 0)
+    x[which.max(x)]
+  else
     M * exp(S * abs(zlim))
-	delta <- (xr[2] - xr[1]) / N
-	x <- xr[1] + delta * (1:N - 0.5)
-	density <- vapply(seq(nrow(LMS)), function(i) {
-	  with (LMS[i, ], {
-  	  z <- zLMS(x, L, M, S)
-  	  z <- dnorm(z) * x^(L - 1)
-  	  z/sum(z)/delta
-	  })
-	}, x)
-	if (!is.null(zcent)) {
-	  centile <- as.matrix(cLMS(zcent, L, M, S, square=TRUE))
-	  if (length(zcent) == 1) centile <- t(centile)
-	  dimnames(centile) <- list(zcent, seq(nrow(LMS)))
+  delta <- (xr[2] - xr[1]) / N
+  x <- xr[1] + delta * (1:N - 0.5)
+  density <- vapply(seq(nrow(LMS)), function(i) {
+    with (LMS[i,], {
+      z <- zLMS(x, L, M, S)
+      z <- dnorm(z) * x ^ (L - 1)
+      z / sum(z) / delta
+    })
+  }, x)
+  if (!is.null(zcent)) {
+    centile <- as.matrix(cLMS(zcent, L, M, S, square = TRUE))
+    if (length(zcent) == 1)
+      centile <- t(centile)
+    dimnames(centile) <- list(zcent, seq(nrow(LMS)))
   }
-	else
-	  centile <- NULL
-	if (plot) {
-  	matplot(x, density, type = "l", ...)
-	  abline(h=0, col=8)
-	  if (!is.null(zcent))
-	    matpoints(centile, rep(0, nrow(centile)), ...)
-	}
-	invisible(list(x=x, density=density, centile=centile))
+  else
+    centile <- NULL
+  if (plot) {
+    matplot(x, density, type = "l", ...)
+    abline(h = 0, col = 8)
+    if (!is.null(zcent))
+      matpoints(centile, rep(0, nrow(centile)), ...)
+  }
+  invisible(list(x = x, density = density, centile = centile))
 }
