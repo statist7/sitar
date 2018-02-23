@@ -88,13 +88,13 @@
 #' of LMS values, the functions convert z-scores to measurement centiles and
 #' vice versa.
 #'
-#' L, M and S should all be the same length, recycled if necessary. The
-#' formulae converting \code{x} to \code{z} and vice versa are:
+#' L, M and S -- and if \code{matrix} is false then \code{x} and \code{z} --
+#' should all be the same length, recycled if necessary.
+#' The formulae converting \code{x} to \code{z} and vice versa are:
 #' \deqn{z = \frac{(x/M)^L - 1}{L S}}{z = ((x/M)^L - 1)/L/S}
 #'
 #' \deqn{x = M (1 + L S z)^{1/L})}{x = M (1 + L S z)^(1/L)} where L is reset
-#' to 10^-7 if it is zero. \code{x} and \code{z} are usually the same length as
-#' L M and S, but can be different. The LMS method is the same as the BCCG
+#' to 10^-7 if it is zero. The LMS method is the same as the BCCG
 #' family in the \code{gamlss} package, except that lambda in LMS is referred
 #' to as nu in BCCG.
 #'
@@ -105,42 +105,42 @@
 #' method.
 #' @param M vector of medians (mu), M in the LMS method.
 #' @param S vector of coefficients of variation (sigma), S in the LMS method.
-#' @param square logical if \code{x} or \code{z} are non-scalar and equal in
-#' length to L, M and S, FALSE (default) returns a vector and TRUE a square matrix.
-#' @return \code{zLMS} and \code{cLMS} each return a vector or matrix,
-#' respectively of z-scores and measurement centiles, with the number of rows
-#' matching the length of \code{x} or \code{z}, and the number of columns
-#' matching the length of (the longest of) L, M and S. If the two lengths are
-#' the same, or if either length is 1, a vector is returned, unless \code{square}
-#' is TRUE in which case a square matrix is returned.
+#' @param matrix logical (default FALSE) defines if a vector or matrix is returned.
+#' @return If \code{matrix} is FALSE, \code{zLMS} and \code{cLMS} each return
+#' a vector, respectively of z-scores and measurement centiles, with length
+#' matching the length of (the longest of) \code{x} or \code{z}, L, M and S.
+#' If \code{matrix} is TRUE a matrix is returned, the number of rows matching
+#' the length of (the longest of) L, M and S, and the number of columns matching
+#' the length of \code{x} or \code{z}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{z2cent}}, \code{\link{LMS2z}}, \code{\link{pdLMS}}
 #' @keywords arith
 #' @examples
 #'
-#' cLMS(z = -2:2, L = 1:-1, M = 5:7, S = rep(0.1, 3))
-#' cLMS(z = -2:2, L = 1:-1, M = 7, S = 0.1)
-#' zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
+#' cLMS(z = -2:2, L = 1:-1, M = 5:7, S = rep(0.1, 3), matrix=TRUE)
+	#' cLMS(z = 0:2, L = 1:-1, M = 7, S = 0.1)
+	#' cLMS(z = 0:2, L = 1:-1, M = 7, S = 0.1, matrix=TRUE)
+	#' zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 #'
 #' @export cLMS
-	cLMS <- function(z, L = 1, M, S, square = FALSE) {
+	cLMS <- function(z, L = 1, M, S, matrix = FALSE) {
 	  L <- L + 1e-7 * (L == 0)
 	  LMS <- data.frame(L, M, S)
-	  if ((length(z) == nrow(LMS)  && !square) || min(length(z), nrow(LMS)) == 1)
+	  if (!matrix)
 	    drop(with(LMS, M * (1 + L * S * z) ^ (1/L)))
 	  else
-	    drop(with(LMS, t(M * (1 + L * S %*% t(z)) ^ (1/L))))
+	    drop(with(LMS, M * (1 + L * S %*% t(z)) ^ (1/L)))
 	}
 
 #' @rdname cLMS
 #' @export
-	zLMS <- function(x, L = 1, M, S, square = FALSE) {
+	zLMS <- function(x, L = 1, M, S, matrix = FALSE) {
 	  L <- L + 1e-7 * (L == 0)
 	  LMS <- data.frame(L, M, S)
-	  if ((length(x) == nrow(LMS)  && !square) || min(length(x), nrow(LMS)) == 1)
+	  if (!matrix)
 	    drop(with(LMS, ((x / M) ^ L - 1) / L / S))
 	  else
-	    drop(with(LMS, ((x %*% t(1 / M)) ^ L - 1) / L / S))
+	    drop(with(LMS, (t(x %*% t(1 / M)) ^ L - 1) / L / S))
 	}
 
 #' Express z-scores as centile character strings for plotting
