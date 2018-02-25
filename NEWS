@@ -4,7 +4,9 @@ Changes in Version 1.1.0
 
   o Add berkeley dataset.
 
-  o Add pdLMS to plot density function(s) of Box-Cox transformed variable(s).
+  o cLMS and zLMS now have matrix parameter to return matrix.
+
+  o pdLMS (new) plots density function(s) of Box-Cox transformed variable(s).
 
   o predict.sitar now recognises special case of .x and .id in newdata.
 
