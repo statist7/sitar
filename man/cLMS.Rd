@@ -25,7 +25,7 @@ method.}
 \item{x}{vector of measurements to be converted to z-scores.}
 }
 \value{
-If \code{matrix} is FALSE, \code{zLMS} and \code{cLMS} each return
+If \code{matrix} is FALSE \code{zLMS} and \code{cLMS} each return
 a vector, respectively of z-scores and measurement centiles, with length
 matching the length of (the longest of) \code{x} or \code{z}, L, M and S.
 If \code{matrix} is TRUE a matrix is returned, the number of rows matching
@@ -38,7 +38,7 @@ of LMS values, the functions convert z-scores to measurement centiles and
 vice versa.
 }
 \details{
-L, M and S -- and if \code{matrix} is false then \code{x} and \code{z} --
+L, M and S -- and if \code{matrix} is FALSE then \code{x} and \code{z} --
 should all be the same length, recycled if necessary.
 The formulae converting \code{x} to \code{z} and vice versa are:
 \deqn{z = \frac{(x/M)^L - 1}{L S}}{z = ((x/M)^L - 1)/L/S}

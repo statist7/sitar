@@ -88,7 +88,7 @@
 #' of LMS values, the functions convert z-scores to measurement centiles and
 #' vice versa.
 #'
-#' L, M and S -- and if \code{matrix} is false then \code{x} and \code{z} --
+#' L, M and S -- and if \code{matrix} is FALSE then \code{x} and \code{z} --
 #' should all be the same length, recycled if necessary.
 #' The formulae converting \code{x} to \code{z} and vice versa are:
 #' \deqn{z = \frac{(x/M)^L - 1}{L S}}{z = ((x/M)^L - 1)/L/S}
@@ -106,7 +106,7 @@
 #' @param M vector of medians (mu), M in the LMS method.
 #' @param S vector of coefficients of variation (sigma), S in the LMS method.
 #' @param matrix logical (default FALSE) defines if a vector or matrix is returned.
-#' @return If \code{matrix} is FALSE, \code{zLMS} and \code{cLMS} each return
+#' @return If \code{matrix} is FALSE \code{zLMS} and \code{cLMS} each return
 #' a vector, respectively of z-scores and measurement centiles, with length
 #' matching the length of (the longest of) \code{x} or \code{z}, L, M and S.
 #' If \code{matrix} is TRUE a matrix is returned, the number of rows matching
@@ -124,23 +124,25 @@
 #'
 #' @export cLMS
 	cLMS <- function(z, L = 1, M, S, matrix = FALSE) {
-	  L <- L + 1e-7 * (L == 0)
-	  LMS <- data.frame(L, M, S)
+	  L[L == 0] <- 1e-7
 	  if (!matrix)
-	    drop(with(LMS, M * (1 + L * S * z) ^ (1/L)))
+	    with(data.frame(z, L, M, S),
+	       M * (1 + L * S * z) ^ (1/L))
 	  else
-	    drop(with(LMS, M * (1 + L * S %*% t(z)) ^ (1/L)))
+	    with(data.frame(L, M, S),
+	      M * (1 + L * S %*% t(z)) ^ (1/L))
 	}
 
 #' @rdname cLMS
 #' @export
 	zLMS <- function(x, L = 1, M, S, matrix = FALSE) {
-	  L <- L + 1e-7 * (L == 0)
-	  LMS <- data.frame(L, M, S)
+	  L[L == 0] <- 1e-7
 	  if (!matrix)
-	    drop(with(LMS, ((x / M) ^ L - 1) / L / S))
+	    with(data.frame(x, L, M, S),
+	      ((x/M) ^ L - 1) / L / S)
 	  else
-	    drop(with(LMS, (t(x %*% t(1 / M)) ^ L - 1) / L / S))
+	    with(data.frame(L, M, S),
+	      (t(outer(x, M, `/`)) ^ L - 1) / L / S)
 	}
 
 #' Express z-scores as centile character strings for plotting
