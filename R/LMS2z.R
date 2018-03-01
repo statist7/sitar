@@ -145,26 +145,27 @@
 #' character strings that can be used to label the centile curves.
 #'
 #' @param z a scalar or vector of z-scores.
-#' @return A character string is returned, the same length as z. Z-scores in
-#' the range +/- 3.3 are converted to centiles with one or two significant
-#' figures (lower tail) or to their complement (upper tail). For z-scores
-#' exceeding 3.3 in absolute value the character consists of "SDS" appended to
-#' the z-score rounded to one decimal place.
+#' @return A character string is returned, the same length as z. Z-scores between
+#' the 1st and 99th centile are converted to centiles with one or two significant
+#' figures (lower tail) or to their complement (upper tail). For larger z-scores
+#' in absolute value the character consists of "SDS" appended to the z-score
+#' rounded to one decimal place.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{cLMS}}
 #' @keywords character
 #' @examples
 #'
 #' z2cent(-4:4)
+#' z2cent(qnorm(0:100/100))
 #'
 #' @export z2cent
 	z2cent <- function(z) {
-	np <- ifelse(abs(z) < 2.33, 0, 1)
+	np <- abs(z) > qnorm(0.99)
 	ct <- round(pnorm(z) * 100, np)
-	mod10 <- ifelse(np == 1, 0, floor(ct %% 10))
-	th <- ifelse(mod10 == 0 | mod10 > 4, 4, mod10)
-	th <- paste(ct, c('st','nd','rd','th')[th], sep='')
-	th[th == '0th'] <- paste('SDS', round(z[th == '0th'], 1), sep='')
+	mod10 <- ifelse(np, 0, floor(ct %% 10))
+	th <- ifelse(mod10 == 0 | mod10 > 4 | (ct > 10 & ct < 14), 4, mod10)
+	th <- paste0(ct, c('st', 'nd', 'rd', 'th')[th])
+	th[th == '0th'] <- paste0('SDS', round(z[th == '0th'], 1))
 	th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
 	th
 }
