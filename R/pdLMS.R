@@ -61,7 +61,7 @@ pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
     })
   }, x)
   if (!is.null(zcent)) {
-    centile <- t(cLMS(zcent, L, M, S, matrix = TRUE))
+    centile <- t(cLMS(as.matrix(zcent), L, M, S))
     dimnames(centile) <- list(zcent, seq(nrow(LMS)))
   }
   else
