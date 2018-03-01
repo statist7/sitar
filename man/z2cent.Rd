@@ -10,11 +10,11 @@ z2cent(z)
 \item{z}{a scalar or vector of z-scores.}
 }
 \value{
-A character string is returned, the same length as z. Z-scores in
-the range +/- 3.3 are converted to centiles with one or two significant
-figures (lower tail) or to their complement (upper tail). For z-scores
-exceeding 3.3 in absolute value the character consists of "SDS" appended to
-the z-score rounded to one decimal place.
+A character string is returned, the same length as z. Z-scores between
+the 1st and 99th centile are converted to centiles with one or two significant
+figures (lower tail) or to their complement (upper tail). For larger z-scores
+in absolute value the character consists of "SDS" appended to the z-score
+rounded to one decimal place.
 }
 \description{
 Converts z-scores, typically defining centiles in a growth chart, to
@@ -23,6 +23,7 @@ character strings that can be used to label the centile curves.
 \examples{
 
 z2cent(-4:4)
+z2cent(qnorm(0:100/100))
 
 }
 \seealso{

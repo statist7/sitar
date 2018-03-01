@@ -4,7 +4,11 @@ Changes in Version 1.1.0
 
   o Add berkeley dataset.
 
-  o cLMS and zLMS now have matrix parameter to return matrix.
+  o cLMS and zLMS now return a matrix if z or x are matrices.
+
+  o LMS2z now returns a matrix if y is a matrix.
+
+  o Fix bug in z2cent for 11th, 12th and 13th centiles.
 
   o pdLMS (new) plots density function(s) of Box-Cox transformed variable(s).
 
