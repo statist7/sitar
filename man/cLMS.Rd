@@ -6,12 +6,12 @@
 \alias{zLMS}
 \title{LMS conversion to and from z-scores}
 \usage{
-cLMS(z, L = 1, M, S, matrix = FALSE)
+cLMS(z, L = 1, M, S)
 
-zLMS(x, L = 1, M, S, matrix = FALSE)
+zLMS(x, L = 1, M, S)
 }
 \arguments{
-\item{z}{vector of z-scores to be converted to measurements.}
+\item{z}{vector or one-column matrix of z-scores to be converted to measurements.}
 
 \item{L}{vector of Box-Cox transformation (lambda) values, L in the LMS
 method.}
@@ -20,17 +20,15 @@ method.}
 
 \item{S}{vector of coefficients of variation (sigma), S in the LMS method.}
 
-\item{matrix}{logical (default FALSE) defines if a vector or matrix is returned.}
-
-\item{x}{vector of measurements to be converted to z-scores.}
+\item{x}{vector or one-column matrix of measurements to be converted to z-scores.}
 }
 \value{
-If \code{matrix} is FALSE \code{zLMS} and \code{cLMS} each return
-a vector, respectively of z-scores and measurement centiles, with length
+If \code{x} and \code{z} are vectors \code{zLMS} and \code{cLMS}
+each return a vector, respectively of z-scores and measurement centiles, with length
 matching the length of (the longest of) \code{x} or \code{z}, L, M and S.
-If \code{matrix} is TRUE a matrix is returned, the number of rows matching
-the length of (the longest of) L, M and S, and the number of columns matching
-the length of \code{x} or \code{z}.
+If \code{x} or \code{z} are matrices \code{zLMS} and \code{cLMS} each return a matrix,
+the number of rows matching the length of (the longest of) L, M and S,
+and the number of columns matching the length of \code{x} or \code{z}.
 }
 \description{
 Routines to handle references constructed with the LMS method. Given a set
@@ -38,7 +36,7 @@ of LMS values, the functions convert z-scores to measurement centiles and
 vice versa.
 }
 \details{
-L, M and S -- and if \code{matrix} is FALSE then \code{x} and \code{z} --
+L, M and S -- and if vectors then \code{x} and \code{z} --
 should all be the same length, recycled if necessary.
 The formulae converting \code{x} to \code{z} and vice versa are:
 \deqn{z = \frac{(x/M)^L - 1}{L S}}{z = ((x/M)^L - 1)/L/S}
@@ -50,9 +48,9 @@ to as nu in BCCG.
 }
 \examples{
 
-cLMS(z = -2:2, L = 1:-1, M = 5:7, S = rep(0.1, 3), matrix=TRUE)
+cLMS(z = as.matrix(-2:2), L = 1:-1, M = 5:7, S = rep(0.1, 3))
 cLMS(z = 0:2, L = 1:-1, M = 7, S = 0.1)
-cLMS(z = 0:2, L = 1:-1, M = 7, S = 0.1, matrix=TRUE)
+cLMS(z = as.matrix(0:2), L = 1:-1, M = 7, S = 0.1)
 zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 
 }

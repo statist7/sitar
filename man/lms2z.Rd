@@ -9,10 +9,10 @@ LMS2z(x, y, sex, measure, ref, toz = TRUE, verbose = FALSE)
 \arguments{
 \item{x}{vector of ages.}
 
-\item{y}{vector of either measurements or z-scores, depending on the value
-of \code{toz}.}
+\item{y}{vector or one-column matrix of either measurements or z-scores,
+depending on the value of \code{toz}.}
 
-\item{sex}{factor where males = 1 and females = 2.}
+\item{sex}{vector where males = 1 and females = 2.}
 
 \item{measure}{measurement, either as name or character string, the choice
 depending on the choice of \code{ref} (see e.g. references \code{uk90},
@@ -27,12 +27,11 @@ or FALSE for the reverse.}
 \item{verbose}{logical set to TRUE to print the associated LMS table.}
 }
 \value{
-A vector or matrix, depending on the lengths of \code{x} and
-\code{y}, containing the transformed values. If the two lengths are the
-same, or either is one, then a vector is returned. If they are different and
-not one, then a matrix with \code{length(x)} rows and \code{length(y)}
-columns is returned. In this latter case the row names are set to \code{x},
-and if \code{toz} is false the column names are set using \code{z2cent}.
+A vector or matrix containing the transformed values. If \code{y}
+is a vector then a vector is returned, else if \code{y} is a one-column matrix
+then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
+columns. The matrix row names are set to \code{x}, and the column names to either \code{y} or
+if \code{toz} is FALSE, \code{z2cent(y)}.
 }
 \description{
 A function to convert between measurements and z-scores using a growth
@@ -40,8 +39,8 @@ reference previously fitted by the LMS method.
 }
 \details{
 Vectors of L, M and S corresponding to \code{x} and \code{sex} are extracted
-and passed to either \code{\link{cLMS}} or \code{\link{zLMS}}, depending on
-\code{toz}.
+using cubic interpolation and passed to either \code{\link{cLMS}} or
+\code{\link{zLMS}}, depending on \code{toz}.
 }
 \examples{
 
@@ -54,17 +53,13 @@ with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages
-v <- vapply(as.list(zs), function(z)
- LMS2z(ages, z, sex = 1, measure = wt, ref = who06, toz = FALSE),
-  rep(0, length(ages)))
-dimnames(v) <- list(ages, z2cent(zs))
-round(v, 2)
+LMS2z(ages, as.matrix(zs), sex = 1, measure = wt, ref = who06, toz = FALSE)
 
 }
 \seealso{
 \code{\link{z2cent}}. The LMS method can be fitted to data using
-the package \code{gamlss} with the \code{BCCG} family, where nu (originally
-lambda), mu and sigma correspond to L, M and S respectively.
+the package \code{gamlss} with the \code{BCCG} or \code{BCCGo} family,
+where nu (originally lambda), mu and sigma correspond to L, M and S respectively.
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
