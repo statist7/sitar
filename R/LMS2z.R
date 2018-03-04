@@ -18,7 +18,8 @@
 #' as a \code{data} object or data frame.
 #' @param toz logical set to TRUE for conversion from measurement to z-score,
 #' or FALSE for the reverse.
-#' @param verbose logical set to TRUE to print the associated LMS table.
+#' @param LMStable logical set to TRUE to return the associated LMS table as
+#' attribute \code{LMStable}.
 #' @return A vector or matrix containing the transformed values. If \code{y}
 #' is a vector then a vector is returned, else if \code{y} is a one-column matrix
 #' then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
@@ -43,7 +44,7 @@
 #' LMS2z(ages, as.matrix(zs), sex = 1, measure = wt, ref = who06, toz = FALSE)
 #'
 #' @export LMS2z
-	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, verbose=FALSE) {
+	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
 	xy <- data.frame(x, sex)
 	x <- xy$x
 	sex <- xy$sex
@@ -72,8 +73,8 @@
 	  else
 	    list(x, z2cent(y))
 	}
-	if (verbose)
-  	print(cbind(y, cz, sex, v), digits=6)
+	if (LMStable)
+	  attr(cz, 'LMStable') <- v
 	cz
 }
 

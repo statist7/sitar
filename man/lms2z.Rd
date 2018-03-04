@@ -4,7 +4,7 @@
 \alias{LMS2z}
 \title{Convert to/from measurement from/to z-score with growth reference}
 \usage{
-LMS2z(x, y, sex, measure, ref, toz = TRUE, verbose = FALSE)
+LMS2z(x, y, sex, measure, ref, toz = TRUE, LMStable = FALSE)
 }
 \arguments{
 \item{x}{vector of ages.}
@@ -24,7 +24,8 @@ as a \code{data} object or data frame.}
 \item{toz}{logical set to TRUE for conversion from measurement to z-score,
 or FALSE for the reverse.}
 
-\item{verbose}{logical set to TRUE to print the associated LMS table.}
+\item{LMStable}{logical set to TRUE to return the associated LMS table as
+attribute \code{LMStable}.}
 }
 \value{
 A vector or matrix containing the transformed values. If \code{y}
