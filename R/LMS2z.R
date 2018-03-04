@@ -19,12 +19,14 @@
 #' @param toz logical set to TRUE for conversion from measurement to z-score,
 #' or FALSE for the reverse.
 #' @param LMStable logical set to TRUE to return the associated LMS table as
-#' attribute \code{LMStable}.
+#' a data frame in attribute \code{LMStable}.
 #' @return A vector or matrix containing the transformed values. If \code{y}
 #' is a vector then a vector is returned, else if \code{y} is a one-column matrix
 #' then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
-#' columns. The matrix row names are set to \code{x}, and the column names to either \code{y} or
-#'if \code{toz} is FALSE, \code{z2cent(y)}.
+#' columns. The matrix row names are set to \code{x}, and the column names to
+#' either \code{y} or if \code{toz} is FALSE, \code{z2cent(y)}. If LMStable is
+#' TRUE the associated LMS table is returned as a data frame in attribute
+#' \code{LMStable}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{z2cent}}. The LMS method can be fitted to data using
 #' the package \code{gamlss} with the \code{BCCG} or \code{BCCGo} family,
@@ -74,7 +76,7 @@
 	    list(x, z2cent(y))
 	}
 	if (LMStable)
-	  attr(cz, 'LMStable') <- v
+	  attr(cz, 'LMStable') <- as.data.frame(v)
 	cz
 }
 
