@@ -28,7 +28,7 @@
 #' @examples
 #' data(heights)
 #' m1 <- sitar(log(age), height, id, heights, 4)
-#' dfpower(m1, df=3:5, xpowers=0:1, maxIter=8)
+#' dfpower(m1, df=4:5, xpowers=0:1, maxIter=8)
 #' @export dfpower
 dfpower <- function(model, df, xpowers, ypowers, FUN=BICadj,
                     maxIter=nlmeControl()$maxIter, verbose=FALSE) {
@@ -93,7 +93,7 @@ dfpower <- function(model, df, xpowers, ypowers, FUN=BICadj,
         else {
           . <- eval(do.call('substitute', list(expr, list(df=df[idf], y=as.lang(yp), x=as.lang(xp)))))
         }
-        if (!is(., 'error')) {
+        if (!inherits(., 'error')) {
           B <- FUN(.$value)
           if (length(.$warnings))
             B <- -B
