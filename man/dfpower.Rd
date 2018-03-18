@@ -16,26 +16,27 @@ dfpower(model, df, xpowers, ypowers, FUN = BICadj,
 
 \item{ypowers}{vector of powers to apply to y (defaults to y power in \code{model}).}
 
-\item{FUN}{function to be tabulated (e.g. BICadj or AICadj).}
+\item{FUN}{function to be tabulated (default BICadj, or e.g. AICadj or varexp).}
 
 \item{maxIter}{maximum number of iterations per fit.}
 
 \item{verbose}{logical controlling monitoring.}
 }
 \value{
-3-way table of returned values by df, x and y powers.
+Table or vector of returned values.
 }
 \description{
-\code{dfpower} fits a series of SITAR models for specified degrees of freedom
-and power transformations of x and y, returning a table of adjusted BIC.
+\code{dfpower} fits a series of SITAR models tabulated by specified degrees of freedom
+and power transformations of x and y, returning a table of function values (e.g. BIC)
+applied to each model.
 }
 \details{
 The function provides a convenient way to optimise the model's degrees of freedom
-and explore transformations of x and y.
-Adjusted BIC is obtained using \code{\link{BICadj}}, and
-is set negative for models failing to converge; the
-run-time can be shortened by reducing \code{maxIter} appropriately. For models
-failing to fit it returns NA.
+and explore transformations of x and y, based by default on adjusted BIC.
+The function value is returned with changed sign if there is a warning, or as
+NA if there is an error. The run-time can be shortened by reducing \code{maxIter},
+as the models that converge do so in relatively few iterations, and much of
+the run-time is spent on models that fail to converge.
 
 \code{FUN} can be any function returning a single numerical value.
 
@@ -44,7 +45,7 @@ The returned table can be rearranged using \code{\link{aperm}}.
 \examples{
 data(heights)
 m1 <- sitar(log(age), height, id, heights, 4)
-dfpower(m1, 4:5)
+dfpower(m1, df=3:5, xpowers=0:1, maxIter=8)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
