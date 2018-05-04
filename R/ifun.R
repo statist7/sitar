@@ -46,8 +46,10 @@
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{plot.sitar}}
 #' @examples
+#' ## for best effect run all the code
+#'
 #' ## define varname variable
-#' age <- 1:9
+#' (age <- 1:9)
 #'
 #' ## simple case - age transformed to log(age)
 #' (expr <- quote(log(age)))
@@ -59,7 +61,7 @@
 #' all.equal(age, ifun(expr)(eval(expr)))
 #'
 #' ## more complex case - age transformed to log age since conception
-#' expr <- quote(log(age + 0.75))
+#' (expr <- quote(log(age + 0.75)))
 #' ## inverting function
 #' ifun(expr)
 #' ## inverted transformed age identical to age
@@ -67,7 +69,7 @@
 #'
 #' ## ludicrously complex case involving exp, log10, ^, pi and trigonometry
 #' (expr <- quote((exp(sin(pi * log10(age + 0.75)/2) - 1)^4)))
-#' ## inverting function
+#' ## inverting function, showing intermediate stages
 #' ifun(expr, verbose=TRUE)
 #' ## identical to original
 #' all.equal(age, ifun(expr)(eval(expr)))
@@ -80,7 +82,7 @@
 #' ## default plot options for xfun & yfun back-transform x & y to original scales
 #' ## xfun=ifun(x$call.sitar$x)
 #' ## yfun=ifun(x$call.sitar$y)
-#' ## compare mean curves for the three models with x & y on the original scales
+#' ## compare mean curves for the two models where x & y are on the original scales
 #' plot(m1, 'd', las=1)
 #' lines(m2, 'd', col=2)
 #' @export ifun
