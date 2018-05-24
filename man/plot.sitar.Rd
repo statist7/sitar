@@ -8,7 +8,8 @@
 \usage{
 \method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun = NULL,
   yfun = NULL, subset = NULL, ns = 101, abc = NULL, add = FALSE,
-  nlme = FALSE, ...)
+  nlme = FALSE, ..., xlab = NULL, ylab = NULL, vlab = NULL,
+  xlim = c(NA, NA), ylim = c(NA, NA), vlim = c(NA, NA))
 
 \method{lines}{sitar}(x, ...)
 }
@@ -26,10 +27,10 @@ axis for the velocity curve appears on the right side of the plot (y2), and
 a legend identifying the distance and velocity curves is provided.}
 
 \item{labels}{optional character vector containing plot labels for \code{x},
-\code{y} and \code{y} velocity from the original SITAR model. The first two
-elements can alternatively be provided via \code{\link{par}} parameters
-\code{xlab} and \code{ylab}, and the third element via \code{y2par} (see
-Details). The latter take precedence. Default labels are the names of \code{x} and \code{y}, and
+\code{y} and \code{y} velocity from the original SITAR model. The three
+elements can alternatively be provided via parameters
+\code{xlab}, \code{ylab} and \code{vlab}. The latter take precedence.
+Default labels are the names of \code{x} and \code{y}, and
 "\code{y} velocity", suitably adjusted to reflect any back-transformation
 via \code{xfun} and \code{yfun}.}
 
