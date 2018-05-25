@@ -17,8 +17,10 @@ Depends:
     R (>= 3.0.0),
     nlme,
     splines,
-    tidyverse
 Imports:
+    rlang,
+    tibble,
+    dplyr,
     quantreg
 RoxygenNote: 6.0.1
 URL: https://github.com/statist7/sitar

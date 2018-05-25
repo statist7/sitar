@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 SITAR is a form of growth curve analysis that models the biology of growth. To illustrate this we use the berkeley dataset to explore the growth of height in girls during puberty. If necessary, first install the sitar library.
 ```{r, eval=FALSE}
-install.packages('sitar')
+if (!require(sitar)) install.packages('sitar')
 ```
 Next load the sitar library, which contains the berkeley dataset, and then fit a SITAR model to the heights of girls from 8 to 18 years.
 ```{r, results='hide'}

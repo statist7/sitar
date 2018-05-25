@@ -41,7 +41,8 @@
 #' and inverts any transformation applied to y in the original SITAR model
 #' call. To plot on the transformed scale set \code{yfun} to \code{I}.
 #' @param subset optional logical vector of length \code{x} defining a subset
-#' of \code{data} rows to be plotted.
+#' of \code{data} rows to be plotted, for \code{x} and \code{data} in the
+#' original \code{sitar} call.
 #' @param ns scalar defining the number of points for spline curves
 #' (default 101).
 #' @param abc vector of named values of random effects a, b and c used to
@@ -55,15 +56,21 @@
 #' @param nlme optional logical which set TRUE plots the model as an
 #' \code{nlme} object, using \code{plot.nlme} arguments.
 #' @param \dots Further graphical parameters (see \code{par}) may also be
-#' supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line
-#' type \code{lty}, line width \code{lwd}, and color \code{col}. For the
+#' supplied as arguments, e.g. line
+#' type \code{lty}, line width \code{lwd}, and colour \code{col}. For the
 #' velocity (y2) plot \code{y2par} can be used (see Details).
-#' @return Returns invisibly a list of three objects:
-#' \item{ss}{\code{smooth.spline} object corresponding to the fitted distance
-#' curve.} \item{usr}{value of \code{par('usr')} for the main plot.}
+#' @param xlab optional label for x axis
+#' @param ylab optional label for y axis
+#' @param vlab optional label for v axis (velocity)
+#' @param xlim optional x axis limits
+#' @param ylim optional y axis limits
+#' @param vlim optional v axis limits
+#' @return Returns invisibly a list of (up to) three objects:
+#' \item{usr}{value of \code{par('usr')} for the main plot.}
 #' \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
 #' \item{apv}{if argument \code{apv} is TRUE a named list giving the age at
-#' peak velocity (apv) and peak velocity (pv) from the fitted velocity curve.}
+#' peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
+#' either overall or (with options D or V) for all subjects.}
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{mplot}},
 #' \code{\link{plotclean}}, \code{\link{y2plot}}, \code{\link{ifun}}
@@ -89,18 +96,20 @@
 #' lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
 #'
 #' @importFrom grDevices xy.coords
-#' @importFrom graphics axis identify legend lines locator par text title mtext abline
+#' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
+#' @importFrom tibble tibble
+#' @importFrom dplyr mutate
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
                        ns=101, abc=NULL, add=FALSE, nlme=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
                        xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA)) {
 
-  plotaxes <- function(dv, xlab, ylab, vlab, xlim, ylim, vlim)
-    #	dv = 1 for distance, 2 for velocity, 3 for distance and velocity
-    #	returns par()$usr for d and v
+  plotaxes <- function(dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
+#	dv = 1 for distance, 2 for velocity, 3 for distance and velocity
+#	returns par()$usr for d and v
   {
-    #	args for y1 and y2
+#	args for y1 and y2
     if (dv == 2) {
       ylab <- vlab
       ylim <- vlim
@@ -109,51 +118,52 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       mar[4] <- mar[2]
       par(mar=mar)
     }
-    #	plot x & y1 axes
-    plot(xlim, ylim, type='n', xlab=xlab, ylab=ylab)
+    dots <- match.call(expand.dots=FALSE)$...
+    ARG <- if (!is.null(dots))
+      lapply(as.list(dots), eval, data, parent.frame())
+    else
+      NULL
+    ARG1 <- ARG[names(ARG) != 'y2par']
+    ARG2 <- ARG[['y2par']]
+    if ('las' %in% names(ARG1)) ARG2$las <- ARG1$las
+
+#	plot x & y1 axes
+    do.call('plot', c(list(x=xlim, y=ylim, type='n', xlab=xlab, ylab=ylab), ARG1))
     #	save x & y1 axis limits
     xy <- list()
     xy$usr <- par('usr')
-    #	optionally add right axis
+#	optionally add right axis
     if (dv == 3) {
       par(new=TRUE)
       plot(xlim, vlim, type='n', bty='n', ann=FALSE, axes=FALSE)
-      axis(4)
+      do.call('axis', c(list(side=4), ARG2))
       mtext(vlab, 4, par('mgp')[1])
-      #	save y2 axis limits
+#	save y2 axis limits
       xy$usr2 <- par('usr')
       eval(parse(text=".par.usr2 <<- par('usr')"))
-      #	reset axis limits
+#	reset axis limits
       par(usr=xy$usr)
+    } else {
+# save null y2 axis limits
+      eval(parse(text=".par.usr2 <<- NULL"))
     }
     invisible(xy)
   }
 
   v2d <- function(ylim, vlim) {
-    # converts velocity to distance
+# converts velocity to distance
     rc <- lm(ylim ~ vlim)$coef
     function(v) rc[[1]] + rc[[2]] * v
   }
 
   xseq <- function(x, n=ns) {
-    # n is the number of points across the x range
+# n is the number of points across the x range
     rx <- range(x, na.rm=TRUE)
     seq(rx[1], rx[2], length.out=n)
   }
 
-  # stackage <- function(x, id, n=ns) {
-  #   # generate x and id values across the x range to plot spline curves
-  #   npt <- n / diff(range(x))
-  #   xid <- by(data.frame(x=x, id=id), id, function(z) {
-  #     nt <- floor(npt * diff(range(z$x))) + 1
-  #     data.frame(x=seq(min(z$x), to=max(z$x), length.out=nt), id=rep.int(z$id[[1]], nt))
-  #   })
-  #   df <- xid[[1]][FALSE, ]
-  #   for (dft in xid) df <- rbind(df, dft)
-  #   df
-  # }
-
-  distance <- velocity <- function(model, n=ns) {
+  distance <- velocity <- function(model, subset=subset, n=ns) {
+# generate x values across the range to plot mean spline curve
     dvt <- rlang::quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
@@ -163,11 +173,11 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       .x=xfun(.x)
     )
     if (length(.x[subset]) != length(.x)) attr(., 'subset') <- subset
-    .
+    .[, c('.x', '.y')]
   }
 
-  Distance <- Velocity <- function(model, n=ns) {
-    # generate x and id values across the x range to plot spline curves
+  Distance <- Velocity <- function(model, subset=subset, n=ns) {
+# generate x and id values across the range to plot spline curves
     dvt <- rlang::quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
     .x <- getCovariate(model)[subset]
@@ -186,34 +196,37 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
                 .y=predict(model, ., deriv=dvt, xfun=xfun, yfun=yfun),
                 .x=xfun(.x)
     )
-    invisible(.)
+    .[, c('.x', '.y', '.id')]
   }
 
-  unadjusted <- function(model) {
+  unadjusted <- function(model, subset=subset) {
+# unadjusted individual curves
     tibble(
-      .x=xfun(getCovariate(model)),
-      .y=yfun(getResponse(model)),
-      .id=getGroups(model)
+      .x=xfun(getCovariate(model)[subset]),
+      .y=yfun(getResponse(model)[subset]),
+      .id=getGroups(model)[subset]
     )
   }
 
-  adjusted <- function(model) {
+  adjusted <- function(model, subset=subset) {
+# adjusted individual curves
     . <- xyadj(model)
     tibble(
-      .x=xfun(.$x),
-      .y=yfun(.$y),
-      .id=getGroups(model)
+      .x=xfun(.$x)[subset],
+      .y=yfun(.$y)[subset],
+      .id=getGroups(model)[subset]
     )
   }
 
-  effect <- function(model) {
+  effect <- function(model, subset=subset, n=ns) {
+# fixed effect mean curve
     x <- getCovariate(model)[subset]
-    x <- xseq(x, ns) - model$xoffset
+    x <- xseq(x, n) - model$xoffset
     . <- tibble(
       .y=yfun(predict(model$ns, tibble(x))),
       .x=xfun(x + model$xoffset)
     )
-    .
+    .[, c('.x', '.y')]
   }
 
   if (nlme) {
@@ -223,21 +236,16 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     model <- x
     data <- getData(model)
     mcall <- model$call.sitar
-    x <- getCovariate(model)
-    y <- getResponse(model)
-    id <- getGroups(model)
-    nf <- length(fitted(model))
-    if (nf != length(y))
-      stop(paste0('model (length=', nf, ') incompatible with data (nrows=', length(y), ')'))
-    #	extract list(...)
+#	extract list(...)
     ccall <- match.call(expand.dots=FALSE)
-    #	subset to plot model
+#	subset to plot model
     subset <- eval(ccall$subset, data, parent.frame())
-    if (is.null(subset)) subset <- rep_len(TRUE, nf)
-    # ... args
+    if (is.null(subset))
+      subset <- rep_len(TRUE, model$dims$N)
+# ... args
     dots <- ccall$...
-    ARG <- if(!is.null(dots))
-      lapply(as.list(dots), eval, data, parent.frame())
+    ARG <- if (!is.null(dots))
+      lapply(as.list(dots), eval, data[subset, ], parent.frame())
     else
       NULL
 
@@ -247,10 +255,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     optmult <- c( FALSE,   FALSE,   TRUE,   TRUE,   TRUE,   FALSE,   TRUE ) # multiple curves
     optsmooth <- c( TRUE,   TRUE,   FALSE,   FALSE,   TRUE,   TRUE,   TRUE ) # spline curves
     opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
-    if (length(opts) == 0) stop('option(s) not recognised')
+    if (length(opts) == 0)
+      stop('option(s) not recognised')
     dv <- range(optaxis[opts])
     dv <- min(dv) + diff(dv) * 2 # 1=d, 2=v, 3=dv
-    mult <- any(optmult[opts]) # multiple curves
 
 # create missing labels
     if (missing(labels))
@@ -262,7 +270,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
 #	if xlab not specified replace with label or x name (depending on xfun)
     if (is.null(xlab)) {
-      if(labels[1] == '') {
+      if (labels[1] == '') {
         xlab <- if (!is.null(xfun))
           paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
         else
@@ -275,7 +283,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
 #	if ylab not specified replace with label or y name (depending on yfun)
     if (is.null(ylab)) {
-      if(labels[2] == '') {
+      if (labels[2] == '') {
         ylab <- if (!is.null(yfun))
           paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
         else
@@ -288,12 +296,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
 #	if vlab not specified replace with label or v name
     if (is.null(vlab)) {
-      if(labels[3] == '')
+      if (labels[3] == '')
         labels[3] <- paste(labels[2], 'velocity')
       vlab <- labels[3]
     }
 
-    # set up ARG for left and right axes
+# set up ARG for left and right axes
     ARG1 <- ARG[names(ARG) != 'y2par']
     ARG2 <- ARG[['y2par']]
 # default dotted line for velocity curve
@@ -308,25 +316,42 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # generate list of data frames for selected options
     data <- lapply(opts, function(i) {
       if (optsmooth[[i]])
-        do.call(optnames[[i]], list(model=model, n=ns))
+        do.call(optnames[[i]], list(model=model, subset=subset, n=ns))
       else
-        do.call(optnames[[i]], list(model=model))
+        do.call(optnames[[i]], list(model=model, subset=subset))
     })
 
-# extract axis ranges
-    for (i in 1:length(opts)) {
-      xlim <- range(xlim, data[[i]]$.x, na.rm=TRUE)
-      if (optaxis[opts[[i]]] == 1)
-        ylim <- range(ylim, data[[i]]$.y, na.rm=TRUE)
-      else
-        vlim <- range(vlim, data[[i]]$.y, na.rm=TRUE)
+# extract axis ranges and plot axes
+    if (!add) {
+      for (i in 1:length(opts)) {
+        xlim0 <- range(xlim, data[[i]]$.x, na.rm=TRUE)
+        if (optaxis[opts[[i]]] == 1)
+          ylim0 <- range(ylim, data[[i]]$.y, na.rm=TRUE)
+        else
+          vlim0 <- range(vlim, data[[i]]$.y, na.rm=TRUE)
+      }
+      if (any(is.na(xlim))) xlim <- xlim0
+      if (any(is.na(ylim)) && exists('ylim0')) ylim <- ylim0
+      if (any(is.na(vlim)) && exists('vlim0')) vlim <- vlim0
+      # xy <- plotaxes(dv, xlab, ylab, vlab, xlim, ylim, vlim)
+      xy <- do.call('plotaxes',
+                    c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
+                            xlim=xlim, ylim=ylim, vlim=vlim), ARG))
     }
-
-# plot axes
-    if (!add)
-      xy <- plotaxes(dv, xlab, ylab, vlab, xlim, ylim, vlim)
-    else
-      xy <- .par.usr2
+# else retrieve axis ranges
+    else {
+      xy <- list()
+      xy$usr <- par('usr')
+      xlim <- xaxsd()
+      ylim <- yaxsd()
+      vlim <- .par.usr2
+      if (!is.null(vlim)) {
+        xy$usr2 <- vlim
+        vlim <- yaxsd(.par.usr2[3:4])
+        dv <- 3
+      } else if (dv == 3)
+          stop('right y axis not set up')
+    }
 
 # plot curves
     lapply(1:length(opts), function(i) {
@@ -344,97 +369,25 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         xy <- do.call("lines", c(list(x=data[[i]]$.x, y=fun(data[[i]]$.y)), ARG))
     })
 
-    if (TRUE) return(invisible(xy))
-
-    # #	plot y vs t by subject
-    # if (grepl("u", opt)) {
-    #   xt <- x
-    #   yt <- y
-    #   do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG1))
-    #   add <- TRUE
-    # }
-    #
-    # #	plot fitted distance or velocity curves by subject
-    # for (o in c('D', 'V')) {
-    #   oV <- as.numeric(o == 'V')
-    #   if (grepl(o, opt)) {
-    #     newdata <- setNames(stackage(x[subset], id[subset]), c('.x', '.id'))
-    #     newdata <- cbind(newdata, y=predict(model, newdata=newdata, xfun=xfun, yfun=yfun, deriv=oV))
-    #     ylab <- labels[2 + oV]
-    #     # adjust ARG=id to ARG=newid
-    #     for (i in 1:length(ARG)) {
-    #       arg <- ARG[[i]]
-    #       if (length(arg) == length(id) &&
-    #           length(lvl <- unlist(tapply(id, arg, unique))) == nlevels(id))
-    #         ARG[[i]] <- lvl[newdata[, 2]]
-    #     }
-    #     do.call("mplot", c(list(x=xfun(newdata[, 1]), y=newdata[, 3], id=newdata[, 2],
-    #                             data=newdata, add=add), ARG))
-    #     add <- TRUE
-    #   }
-    # }
-    #
-    # #	plot fitted distance and velocity curves
-    # if (grepl("d", opt) || grepl("v", opt) || apv) {
-    #   xt <- xseq(x[subset])
-    #   newdata <- data.frame(.x=xt)
-    #   # if subset, flag for predict
-    #   if (!identical(subset, rep_len(TRUE, nf))) attr(newdata, 'subset') <- subset
-    #
-    #   # distance and velocity
-    #   xt <- xfun(xt)
-    #   yt <- yfun(predict(object=model, newdata=newdata, level=0, abc=abc))
-    #   vt <- predict(object=model, newdata=newdata, level=0, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
-
-    # save and print apv
+# save and print vertical line(s) at age of peak velocity
     if (apv) {
-      xy$apv <- setNames(getPeakTrough(xt, vt), c('apv', 'pv'))
+# single curve
+      xy$apv <- with(velocity(model), setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
       print(signif(xy$apv, 4))
-    }
-
-    #   # plot d &| v curve(s)
-    #   if (grepl("d", opt) && grepl("v", opt))
-    #     xy <- do.call("y2plot", c(list(x=xt, y1=yt, y2=vt, labels=labels, add=add, xy=xy), ARG))
-    #   else {
-    #     if (grepl("v", opt)) yt <- vt
-    #     xy <- do.call("y2plot", c(list(x=xt, y1=yt, add=add, xy=xy), ARG1))
-    #   }
-    #   add <- TRUE
-    # }
-    #
-    # #	plot fixed effects distance curve
-    # if (grepl("e", opt)) {
-    #   xt <- xseq(x[subset])
-    #   yt <- predict(model$ns, newdata=data.frame(x=xt - model$xoffset))
-    #   ox <- order(xt)
-    #   xy <- do.call("y2plot", c(list(x=xfun(xt[ox]), y1=yfun(yt[ox]), add=add, xy=xy), ARG1))
-    #   add <- TRUE
-    # }
-    #
-    # #	plot adjusted y vs adjusted t by subject
-    # if (grepl("a", opt)) {
-    #   yt <- xyadj(model)
-    #   xt <- yt$x
-    #   yt <- yt$y
-    #   do.call("mplot", c(list(x=xfun(xt), y=yfun(yt), id=id, subset=subset, add=add), ARG1))
-    #   add <- TRUE
-    # }
-
-# plot vertical line(s) at age of peak velocity
-    if (apv) {
-      # multiple curves
-      if (mult) {
-        # x and y untransformed
-        if (sum(x - xfun(x)) == 0 && sum(y - yfun(y)) == 0) {
+      if (any(optmult[opts])) {
+# multiple curves
+        if (body(ifun(mcall$x)) == as.name('x') &&
+            body(ifun(mcall$y)) == as.name('x')) {
+# x and y untransformed
           apv1 <- xyadj(model, xy$apv[1], tomean=FALSE)$x # subject-specific APVs
           pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
           xy$apv <- data.frame(apv=apv1, pv=pv1)
         }
-        # xfun or yfun set
+# xfun or yfun set
         else {
           xt <- xseq(x[subset])
           newdata <- data.frame(.x=xt)
-          . <- vapply(levels(factor(id[subset])), function(z) {
+          . <- vapply(levels(factor(getGroups(model)[subset])), function(z) {
             newdata$.id <- z
             vt <- predict(object=model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun)
             getPeakTrough(xfun(xt), vt)
@@ -442,8 +395,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
           xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
         }
       }
-      if (is.null(ARG2$lty)) ARG2$lty <- 3
-      if (add) do.call('abline', c(list(v=unlist(xy$apv['apv'])), ARG$y2par))
+# plot apv
+      ARG2$lty <- 3
+      do.call('abline', c(list(v=unlist(xy$apv['apv'])), ARG2))
     }
     invisible(xy)
   }

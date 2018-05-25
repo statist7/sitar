@@ -52,7 +52,8 @@ and inverts any transformation applied to y in the original SITAR model
 call. To plot on the transformed scale set \code{yfun} to \code{I}.}
 
 \item{subset}{optional logical vector of length \code{x} defining a subset
-of \code{data} rows to be plotted.}
+of \code{data} rows to be plotted, for \code{x} and \code{data} in the
+original \code{sitar} call.}
 
 \item{ns}{scalar defining the number of points for spline curves
 (default 101).}
@@ -71,17 +72,29 @@ new (FALSE). TRUE is equivalent to using \code{lines}.}
 \code{nlme} object, using \code{plot.nlme} arguments.}
 
 \item{\dots}{Further graphical parameters (see \code{par}) may also be
-supplied as arguments, e.g. axis labels \code{xlab} and \code{ylab}, line
-type \code{lty}, line width \code{lwd}, and color \code{col}. For the
+supplied as arguments, e.g. line
+type \code{lty}, line width \code{lwd}, and colour \code{col}. For the
 velocity (y2) plot \code{y2par} can be used (see Details).}
+
+\item{xlab}{optional label for x axis}
+
+\item{ylab}{optional label for y axis}
+
+\item{vlab}{optional label for v axis (velocity)}
+
+\item{xlim}{optional x axis limits}
+
+\item{ylim}{optional y axis limits}
+
+\item{vlim}{optional v axis limits}
 }
 \value{
-Returns invisibly a list of three objects:
-\item{ss}{\code{smooth.spline} object corresponding to the fitted distance
-curve.} \item{usr}{value of \code{par('usr')} for the main plot.}
+Returns invisibly a list of (up to) three objects:
+\item{usr}{value of \code{par('usr')} for the main plot.}
 \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
 \item{apv}{if argument \code{apv} is TRUE a named list giving the age at
-peak velocity (apv) and peak velocity (pv) from the fitted velocity curve.}
+peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
+either overall or (with options D or V) for all subjects.}
 }
 \description{
 \code{plot} and \code{lines} methods for objects of class \code{sitar},
