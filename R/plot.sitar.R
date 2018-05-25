@@ -162,21 +162,21 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     seq(rx[1], rx[2], length.out=n)
   }
 
-  distance <- velocity <- function(model, subset=subset, n=ns) {
+  distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
 # generate x values across the range to plot mean spline curve
     dvt <- rlang::quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
     .x <- xseq(.x, n)
     . <- tibble(
-      .y=predict(model, tibble(.x), level=0, deriv=dvt, xfun=xfun, yfun=yfun),
+      .y=predict(model, tibble(.x), level=0, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
       .x=xfun(.x)
     )
     if (length(.x[subset]) != length(.x)) attr(., 'subset') <- subset
     .[, c('.x', '.y')]
   }
 
-  Distance <- Velocity <- function(model, subset=subset, n=ns) {
+  Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
 # generate x and id values across the range to plot spline curves
     dvt <- rlang::quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
@@ -193,13 +193,13 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     })
     . <- do.call('rbind', .)
     . <- mutate(.,
-                .y=predict(model, ., deriv=dvt, xfun=xfun, yfun=yfun),
+                .y=predict(model, ., deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
                 .x=xfun(.x)
     )
     .[, c('.x', '.y', '.id')]
   }
 
-  unadjusted <- function(model, subset=subset) {
+  unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun) {
 # unadjusted individual curves
     tibble(
       .x=xfun(getCovariate(model)[subset]),
@@ -208,7 +208,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     )
   }
 
-  adjusted <- function(model, subset=subset) {
+  adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun) {
 # adjusted individual curves
     . <- xyadj(model)
     tibble(
@@ -218,7 +218,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     )
   }
 
-  effect <- function(model, subset=subset, n=ns) {
+  effect <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
     x <- xseq(x, n) - model$xoffset
@@ -316,24 +316,19 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # generate list of data frames for selected options
     data <- lapply(opts, function(i) {
       if (optsmooth[[i]])
-        do.call(optnames[[i]], list(model=model, subset=subset, n=ns))
+        do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns))
       else
-        do.call(optnames[[i]], list(model=model, subset=subset))
+        do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun))
     })
 
 # extract axis ranges and plot axes
     if (!add) {
-      for (i in 1:length(opts)) {
-        xlim0 <- range(xlim, data[[i]]$.x, na.rm=TRUE)
-        if (optaxis[opts[[i]]] == 1)
-          ylim0 <- range(ylim, data[[i]]$.y, na.rm=TRUE)
-        else
-          vlim0 <- range(vlim, data[[i]]$.y, na.rm=TRUE)
-      }
-      if (any(is.na(xlim))) xlim <- xlim0
-      if (any(is.na(ylim)) && exists('ylim0')) ylim <- ylim0
-      if (any(is.na(vlim)) && exists('vlim0')) vlim <- vlim0
-      # xy <- plotaxes(dv, xlab, ylab, vlab, xlim, ylim, vlim)
+      if (any(is.na(xlim)))
+        xlim <- range(vapply(data, function(z) range(z$.x), 0:1/2))
+      if (any(is.na(ylim)))
+        ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y), 0:1/2))
+      if (any(is.na(vlim)))
+        vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y), 0:1/2))
       xy <- do.call('plotaxes',
                     c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
                             xlim=xlim, ylim=ylim, vlim=vlim), ARG))
@@ -372,7 +367,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # save and print vertical line(s) at age of peak velocity
     if (apv) {
 # single curve
-      xy$apv <- with(velocity(model), setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
+        xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns),
+                       setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
       print(signif(xy$apv, 4))
       if (any(optmult[opts])) {
 # multiple curves
@@ -385,11 +381,11 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         }
 # xfun or yfun set
         else {
-          xt <- xseq(x[subset])
+          xt <- xseq(getCovariate(model)[subset])
           newdata <- data.frame(.x=xt)
           . <- vapply(levels(factor(getGroups(model)[subset])), function(z) {
             newdata$.id <- z
-            vt <- predict(object=model, newdata=newdata, deriv=1, xfun=xfun, yfun=yfun)
+            vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
             getPeakTrough(xfun(xt), vt)
           }, c(0, 0))
           xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
