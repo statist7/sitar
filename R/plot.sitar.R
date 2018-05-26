@@ -245,11 +245,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     ARG <- if (!is.null(dots))
       lapply(as.list(dots), eval, data[subset, ], parent.frame())
 
-    options <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
-    optnames <- c('distance', 'effect', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
-    optaxis <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
-    optmult <- c( FALSE,   FALSE,   TRUE,   TRUE,   TRUE,   FALSE,   TRUE ) # multiple curves
-    optsmooth <- c( TRUE,   TRUE,   FALSE,   FALSE,   TRUE,   TRUE,   TRUE ) # spline curves
+    options   <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
+    optnames  <- c('distance', 'effect', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
+    optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
+    optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
+    optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+    optDV     <- c( FALSE, FALSE, FALSE, FALSE, TRUE,  FALSE, TRUE ) # extended curves
     opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
     if (length(opts) == 0)
       stop('option(s) not recognised')
@@ -338,16 +339,17 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
           stop('right y axis not set up')
     }
 
-    # plot curves
+# plot curves
     lapply(1:length(opts), function(i) {
       opt <- opts[[i]]
       . <- data[[i]]
       ARG0 <- ARG
-      if (optmult[opt]) {
+      # if D or V and dots, extend ARG
+      if (optDV[opt] && !is.null(dots)) {
         names(.) <- unlist(as.list(mcall[2:(length(.)+1)]))
-        ARG0 <- if (!is.null(dots))
-          lapply(as.list(dots), eval, ., parent.frame())
+        ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
       }
+      # select distance or velocity axis
       if (optaxis[opt] == 1 || dv < 3) {
         fun <- I
         ARG0 <- ARG0[names(ARG0) != 'y2par']
