@@ -121,8 +121,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     dots <- match.call(expand.dots=FALSE)$...
     ARG <- if (!is.null(dots))
       lapply(as.list(dots), eval, data, parent.frame())
-    else
-      NULL
     ARG1 <- ARG[names(ARG) != 'y2par']
     ARG2 <- ARG[['y2par']]
     if ('las' %in% names(ARG1)) ARG2$las <- ARG1$las
@@ -246,8 +244,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     dots <- ccall$...
     ARG <- if (!is.null(dots))
       lapply(as.list(dots), eval, data[subset, ], parent.frame())
-    else
-      NULL
 
     options <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
     optnames <- c('distance', 'effect', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
@@ -301,12 +297,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       vlab <- labels[3]
     }
 
-# set up ARG for left and right axes
-    ARG1 <- ARG[names(ARG) != 'y2par']
-    ARG2 <- ARG[['y2par']]
-# default dotted line for velocity curve
-  	if (is.null(ARG2$lty)) ARG2$lty <- 2
-
 # derive xfun and yfun
     if (is.null(xfun))
       xfun <- ifun(mcall$x)
@@ -325,9 +315,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     if (!add) {
       if (any(is.na(xlim)))
         xlim <- range(vapply(data, function(z) range(z$.x), 0:1/2))
-      if (any(is.na(ylim)))
+      if (any(is.na(ylim)) && any(optaxis[opts] == 1))
         ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y), 0:1/2))
-      if (any(is.na(vlim)))
+      if (any(is.na(vlim)) && any(optaxis[opts] == 2))
         vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y), 0:1/2))
       xy <- do.call('plotaxes',
                     c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
@@ -348,20 +338,29 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
           stop('right y axis not set up')
     }
 
-# plot curves
+    # plot curves
     lapply(1:length(opts), function(i) {
       opt <- opts[[i]]
-      if (optaxis[opt] == 2 && dv == 3) {
-        fun <- v2d(ylim, vlim)
-        ARG <- ARG2
-      } else {
+      . <- data[[i]]
+      ARG0 <- ARG
+      if (optmult[opt]) {
+        names(.) <- unlist(as.list(mcall[2:(length(.)+1)]))
+        ARG0 <- if (!is.null(dots))
+          lapply(as.list(dots), eval, ., parent.frame())
+      }
+      if (optaxis[opt] == 1 || dv < 3) {
         fun <- I
-        ARG <- ARG1
+        ARG0 <- ARG0[names(ARG0) != 'y2par']
+      } else {
+        fun <- v2d(ylim, vlim)
+        ARG0 <- ARG0[['y2par']]
+        # default dotted line for velocity curve
+        if (is.null(ARG0$lty)) ARG0$lty <- 2
       }
       if (optmult[opt])
-        do.call("mplot", c(list(x=data[[i]]$.x, y=fun(data[[i]]$.y), id=data[[i]]$.id, add=TRUE), ARG))
+        do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
       else
-        xy <- do.call("lines", c(list(x=data[[i]]$.x, y=fun(data[[i]]$.y)), ARG))
+        xy <- do.call("lines", c(list(x=.[[1]], y=fun(.[[2]])), ARG0))
     })
 
 # save and print vertical line(s) at age of peak velocity
@@ -392,6 +391,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         }
       }
 # plot apv
+      ARG2 <- ARG[['y2par']]
       ARG2$lty <- 3
       do.call('abline', c(list(v=unlist(xy$apv['apv'])), ARG2))
     }
