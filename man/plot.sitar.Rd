@@ -9,7 +9,8 @@
 \method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun = NULL,
   yfun = NULL, subset = NULL, ns = 101, abc = NULL, add = FALSE,
   nlme = FALSE, ..., xlab = NULL, ylab = NULL, vlab = NULL,
-  xlim = c(NA, NA), ylim = c(NA, NA), vlim = c(NA, NA))
+  xlim = c(NA, NA), ylim = c(NA, NA), vlim = c(NA, NA),
+  xlegend = "topleft")
 
 \method{lines}{sitar}(x, ...)
 }
@@ -87,6 +88,10 @@ velocity (y2) plot \code{y2par} can be used (see Details).}
 \item{ylim}{optional y axis limits}
 
 \item{vlim}{optional v axis limits}
+
+\item{xlegend}{optional legend position (default 'topleft')}
+
+\item{inset}{optional legend inset (default 0.04)}
 }
 \value{
 Returns invisibly a list of (up to) three objects:

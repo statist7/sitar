@@ -3,10 +3,10 @@
 #' \code{plot} and \code{lines} methods for objects of class \code{sitar},
 #' providing various flavours of plot of the fitted growth curves.
 #'
-#' For option 'dv' (the default) the velocity curve plot (with right axis) can
-#' be annotated with \code{par} parameters given as a named list called
-#' \code{y2par}. To suppress the legend that comes with it set \code{xlegend =
-#' NULL}.
+#' For options involving both distance curves (options 'deDua') and velocity curves
+#' (options 'vV') the velocity curve plot (with right axis) can be annotated with
+#' \code{par} parameters given as a named list called \code{y2par}.
+#' To suppress the legend that comes with it set \code{legend = NULL}.
 #'
 #' @aliases plot.sitar lines.sitar
 #' @param x object of class \code{sitar}.
@@ -65,6 +65,7 @@
 #' @param xlim optional x axis limits
 #' @param ylim optional y axis limits
 #' @param vlim optional v axis limits
+#' @param legend optional list of arguments for legend with distance-velocity plots
 #' @return Returns invisibly a list of (up to) three objects:
 #' \item{usr}{value of \code{par('usr')} for the main plot.}
 #' \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
@@ -103,7 +104,8 @@
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
                        ns=101, abc=NULL, add=FALSE, nlme=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
-                       xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA)) {
+                       xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
+                       legend=list(x='topleft', inset=0.04, bty='o')) {
 
   plotaxes <- function(dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
 #	dv = 1 for distance, 2 for velocity, 3 for distance and velocity
@@ -134,7 +136,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     if (dv == 3) {
       par(new=TRUE)
       plot(xlim, vlim, type='n', bty='n', ann=FALSE, axes=FALSE)
-      do.call('axis', c(list(side=4), ARG2))
+      do.call('axis', list(side=4))
       mtext(vlab, 4, par('mgp')[1])
 #	save y2 axis limits
       xy$usr2 <- par('usr')
@@ -227,6 +229,20 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     .[, c('.x', '.y')]
   }
 
+  dolegend <- function(ypar, y2par, legend) {
+# add legend
+    parlu <- function(...) par(do.call('par', list(...)))
+    llc <- sapply(c('lty', 'lwd', 'col'), function(i) {
+      p12 <- rep(par()[[i]], 2)
+      if (!is.null(ypar[[i]]))
+        p12[1] <- parlu(ypar[i])[[1]]
+      if (!is.null(y2par[[i]]))
+        p12[2] <- parlu(y2par[i])[[1]]
+      p12
+    })
+    do.call('legend', c(legend, list(lty=llc[, 'lty'], lwd=llc[, 'lwd'], col=llc[, 'col'])))
+  }
+
   if (nlme) {
     do.call('plot.lme', as.list(match.call()[-1]))
   }
@@ -244,6 +260,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     dots <- ccall$...
     ARG <- if (!is.null(dots))
       lapply(as.list(dots), eval, data[subset, ], parent.frame())
+    ARG1 <- ARG[names(ARG) != 'y2par']
+    ARG2 <- ARG[['y2par']]
 
     options   <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
     optnames  <- c('distance', 'effect', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
@@ -323,6 +341,18 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       xy <- do.call('plotaxes',
                     c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
                             xlim=xlim, ylim=ylim, vlim=vlim), ARG))
+# add legend
+      if (dv == 3) {
+        # default dotted line for velocity curve
+        if (is.null(ARG$y2par$lty)) {
+          ARG$y2par$lty <- 2
+          ARG2 <- ARG$y2par
+        }
+        if (!is.null(legend)) {
+          legend[['legend']] <- labels[2:3]
+          dolegend(ARG1, ARG2, legend)
+        }
+      }
     }
 # else retrieve axis ranges
     else {
@@ -356,8 +386,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       } else {
         fun <- v2d(ylim, vlim)
         ARG0 <- ARG0[['y2par']]
-        # default dotted line for velocity curve
-        if (is.null(ARG0$lty)) ARG0$lty <- 2
       }
       if (optmult[opt])
         do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
@@ -393,10 +421,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         }
       }
 # plot apv
-      ARG2 <- ARG[['y2par']]
       ARG2$lty <- 3
       do.call('abline', c(list(v=unlist(xy$apv['apv'])), ARG2))
     }
+# return xy
     invisible(xy)
   }
 }
