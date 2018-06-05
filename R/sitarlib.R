@@ -187,152 +187,6 @@
 
 #############################
 #
-#	y2plot
-#
-#############################
-
-
-
-
-
-#' Plot with two y axes
-#'
-#' Function to plot two y variables, y1 and y2, against a single x variable,
-#' with the y1 and y2 axes on the left and right of the plot respectively.
-#'
-#' y2plot draws up to two superimposed plots, one with the y axis on the left
-#' and the other on the right, with suitable adjustment for \code{par('mar')}
-#' and including a legend.  The format for y1 is controlled by par arguments,
-#' and that for y2 by the list y2par.
-#'
-#' @param x vector of ages.
-#' @param y1 vector of measurements for plotting on left y axis.
-#' @param y2 optional vector of measurements for plotting on right y axis.
-#' @param labels character vector containing labels for x, y1 and y2.
-#' @param y2par optional named list of par arguments to format the y2 axis.
-#' @param add logical flag to specify if a new plot (with axes etc) is to be
-#' drawn (FALSE) or an existing plot is to be added to (TRUE).
-#' @param xy optional list to pass \code{usr} and \code{usr2} (see Value).
-#' @param xlegend position for legend.
-#' @param inset inset for legend.
-#' @param \dots optional \code{par} arguments.
-#' @return Returns the list \item{usr}{par('usr') for y1 axis}
-#' \item{usr2}{par('usr') for y2 axis} In addition the variable
-#' \code{.par.usr2}, equal to \code{usr2}, is created in globalenv().
-#' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @seealso \code{\link{plot.sitar}}
-#' @examples
-#'
-#' ## plot boys median height and weight on the UK 1990 reference
-#' with(uk90[uk90$sex == 1,],
-#'   y2plot(x=years, y1=M.ht, y2=M.wt, y2par=list(col='red'))
-#' )
-#'
-#' @export y2plot
-	y2plot <- function(x, y1, y2=NULL, labels, y2par=list(), add=FALSE, xy=NULL, xlegend="topleft", inset=0.04, ...)
-#	plot x versus y1 and y2 using left/right axes for the two y's
-#	returns par() for y1 or list(par(), par("usr")) with y2
-#	labels are labels for x, y1 and y2 (xlab and ylab override x and y1, y2par['ylab'] overrides y2)
-#	y2par is optional list of par args for y2 axis
-#	add suppresses plot axes
-#	xy set uses par() from previous call
-#	xlegend and inset place legend (NULL suppresses)
-{
-#	save par args
-	opar <- par(no.readonly=TRUE)
-#	args for y1 and y2
-	ypar <- list(...)
-	y2par <- as.list(y2par)
-# default dotted line for velocity curve
-	if (is.null(y2par$lty)) y2par$lty <- 2
-#	if a new plot draw axes
-	if (!add) {
-#	if mar specified then set it
-		if (!is.null(ypar$mar)) {
-			mar <- ypar$mar
-		}
-#	otherwise reset mar
-		else {
-			mar <- opar$mar
-#	if y2 set increase mar[4]
-			if (!missing(y2)) mar[4] <- mar[2]
-		}
-		par(mar=mar)
-# get axis labels
-  	if (missing(labels))
-  	  labels <- c(deparse(substitute(x)), deparse(substitute(y1)), deparse(substitute(y2)))
-		if (is.null(ypar$xlab))
-		  ypar$xlab <- labels[1]
-		if (is.null(ypar$ylab))
-		  ypar$ylab <- labels[2]
-#	plot x & y1 axes and y1 ~ x
-		do.call('plot', c(list(x=quote(x), y=quote(y1), type='l'), ypar))
-#	save x & y1 axis limits
-		xy$usr <- par('usr')
-#	optionally plot y2 and add right axis, with y2par as ...
-		if (!missing(y2)) {
-			par(new=TRUE)
-#	ensure x axis same for y2 as y1
-		  if (!is.null(ypar$xlim) && is.null(y2par$xlim)) y2par$xlim <- ypar$xlim
-			do.call('plot', c(list(x=quote(x), y=quote(y2), ann=FALSE, axes=FALSE, type="l"), y2par))
-#	save y2 axis limits
-			xy$usr2 <- par('usr')
-			eval(parse(text=".par.usr2 <<- par('usr')"))
-# local functions
-			localdots <- function(..., col, bg, pch, lty, lwd) list(...)
-			localaxis <- function(..., col, bg, pch, lty, lwd) axis(...)
-			localmtext <- function(..., col, bg, pch, lty, lwd, las) mtext(...)
-# copy relevant args for y2 axis
-			y2par <- c(y2par, do.call('localdots', c(ypar)))
-#	add y2 axis
-			do.call('localaxis', c(list(side=4), y2par))
-#	add y2 axis label
-			mgp <-  if (!is.null(ypar$mgp))
-			  ypar$mgp
-			else
-			  par('mgp')
-			do.call('localmtext', c(list(text=labels[3], side=4, line=mgp[1]), y2par))
-#	add legend
-			if (!is.null(xlegend) && !is.null(inset)) {
-  			parlu <- function(...) par(do.call('par', list(...)))
-  			llc <- sapply(c('lty', 'lwd', 'col'), function(i) {
-  			  p12 <- rep(par()[[i]], 2)
-  			  if (!is.null(ypar[[i]]))
-  			    p12[1] <- parlu(ypar[i])[[1]]
-  			  if (!is.null(y2par[[i]]))
-  			    p12[2] <- parlu(y2par[i])[[1]]
-  			  p12
-  			})
-			  legend(xlegend, legend=labels[2:3], bty="o",
-			         lty=llc[, 'lty'], lwd=llc[, 'lwd'], col=llc[, 'col'], inset=inset)
-			}
-#	reset axis limits
-			par(usr=xy$usr)
-		}
-	}
-	else {
-#	plot y1
-		do.call('lines', c(list(x, y1), ypar))
-#	optionally plot y2
-		if (!missing(y2)) {
-			if (exists('xy$usr2')) {
-				par(usr=xy$usr2)
-				eval(parse(text=".par.usr2 <<- par('usr')"))
-			}
-			else if (exists('.par.usr2')) {
-				par(usr=.par.usr2)
-				xy$usr2 <- par('usr')
-			}
-			else stop("Error in y2plot: second y axis requires previous call to set it\n", call.=FALSE)
-			do.call('lines', c(list(x=x, y=y2), y2par))
-			par(usr=opar$usr)
-		}
-	}
-	invisible(xy)
-}
-
-#############################
-#
 #	funcall
 #
 #############################
@@ -391,7 +245,6 @@
 #
 #############################
 
-#	update value of bstart to minimise b-c correlation
 
 
 
@@ -911,4 +764,3 @@ yaxsd <- function(usr=par()$usr[3:4]) {
 
 #	plot.sitar
 #		add acceleration curve option
-#		improve ylim for dau plots
