@@ -19,7 +19,6 @@
 #' character expansion \code{cex}, colour \code{col}, line type \code{lty},
 #' line width \code{lwd} and character \code{pch}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @seealso \code{\link{y2plot}}
 #' @examples
 #'
 #' mplot(age, height, id, heights, col=id)
