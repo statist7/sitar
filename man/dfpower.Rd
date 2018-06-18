@@ -45,7 +45,7 @@ The returned table can be rearranged using \code{\link{aperm}}.
 \examples{
 data(heights)
 m1 <- sitar(log(age), height, id, heights, 4)
-dfpower(m1, df=4:5, xpowers=0:1, maxIter=8)
+dfpower(m1, df=4:5, xpowers=0:1, maxIter=4)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
