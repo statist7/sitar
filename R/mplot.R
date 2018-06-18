@@ -66,9 +66,9 @@
 	if (!is.null(subset)) {
 		if (length(subset) != nrow(df))
 		  stop('subset wrong length for data')
-		subset <- ifelse(is.na(df[, 1]) | is.na(df[, 2]), FALSE, subset)
 		df <- df[subset, ]
 	}
+	df <- na.omit(df)
 	if (nrow(df) == 0)
 	  stop("no data to plot")
 
@@ -79,7 +79,7 @@
 		if (!"ylab" %in% names(ARG))
 		  ARG <- c(ARG, list(ylab=quote(names(df)[2])))
 		type <- match(names(ARG), "type", 0)
-		do.call("plot", c(list(x=range(df[, 1]), y=range(df[, 2]), type='n'), ARG[!type]))
+		do.call("plot", c(list(x=range(df[, 1], na.rm=TRUE), y=range(df[, 2], na.rm=TRUE), type='n'), ARG[!type]))
 	}
 
 #	draw growth curves

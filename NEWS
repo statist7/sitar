@@ -18,6 +18,8 @@ Changes in Version 1.1.0
 
   o pdLMS (new) plots density function(s) of Box-Cox transformed variable(s).
 
+  o mplot now omits rows with missing data.
+
   o predict.sitar now recognises special case of .x and .id in newdata.
 
 Changes in Version 1.0.10
