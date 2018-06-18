@@ -69,7 +69,6 @@
 		subset <- ifelse(is.na(df[, 1]) | is.na(df[, 2]), FALSE, subset)
 		df <- df[subset, ]
 	}
-	df <- na.omit(df)
 	if (nrow(df) == 0)
 	  stop("no data to plot")
 
