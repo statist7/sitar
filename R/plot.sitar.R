@@ -1,21 +1,28 @@
 #' Plot SITAR model
 #'
 #' \code{plot} and \code{lines} methods for objects of class \code{sitar},
-#' providing various flavours of plot of the fitted growth curves.
+#' providing various flavours of plot of the fitted growth curves. Also helper
+#' functions to return the data for plotting, e.g. with \code{ggplot2}.
 #'
-#' For options involving both distance curves (options 'deDua') and velocity curves
+#' For options involving both distance curves (options 'dcDua') and velocity curves
 #' (options 'vV') the velocity curve plot (with right axis) can be annotated with
 #' \code{par} parameters given as a named list called \code{y2par}.
 #' To suppress the legend that comes with it set \code{legend = NULL}.
 #'
-#' @aliases plot.sitar lines.sitar
+#' The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
+#' \code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
+#' correspond to the seven plot \code{option}s defined by their last letter,
+#' and return the data for plotting, e.g. for use with \code{ggplot2}.
+#'
+#' @aliases plot.sitar lines.sitar plot_d plot_v plot_D plot_V plot_u
+#'  plot_a plot_c
 #' @param x object of class \code{sitar}.
 #' @param opt character string containing a subset of letters corresponding to
 #' the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve,
-#' 'e' for fitted fixed Effects distance curve, 'D' for individual fitted
+#' 'c' for fitted Crosssectional distance curve, 'D' for individual fitted
 #' Distance curves, 'V' for individual fitted Velocity curves, 'u' for
 #' Unadjusted individual growth curves, and 'a' for Adjusted individual growth
-#' curves. Options 'dveDV' give spline curves, while 'ua' give data curves made
+#' curves. Options 'dvcDV' give spline curves, while 'ua' give data curves made
 #' up as line segments. If both distance and velocity curves are specified, the
 #' axis for the velocity curve appears on the right side of the plot (y2), and
 #' a legend identifying the distance and velocity curves is provided.
@@ -55,6 +62,8 @@
 #' new (FALSE). TRUE is equivalent to using \code{lines}.
 #' @param nlme optional logical which set TRUE plots the model as an
 #' \code{nlme} object, using \code{plot.nlme} arguments.
+#' @param returndata logical defining whether to plot the data (default FALSE)
+#' or just return the data for plotting (TRUE).
 #' @param \dots Further graphical parameters (see \code{par}) may also be
 #' supplied as arguments, e.g. line
 #' type \code{lty}, line width \code{lwd}, and colour \code{col}. For the
@@ -66,20 +75,27 @@
 #' @param ylim optional y axis limits
 #' @param vlim optional v axis limits
 #' @param legend optional list of arguments for legend with distance-velocity plots
-#' @return Returns invisibly a list of (up to) three objects:
+#' @return If \code{returndata} is FALSE returns invisibly a list of (up to) three objects:
 #' \item{usr}{value of \code{par('usr')} for the main plot.}
 #' \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
 #' \item{apv}{if argument \code{apv} is TRUE a named list giving the age at
 #' peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
 #' either overall or (with options D or V) for all subjects.}
+#' If \code{returndata} is TRUE (which it is with the helper functions) returns
+#' invisibly either a tibble or named list of tibbles,
+#' containing the data to be plotted. The helper functions each return a tibble.
+#' The variable names are '.x', '.y' and
+#' (for curves grouped by subject) '.id'. Note that '.x' and '.y' are returned
+#' after applying \code{xfun} and \code{yfun}. Hence if for examplex \code{x = log(age)}
+#' in the original \code{sitar} call then '.x' corresponds by default to \code{age}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{mplot}},
-#' \code{\link{plotclean}}, \code{\link{y2plot}}, \code{\link{ifun}}
+#' \code{\link{plotclean}}, \code{\link{ifun}}
 #' @keywords aplot
 #' @examples
 #'
 #' ## fit sitar model
-#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=7)
+#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=4)
 #'
 #' ## draw fitted distance and velocity curves
 #' ## with velocity curve in blue
@@ -96,13 +112,22 @@
 #' ## add mean curve for a, b, c = -1 SD
 #' lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
 #'
+#' ## draw fitted height distance curves coloured by subject, using ggplot
+#' \dontrun{
+#' require(ggplot2)
+#' ggplot(plot_D(m1), aes(.x, .y, colour=.id)) +
+#' labs(x='age', y='height') +
+#' geom_line(show.legend=FALSE)
+#' }
+
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble
 #' @importFrom dplyr mutate
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
-                       ns=101, abc=NULL, add=FALSE, nlme=FALSE, ...,
+                       ns=101, abc=NULL, add=FALSE, nlme=FALSE,
+                       returndata=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
                        xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
                        legend=list(x='topleft', inset=0.04, bty='o')) {
@@ -168,8 +193,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
     .x <- xseq(.x, n)
-    . <- tibble(
-      .y=predict(model, tibble(.x), level=0, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
+    . <- tibble::tibble(
+      .y=predict(model, tibble::tibble(.x), level=0, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
       .x=xfun(.x)
     )
     if (length(.x[subset]) != length(.x)) attr(., 'subset') <- subset
@@ -183,16 +208,16 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     .x <- getCovariate(model)[subset]
     .id <- getGroups(model)[subset]
     npt <- n / diff(range(.x))
-    . <- by(tibble(.x, .id), .id, function(z) {
+    . <- by(tibble::tibble(.x, .id), .id, function(z) {
       xrange <- range(z$.x)
       nt <- floor(npt * diff(xrange)) + 1
-      tibble(
+      tibble::tibble(
         .x=xseq(xrange, nt),
         .id=z$.id[[1]]
       )
     })
     . <- do.call('rbind', .)
-    . <- mutate(.,
+    . <- dplyr::mutate(.,
                 .y=predict(model, ., deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
                 .x=xfun(.x)
     )
@@ -201,7 +226,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
   unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun) {
 # unadjusted individual curves
-    tibble(
+    tibble::tibble(
       .x=xfun(getCovariate(model)[subset]),
       .y=yfun(getResponse(model)[subset]),
       .id=getGroups(model)[subset]
@@ -211,19 +236,19 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
   adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun) {
 # adjusted individual curves
     . <- xyadj(model)
-    tibble(
+    tibble::tibble(
       .x=xfun(.$x)[subset],
       .y=yfun(.$y)[subset],
       .id=getGroups(model)[subset]
     )
   }
 
-  effect <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
+  crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
     x <- xseq(x, n) - model$xoffset
-    . <- tibble(
-      .y=yfun(predict(model$ns, tibble(x))),
+    . <- tibble::tibble(
+      .y=yfun(predict(model$ns, tibble::tibble(x))),
       .x=xfun(x + model$xoffset)
     )
     .[, c('.x', '.y')]
@@ -263,8 +288,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     ARG1 <- ARG[names(ARG) != 'y2par']
     ARG2 <- ARG[['y2par']]
 
-    options   <- c('d', 'e', 'u', 'a', 'D', 'v', 'V')
-    optnames  <- c('distance', 'effect', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
+    options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
+    optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
     optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
     optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
     optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
@@ -329,6 +354,15 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       else
         do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun))
     })
+
+# return data?
+    if (returndata){
+      if (length(data) == 1)
+        data <- data[[1]]
+      else
+        names(data) <- options[opts]
+      return(invisible(data))
+    }
 
 # extract axis ranges and plot axes
     if (!add) {
@@ -444,3 +478,41 @@ lines.sitar <- function (x, ...)
   eval(mcall, parent.frame())
 }
 
+#' @rdname plot.sitar
+#' @export
+plot_d <- function (x, ...)
+{
+  mcall <- match.call()
+  opt <- deparse(mcall[[1]])
+  opt <- substring(opt, nchar(opt), nchar(opt))
+  mcall[[1]] <- as.name("plot")
+  mcall[["opt"]] <- opt
+  mcall[['returndata']] <- TRUE
+  eval(mcall, parent.frame())
+}
+
+#' @rdname plot.sitar
+#' @export
+plot_v <- function (x, ...) {}
+
+#' @rdname plot.sitar
+#' @export
+plot_D <- function (x, ...) {}
+
+#' @rdname plot.sitar
+#' @export
+plot_V <- function (x, ...) {}
+
+#' @rdname plot.sitar
+#' @export
+plot_u <- function (x, ...) {}
+
+#' @rdname plot.sitar
+#' @export
+plot_a <- function (x, ...) {}
+
+#' @rdname plot.sitar
+#' @export
+plot_c <- function (x, ...) {}
+
+body(plot_v) <- body(plot_D) <- body(plot_V) <- body(plot_u) <- body(plot_a) <- body(plot_c) <- body(plot_d)
