@@ -1,5 +1,11 @@
 Changes in Version 1.1.0
 
+  o plot.sitar now allows data output for plotting in ggplot2 etc.
+
+  o plot.sitar now applies apv to multiple curves (options D and V).
+
+  o Fix bug in plot.sitar with options dv.
+
   o Add vignette Fitting models in SITAR.
 
   o Add berkeley dataset.
@@ -13,14 +19,6 @@ Changes in Version 1.1.0
   o pdLMS (new) plots density function(s) of Box-Cox transformed variable(s).
 
   o predict.sitar now recognises special case of .x and .id in newdata.
-
-  o plot.sitar now applies apv to multiple curves (options D and V).
-
-  o mplot now ignores rows with missing data.
-
-  o plot.sitar tidies label handling.
-
-  o Fix bug in plot.sitar with options dv.
 
 Changes in Version 1.0.10
 
