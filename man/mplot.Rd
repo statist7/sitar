@@ -39,9 +39,6 @@ variables in \code{data}, e.g. to colour curves separately by \code{id} use:
 mplot(age, height, id, heights, col=id)
 
 }
-\seealso{
-\code{\link{y2plot}}
-}
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
 }
