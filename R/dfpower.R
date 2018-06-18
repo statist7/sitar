@@ -28,7 +28,7 @@
 #' @examples
 #' data(heights)
 #' m1 <- sitar(log(age), height, id, heights, 4)
-#' dfpower(m1, df=4:5, xpowers=0:1, maxIter=8)
+#' dfpower(m1, df=4:5, xpowers=0:1, maxIter=4)
 #' @export dfpower
 dfpower <- function(model, df, xpowers, ypowers, FUN=BICadj,
                     maxIter=nlmeControl()$maxIter, verbose=FALSE) {
