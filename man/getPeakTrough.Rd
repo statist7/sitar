@@ -15,7 +15,8 @@ getPeakTrough(x, y, peak = TRUE)
 }
 \value{
 A length-2 vector containing the values of \code{x} and  \code{y}
-at the peak or trough. If no peak/trough is identified NULL is returned invisibly.
+at the peak or trough. If no peak/trough is identified \code{x} and  \code{y}
+are set to NA.
 }
 \description{
 Given vectors \code{x} and  \code{y}, returns their values at the peak or
