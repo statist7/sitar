@@ -14,7 +14,7 @@ depending on the value of \code{toz}.}
 
 \item{sex}{vector where males = 1 and females = 2.}
 
-\item{measure}{measurement, either as name or character string, the choice
+\item{measure}{measurement name, as character string, the choice
 depending on the choice of \code{ref} (see e.g. references \code{uk90},
 \code{who06} and \code{ukwhopt}).}
 
@@ -56,7 +56,7 @@ with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages
-LMS2z(ages, as.matrix(zs), sex = 1, measure = wt, ref = who06, toz = FALSE)
+LMS2z(ages, as.matrix(zs), sex = 1, measure = 'wt', ref = who06, toz = FALSE)
 
 }
 \seealso{

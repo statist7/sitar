@@ -11,7 +11,7 @@
 #' @param y vector or one-column matrix of either measurements or z-scores,
 #' depending on the value of \code{toz}.
 #' @param sex vector where males = 1 and females = 2.
-#' @param measure measurement, either as name or character string, the choice
+#' @param measure measurement name, as character string, the choice
 #' depending on the choice of \code{ref} (see e.g. references \code{uk90},
 #' \code{who06} and \code{ukwhopt}).
 #' @param ref growth reference, either as name or character string, available
@@ -43,7 +43,7 @@
 #' data(who06)
 #' zs <- -4:4*2/3 # z-scores for centiles
 #' ages <- 0:12/4 # 3-month ages
-#' LMS2z(ages, as.matrix(zs), sex = 1, measure = wt, ref = who06, toz = FALSE)
+#' LMS2z(ages, as.matrix(zs), sex = 1, measure = 'wt', ref = who06, toz = FALSE)
 #'
 #' @export LMS2z
 	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
@@ -52,9 +52,6 @@
 	sex <- xy$sex
 	v <- matrix(nrow=length(x), ncol=3)
   colnames(v) <- c('L', 'M', 'S')
-  mc <- match.call()[['measure']]
-  if (!is.character(mc))
-    measure <- deparse(substitute(mc))
   if (is.character(ref))
     ref <- get(ref)
   x[x < min(ref$years) | x > max(ref$years)] <- NA
