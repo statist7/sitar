@@ -193,12 +193,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
     .x <- xseq(.x, n)
+    newdata <- tibble::tibble(.x)
+    if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
     . <- tibble::tibble(
-      .y=predict(model, tibble::tibble(.x), level=0, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
-      .x=xfun(.x)
+      .x=xfun(.x),
+      .y=predict(model, newdata, level=0, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
     )
-    if (length(.x[subset]) != length(.x)) attr(., 'subset') <- subset
-    .[, c('.x', '.y')]
   }
 
   Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
@@ -210,7 +210,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     npt <- n / diff(range(.x))
     . <- by(tibble::tibble(.x, .id), .id, function(z) {
       xrange <- range(z$.x)
-      nt <- floor(npt * diff(xrange)) + 1
+      nt <- ceiling(npt * diff(xrange))
       tibble::tibble(
         .x=xseq(xrange, nt),
         .id=z$.id[[1]]
@@ -378,9 +378,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # add legend
       if (dv == 3) {
         # default dotted line for velocity curve
-        if (is.null(ARG$y2par$lty)) {
-          ARG$y2par$lty <- 2
-          ARG2 <- ARG$y2par
+        if (is.null(ARG2$lty)) {
+          ARG2$lty <- 2
+          ARG$y2par <- ARG2
         }
         if (!is.null(legend)) {
           legend[['legend']] <- labels[2:3]
@@ -399,6 +399,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         xy$usr2 <- vlim
         vlim <- yaxsd(.par.usr2[3:4])
         dv <- 3
+        if (is.null(ARG2$lty)) {
+          ARG2$lty <- 2
+          ARG$y2par <- ARG2
+        }
       } else if (dv == 3)
           stop('right y axis not set up')
     }
