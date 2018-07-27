@@ -150,7 +150,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       lapply(as.list(dots), eval, data, parent.frame())
     ARG1 <- ARG[names(ARG) != 'y2par']
     ARG2 <- ARG[['y2par']]
-    if ('las' %in% names(ARG1)) ARG2$las <- ARG1$las
+    if ('las' %in% names(ARG1))
+      ARG2$las <- ARG1$las
 
 #	plot x & y1 axes
     do.call('plot', c(list(x=xlim, y=ylim, type='n', xlab=xlab, ylab=ylab), ARG1))
@@ -161,7 +162,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     if (dv == 3) {
       par(new=TRUE)
       plot(xlim, vlim, type='n', bty='n', ann=FALSE, axes=FALSE)
-      do.call('axis', list(side=4))
+      do.call('axis', c(list(side=4), ARG2))
       mtext(vlab, 4, par('mgp')[1])
 #	save y2 axis limits
       xy$usr2 <- par('usr')
@@ -254,15 +255,18 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     .[, c('.x', '.y')]
   }
 
-  dolegend <- function(ypar, y2par, legend) {
+  dolegend <- function(ARG1, ARG2, legend) {
 # add legend
     parlu <- function(...) par(do.call('par', list(...)))
+    if (is.null(ARG2$lty))
+      ARG2$lty <- 2
     llc <- sapply(c('lty', 'lwd', 'col'), function(i) {
       p12 <- rep(par()[[i]], 2)
-      if (!is.null(ypar[[i]]))
-        p12[1] <- parlu(ypar[i])[[1]]
-      if (!is.null(y2par[[i]]))
-        p12[2] <- parlu(y2par[i])[[1]]
+      for (j in 1:2) {
+        k <- list(ARG1[i], ARG2[i])[[j]]
+        if (!is.null(k[[1]]) && length(k[[1]]) == 1)
+          p12[j] <- parlu(k)[[1]]
+      }
       p12
     })
     do.call('legend', c(legend, list(lty=llc[, 'lty'], lwd=llc[, 'lwd'], col=llc[, 'col'])))
@@ -285,8 +289,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     dots <- ccall$...
     ARG <- if (!is.null(dots))
       lapply(as.list(dots), eval, data[subset, ], parent.frame())
-    ARG1 <- ARG[names(ARG) != 'y2par']
-    ARG2 <- ARG[['y2par']]
 
     options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
     optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
@@ -376,16 +378,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
                     c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
                             xlim=xlim, ylim=ylim, vlim=vlim), ARG))
 # add legend
-      if (dv == 3) {
-        # default dotted line for velocity curve
-        if (is.null(ARG2$lty)) {
-          ARG2$lty <- 2
-          ARG$y2par <- ARG2
-        }
-        if (!is.null(legend)) {
-          legend[['legend']] <- labels[2:3]
-          dolegend(ARG1, ARG2, legend)
-        }
+      if (dv == 3 && !is.null(legend)) {
+        legend[['legend']] <- labels[2:3]
+        dolegend(ARG[names(ARG) != 'y2par'], ARG$y2par, legend)
       }
     }
 # else retrieve axis ranges
@@ -399,10 +394,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         xy$usr2 <- vlim
         vlim <- yaxsd(.par.usr2[3:4])
         dv <- 3
-        if (is.null(ARG2$lty)) {
-          ARG2$lty <- 2
-          ARG$y2par <- ARG2
-        }
       } else if (dv == 3)
           stop('right y axis not set up')
     }
@@ -414,7 +405,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       ARG0 <- ARG
       # if D or V and dots, extend ARG
       if (optDV[opt] && !is.null(dots)) {
-        names(.) <- unlist(as.list(mcall[2:(length(.)+1)]))
+        names(.) <- unlist(as.list(mcall[2:(length(.) + 1)]))
         ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
       }
       # select distance or velocity axis
@@ -424,6 +415,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       } else {
         fun <- v2d(ylim, vlim)
         ARG0 <- ARG0[['y2par']]
+        if (is.null(ARG0[['lty']]))
+          ARG0[['lty']] <- 2
       }
       if (optmult[opt])
         do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
@@ -459,8 +452,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         }
       }
 # plot apv
-      ARG2$lty <- 3
-      do.call('abline', c(list(v=unlist(xy$apv['apv'])), ARG2))
+      do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
     }
 # return xy
     invisible(xy)
