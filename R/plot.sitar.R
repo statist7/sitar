@@ -389,11 +389,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       xy$usr <- par('usr')
       xlim <- xaxsd()
       ylim <- yaxsd()
-      vlim <- .par.usr2
-      if (!is.null(vlim)) {
-        xy$usr2 <- vlim
-        vlim <- yaxsd(.par.usr2[3:4])
+      if (exists('.par.usr2') && !is.null(.par.usr2)) {
         dv <- 3
+        vlim <- yaxsd(.par.usr2[3:4])
+        xy$usr2 <- .par.usr2
       } else if (dv == 3)
           stop('right y axis not set up')
     }
