@@ -45,7 +45,13 @@ xyadj <- function(object, x, y=NULL, id, abc=ranef(object)[id, , drop=FALSE], to
     y <- getResponse(object)
     id <- getGroups(object)
   }
-  abc[, letters[1:3][!letters[1:3] %in% names(ranef(object))]] <- 0 # omit not in model
+  # add missing columns
+  abc <- as.data.frame(abc)
+  if (ncol(abc) < 3) {
+    . <- matrix(0, nrow=nrow(abc), ncol=3-ncol(abc),
+                dimnames=list(NULL, letters[1:3][!letters[1:3] %in% names(abc)]))
+    abc <- cbind(abc, .)
+  }
   xoffset <- object$xoffset
   if (!is.na(b0 <- fixef(object)['b'])) xoffset <- xoffset + b0
   if (tomean) {
