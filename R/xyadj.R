@@ -42,8 +42,10 @@ xyadj <- function(object, x, y=NULL, id, abc=ranef(object)[id, , drop=FALSE], to
 #	returns x and y adjusted for random effects a, b and c
   if (missing(x)) {
     x <- getCovariate(object)
-    y <- getResponse(object)
-    id <- getGroups(object)
+    if (missing(y))
+        y <- getResponse(object)
+    if (missing(id))
+      id <- getGroups(object)
   }
   # add missing columns
   abc <- as.data.frame(abc)
