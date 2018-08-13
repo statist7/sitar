@@ -1,3 +1,20 @@
+Changes in Version 1.1.1
+
+  o simulate.sitar (new) simulates new data frames based on a given SITAR model
+    (stimulated by a question from Esther Perez).
+
+  o Fix several bugs in plot.sitar, involving subset with predict, dashed line
+    for velocity, and axis 4 etc.
+
+  o Fix bugs in xyadj improving the defaults for y and id, and making abc a
+    data frame and adding missing columns.
+
+  o getData.sitar now based on getData.nlme not getData.lme.
+
+  o getPeakTrough now returns NA if no turning points.
+
+  o LMS2z now requires 'measure' to be character, changing example accordingly.
+
 Changes in Version 1.1.0
 
   o plot.sitar now allows data output for plotting in ggplot2 etc.
