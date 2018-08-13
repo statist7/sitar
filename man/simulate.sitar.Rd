@@ -58,7 +58,7 @@ sim[dud] <- models[dud] <- NULL
   plot(models[[i]], apv=TRUE)$apv
 }, c(0, 0))
 rm(zz)
-plot(object, apv=TRUE)
+plot(model, apv=TRUE)
 apply(., 1, mean, na.rm=TRUE)
 apply(., 1, sd, na.rm=TRUE)
 }

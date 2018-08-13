@@ -44,12 +44,12 @@
 #'   plot(models[[i]], apv=TRUE)$apv
 #' }, c(0, 0))
 #' rm(zz)
-#' plot(object, apv=TRUE)
+#' plot(model, apv=TRUE)
 #' apply(., 1, mean, na.rm=TRUE)
 #' apply(., 1, sd, na.rm=TRUE)
 #' @importFrom tibble tibble
 #' @importFrom MASS mvrnorm
-#' @importFrom stats rnorm
+#' @importFrom stats simulate rnorm
 #' @export
 simulate.sitar <- function(object, nsim=1, seed=NULL, ...) {
   set.seed(seed)
