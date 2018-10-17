@@ -24,9 +24,9 @@
 #' points(t(getPeakTrough(x, y)), pch=17)
 #' points(t(getPeakTrough(x, y, peak=FALSE)), pch=25)
 #' @export getPeakTrough
-	getPeakTrough <- function(x, y, peak=TRUE) {
+	getPeakTrough <- function(x, y=NULL, peak=TRUE) {
 #	returns values of x and y at peak/trough, i.e. where dy/dx=0
-	. <- unique(data.frame(x, y)[order(x), ])
+	. <- xy.coords(x, y)
 	x <- .$x
 	y <- .$y
   . <- ifelse(peak, -1, 1)

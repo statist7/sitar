@@ -4,7 +4,7 @@
 \alias{getPeakTrough}
 \title{Identify peaks and troughs of curve}
 \usage{
-getPeakTrough(x, y, peak = TRUE)
+getPeakTrough(x, y = NULL, peak = TRUE)
 }
 \arguments{
 \item{x}{vector.}
