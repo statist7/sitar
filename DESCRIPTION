@@ -22,11 +22,13 @@ Depends:
     nlme,
     splines
 Imports:
-    dplyr,
-    MASS,
-    quantreg,
-    rlang,
     stats,
+    quantreg,
+    dplyr,
+    rlang,
+    purrr,
+    rsample,
+    tidyr,
     tibble
 RoxygenNote: 6.0.1
 URL: https://github.com/statist7/sitar
