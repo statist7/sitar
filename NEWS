@@ -1,5 +1,7 @@
 Changes in Version 1.1.1
 
+  o msMaxIter default in nlmeControl doubled to 100.
+
   o getPeakTrough now uses xy.coords.
 
   o Fix several bugs in plot.sitar, involving subset with predict, dashed line
