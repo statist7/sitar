@@ -1,8 +1,5 @@
 Changes in Version 1.1.1
 
-  o simulate.sitar (new) simulates new data frames based on a given SITAR model
-    (stimulated by a question from Esther Perez).
-
   o Fix several bugs in plot.sitar, involving subset with predict, dashed line
     for velocity, and axis 4 etc.
 
