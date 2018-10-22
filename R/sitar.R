@@ -112,7 +112,7 @@
 	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
 	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, xoffset='mean', bstart=xoffset,
 	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
-	                  na.action=na.fail, control = nlmeControl(returnObject=TRUE))
+	                  na.action=na.fail, control = nlmeControl(msMaxIter=100, returnObject=TRUE))
 {
 	b.origin <- function(b) {
 		if (b == 'mean') return(mean(x))
