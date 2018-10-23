@@ -38,7 +38,8 @@
 #' calculated as the age when the second derivative of the fitted curve changes
 #' sign (after applying \code{xfun} and/or \code{yfun}). Age at peak velocity
 #' is marked in the plot with a vertical dotted line, and its value, along with
-#' peak velocity, is printed and returned.
+#' peak velocity, is printed and returned. NB their standard errors can be
+#' obtained using the bootstrap with the function \code{apv_se}.
 #' @param xfun optional function to be applied to the x variable prior to
 #' plotting. Defaults to NULL, which translates to \code{ifun(x$call.sitar$x)}
 #' and inverts any transformation applied to x in the original SITAR model
@@ -90,7 +91,7 @@
 #' in the original \code{sitar} call then '.x' corresponds by default to \code{age}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{mplot}},
-#' \code{\link{plotclean}}, \code{\link{ifun}}
+#' \code{\link{plotclean}}, \code{\link{ifun}}, \code{\link{apv_se}}
 #' @keywords aplot
 #' @examples
 #'
@@ -99,9 +100,14 @@
 #'
 #' ## draw fitted distance and velocity curves
 #' ## with velocity curve in blue
-#' ## adding age at peak velocity
+#' ## adding age at peak velocity (apv)
 #' plot(m1, y2par=list(col='blue'), apv=TRUE)
 #'
+#' ## bootstrap standard errors for apv and pv
+#' \dontrun{
+#' res <- apv_se(m1, nboot=20, plot=TRUE)
+#' }
+
 #' ## draw individually coloured growth curves adjusted for random effects
 #' ## using same x-axis limits as for previous plot
 #' plot(m1, opt='a', col=id, xlim=xaxsd())
