@@ -168,7 +168,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     if (dv == 3) {
       par(new=TRUE)
       plot(xlim, vlim, type='n', bty='n', ann=FALSE, axes=FALSE)
-      do.call('axis', c(list(side=4), ARG2))
+      localaxis <- function(..., col, bg, pch, cex, lty, lwd) axis(...)
+      do.call('localaxis', c(list(side=4), ARG2))
       mtext(vlab, 4, par('mgp')[1])
 #	save y2 axis limits
       xy$usr2 <- par('usr')
