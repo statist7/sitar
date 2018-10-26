@@ -23,7 +23,7 @@ dfset(x, y, data = parent.frame(), FUN = BIC, df = 1:15, plot = FALSE,
 \item{\dots}{parameters to pass to \code{plot}.}
 }
 \value{
-Optimal degrees of freedom.
+degrees of freedom and value of FUN at minimum.
 }
 \description{
 \code{dfset} fits a natural cubic spline for a range

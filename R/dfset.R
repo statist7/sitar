@@ -5,12 +5,12 @@
 #'
 #' @param x vector of x coordinates.
 #' @param y vector of y coordinates.
-#' @param data data frame containing \code{x} and \code{y}.
+#' @param data environment containing \code{x} and \code{y}.
 #' @param FUN function to be minimised (e.g. BIC or AIC).
 #' @param df vector of degrees of freedom to be searched.
 #' @param plot logical controlling plotting of FUN versus df.
 #' @param \dots parameters to pass to \code{plot}.
-#' @return Optimal degrees of freedom.
+#' @return degrees of freedom and value of FUN at minimum.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
 #' data(heights)
@@ -21,16 +21,18 @@
     mc <- match.call()
     x <- eval(mc$x, data)
     y <- eval(mc$y, data)
-    . <- vapply(df, function(i) {
+    fun <- vapply(df, function(i) {
       obj <- try(lm(y ~ ns(x, df=i)), silent=TRUE)
       if (inherits(obj, 'lm'))
         FUN(obj)
       else
         NA
     }, 0)
+    xy <- setNames(data.frame(df, fun), c('df', deparse(substitute(FUN))))
+    xymin <- unlist(xy[which.min(fun), , drop=TRUE])
     if (plot) {
-      plot(. ~ df, ..., ylab=deparse(substitute(FUN)))
-      abline(h=df[which.min(.)], lty=3)
+      plot(xy, ...)
+      abline(v=xymin[1], h=xymin[2], lty=3)
     }
-    df[which.min(.)]
+    xymin
   }
