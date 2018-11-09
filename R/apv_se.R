@@ -39,31 +39,36 @@ apv_se <- function(object, nboot=10, seed=NULL, plot=FALSE, ...) {
   df <- map(bs$splits, ~as_tibble(.) %>% # generate bootstrap samples
               unnest(.id='.newid'))
 
+  dots <- eval(substitute(alist(...)))
+  edots <- lapply(dots, eval, getData(object))
+  vel <- do.call('plot', c(list(x=object, opt='v', returndata=TRUE), edots))
+  peak <- getPeakTrough(vel)
+
   run_sitar <- quote(update(object, data=.df, id=.newid, start=fixef(object)))
+
   apv <- na.omit(as_tibble(t(vapply(df, function(z) { # fit sitar and extract apv and pv
     eval(parse(text=".df <<- z"))
     obj <- try(eval(run_sitar))
-    if (any(class(obj) %in% 'sitar'))
-      getPeakTrough(plot_v(obj))
-    else
+    if (any(class(obj) %in% 'sitar')) {
+      edots <- lapply(dots, eval, getData(obj))
+      vel <- do.call('plot', c(list(x=obj, opt='v', returndata=TRUE), edots))
+      getPeakTrough(vel)
+    } else
       c(NA, NA)
   }, vector('numeric', 2)))))
 
-  vel <- plot_v(object)
-  peak <- getPeakTrough(vel)
   names(apv) <- names(vel) <- names(peak) <- c('apv', 'pv')
 
   if (plot) {
+    localplot <- function(..., subset, abc, xfun, yfun, ns) plot(...)
     xy <- rbind(vel, apv)
     ARG <- setNames(lapply(xy, range), c('xlim', 'ylim')) # default plot
-    dots <- list(...)
-    ARG[names(dots)] <- dots
-    do.call('plot', c(list(x=apv), ARG)) # plot apv and pv
+    do.call('localplot', c(list(x=apv), ARG, edots)) # plot apv and pv
     lines(vel, lwd=2) # add velocity curve
     abline(v=peak[1], h=peak[2], lty=3)
   }
 
-  se <- vapply(apv, sd, 1)
+  se <- vapply(apv, sd, 1.0)
   output <- rbind(peak, se)
   attr(output, 'bs') <- apv
   return(output)
