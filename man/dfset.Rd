@@ -12,7 +12,7 @@ dfset(x, y, data = parent.frame(), FUN = BIC, df = 1:15, plot = FALSE,
 
 \item{y}{vector of y coordinates.}
 
-\item{data}{data frame containing \code{x} and \code{y}.}
+\item{data}{environment containing \code{x} and \code{y}.}
 
 \item{FUN}{function to be minimised (e.g. BIC or AIC).}
 
