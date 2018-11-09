@@ -15,7 +15,8 @@ apv_se(object, nboot = 10, seed = NULL, plot = FALSE, ...)
 
 \item{plot}{logical to control plotting (default FALSE).}
 
-\item{\dots}{optional plot arguments.}
+\item{\dots}{optional arguments defining the velocity
+curve to be bootstrapped, and the plot. See Details.}
 }
 \value{
 a 2x2 array giving the mean and se of apv and pv, with attribute "bs"
@@ -26,7 +27,10 @@ a tibble containing the bootstrap estimates of apv and pv, with NAs removed.
 age at peak velocity (apv) and peak velocity (pv).
 }
 \details{
-If \code{plot} is TRUE, the mean velocity curve is plotted along with
+The mean velocity curve to be bootstrapped can be modified with
+arguments \code{subset}, \code{abc}, \code{xfun}, \code{yfun} or \code{ns}.
+
+If \code{plot} is TRUE, the original velocity curve is plotted along with
 each bootstrap sample's pv versus apv.
 }
 \examples{

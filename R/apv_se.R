@@ -3,14 +3,18 @@
 #' \code{apv_se} bootstraps a SITAR model to generate standard errors for
 #' age at peak velocity (apv) and peak velocity (pv).
 #'
-#' If \code{plot} is TRUE, the mean velocity curve is plotted along with
+#' The mean velocity curve to be bootstrapped can be modified with
+#' arguments \code{subset}, \code{abc}, \code{xfun}, \code{yfun} or \code{ns}.
+#'
+#' If \code{plot} is TRUE, the original velocity curve is plotted along with
 #' each bootstrap sample's pv versus apv.
 #'
 #' @param object SITAR model.
 #' @param nboot number of bootstrap samples (default 10).
 #' @param seed integer to initialize the random number generator (default NULL).
 #' @param plot logical to control plotting (default FALSE).
-#' @param \dots optional plot arguments.
+#' @param \dots optional arguments defining the velocity
+#' curve to be bootstrapped, and the plot. See Details.
 #' @return a 2x2 array giving the mean and se of apv and pv, with attribute "bs"
 #' a tibble containing the bootstrap estimates of apv and pv, with NAs removed.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
