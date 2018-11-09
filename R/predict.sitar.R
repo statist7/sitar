@@ -145,7 +145,11 @@
       }
 # newdata subsetted (in plot)
       else {
-        gd <- update(object, returndata=TRUE)[subset, argnames, drop=FALSE]
+        gd <- update(object, returndata=TRUE)
+        if (length(subset) == nrow(gd))
+          gd <- gd[subset, argnames, drop=FALSE]
+        else
+          stop('subset wrong length for data')
         argnames <- unlist(lapply(gd, mean))
         newdata <- data.frame(newdata, t(argnames))
       }
