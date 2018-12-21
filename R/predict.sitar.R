@@ -85,7 +85,8 @@
     }
     newdata$id <- id
 # check abc as length-3 vector or 1-row data frame
-    if (is.null(abc)) abc <- ranef(object)
+    if (is.null(abc))
+      abc <- ranef(object)
     else if (is.vector(abc)) {
 #	abc is named vector
       if (!is.null(names(abc)) && all(unique(names(abc)) %in% letters[1:3])) {
@@ -95,7 +96,8 @@
 #	abc is id level
       if (length(abc) == 1) {
         . <- rownames(ranef(object)) %in% abc
-        if (!any(.)) stop(paste('id', abc, 'not found'))
+        if (!any(.))
+          stop(paste('id', abc, 'not found'))
         abc <- ranef(object)[., , drop=FALSE]
       }
     }
@@ -131,7 +133,8 @@
     		  gd <- getData(object)
     		  for (i in covnames) {
 # continuous variable
-    		    if (i %in% argnames) newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
+    		    if (i %in% argnames)
+    		      newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
     	      else {
 # factor as instrumental variable(s)
     	        lev <- levels(gd[[i]])
@@ -174,22 +177,26 @@
 # level 1 prediction
         pred <- spline(list(x=x, y=pred), method='natural', xout=xout)$y
 # add individual a to prediction (inexact when yfun != y)
-        if (!is.null(abc$a)) pred <- yfun(pred + abc$a)
+        if (as.logical(abc$a))
+          pred <- yfun(pred + abc$a)
       }
 # VELOCITY
       else { # deriv != 0
 # mean velocity curve on back-transformed axes
         vel0 <- predict(smooth.spline(xfun(x), yfun(pred)), xfun(x), deriv=deriv)
-        if (any(level == 0) && !abcset) pred0 <- pred <- vel0$y
+        if (any(level == 0) && !abcset)
+          pred0 <- pred <- vel0$y
         if (any(level == 1) || abcset) {
 # level 1 prediction
           pred <- spline(vel0, method='natural', xout=xfun(xout))$y
 # multiply velocity by individual c (inexact when xfun != x)
-          if (!is.null(abc$c)) pred <- pred * exp(abc$c)
+          if (as.logical(abc$c))
+            pred <- pred * exp(abc$c)
         }
       }
 # return data frame if level 0:1
-      if (length(level) > 1) return(data.frame(id=id, predict.fixed=pred0, predict.id=pred))
+      if (length(level) > 1)
+        return(data.frame(id=id, predict.fixed=pred0, predict.id=pred))
 # add names or split by id if level 1
       if (level == 1) {
         asList <- ifelse(is.null(asList <- list(...)$asList), FALSE, asList)
