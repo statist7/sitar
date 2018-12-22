@@ -78,7 +78,7 @@
     id <- if ('.id' %in% names(newdata))
       newdata$.id
     else {
-      if (any(level == 1))
+      if (any(level == 1) && missing(abc))
         eval(oc$id, newdata)
       else
         rep.int(getGroups(object)[1], nrow(newdata))
