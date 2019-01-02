@@ -4,14 +4,15 @@
 \alias{predict.sitar}
 \title{Predict SITAR model}
 \usage{
-\method{predict}{sitar}(object, newdata = getData(object), level = 1, ...,
-  deriv = 0, abc = NULL, xfun = function(x) x, yfun = function(y) y)
+\method{predict}{sitar}(object, newdata = getData(object), level = 1L, ...,
+  deriv = 0L, abc = NULL, xfun = function(x) x, yfun = function(y) y)
 }
 \arguments{
 \item{object}{an object inheriting from class \code{sitar}.}
 
 \item{newdata}{an optional data frame to be used for obtaining the
-predictions. It requires named columns for \code{x}, and for \code{id} if
+predictions, defaulting to the data used to fit \code{object}.
+It requires named columns for \code{x}, and for \code{id} if
 \code{level = 1}, matching the names in \code{object}. Variables with the
 reserved names \code{x=.x} or \code{id=.id} take precedence over the model
 \code{x} and \code{id} variables. Any covariates in
@@ -19,9 +20,9 @@ reserved names \code{x=.x} or \code{id=.id} take precedence over the model
 By default their values are set to the mean, so when \code{level = 0} the
 prediction represents the mean curve.}
 
-\item{level}{an optional integer giving the level(s) of grouping to be used
+\item{level}{an optional integer vector giving the level(s) of grouping to be used
 in obtaining the predictions, level 0 corresponding to the population
-predictions. Defaults to level 1.}
+predictions. Defaults to level 1, and \code{level = 0:1} fits both levels.}
 
 \item{\dots}{other optional arguments: \code{asList}, \code{na.action} and
 \code{naPattern}.}
@@ -32,10 +33,10 @@ specifies the distance curve, \code{deriv = 1} the velocity curve and
 \code{deriv = 2} the acceleration curve.}
 
 \item{abc}{an optional named vector containing values of a subset of
-\code{a}, \code{b} and \code{c}, default \code{NULL}. If \code{abc} is set,
-\code{level} is set to 0. It gives predictions for a single subject with the
+\code{a}, \code{b} and \code{c}, default \code{NULL}. Ignored if
+\code{level = 0}. It gives predictions for a single subject with the
 specified values of \code{a}, \code{b} and \code{c}, where missing values
-are set to 0.}
+are set to 0. Alternatively \code{abc} can contain the value for a single id.}
 
 \item{xfun}{an optional function to apply to \code{x} to convert it back to
 the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
