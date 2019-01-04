@@ -48,8 +48,10 @@ xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
       id <- getGroups(object)
   }
   # add missing columns
-  if (is.null(abc))
-    abc <- ranef(object)[id, , drop=FALSE]
+  if (is.null(abc)) {
+    re <- ranef(object)
+    abc <- re[match(id, rownames(re)), , drop=FALSE]
+  }
   abc <- as.data.frame(abc)
   if (ncol(abc) < 3) {
     . <- matrix(0, nrow=nrow(abc), ncol=3-ncol(abc),
