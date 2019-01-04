@@ -40,13 +40,12 @@
 #' @export xyadj
 xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
 #	returns x and y adjusted for random effects a, b and c
-  if (missing(x)) {
+  if (missing(x))
     x <- getCovariate(object)
-    if (missing(y))
-        y <- getResponse(object)
-    if (missing(id))
-      id <- getGroups(object)
-  }
+  if (missing(y))
+      y <- getResponse(object)
+  if (missing(id))
+    id <- getGroups(object)
   # add missing columns
   if (is.null(abc)) {
     re <- ranef(object)
