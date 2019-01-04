@@ -83,7 +83,7 @@
       if (is.null(names(abc))) {
         if (is.vector(abc) && length(abc) == 1 && as.character(abc) %in% id) {
           newdata$id <- abc
-          abc <- NULL
+          newdata$.id <- abc <- NULL
         }
         else
           stop('abc unrecognised as id')
@@ -163,47 +163,57 @@
 # ensure deriv integral
     deriv <- as.integer(deriv)
 # simple prediction
-    if (deriv == 0L && is.null(abc))
+    if (all(deriv == 0L) && is.null(abc))
       return(yfun(predict(object, newdata, level=level, ...)))
-# else deriv > 0L || !is.null(abc)
 # DISTANCE
 # level 0 prediction
     pred0 <- yfun(predict(object, newdata, level=0L))
     xy.id <- xyadj(object, x=x, y=0, id=id, abc=abc)
-    if (deriv == 0L) { # abc set
 # level 1 prediction
-      newdata$x <- xy.id$x - xoffset
-      pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
-    }
-    else { # deriv > 0
+    newdata$x <- xy.id$x - xoffset
+    pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+    if (any(deriv > 0)) {
 # VELOCITY
 # level 0 prediction
-      vel0 <- predict(smooth.spline(xfun(x), pred0), xfun(x), deriv=deriv)
-      pred <- vel0$y
+      vel0 <- predict(smooth.spline(xfun(x), pred0), xfun(x), deriv=max(deriv))
+      pred0 <- vel0$y
 # velocity curve on back-transformed axes
       if (any(level == 1L)) {
 # level 1 prediction
-        xout <- xy.id$x
-        vel <- spline(vel0, method='natural', xout=xfun(xout))$y
-        if (is.null(abc))
-          abc <- ranef(object)[id, , drop=FALSE]
-        if (!is.null(abc$c))
-          vel <- vel * exp(abc$c)
+        if (body(xfun) == as.name('x') &&
+            body(yfun) == as.name('x')) {
+# x and y untransformed
+            vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
+            if (is.null(abc))
+              abc <- ranef(object)[id, , drop=FALSE]
+            if (!is.null(abc$c))
+              vel <- vel * exp(abc$c)
+          } else {
+# x or y transformed
+          newdata$pred <- pred
+          newdata$xorig <- xfun(xy.id$x)
+          vel <- by(newdata, id, function(z) {
+            with(z, {
+              ss <- smooth.spline(xorig, pred, df=min(20, length(pred)))
+              predict(ss, xorig, deriv=max(deriv))$y
+            })
+          })
+          vel <- do.call('c', vel)
+        }
         pred <- vel
       }
-      pred0 <- vel0$y
     }
 # return data frame if level 0:1
     if (length(level) > 1)
-      return(data.frame(id=id, predict.fixed=pred0, predict.id=pred))
+      return(data.frame(id=factor(id), predict.fixed=pred0, predict.id=pred))
 # add names or split by id if level 1
-    if (level == 1L) {
-      asList <- ifelse(is.null(asList <- list(...)$asList), FALSE, asList)
-      if (asList)
-        pred <- split(pred, id)
-      else
-        names(pred) <- id
-    }
+    if (level == 0L)
+      pred <- pred0
+    asList <- ifelse(is.null(asList <- list(...)$asList), FALSE, asList)
+    if (asList)
+      pred <- split(pred, id)
+    else
+      names(pred) <- id
     attr(pred, 'label') <- 'Predicted values'
     return(pred)
   }
