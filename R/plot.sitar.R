@@ -445,8 +445,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       print(signif(xy$apv, 4))
       if (any(optmult[opts])) {
 # multiple curves
-        if (body(ifun(mcall$x)) == as.name('x') &&
-            body(ifun(mcall$y)) == as.name('x')) {
+        if (body(xfun) == as.name('x') &&
+            body(yfun) == as.name('x')) {
 # x and y untransformed
           apv1 <- xyadj(model, xy$apv[1], tomean=FALSE)$x # subject-specific APVs
           pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
