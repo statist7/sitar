@@ -191,7 +191,7 @@
           } else {
 # x or y transformed
           newdata$pred <- pred
-          newdata$xorig <- xfun(xy.id$x)
+          newdata$xorig <- xfun(x)
           vel <- by(newdata, id, function(z) {
             with(z, {
               ss <- smooth.spline(xorig, pred, df=min(20, length(pred)))
