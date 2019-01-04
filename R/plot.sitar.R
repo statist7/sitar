@@ -195,12 +195,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     seq(rx[1], rx[2], length.out=n)
   }
 
-  distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
+  distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # generate x values across the range to plot mean spline curve
     dvt <- rlang::quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
-    .x <- xseq(.x, n)
+    .x <- xseq(.x, ns)
     newdata <- tibble::tibble(.x)
     if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
     . <- tibble::tibble(
@@ -209,22 +209,29 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     )
   }
 
-  Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
+  Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # generate x and id values across the range to plot spline curves
     dvt <- rlang::quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
     .x <- getCovariate(model)[subset]
     .id <- getGroups(model)[subset]
-    npt <- n / diff(range(.x))
-    . <- by(tibble::tibble(.x, .id), .id, function(z) {
-      xrange <- range(z$.x)
-      nt <- ceiling(npt * diff(xrange))
-      tibble::tibble(
-        .x=xseq(xrange, nt),
-        .id=z$.id[[1]]
+    npt <- ns / diff(range(.x))
+    if (is.null(abc)) {
+      . <- by(tibble::tibble(.x, .id), .id, function(z) {
+        xrange <- range(z$.x)
+        nt <- ceiling(npt * diff(xrange))
+        tibble::tibble(
+          .x=xseq(xrange, nt),
+          .id=z$.id[[1]]
+        )
+      })
+      . <- do.call('rbind', .)
+    } else {
+      . <- tibble::tibble(
+        .x=xseq(.x, ns),
+        .id=.id[[1]],
       )
-    })
-    . <- do.call('rbind', .)
+    }
     . <- dplyr::mutate(.,
                 .y=predict(model, ., deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
                 .x=xfun(.x)
@@ -251,10 +258,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     )
   }
 
-  crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns) {
+  crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
-    x <- xseq(x, n) - model$xoffset
+    x <- xseq(x, ns) - model$xoffset
     . <- tibble::tibble(
       .y=yfun(predict(model$ns, tibble::tibble(x))),
       .x=xfun(x + model$xoffset)
@@ -359,7 +366,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # generate list of data frames for selected options
     data <- lapply(opts, function(i) {
       if (optsmooth[[i]])
-        do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns))
+        do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns))
       else
         do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun))
     })
@@ -433,7 +440,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # save and print vertical line(s) at age of peak velocity
     if (apv) {
 # single curve
-        xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, n=ns),
+        xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns),
                        setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
       print(signif(xy$apv, 4))
       if (any(optmult[opts])) {
@@ -449,11 +456,14 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         else {
           xt <- xseq(getCovariate(model)[subset])
           newdata <- data.frame(.x=xt)
-          . <- vapply(levels(factor(getGroups(model)[subset])), function(z) {
+          ids <- levels(factor(getGroups(model)[subset]))
+          if (!is.null(abc))
+            ids <- factor(1, labels=ids[[1]])
+          . <- vapply(ids, function(z) {
             newdata$.id <- z
             vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
             getPeakTrough(xfun(xt), vt)
-          }, c(0, 0))
+          }, numeric(2))
           xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
         }
       }
