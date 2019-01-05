@@ -175,7 +175,8 @@
     if (any(deriv > 0)) {
 # VELOCITY
 # level 0 prediction
-      vel0 <- predict(smooth.spline(xfun(x), pred0), xfun(x), deriv=max(deriv))
+      ss0 <- smooth.spline(xfun(x), pred0)
+      vel0 <- predict(ss0, xfun(x), deriv=max(deriv))
       pred0 <- vel0$y
 # velocity curve on back-transformed axes
       if (any(level == 1L)) {
@@ -194,8 +195,11 @@
           newdata$xorig <- xfun(x)
           vel <- by(newdata, id, function(z) {
             with(z, {
-              ss <- smooth.spline(xorig, pred, df=min(20, length(pred)))
-              predict(ss, xorig, deriv=max(deriv))$y
+              if (length(xorig) >= 4) {
+                ss <- smooth.spline(xorig, pred, df=min(20, length(xorig)))
+                predict(ss, xorig, deriv=max(deriv))$y
+              } else
+                predict(ss0, xorig, deriv=max(deriv))$y
             })
           })
           vel <- do.call('c', vel)
