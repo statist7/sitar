@@ -68,8 +68,7 @@
 		  stop('subset wrong length for data')
 		df <- df[subset, ]
 	}
-	df <- na.omit(df)
-	if (nrow(df) == 0)
+	if (nrow(na.omit(df)) == 0)
 	  stop("no data to plot")
 
 #	plot axes if new graph
