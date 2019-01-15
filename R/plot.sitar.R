@@ -14,6 +14,12 @@
 #' correspond to the seven plot \code{option}s defined by their last letter,
 #' and return the data for plotting, e.g. for use with \code{ggplot2}.
 #'
+#' The \code{trim} option allows disfiguringly long line segments to be omitted
+#' from plots with options 'a' or 'u'. It ranks the line segments on the basis
+#' of the distance of the midpoint from the mean curve (dy) and the age range (dx)
+#' using the formula \code{dy/mad(dy) + dx/mad(dx)} and omits those with the
+#' largest values.
+
 #' @aliases plot.sitar lines.sitar plot_d plot_v plot_D plot_V plot_u
 #'  plot_a plot_c
 #' @param x object of class \code{sitar}.
@@ -59,6 +65,8 @@
 #' values are used. If \code{abc} is set, \code{level} is ignored. If
 #' \code{abc} is NULL (default), or if a, b or c values are missing, values of
 #' zero are assumed.
+#' @param trim proportion (default 0) of long line segments to be
+#' excluded from plots with options 'u' or 'a'. See Details.
 #' @param add optional logical defining if the plot is pre-existing (TRUE) or
 #' new (FALSE). TRUE is equivalent to using \code{lines}.
 #' @param nlme optional logical which set TRUE plots the model as an
@@ -81,7 +89,7 @@
 #' \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
 #' \item{apv}{if argument \code{apv} is TRUE a named list giving the age at
 #' peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
-#' either overall or (with options D or V) for all subjects.}
+#' either overall or (with options D or V, invisibly) for all subjects.}
 #' If \code{returndata} is TRUE (which it is with the helper functions) returns
 #' invisibly either a tibble or named list of tibbles,
 #' containing the data to be plotted. The helper functions each return a tibble.
@@ -132,7 +140,7 @@
 #' @importFrom dplyr mutate
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
-                       ns=101, abc=NULL, add=FALSE, nlme=FALSE,
+                       ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
                        returndata=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
                        xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
@@ -203,9 +211,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     .x <- xseq(.x, ns)
     newdata <- tibble::tibble(.x)
     if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
+    level <- ifelse(is.null(abc), 0, 1)
     . <- tibble::tibble(
       .x=xfun(.x),
-      .y=predict(model, newdata, level=0, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
+      .y=predict(model, newdata, level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
     )
   }
 
@@ -239,23 +248,53 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     .[, c('.x', '.y', '.id')]
   }
 
-  unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun) {
+  unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # unadjusted individual curves
-    tibble::tibble(
-      .x=xfun(getCovariate(model)[subset]),
-      .y=yfun(getResponse(model)[subset]),
-      .id=getGroups(model)[subset]
+    data <- tibble::tibble(
+      .x=getCovariate(model),
+      .y=getResponse(model),
+      .id=getGroups(model)
     )
+    data <- data[subset, ]
+    data <- trimlines(model, data, level=1, trim) %>%
+      mutate(.x=xfun(.x),
+             .y=yfun(.y))
   }
 
-  adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun) {
+  adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # adjusted individual curves
-    . <- xyadj(model)
-    tibble::tibble(
-      .x=xfun(.$x)[subset],
-      .y=yfun(.$y)[subset],
-      .id=getGroups(model)[subset]
-    )
+    data <- tibble::as_tibble(xyadj(model))
+    data$id <- getGroups(model)
+    names(data) <- c('.x', '.y', '.id')
+    data <- data[subset, ]
+    data <- trimlines(model, data, level=0, trim) %>%
+      mutate(.x=xfun(.x),
+             .y=yfun(.y))
+  }
+
+  trimlines <- function(model, data, level, trim) {
+# if midpoint of line segment is far from mean curve, or age gap is large,
+# insert NA row to data to omit line segment
+    if (trim <= 0)
+      return(data)
+    data <- with(data, data[order(.id, .x), ]) # sort data
+    addna <- (data[-1, -3] + data[-nrow(data), -3]) / 2 # midpoint of line segment
+    addna$.id <- data$.id[-1]
+    addna$dx <- data$.x[-1] - data$.x[-nrow(data)] # age gap dx
+    tid <- as.integer(data$.id)
+    addna <- addna[tid[-1] == tid[-nrow(data)], ] # restrict segments to within id
+    addna$ey <- predict(model, addna, level=level) # mean curve value at midpoint
+    addna$dy <- with(addna, abs(.y - ey)) # gap between line segment and mean curve dy
+    addna$lp <- with(addna, dx / mad(dx) + dy / mad(dy)) # add scaled dx and dy
+    outliers <- order(addna$lp, decreasing=TRUE) # rank
+    outliers <- outliers[1:round(trim * nrow(addna))] # identify outliers
+    addna <- addna[outliers, ] # trim
+    if (nrow(addna) == 0)
+      return(data)
+    addna <- addna[, 1:3]
+    addna$.y <- NA
+    data <- rbind(data, addna)
+    with(data, data[order(.id, .x), ])
   }
 
   crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
@@ -309,7 +348,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
     optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
     optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
-    optDV     <- c( FALSE, FALSE, FALSE, FALSE, TRUE,  FALSE, TRUE ) # extended curves
     opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
     if (length(opts) == 0)
       stop('option(s) not recognised')
@@ -368,7 +406,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       if (optsmooth[[i]])
         do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns))
       else
-        do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun))
+        do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, trim=trim))
     })
 
 # return data?
@@ -383,11 +421,11 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 # extract axis ranges and plot axes
     if (!add) {
       if (any(is.na(xlim)))
-        xlim <- range(vapply(data, function(z) range(z$.x), 0:1/2))
+        xlim <- range(vapply(data, function(z) range(z$.x, na.rm=TRUE), numeric(2)))
       if (any(is.na(ylim)) && any(optaxis[opts] == 1))
-        ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y), 0:1/2))
+        ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
       if (any(is.na(vlim)) && any(optaxis[opts] == 2))
-        vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y), 0:1/2))
+        vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
       xy <- do.call('plotaxes',
                     c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
                             xlim=xlim, ylim=ylim, vlim=vlim), ARG))
@@ -416,12 +454,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       opt <- opts[[i]]
       . <- data[[i]]
       ARG0 <- ARG
-      # if D or V and dots, extend ARG
-      if (optDV[opt] && !is.null(dots)) {
+# data frame extended, extend ARG
+      if (optmult[opt] && nrow(.) != model$dims$N && !is.null(dots)) {
         names(.) <- unlist(as.list(mcall[2:(length(.) + 1)]))
         ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
       }
-      # select distance or velocity axis
+# select distance or velocity axis
       if (optaxis[opt] == 1 || dv < 3) {
         fun <- I
         ARG0 <- ARG0[names(ARG0) != 'y2par']

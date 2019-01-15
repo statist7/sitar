@@ -21,10 +21,10 @@
 \title{Plot SITAR model}
 \usage{
 \method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun = NULL,
-  yfun = NULL, subset = NULL, ns = 101, abc = NULL, add = FALSE,
-  nlme = FALSE, returndata = FALSE, ..., xlab = NULL, ylab = NULL,
-  vlab = NULL, xlim = c(NA, NA), ylim = c(NA, NA), vlim = c(NA, NA),
-  legend = list(x = "topleft", inset = 0.04, bty = "o"))
+  yfun = NULL, subset = NULL, ns = 101, abc = NULL, trim = 0,
+  add = FALSE, nlme = FALSE, returndata = FALSE, ..., xlab = NULL,
+  ylab = NULL, vlab = NULL, xlim = c(NA, NA), ylim = c(NA, NA),
+  vlim = c(NA, NA), legend = list(x = "topleft", inset = 0.04, bty = "o"))
 
 \method{lines}{sitar}(x, ...)
 
@@ -95,6 +95,9 @@ values are used. If \code{abc} is set, \code{level} is ignored. If
 \code{abc} is NULL (default), or if a, b or c values are missing, values of
 zero are assumed.}
 
+\item{trim}{proportion (default 0) of long line segments to be
+excluded from plots with options 'u' or 'a'. See Details.}
+
 \item{add}{optional logical defining if the plot is pre-existing (TRUE) or
 new (FALSE). TRUE is equivalent to using \code{lines}.}
 
@@ -129,7 +132,7 @@ If \code{returndata} is FALSE returns invisibly a list of (up to) three objects:
 \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
 \item{apv}{if argument \code{apv} is TRUE a named list giving the age at
 peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
-either overall or (with options D or V) for all subjects.}
+either overall or (with options D or V, invisibly) for all subjects.}
 If \code{returndata} is TRUE (which it is with the helper functions) returns
 invisibly either a tibble or named list of tibbles,
 containing the data to be plotted. The helper functions each return a tibble.
@@ -153,6 +156,12 @@ The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
 \code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
 correspond to the seven plot \code{option}s defined by their last letter,
 and return the data for plotting, e.g. for use with \code{ggplot2}.
+
+The \code{trim} option allows disfiguringly long line segments to be omitted
+from plots with options 'a' or 'u'. It ranks the line segments on the basis
+of the distance of the midpoint from the mean curve (dy) and the age range (dx)
+using the formula \code{dy/mad(dy) + dx/mad(dx)} and omits those with the
+largest values.
 }
 \examples{
 
