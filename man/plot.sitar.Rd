@@ -88,8 +88,8 @@ values are used. If \code{abc} is set, \code{level} is ignored. If
 \code{abc} is NULL (default), or if a, b or c values are missing, values of
 zero are assumed.}
 
-\item{trim}{number (default 0) of long line segments to be
-excluded from plots with options 'u' or 'a'. See Details.}
+\item{trim}{number (default 0) of long line segments to be excluded from plot
+with option 'u' or 'a'. See Details.}
 
 \item{add}{optional logical defining if the plot is pre-existing (TRUE) or
 new (FALSE). TRUE is equivalent to using \code{lines}.}
@@ -152,9 +152,9 @@ and return the data for plotting, e.g. for use with \code{ggplot2}.
 
 The \code{trim} option allows disfiguringly long line segments to be omitted
 from plots with options 'a' or 'u'. It ranks the line segments on the basis
-of the age gap (dx) and the distance of the midpoint from the mean curve (dy)
-using the formula \code{dx/mad(dx) + dy/mad(dy)} and omits those with the
-largest values.
+of the age gap (dx) and the distance of the midpoint of the line from the
+mean curve (dy) using the formula \code{dx/mad(dx) + dy/mad(dy)} and omits
+those with the largest values.
 }
 \examples{
 

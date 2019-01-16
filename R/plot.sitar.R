@@ -16,9 +16,9 @@
 #'
 #' The \code{trim} option allows disfiguringly long line segments to be omitted
 #' from plots with options 'a' or 'u'. It ranks the line segments on the basis
-#' of the distance of the midpoint from the mean curve (dy) and the age range (dx)
-#' using the formula \code{dy/mad(dy) + dx/mad(dx)} and omits those with the
-#' largest values.
+#' of the age gap (dx) and the distance of the midpoint of the line from the
+#' mean curve (dy) using the formula \code{dx/mad(dx) + dy/mad(dy)} and omits
+#' those with the largest values.
 
 #' @aliases plot.sitar lines.sitar plot_d plot_v plot_D plot_V plot_u
 #'  plot_a plot_c
@@ -65,8 +65,8 @@
 #' values are used. If \code{abc} is set, \code{level} is ignored. If
 #' \code{abc} is NULL (default), or if a, b or c values are missing, values of
 #' zero are assumed.
-#' @param trim proportion (default 0) of long line segments to be
-#' excluded from plots with options 'u' or 'a'. See Details.
+#' @param trim number (default 0) of long line segments to be excluded from plot
+#' with option 'u' or 'a'. See Details.
 #' @param add optional logical defining if the plot is pre-existing (TRUE) or
 #' new (FALSE). TRUE is equivalent to using \code{lines}.
 #' @param nlme optional logical which set TRUE plots the model as an
@@ -136,8 +136,9 @@
 
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
-#' @importFrom tibble tibble
-#' @importFrom dplyr mutate
+#' @importFrom tibble tibble as_tibble
+#' @importFrom dplyr mutate rename filter arrange
+#' @importFrom rlang .data quo_name
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
                        ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
@@ -205,14 +206,14 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
   distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # generate x values across the range to plot mean spline curve
-    dvt <- rlang::quo_name(match.call()[[1]])
+    dvt <- quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
     .x <- xseq(.x, ns)
-    newdata <- tibble::tibble(.x)
+    newdata <- tibble(.x)
     if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
     level <- ifelse(is.null(abc), 0, 1)
-    . <- tibble::tibble(
+    . <- tibble(
       .x=xfun(.x),
       .y=predict(model, newdata, level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
     )
@@ -220,28 +221,28 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
   Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # generate x and id values across the range to plot spline curves
-    dvt <- rlang::quo_name(match.call()[[1]])
+    dvt <- quo_name(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
     .x <- getCovariate(model)[subset]
     .id <- getGroups(model)[subset]
     npt <- ns / diff(range(.x))
     if (is.null(abc)) {
-      . <- by(tibble::tibble(.x, .id), .id, function(z) {
+      . <- by(tibble(.x, .id), .id, function(z) {
         xrange <- range(z$.x)
         nt <- ceiling(npt * diff(xrange))
-        tibble::tibble(
+        tibble(
           .x=xseq(xrange, nt),
           .id=z$.id[[1]]
         )
       })
       . <- do.call('rbind', .)
     } else {
-      . <- tibble::tibble(
+      . <- tibble(
         .x=xseq(.x, ns),
         .id=.id[[1]],
       )
     }
-    . <- dplyr::mutate(.,
+    . <- mutate(.,
                 .y=predict(model, ., deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
                 .x=xfun(.x)
     )
@@ -250,59 +251,59 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
   unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # unadjusted individual curves
-    data <- tibble::tibble(
+    data <- tibble(
       .x=getCovariate(model),
       .y=getResponse(model),
-      .id=getGroups(model)
-    )
-    data <- data[subset, ]
+      .id=getGroups(model)) %>%
+      filter(subset)
     data <- trimlines(model, data, level=1, trim) %>%
-      mutate(.x=xfun(.x),
-             .y=yfun(.y))
+      mutate(.x=xfun(.data$.x),
+             .y=yfun(.data$.y))
+    data
   }
 
   adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # adjusted individual curves
-    data <- tibble::as_tibble(xyadj(model))
-    data$id <- getGroups(model)
-    names(data) <- c('.x', '.y', '.id')
-    data <- data[subset, ]
+    data <- as_tibble(xyadj(model)) %>%
+      mutate(.id=getGroups(model)) %>%
+      rename(.x=.data$x,
+             .y=.data$y) %>%
+      filter(subset)
     data <- trimlines(model, data, level=0, trim) %>%
-      mutate(.x=xfun(.x),
-             .y=yfun(.y))
+      mutate(.x=xfun(.data$.x),
+             .y=yfun(.data$.y))
+    data
   }
 
   trimlines <- function(model, data, level, trim) {
 # if midpoint of line segment is far from mean curve, or age gap is large,
 # insert NA row to data to omit line segment
-    if (trim <= 0)
+    if (trim == 0)
       return(data)
     data <- with(data, data[order(.id, .x), ]) # sort data
-    addna <- (data[-1, -3] + data[-nrow(data), -3]) / 2 # midpoint of line segment
-    addna$.id <- data$.id[-1]
-    addna$dx <- data$.x[-1] - data$.x[-nrow(data)] # age gap dx
-    tid <- as.integer(data$.id)
-    addna <- addna[tid[-1] == tid[-nrow(data)], ] # restrict segments to within id
+    addna <- data %>%
+      mutate(dx=c(NA, diff(.data$.x)), # age gap dx
+             .x=(.data$.x + lag(.data$.x)) / 2, # mid age
+             .y=(.data$.y + lag(.data$.y)) / 2) %>% # mid y
+      filter(.data$.id == lag(.data$.id)) # segments within id
     addna$ey <- predict(model, addna, level=level) # mean curve value at midpoint
-    addna$dy <- with(addna, abs(.y - ey)) # gap between line segment and mean curve dy
-    addna$lp <- with(addna, dx / mad(dx) + dy / mad(dy)) # add scaled dx and dy
-    outliers <- order(addna$lp, decreasing=TRUE) # rank
-    outliers <- outliers[1:round(trim * nrow(addna))] # identify outliers
-    addna <- addna[outliers, ] # trim
-    if (nrow(addna) == 0)
-      return(data)
-    addna <- addna[, 1:3]
+    addna <- addna %>%
+      mutate(dy=abs(.data$.y - .data$ey), # gap between line segment and mean curve dy
+             xy=.data$dx / mad(.data$dx) + .data$dy / mad(.data$dy)) # add scaled dx and dy
+    outliers <- order(addna$xy, decreasing=TRUE)[1:trim] # identify outliers
+    addna <- addna[outliers, 1:3] # trim
     addna$.y <- NA
     data <- rbind(data, addna)
-    with(data, data[order(.id, .x), ])
+    data <- with(data, data[order(.id, .x), ]) # sort data
+    data
   }
 
   crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
     x <- xseq(x, ns) - model$xoffset
-    . <- tibble::tibble(
-      .y=yfun(predict(model$ns, tibble::tibble(x))),
+    . <- tibble(
+      .y=yfun(predict(model$ns, tibble(x))),
       .x=xfun(x + model$xoffset)
     )
     .[, c('.x', '.y')]
