@@ -4,7 +4,8 @@
 \alias{summary.sitar}
 \title{Create summary of SITAR model}
 \usage{
-\method{summary}{sitar}(object, adjustSigma = TRUE, verbose = FALSE, ...)
+\method{summary}{sitar}(object, adjustSigma = TRUE, verbose = FALSE,
+  ...)
 }
 \arguments{
 \item{object}{object inheriting from class \code{sitar}.}

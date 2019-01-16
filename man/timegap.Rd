@@ -4,8 +4,6 @@
 \alias{timegap}
 \alias{timegap.id}
 \alias{diffid}
-\alias{timegap.id}
-\alias{diffid}
 \title{Select equally spaced ages from a vector of ages}
 \usage{
 timegap(age, gap, tol = 0.1 * gap, multiple = FALSE)

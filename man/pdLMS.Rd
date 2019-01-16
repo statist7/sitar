@@ -4,8 +4,8 @@
 \alias{pdLMS}
 \title{Plot frequency distributions(s) for given L, M and S values in LMS method}
 \usage{
-pdLMS(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5, N = 1000,
-  plot = TRUE, ...)
+pdLMS(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
+  N = 1000, plot = TRUE, ...)
 }
 \arguments{
 \item{L}{vector of Box-Cox transformation (lambda) values, L in the LMS

@@ -3,7 +3,6 @@
 \name{codeplot}
 \alias{codeplot}
 \alias{zapvelout}
-\alias{zapvelout}
 \title{Plot and zap velocity outliers in growth curves}
 \usage{
 codeplot(outliers, icode = 4, ..., print = TRUE)

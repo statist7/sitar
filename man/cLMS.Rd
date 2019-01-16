@@ -3,7 +3,6 @@
 \name{cLMS}
 \alias{cLMS}
 \alias{zLMS}
-\alias{zLMS}
 \title{LMS conversion to and from z-scores}
 \usage{
 cLMS(z, L = 1, M, S)

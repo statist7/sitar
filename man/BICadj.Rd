@@ -5,9 +5,6 @@
 \alias{AICadj}
 \alias{varexp}
 \alias{getL}
-\alias{AICadj}
-\alias{varexp}
-\alias{getL}
 \title{Ways to compare SITAR models for fit}
 \usage{
 BICadj(..., pattern = NULL)

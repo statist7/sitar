@@ -17,6 +17,7 @@ Description: Functions for fitting and plotting SITAR (Super Imposition by
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
+Encoding: UTF-8
 Depends:
     R (>= 3.0.0),
     nlme,
@@ -30,7 +31,7 @@ Imports:
     rsample,
     tidyr,
     tibble
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 URL: https://github.com/statist7/sitar
 Suggests: knitr,
     rmarkdown

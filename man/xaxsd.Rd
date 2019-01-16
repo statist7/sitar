@@ -3,7 +3,6 @@
 \name{xaxsd}
 \alias{xaxsd}
 \alias{yaxsd}
-\alias{yaxsd}
 \title{Par args xaxs and yaxs option d}
 \usage{
 xaxsd(usr = par()$usr[1:2])

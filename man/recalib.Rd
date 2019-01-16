@@ -4,8 +4,8 @@
 \alias{recalib}
 \title{Recalibrate x, y data using SITAR random effects}
 \usage{
-recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model, from,
-  to)
+recalib(xc, yc, id = NULL, data, xcnew = NULL, ycnew = NULL, model,
+  from, to)
 }
 \arguments{
 \item{xc}{character vector defining column name(s) of \code{x} data to be
