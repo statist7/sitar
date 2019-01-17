@@ -281,21 +281,21 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     if (trim == 0)
       return(data)
     data <- with(data, data[order(.id, .x), ]) # sort data
-    addna <- data %>%
-      mutate(dx=c(NA, diff(.data$.x)), # age gap dx
-             .x=(.data$.x + lag(.data$.x)) / 2, # mid age
-             .y=(.data$.y + lag(.data$.y)) / 2) %>% # mid y
-      filter(.data$.id == lag(.data$.id)) # segments within id
-    addna$ey <- predict(model, addna, level=level) # mean curve value at midpoint
-    addna <- addna %>%
+    extra <- as_tibble(diff(as.matrix(data[, 1:2]))) # diff for .x and .y
+    extra$.id <- data$.id[-1] # save .id
+    did <- diff(as.integer(data$.id)) # 1+ = change of .id, 0 = .id
+    extra$dx <- extra$.x # save dx age gap
+    extra[, 1:2] <- data[-1, 1:2] - extra[, 1:2] / 2 # midpoints for .x and .y
+    extra <- extra[!did, ] # restrict to same .id
+    extra$ey <- predict(model, extra, level=level) # predicted y value at midpoint
+    extra <- extra %>%
       mutate(dy=abs(.data$.y - .data$ey), # gap between line segment and mean curve dy
              xy=.data$dx / mad(.data$dx) + .data$dy / mad(.data$dy)) # add scaled dx and dy
-    outliers <- order(addna$xy, decreasing=TRUE)[1:trim] # identify outliers
-    addna <- addna[outliers, 1:3] # trim
-    addna$.y <- NA
-    data <- rbind(data, addna)
-    data <- with(data, data[order(.id, .x), ]) # sort data
-    data
+    outliers <- order(extra$xy, decreasing=TRUE)[1:trim] # identify outliers
+    extra <- extra[outliers, 1:3] # trim
+    extra$.y <- NA
+    data <- rbind(data, extra)
+    with(data, data[order(.id, .x), ]) # sort data
   }
 
   crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
