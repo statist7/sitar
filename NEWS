@@ -1,5 +1,9 @@
 Changes in Version 1.1.1
 
+  o trim (new) option in plot.sitar to remove unsightly long lines from plots.
+
+  o For trim to work, mplot now allows rows with missing data.
+
   o apv_se (new) bootstraps standard errors for peak velocity (pv) and age at pv.
 
   o msMaxIter default in nlmeControl doubled to 100.
@@ -8,6 +12,9 @@ Changes in Version 1.1.1
 
   o Fix several bugs in plot.sitar, involving subset with predict, dashed line
     for velocity, and axis 4 etc.
+
+  o Improve predict.sitar so individual velocity curves (option V) now plot
+    correctly when y and/or t are transformed.
 
   o Fix bugs in xyadj improving the defaults for y and id, and making abc a
     data frame and adding missing columns.
