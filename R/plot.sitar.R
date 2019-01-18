@@ -137,8 +137,8 @@
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter arrange
-#' @importFrom rlang .data quo_name
+#' @importFrom dplyr mutate rename filter
+#' @importFrom rlang .data as_label
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
                        ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
@@ -206,7 +206,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
   distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # generate x values across the range to plot mean spline curve
-    dvt <- quo_name(match.call()[[1]])
+    dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
     .x <- getCovariate(model)[subset]
     .x <- xseq(.x, ns)
@@ -221,7 +221,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
 
   Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
 # generate x and id values across the range to plot spline curves
-    dvt <- quo_name(match.call()[[1]])
+    dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
     .x <- getCovariate(model)[subset]
     .id <- getGroups(model)[subset]
