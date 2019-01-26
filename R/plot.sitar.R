@@ -139,6 +139,7 @@
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr mutate rename filter
 #' @importFrom rlang .data as_label
+#' @importFrom glue glue
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, subset=NULL,
                        ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
@@ -332,6 +333,9 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
   else {
     model <- x
     data <- getData(model)
+# check data versus model
+    if (nrow(data) != model$dims$N)
+      stop(glue('lengths of data ({nrow(data)}) and model ({model$dims$N}) do not match'))
     mcall <- model$call.sitar
 #	extract list(...)
     ccall <- match.call(expand.dots=FALSE)
