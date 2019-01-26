@@ -23,14 +23,15 @@ Depends:
     nlme,
     splines
 Imports:
-    stats,
-    quantreg,
     dplyr,
-    rlang,
+    glue,
     purrr,
+    quantreg,
+    rlang,
     rsample,
-    tidyr,
-    tibble
+    stats,
+    tibble,
+    tidyr
 RoxygenNote: 6.1.1
 URL: https://github.com/statist7/sitar
 Suggests: knitr,
