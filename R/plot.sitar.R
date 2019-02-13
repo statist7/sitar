@@ -327,195 +327,193 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     do.call('legend', c(legend, list(lty=llc[, 'lty'], lwd=llc[, 'lwd'], col=llc[, 'col'])))
   }
 
-  if (nlme) {
+  if (nlme)
     do.call('plot.lme', as.list(match.call()[-1]))
-  }
-  else {
-    model <- x
-    data <- getData(model)
+  model <- x
+  data <- getData(model)
 # check data versus model
-    if (nrow(data) != model$dims$N)
-      stop(glue('lengths of data ({nrow(data)}) and model ({model$dims$N}) do not match'))
-    mcall <- model$call.sitar
+  if (nrow(data) != model$dims$N)
+    stop(glue('lengths of data ({nrow(data)}) and model ({model$dims$N}) do not match'))
+  mcall <- model$call.sitar
 #	extract list(...)
-    ccall <- match.call(expand.dots=FALSE)
+  ccall <- match.call(expand.dots=FALSE)
 #	subset to plot model
-    subset <- eval(ccall$subset, data, parent.frame())
-    if (is.null(subset))
-      subset <- rep_len(TRUE, model$dims$N)
+  subset <- eval(ccall$subset, data, parent.frame())
+  if (is.null(subset))
+    subset <- rep_len(TRUE, model$dims$N)
 # ... args
-    dots <- ccall$...
-    ARG <- if (!is.null(dots))
-      lapply(as.list(dots), eval, data[subset, ], parent.frame())
+  dots <- ccall$...
+  ARG <- if (!is.null(dots))
+    lapply(as.list(dots), eval, data[subset, ], parent.frame())
 
-    options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
-    optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
-    optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
-    optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
-    optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
-    opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
-    if (length(opts) == 0)
-      stop('option(s) not recognised')
-    dv <- range(optaxis[opts])
-    dv <- min(dv) + diff(dv) * 2 # 1=d, 2=v, 3=dv
+  options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
+  optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
+  optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
+  optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
+  optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+  opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
+  if (length(opts) == 0)
+    stop('option(s) not recognised')
+  dv <- range(optaxis[opts])
+  dv <- min(dv) + diff(dv) * 2 # 1=d, 2=v, 3=dv
 
 # create missing labels
-    if (missing(labels))
-      labels <- vector('character', 3)
-    else if (length(labels) < 3)
-      labels <- c(labels, '', '')
-    if (labels[3] == '' && labels[2] != '')
-      labels[3] <- paste(labels[2], 'velocity')
+  if (missing(labels))
+    labels <- vector('character', 3)
+  else if (length(labels) < 3)
+    labels <- c(labels, '', '')
+  if (labels[3] == '' && labels[2] != '')
+    labels[3] <- paste(labels[2], 'velocity')
 
 #	if xlab not specified replace with label or x name (depending on xfun)
-    if (is.null(xlab)) {
-      if (labels[1] == '') {
-        xlab <- if (!is.null(xfun))
-          paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
-        else
-          attr(ifun(mcall$x), 'varname')
-        labels[1] <- xlab
-      }
+  if (is.null(xlab)) {
+    if (labels[1] == '') {
+      xlab <- if (!is.null(xfun))
+        paste0('(', deparse(substitute(xfun)), ')(', deparse(mcall$x), ")")
       else
-        xlab <- labels[1]
+        attr(ifun(mcall$x), 'varname')
+      labels[1] <- xlab
     }
+    else
+      xlab <- labels[1]
+  }
 
 #	if ylab not specified replace with label or y name (depending on yfun)
-    if (is.null(ylab)) {
-      if (labels[2] == '') {
-        ylab <- if (!is.null(yfun))
-          paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
-        else
-          attr(ifun(mcall$y), 'varname')
-        labels[2] <- ylab
-      }
+  if (is.null(ylab)) {
+    if (labels[2] == '') {
+      ylab <- if (!is.null(yfun))
+        paste0('(', deparse(substitute(yfun)), ')(', deparse(mcall$y), ")")
       else
-        ylab <- labels[2]
+        attr(ifun(mcall$y), 'varname')
+      labels[2] <- ylab
     }
+    else
+      ylab <- labels[2]
+  }
 
 #	if vlab not specified replace with label or v name
-    if (is.null(vlab)) {
-      if (labels[3] == '')
-        labels[3] <- paste(labels[2], 'velocity')
-      vlab <- labels[3]
-    }
+  if (is.null(vlab)) {
+    if (labels[3] == '')
+      labels[3] <- paste(labels[2], 'velocity')
+    vlab <- labels[3]
+  }
 
 # derive xfun and yfun
-    if (is.null(xfun))
-      xfun <- ifun(mcall$x)
-    if (is.null(yfun))
-      yfun <- ifun(mcall$y)
+  if (is.null(xfun))
+    xfun <- ifun(mcall$x)
+  if (is.null(yfun))
+    yfun <- ifun(mcall$y)
 
 # generate list of data frames for selected options
-    data <- lapply(opts, function(i) {
-      if (optsmooth[[i]])
-        do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns))
-      else
-        do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, trim=trim))
-    })
+  data <- lapply(opts, function(i) {
+    if (optsmooth[[i]])
+      do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns))
+    else
+      do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, trim=trim))
+  })
 
 # return data?
-    if (returndata){
-      if (length(data) == 1)
-        data <- data[[1]]
-      else
-        names(data) <- options[opts]
-      return(invisible(data))
-    }
+  if (returndata){
+    if (length(data) == 1)
+      data <- data[[1]]
+    else
+      names(data) <- options[opts]
+    return(invisible(data))
+  }
 
 # extract axis ranges and plot axes
-    if (!add) {
-      if (any(is.na(xlim)))
-        xlim <- range(vapply(data, function(z) range(z$.x, na.rm=TRUE), numeric(2)))
-      if (any(is.na(ylim)) && any(optaxis[opts] == 1))
-        ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
-      if (any(is.na(vlim)) && any(optaxis[opts] == 2))
-        vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
-      xy <- do.call('plotaxes',
-                    c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
-                            xlim=xlim, ylim=ylim, vlim=vlim), ARG))
+  if (!add) {
+    if (any(is.na(xlim)))
+      xlim <- range(vapply(data, function(z) range(z$.x, na.rm=TRUE), numeric(2)))
+    if (any(is.na(ylim)) && any(optaxis[opts] == 1))
+      ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
+    if (any(is.na(vlim)) && any(optaxis[opts] == 2))
+      vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
+    xy <- do.call('plotaxes',
+                  c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
+                          xlim=xlim, ylim=ylim, vlim=vlim), ARG))
 # add legend
-      if (dv == 3 && !is.null(legend)) {
-        legend[['legend']] <- labels[2:3]
-        dolegend(ARG[names(ARG) != 'y2par'], ARG$y2par, legend)
-      }
+    if (dv == 3 && !is.null(legend)) {
+      legend[['legend']] <- labels[2:3]
+      dolegend(ARG[names(ARG) != 'y2par'], ARG$y2par, legend)
     }
+  }
 # else retrieve axis ranges
-    else {
-      xy <- list()
-      xy$usr <- par('usr')
-      xlim <- xaxsd()
-      ylim <- yaxsd()
-      if (exists('.par.usr2') && !is.null(.par.usr2)) {
-        dv <- 3
-        vlim <- yaxsd(.par.usr2[3:4])
-        xy$usr2 <- .par.usr2
-      } else if (dv == 3)
-          stop('right y axis not set up')
-    }
+  else {
+    xy <- list()
+    xy$usr <- par('usr')
+    xlim <- xaxsd()
+    ylim <- yaxsd()
+    if (exists('.par.usr2') && !is.null(.par.usr2)) {
+      dv <- 3
+      vlim <- yaxsd(.par.usr2[3:4])
+      xy$usr2 <- .par.usr2
+    } else if (dv == 3)
+        stop('right y axis not set up')
+  }
 
 # plot curves
-    lapply(1:length(opts), function(i) {
-      opt <- opts[[i]]
-      . <- data[[i]]
-      ARG0 <- ARG
+  lapply(1:length(opts), function(i) {
+    opt <- opts[[i]]
+    . <- data[[i]]
+    ARG0 <- ARG
 # data frame extended, extend ARG
-      if (optmult[opt] && nrow(.) != model$dims$N && !is.null(dots)) {
-        names(.) <- unlist(as.list(mcall[2:(length(.) + 1)]))
-        ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
-      }
+    if (optmult[opt] && nrow(.) != model$dims$N && !is.null(dots)) {
+      names(.) <- unlist(as.list(mcall[2:(length(.) + 1)]))
+      ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
+    }
 # select distance or velocity axis
-      if (optaxis[opt] == 1 || dv < 3) {
-        fun <- I
-        ARG0 <- ARG0[names(ARG0) != 'y2par']
-      } else {
-        fun <- v2d(ylim, vlim)
-        ARG0 <- ARG0[['y2par']]
-        if (is.null(ARG0[['lty']]))
-          ARG0[['lty']] <- 2
-      }
-      if (optmult[opt])
-        do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
-      else
-        xy <- do.call("lines", c(list(x=.[[1]], y=fun(.[[2]])), ARG0))
-    })
+    if (optaxis[opt] == 1 || dv < 3) {
+      fun <- I
+      ARG0 <- ARG0[names(ARG0) != 'y2par']
+    } else {
+      fun <- v2d(ylim, vlim)
+      ARG0 <- ARG0[['y2par']]
+      if (is.null(ARG0[['lty']]))
+        ARG0[['lty']] <- 2
+    }
+    if (optmult[opt])
+      do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
+    else
+      xy <- do.call("lines", c(list(x=.[[1]], y=fun(.[[2]])), ARG0))
+  })
 
 # save and print vertical line(s) at age of peak velocity
-    if (apv) {
+  if (apv) {
 # single curve
-        xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns),
-                       setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
-      print(signif(xy$apv, 4))
-      if (any(optmult[opts])) {
+      xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns),
+                     setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
+    print(signif(xy$apv, 4))
+    if (any(optmult[opts])) {
 # multiple curves
-        ids <- levels(factor(getGroups(model)[subset]))
-        if (body(xfun) == as.name('x') &&
-            body(yfun) == as.name('x')) {
+      ids <- levels(factor(getGroups(model)[subset]))
+      if (body(xfun) == as.name('x') &&
+          body(yfun) == as.name('x')) {
 # x and y untransformed
-          apv1 <- xyadj(model, xy$apv[1], y=0, id=ids, tomean=FALSE)$x # subject-specific APVs
-          pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
-          xy$apv <- data.frame(apv=apv1, pv=pv1)
-        }
-# xfun or yfun set
-        else {
-          xt <- xseq(getCovariate(model)[subset])
-          newdata <- data.frame(.x=xt)
-          if (!is.null(abc))
-            ids <- factor(1, labels=ids[[1]])
-          . <- vapply(ids, function(z) {
-            newdata$.id <- z
-            vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
-            getPeakTrough(xfun(xt), vt)
-          }, numeric(2))
-          xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
-        }
+        apv1 <- xyadj(model, xy$apv[1], y=0, id=ids, tomean=FALSE)$x # subject-specific APVs
+        pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
+        xy$apv <- data.frame(apv=apv1, pv=pv1)
       }
-# plot apv
-      do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
+# xfun or yfun set
+      else {
+        xt <- xseq(getCovariate(model)[subset])
+        newdata <- data.frame(.x=xt)
+        if (!is.null(abc))
+          ids <- factor(1, labels=ids[[1]])
+        . <- vapply(ids, function(z) {
+          newdata$.id <- z
+          vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
+          getPeakTrough(xfun(xt), vt)
+        }, numeric(2))
+        xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
+      }
     }
-# return xy
-    invisible(xy)
+# plot apv
+    do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
   }
+# return xy
+  invisible(xy)
+
 }
 #############################
 #

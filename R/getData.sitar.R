@@ -17,15 +17,12 @@
     getData(object)
   }
 
-
 #' @rdname getData.sitar
 #' @method getCovariate sitar
 #' @export
-  getCovariate.sitar <- function(object, ...)
-  {
+  getCovariate.sitar <- function(object, ...) {
     eval(object$call.sitar$x, getData(object))
   }
-
 
 #' @rdname getData.sitar
 #' @method getVarCov sitar
