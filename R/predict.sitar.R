@@ -116,46 +116,41 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
+# check if newdata subsetted (from plot)
+    subset <- attr(newdata, 'subset')
+    subsetted <- !is.null(subset)
+    if (subsetted) {
+      gd <- update(object, returndata=TRUE)
+      if (length(subset) != nrow(gd))
+        stop('subset wrong length for data')
+      gd <- gd[subset, ]
+      if (!is.null(abc))
+        stop('use subset or abc but not both')
+# create abc for subset
+      re <- ranef(object)
+      abc <- apply(re[rownames(re) %in% gd$id, ], 2, mean)
+      abc <- data.frame(t(abc))
+      level <- 1
+    }
 # identify covariates needed in newdata, omitting x, fixed effects and random effects
     argnames <- names(formals(fitnlme))
     argnames <- argnames[!argnames %in% names(fixef(object))][-1]
     argnames <- argnames[!argnames %in% names(ranef(object))]
     if (length(argnames) > 0) {
-# check if newdata subsetted (from plot)
-      if (is.null(subset <- attr(newdata, 'subset'))) {
 # identify covariates in newdata other than x and id
-    		covnames <- names(newdata)
-    		covnames <- covnames[!covnames %in% c('x', 'id')]
+  		covnames <- names(newdata)
+  		covnames <- covnames[!covnames %in% c('x', '.x', 'id', '.id')]
 # set to 0 covariates not in newdata
-    		newdata[, argnames[!argnames %in% covnames]] <- 0
+  		newdata[, argnames[!argnames %in% covnames]] <- 0
+  		covnames <- covnames[covnames %in% argnames]
 # centre each needed covariate in newdata
-    		covnames <- covnames[covnames %in% argnames]
-    		if (length(covnames) > 0) {
-    		  gd <- getData(object)
-    		  for (i in covnames) {
-# continuous variable
-    		    if (i %in% argnames)
-    		      newdata[[i]] <- newdata[[i]] - mean(gd[[i]])
-    	      else {
-# factor as instrumental variable(s)
-    	        lev <- levels(gd[[i]])
-    	        for (j in 2:length(lev)) {
-    	          k <- paste0(i, lev[j])
-    	          newdata[[k]] <- as.numeric(newdata[[i]] == lev[j]) - mean(gd[[i]] == lev[j])
-    	        }
-    	      }
-    		  }
-    		}
-      }
-      else {
-# newdata subsetted (in plot)
-        gd <- update(object, returndata=TRUE)
-        if (length(subset) == nrow(gd))
-          gd <- gd[subset, argnames, drop=FALSE]
-        else
-          stop('subset wrong length for data')
-        argnames <- unlist(lapply(gd, mean))
-        newdata <- data.frame(newdata, t(argnames))
+  		if (length(covnames) > 0) {
+  		  if (!subsetted)
+    		  gd <- update(object, returndata=TRUE)
+  		  gd <- gd[, covnames, drop=FALSE]
+        covmeans <- vapply(gd, mean, numeric(1))
+        for (i in covnames)
+	        newdata[, i] <- newdata[, i] - covmeans[i]
       }
     }
 # set class to nlme
