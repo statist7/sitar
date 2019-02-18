@@ -167,7 +167,7 @@
 # level 1 prediction
     newdata$x <- xy.id$x - xoffset
     pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
-    if (any(deriv > 0)) {
+    if (any(deriv > 0L)) {
 # VELOCITY
 # level 0 prediction
       ss0 <- smooth.spline(xfun(x), pred0)
