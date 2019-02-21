@@ -150,11 +150,11 @@ The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
 correspond to the seven plot \code{option}s defined by their last letter,
 and return the data for plotting, e.g. for use with \code{ggplot2}.
 
-The \code{trim} option allows disfiguringly long line segments to be omitted
+The \code{trim} option allows unsightly long line segments to be omitted
 from plots with options 'a' or 'u'. It ranks the line segments on the basis
 of the age gap (dx) and the distance of the midpoint of the line from the
-mean curve (dy) using the formula \code{dx/mad(dx) + dy/mad(dy)} and omits
-those with the largest values.
+mean curve (dy) using the formula \code{abs(dx)/mad(dx) + abs(dy)/mad(dy)}
+and omits those with the largest values.
 }
 \examples{
 
