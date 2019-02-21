@@ -180,6 +180,7 @@
 #	set up model elements for a, b and c
 	names(model) <- model <- letters[1:3]
 	constant <- mm.formula <- as.formula('~ 1')
+	cmm <- matrix(nrow=nrow(data), ncol=0)
 	for (l in model) {
 		if (!grepl(l, fix) && !grepl(l, random)) {
 			model[l] <- NA
@@ -199,9 +200,7 @@
 # ensure names are valid
       	colnames(mm) <- make.names(colnames(mm), unique=TRUE)
 # omit constant columns
-				mm <- mm[, apply(mm, 2, function(x) max(x) > min(x)), drop=FALSE]
-# centre columns
-				mm <- scale(mm, scale=FALSE)
+				mm <- mm[, apply(mm, 2, sd) > 0, drop=FALSE]
 			}
 			if (exists('mm')) for (i in 1:ncol(mm)) {
 				var <- colnames(mm)[i]
@@ -212,7 +211,7 @@
 				model[l] <- paste0(model[l], '+', rc, '*', var)
 				if (!var %in% pars) {
 					pars <- c(pars, var)
-					fulldata <- cbind(fulldata, mm[, i, drop=FALSE])
+					cmm <- cbind(cmm, mm[, i, drop=FALSE])
 				}
 			}
 		}
@@ -224,6 +223,12 @@
 			}
 		}
 	}
+# centre covariate columns
+	cmm <- scale(cmm, scale=FALSE)
+# combine with data
+	fulldata <- cbind(fulldata, cmm)
+# save covariate means for predict
+	attr(fulldata, 'scaled:center') <- attr(cmm, 'scaled:center')
 
 # 	if (!is.null(weights)) {
 #     if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
@@ -237,7 +242,9 @@
 # 	  }
 # 	}
 
-	if (returndata) invisible(fulldata) else {
+	if (returndata)
+	  invisible(fulldata)
+	else {
 		pars <- paste(pars, collapse=',')
 		fixed <- paste(fixed, collapse='+')
 		sscomma <- paste(ss, collapse=',')
@@ -285,12 +292,12 @@
 
 #	save fitted model
     nlme.out <- eval(parse(text=fitcode))
-#     if (exists('start.')) rm(start., inherits=TRUE)
+		class(nlme.out) <- c('sitar', class(nlme.out))
     nlme.out$fitnlme <- fitenv$fitnlme
 		nlme.out$call.sitar <- mcall
 		nlme.out$xoffset <- xoffset
 		nlme.out$ns <- spline.lm
-		if (!'sitar' %in% class(nlme.out)) class(nlme.out) <- c('sitar', class(nlme.out))
+#   if (exists('start.')) rm(start., inherits=TRUE)
 		nlme.out
 	}
 }

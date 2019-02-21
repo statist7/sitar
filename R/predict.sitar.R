@@ -116,42 +116,34 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-# check if newdata subsetted (from plot)
-    subset <- attr(newdata, 'subset')
-    subsetted <- !is.null(subset)
-    if (subsetted) {
-      gd <- update(object, returndata=TRUE)
-      if (length(subset) != nrow(gd))
-        stop('subset wrong length for data')
-      gd <- gd[subset, ]
-      if (!is.null(abc))
-        stop('use subset or abc but not both')
-# create abc for subset
-      re <- ranef(object)
-      abc <- apply(re[rownames(re) %in% gd$id, ], 2, mean)
-      abc <- data.frame(t(abc))
-      level <- 1
-    }
-# identify covariates needed in newdata, omitting x, fixed effects and random effects
+# identify covariates in model
     argnames <- names(formals(fitnlme))
     argnames <- argnames[!argnames %in% names(fixef(object))][-1]
     argnames <- argnames[!argnames %in% names(ranef(object))]
     if (length(argnames) > 0) {
-# identify covariates in newdata other than x and id
+# identify model covariates in newdata
   		covnames <- names(newdata)
-  		covnames <- covnames[!covnames %in% c('x', '.x', 'id', '.id')]
+  		covnames <- covnames[covnames %in% argnames]
 # set to 0 covariates not in newdata
   		newdata[, argnames[!argnames %in% covnames]] <- 0
-  		covnames <- covnames[covnames %in% argnames]
-# centre each needed covariate in newdata
+# centre covariates in newdata (using means from sitar)
   		if (length(covnames) > 0) {
-  		  if (!subsetted)
-    		  gd <- update(object, returndata=TRUE)
-  		  gd <- gd[, covnames, drop=FALSE]
-        covmeans <- vapply(gd, mean, numeric(1))
+		    gd <- update(object, returndata=TRUE)
+  		  covmeans <- attr(gd, 'scaled:center')
         for (i in covnames)
 	        newdata[, i] <- newdata[, i] - covmeans[i]
       }
+    }
+# check if newdata subsetted (from plot)
+    subset <- attr(newdata, 'subset')
+    if (!is.null(subset)) {
+      if (!is.null(abc))
+        stop('use subset or abc but not both')
+# create abc for subset
+      re <- ranef(object)
+      abc <- apply(re[rownames(re) %in% getGroups(object)[subset], ], 2, mean)
+      abc <- data.frame(t(abc))
+      level <- 1
     }
 # set class to nlme
     class(object) <- class(object)[-1]
