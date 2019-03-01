@@ -25,6 +25,7 @@ Changes in Version 1.1.1
   o getData.sitar now based on getData.nlme not getData.lme.
 
   o LMS2z now requires 'measure' to be character, changing example accordingly.
+    Also the specification of the sex argument has been improved and extended.
 
 Changes in Version 1.1.0
 

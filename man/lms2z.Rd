@@ -12,7 +12,8 @@ LMS2z(x, y, sex, measure, ref, toz = TRUE, LMStable = FALSE)
 \item{y}{vector or one-column matrix of either measurements or z-scores,
 depending on the value of \code{toz}.}
 
-\item{sex}{vector where males = 1 and females = 2.}
+\item{sex}{vector where 1/2 = males/females = boys/girls = TRUE/FALSE, based
+on the uppercase first character of the string.}
 
 \item{measure}{measurement name, as character string, the choice
 depending on the choice of \code{ref} (see e.g. references \code{uk90},
@@ -56,7 +57,7 @@ with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 data(who06)
 zs <- -4:4*2/3 # z-scores for centiles
 ages <- 0:12/4 # 3-month ages
-LMS2z(ages, as.matrix(zs), sex = 1, measure = 'wt', ref = who06, toz = FALSE)
+LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06, toz = FALSE)
 
 }
 \seealso{

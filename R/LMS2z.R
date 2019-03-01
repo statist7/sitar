@@ -10,7 +10,8 @@
 #' @param x vector of ages.
 #' @param y vector or one-column matrix of either measurements or z-scores,
 #' depending on the value of \code{toz}.
-#' @param sex vector where males = 1 and females = 2.
+#' @param sex vector where 1/2 = males/females = boys/girls = TRUE/FALSE, based
+#' on the uppercase first character of the string.
 #' @param measure measurement name, as character string, the choice
 #' depending on the choice of \code{ref} (see e.g. references \code{uk90},
 #' \code{who06} and \code{ukwhopt}).
@@ -43,11 +44,25 @@
 #' data(who06)
 #' zs <- -4:4*2/3 # z-scores for centiles
 #' ages <- 0:12/4 # 3-month ages
-#' LMS2z(ages, as.matrix(zs), sex = 1, measure = 'wt', ref = who06, toz = FALSE)
+#' LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06, toz = FALSE)
 #'
 #' @export LMS2z
-	LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
-	xy <- data.frame(x, sex)
+LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
+# check sex coded correctly
+  test_sex <- function(sex) {
+    if (is.numeric(sex))
+      return(sex)
+    sex <- toupper(substr(sex, 1, 1))
+    levsex <- levels(factor(sex))
+    if (length(levsex) < 2)
+      levsex <- c(levsex, '?')
+    else if (length(levsex) > 2)
+      cat('sex has >2 levels:', levsex, '\n')
+    if (levsex[1] == '2' || levsex[1] == 'F' || levsex[1:2] == c('G', '?'))
+      levsex[1:2] <- levsex[2:1]
+    return(as.integer(factor(sex, levels=levsex)))
+  }
+  xy <- data.frame(x, sex=test_sex(sex))
 	x <- xy$x
 	sex <- xy$sex
 	v <- matrix(nrow=length(x), ncol=3)
@@ -62,7 +77,7 @@
 		    with(ref[ref$sex == ix, ],
 		         spline(years, get(paste(j, measure, sep='.')),
 		                method='natural', xout=x[sexvar])$y)
-		  }, rep(0, sum(sexvar)))
+		  }, numeric(sum(sexvar)))
 		}
 	}
   cz <- do.call(ifelse(toz, 'zLMS', 'cLMS'), list(y, v[, 1], v[, 2], v[, 3]))
@@ -117,27 +132,27 @@
 #' zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 #'
 #' @export cLMS
-	cLMS <- function(z, L = 1, M, S) {
-	  L[L == 0] <- 1e-7
-	  if (is.vector(z))
-	    with(data.frame(z, L, M, S),
-	         M * (1 + L * S * z) ^ (1/L))
-	  else
-	    with(data.frame(L, M, S),
-	      M * (1 + L * outer(S, as.vector(z))) ^ (1/L))
-	}
+cLMS <- function(z, L = 1, M, S) {
+  L[L == 0] <- 1e-7
+  if (is.vector(z))
+    with(data.frame(z, L, M, S),
+         M * (1 + L * S * z) ^ (1/L))
+  else
+    with(data.frame(L, M, S),
+      M * (1 + L * outer(S, as.vector(z))) ^ (1/L))
+}
 
 #' @rdname cLMS
 #' @export
-	zLMS <- function(x, L = 1, M, S) {
-	  L[L == 0] <- 1e-7
-	  if (is.vector(x))
-	    with(data.frame(x, L, M, S),
-	      ((x/M) ^ L - 1) / L / S)
-	  else
-	    with(data.frame(L, M, S),
-	      (t(outer(as.vector(x), M, `/`)) ^ L - 1) / L / S)
-	}
+zLMS <- function(x, L = 1, M, S) {
+  L[L == 0] <- 1e-7
+  if (is.vector(x))
+    with(data.frame(x, L, M, S),
+      ((x/M) ^ L - 1) / L / S)
+  else
+    with(data.frame(L, M, S),
+      (t(outer(as.vector(x), M, `/`)) ^ L - 1) / L / S)
+}
 
 #' Express z-scores as centile character strings for plotting
 #'
@@ -159,7 +174,7 @@
 #' z2cent(qnorm(0:100/100))
 #'
 #' @export z2cent
-	z2cent <- function(z) {
+z2cent <- function(z) {
 	np <- abs(z) > qnorm(0.99)
 	ct <- round(pnorm(z) * 100, np)
 	mod10 <- ifelse(np, 0, floor(ct %% 10))
