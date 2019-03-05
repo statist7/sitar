@@ -243,63 +243,61 @@
 # 	}
 
 	if (returndata)
-	  invisible(fulldata)
-	else {
-		pars <- paste(pars, collapse=',')
-		fixed <- paste(fixed, collapse='+')
-		sscomma <- paste(ss, collapse=',')
+	  return(invisible(fulldata))
+	pars <- paste(pars, collapse=',')
+	fixed <- paste(fixed, collapse='+')
+	sscomma <- paste(ss, collapse=',')
 
 #	combine model elements
-		nsd <- paste(model['a'], '+')
-		nsf <- paste('(x', ifelse(!is.na(model['b']), paste('- (', model['b'], '))'), ')'))
-		if (!is.na(model['c'])) nsf <- paste(nsf, '* exp(', model['c'], ')')
+	nsd <- paste(model['a'], '+')
+	nsf <- paste('(x', ifelse(!is.na(model['b']), paste('- (', model['b'], '))'), ')'))
+	if (!is.na(model['c'])) nsf <- paste(nsf, '* exp(', model['c'], ')')
 
 #	code to parse
-  	fitcode <- c(
-	"fitenv <- new.env()",
-	"fitenv$fitnlme <- function($pars) {",
-	"as.vector( $nsd",
-	"(as.matrix(cbind($sscomma)) * as.matrix(ns($nsf,",
-	"knots=knots, Boundary.knots=bounds))) %*%",
-	"matrix(rep(1,df), ncol=1))",
-	"}",
-	"on.exit(detach(fitenv))",
-	"attach(fitenv)",
-	"nlme(y ~ fitnlme($pars),",
-	"fixed = $fixed ~ 1,",
-	"random = $random ~ 1 | id,",
-	"data = fulldata,",
-	"start = start, correlation = correlation,",
-	"weights = weights, subset = subset, method = method,",
-	"na.action = na.action, control = control, verbose = verbose)")
+	fitcode <- c(
+"fitenv <- new.env()",
+"fitenv$fitnlme <- function($pars) {",
+"as.vector( $nsd",
+"(as.matrix(cbind($sscomma)) * as.matrix(ns($nsf,",
+"knots=knots, Boundary.knots=bounds))) %*%",
+"matrix(rep(1,df), ncol=1))",
+"}",
+"on.exit(detach(fitenv))",
+"attach(fitenv)",
+"nlme(y ~ fitnlme($pars),",
+"fixed = $fixed ~ 1,",
+"random = $random ~ 1 | id,",
+"data = fulldata,",
+"start = start, correlation = correlation,",
+"weights = weights, subset = subset, method = method,",
+"na.action = na.action, control = control, verbose = verbose)")
 
-		for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf'))
-  		fitcode <- gsub(paste0('$', i), get(i), fitcode, fixed=TRUE)
+	for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf'))
+		fitcode <- gsub(paste0('$', i), get(i), fitcode, fixed=TRUE)
 
 #	print values
-		if (verbose) {
-			cat('\nconstructed code', fitcode, sep='\n')
-			cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
-			if (is.list(start)) {
-				cat('\nstarting values\n  fixed effects\n', start$fixed)
-				if (!is.null(start$random)) {
-					cat('\n  random effects\n')
-					print(start$random)
-				}
+	if (verbose) {
+		cat('\nconstructed code', fitcode, sep='\n')
+		cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
+		if (is.list(start)) {
+			cat('\nstarting values\n  fixed effects\n', start$fixed)
+			if (!is.null(start$random)) {
+				cat('\n  random effects\n')
+				print(start$random)
 			}
-			else cat('\nstarting values\n', start, '\n')
 		}
+		else cat('\nstarting values\n', start, '\n')
+	}
 
 #	save fitted model
-    nlme.out <- eval(parse(text=fitcode))
-		class(nlme.out) <- c('sitar', class(nlme.out))
-    nlme.out$fitnlme <- fitenv$fitnlme
-		nlme.out$call.sitar <- mcall
-		nlme.out$xoffset <- xoffset
-		nlme.out$ns <- spline.lm
+  nlme.out <- eval(parse(text=fitcode))
+	class(nlme.out) <- c('sitar', class(nlme.out))
+  nlme.out$fitnlme <- fitenv$fitnlme
+	nlme.out$call.sitar <- mcall
+	nlme.out$xoffset <- xoffset
+	nlme.out$ns <- spline.lm
 #   if (exists('start.')) rm(start., inherits=TRUE)
-		nlme.out
-	}
+	nlme.out
 }
 
 #' @rdname sitar
