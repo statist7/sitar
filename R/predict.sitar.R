@@ -116,21 +116,21 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-# identify covariates in model
+# identify covariates in model (not x or coef)
     argnames <- names(formals(fitnlme))
-    argnames <- argnames[!argnames %in% names(fixef(object))][-1]
-    argnames <- argnames[!argnames %in% names(ranef(object))]
+    argnames <- argnames[!argnames %in% names(coef(object))][-1]
     if (length(argnames) > 0) {
 # identify model covariates in newdata
   		covnames <- names(newdata)
   		covnames <- covnames[covnames %in% argnames]
 # set to 0 covariates not in newdata
-  		newdata[, argnames[!argnames %in% covnames]] <- 0
+  		notnames <- argnames[!argnames %in% covnames]
+  		newdata[, notnames] <- 0
 # centre covariates in newdata (using means from sitar)
   		if (length(covnames) > 0) {
 		    gd <- update(object, returndata=TRUE)
   		  covmeans <- attr(gd, 'scaled:center')
-        for (i in covnames)
+  		  for (i in covnames)
 	        newdata[, i] <- newdata[, i] - covmeans[i]
       }
     }
@@ -144,6 +144,9 @@
       abc <- apply(re[rownames(re) %in% getGroups(object)[subset], ], 2, mean)
       abc <- data.frame(t(abc))
       level <- 1
+# set to mean gd, covariates not in newdata
+      for (i in notnames)
+        newdata[, i] <- mean(gd[subset, i])
     }
 # set class to nlme
     class(object) <- class(object)[-1]
