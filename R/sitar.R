@@ -249,31 +249,35 @@
 	sscomma <- paste(ss, collapse=',')
 
 #	combine model elements
-	nsd <- paste(model['a'], '+')
-	nsf <- paste('(x', ifelse(!is.na(model['b']), paste('- (', model['b'], '))'), ')'))
-	if (!is.na(model['c'])) nsf <- paste(nsf, '* exp(', model['c'], ')')
+	cglue <- function(x, string) ifelse (is.na(x), '', string)
+	nsa <- cglue(model['a'], 'ma+')
+	nsb <- cglue(model['b'], '-mb')
+	nsc <- cglue(model['c'], ')*exp(mc')
+	mat <- matrix(rep(1,df), ncol=1)
 
 #	code to parse
-	fitcode <- c(
-"fitenv <- new.env()",
-"fitenv$fitnlme <- function($pars) {",
-"as.vector( $nsd",
-"(as.matrix(cbind($sscomma)) * as.matrix(ns($nsf,",
-"knots=knots, Boundary.knots=bounds))) %*%",
-"matrix(rep(1,df), ncol=1))",
-"}",
-"on.exit(detach(fitenv))",
-"attach(fitenv)",
-"nlme(y ~ fitnlme($pars),",
-"fixed = $fixed ~ 1,",
-"random = $random ~ 1 | id,",
-"data = fulldata,",
-"start = start, correlation = correlation,",
-"weights = weights, subset = subset, method = method,",
-"na.action = na.action, control = control, verbose = verbose)")
-
-	for (i in c('random', 'pars', 'fixed', 'sscomma', 'nsd', 'nsf'))
-		fitcode <- gsub(paste0('$', i), get(i), fitcode, fixed=TRUE)
+	fitcode <- glue(
+    "fitenv <- new.env()\n",
+    "fitenv$fitnlme <- function(<<pars>>) {\n",
+    "ma <- <<model['a']>>\n",
+    "mb <- <<model['b']>>\n",
+    "mc <- <<model['c']>>\n",
+    "ey <- as.vector(<<nsa>>(as.matrix(cbind(<<sscomma>>))*\n",
+    "as.matrix(ns((x<<nsb>><<nsc>>),k=knots,B=bounds)))%*%mat)\n",
+    "attr(ey, 'a') <- ma\n",
+    "attr(ey, 'b') <- mb\n",
+    "attr(ey, 'c') <- mc\n",
+    "ey}\n",
+    "on.exit(detach(fitenv))\n",
+    "attach(fitenv)\n",
+    "nlme(y ~ fitnlme(<<pars>>),",
+    "fixed = <<fixed>> ~ 1,",
+    "random = <<random>> ~ 1 | id,\n",
+    "data = fulldata,",
+    "start = start, correlation = correlation,",
+    "weights = weights, subset = subset, method = method,\n",
+    "na.action = na.action, control = control, verbose = verbose)",
+  .open = "<<", .close = ">>")
 
 #	print values
 	if (verbose) {
