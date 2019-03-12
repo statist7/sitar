@@ -141,12 +141,16 @@
         stop('use subset or abc but not both')
 # create abc for subset
       re <- ranef(object)
-      abc <- apply(re[rownames(re) %in% getGroups(object)[subset], ], 2, mean)
+      abc <- apply(re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE], 2, mean)
       abc <- data.frame(t(abc))
       level <- 1
 # set to mean gd, covariates not in newdata
-      for (i in notnames)
-        newdata[, i] <- mean(gd[subset, i])
+      if (exists('notnames') && length(notnames) > 0) {
+        if (!exists('gd'))
+          gd <- update(object, returndata=TRUE)
+        for (i in notnames)
+          newdata[, i] <- mean(gd[subset, i])
+      }
     }
 # set class to nlme
     class(object) <- class(object)[-1]
