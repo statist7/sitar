@@ -54,11 +54,11 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
       return(sex)
     sex <- toupper(substr(sex, 1, 1))
     levsex <- levels(factor(sex))
-    if (length(levsex) < 2)
+    if (length(levsex) < 2) {
       levsex <- c(levsex, '?')
-    else if (length(levsex) > 2)
+    } else if (length(levsex) > 2)
       cat('sex has >2 levels:', levsex, '\n')
-    if (levsex[1] == '2' || levsex[1] == 'F' || levsex[1:2] == c('G', '?'))
+    if (levsex[1] == '2' || levsex[1] == 'F' || identical(levsex[1:2], c('G', '?')))
       levsex[1:2] <- levsex[2:1]
     return(as.integer(factor(sex, levels=levsex)))
   }
