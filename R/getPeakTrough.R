@@ -27,8 +27,9 @@
 	getPeakTrough <- function(x, y=NULL, peak=TRUE) {
 #	returns values of x and y at peak/trough, i.e. where dy/dx=0
 	. <- xy.coords(x, y)
-	x <- .$x
-	y <- .$y
+	ox <- order(.$x)
+	x <- .$x[ox]
+	y <- .$y[ox]
   . <- ifelse(peak, -1, 1)
 	. <- c(FALSE, diff(diff(y) > 0) == ., FALSE) # find turning point(s)
 	if (any(., na.rm=TRUE)) { # tp(s) found
