@@ -27,7 +27,7 @@
 #' @param id factor of subject identifiers.
 #' @param data data frame containing variables \code{x}, \code{y} and
 #' \code{id}.
-#' @param df degrees of freedom for cubic regression spline (2 or more).
+#' @param df degrees of freedom for cubic regression spline (1 or more).
 #' @param knots vector of values for knots (default \code{df} quantiles of
 #' \code{x} distribution).
 #' @param fixed character string specifying a, b, c fixed effects (default
@@ -134,12 +134,15 @@
 	y <- eval(mcall$y, data)
 
 # get df, knots and bounds
-	if (missing(df) & missing(knots)) stop("either df or knots must be specified")
-	if (!missing(df) & !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
+	if (missing(df) && missing(knots)) stop("either df or knots must be specified")
+	if (!missing(df) && !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
 	if (missing(knots)) {
-	  if (df < 2) stop("df must be 2 or more")
-	  knots <- quantile(x, (1:(df-1))/df)
-	} else {
+	  df <- round(df)
+	  if (df < 1) stop("df must be 1 or more")
+	  knots <- if (df > 1) quantile(x, (1:(df-1))/df) else numeric(0)
+	} else if (missing(df)) {
+	  if (!identical(range(c(knots, x)), range(x))) stop("knots outside x range")
+	  knots <- knots[order(knots)]
 	  df <- length(knots) + 1
 	}
 	if (nrow(data) <= df) stop("too few data to fit spline curve")
