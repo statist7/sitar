@@ -24,7 +24,7 @@ sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c",
 \item{data}{data frame containing variables \code{x}, \code{y} and
 \code{id}.}
 
-\item{df}{degrees of freedom for cubic regression spline (2 or more).}
+\item{df}{degrees of freedom for cubic regression spline (1 or more).}
 
 \item{knots}{vector of values for knots (default \code{df} quantiles of
 \code{x} distribution).}
