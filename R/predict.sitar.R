@@ -196,7 +196,7 @@
                 predict(ss0, xorig, deriv=max(deriv))$y
             })
           })
-          vel <- do.call('c', vel)
+          vel <- do.call('c', as.list(vel))
         }
         pred <- vel
       }
