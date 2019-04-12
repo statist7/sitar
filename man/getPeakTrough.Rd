@@ -2,9 +2,15 @@
 % Please edit documentation in R/getPeakTrough.R
 \name{getPeakTrough}
 \alias{getPeakTrough}
-\title{Identify peaks and troughs of curve}
+\alias{getPeak}
+\alias{getTrough}
+\title{Identify peak or trough of curve}
 \usage{
 getPeakTrough(x, y = NULL, peak = TRUE)
+
+getPeak(x, y = NULL, peak = TRUE)
+
+getTrough(x, y = NULL, peak = FALSE)
 }
 \arguments{
 \item{x}{vector.}
@@ -19,22 +25,23 @@ at the peak or trough. If no peak/trough is identified \code{x} and  \code{y}
 are set to NA.
 }
 \description{
-Given vectors \code{x} and  \code{y}, returns their values at the peak or
-trough of the curve, where dy/dx = 0.
+Given vectors \code{x} and  \code{y}, returns their values at the (highest)
+peak or (lowest) trough of the curve \code{y ~ x}, where \code{Dy} is zero and
+\code{D2y} is negative or positive respectively.
+}
+\details{
+Note that turning points where the curvature is close to zero (and the curve
+close to linear) are ignored.
 }
 \examples{
 ## create mean height velocity curve
 data(heights)
 m1 <- sitar(age, height, id, heights, 4)
-x <- getCovariate(m1)
-y <- fitted(m1, level=0)
-y <- predict(smooth.spline(x, y), x, deriv=1)$y
-
+xy <- plot_v(m1)
 ## and plot it
-. <- order(x)
-plot(y[.] ~ x[.], type='l', xlab='age', ylab='height')
-points(t(getPeakTrough(x, y)), pch=17)
-points(t(getPeakTrough(x, y, peak=FALSE)), pch=25)
+plot(xy, type='l', xlab='age', ylab='height velocity')
+points(t(getPeak(xy)), pch=17)
+points(t(getTrough(xy)), pch=25, bg=1)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}

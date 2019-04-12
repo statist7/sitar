@@ -1,3 +1,8 @@
+Changes in Version 1.1.2
+
+  o getPeakTrough more reliably identifies peaks and troughs, and the methods
+    getPeak and getTrough are added.
+
 Changes in Version 1.1.1
 
   o trim (new) option in plot.sitar to remove unsightly long lines from plots.
