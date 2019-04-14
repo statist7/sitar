@@ -6,11 +6,11 @@
 \alias{getTrough}
 \title{Identify peak or trough of curve}
 \usage{
-getPeakTrough(x, y = NULL, peak = TRUE)
+getPeakTrough(x, y = NULL, peak = TRUE, use = "value")
 
-getPeak(x, y = NULL, peak = TRUE)
+getPeak(x, y = NULL, peak = TRUE, use = "value")
 
-getTrough(x, y = NULL, peak = FALSE)
+getTrough(x, y = NULL, peak = FALSE, use = "value")
 }
 \arguments{
 \item{x}{vector.}
@@ -18,30 +18,34 @@ getTrough(x, y = NULL, peak = FALSE)
 \item{y}{vector.}
 
 \item{peak}{logical determining whether peak or trough is returned.}
+
+\item{use}{character string defining the criterion to use - "value"
+(default) or "curvature".}
 }
 \value{
-A length-2 vector containing the values of \code{x} and  \code{y}
-at the peak or trough. If no peak/trough is identified \code{x} and  \code{y}
-are set to NA.
+A length-2 vector containing the values of \code{x} and \code{y} at
+the peak or trough, defined as the maximum/minimum value or minimum/maximum
+curvature, depending on \code{use}. If no peak/trough is identified NA's
+are returned.
 }
 \description{
 Given vectors \code{x} and  \code{y}, returns their values at the (highest)
-peak or (lowest) trough of the curve \code{y ~ x}, where \code{Dy} is zero and
-\code{D2y} is negative or positive respectively.
-}
-\details{
-Note that turning points where the curvature is close to zero (and the curve
-close to linear) are ignored.
+peak or (lowest) trough of the smooth curve \code{y ~ x} (typically a fitted
+cubic spline curve), where \code{Dy} is zero and \code{D2y} is negative or
+positive respectively.
 }
 \examples{
 ## create mean height velocity curve
 data(heights)
 m1 <- sitar(age, height, id, heights, 4)
+## plot it
+plot(m1, 'v')
+## mark peak and trough
 xy <- plot_v(m1)
-## and plot it
-plot(xy, type='l', xlab='age', ylab='height velocity')
-points(t(getPeak(xy)), pch=17)
-points(t(getTrough(xy)), pch=25, bg=1)
+points(t(getPeak(xy)), las=1, pch=17)
+points(t(getTrough(xy)), pch=25, col=2, bg=2)
+## wrong trough - use curvature criterion instead
+points(t(getTrough(xy, use='curvature')), pch=25, bg=1)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
