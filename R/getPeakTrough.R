@@ -55,8 +55,8 @@
 	x <- x[region]
 	y <- y[region]
 	curve <- lm(y ~ poly(x, 2, raw=TRUE)) # quadratic in x
-	x <- - curve$coef[2] / curve$coef[3] / 2 # x at tp
-	y <- predict(curve, data.frame(x=x)) # y at tp
+	x <- - curve$coef[[2]] / curve$coef[[3]] / 2 # x at tp
+	y <- unname(predict(curve, data.frame(x=x))) # y at tp
 	return(c(x=x, y=y))
 	}
 #' @rdname getPeakTrough
