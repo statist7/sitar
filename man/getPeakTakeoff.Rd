@@ -24,21 +24,23 @@ A length-2 vector containing the values of \code{x} and \code{y} at
 the peak or takeoff. If no peak/takeoff is identified NA's are returned.
 }
 \description{
-Given vectors \code{x} and  \code{y}, returns their values at the (highest)
+Given vectors \code{x} and \code{y}, returns their values at the (highest)
 peak or (lowest) takeoff point of the smooth (e.g. cubic spline) velocity
-curve \code{y ~ x}, where \code{Dy} is zero and \code{D2y} is
-negative or positive respectively. The takeoff point is required to occur
-before the peak.
+curve \code{y ~ x}.
+}
+\details{
+The takeoff point is defined as the lowest velocity before the peak, so if
+the curve has no peak there can be no takeoff.
 }
 \examples{
 ## create mean height velocity curve
 data(heights)
 m1 <- sitar(age, height, id, heights, 4)
-## plot it
+## plot velocity curve
 plot(m1, 'v')
 ## mark peak and takeoff
 xy <- plot_v(m1)
-points(t(getPeak(xy)), las=1, pch=17)
+points(t(getPeak(xy)), pch=17)
 points(t(getTakeoff(xy)), pch=25, col=2, bg=2)
 }
 \author{
