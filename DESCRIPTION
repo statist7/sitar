@@ -21,8 +21,7 @@ License: GPL (>= 2)
 URL: https://github.com/statist7/sitar
 Depends:
     nlme,
-    R (>= 3.0.0),
-    splines
+    R (>= 3.0.0)
 Imports:
     dplyr,
     glue,
