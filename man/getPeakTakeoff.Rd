@@ -8,9 +8,9 @@
 \usage{
 getPeakTakeoff(x, y = NULL, peak = TRUE)
 
-getPeak(x, y = NULL, peak = TRUE, use = "value")
+getPeak(x, y = NULL, peak = TRUE)
 
-getTakeoff(x, y = NULL, peak = FALSE, use = "value")
+getTakeoff(x, y = NULL, peak = FALSE)
 }
 \arguments{
 \item{x}{vector.}

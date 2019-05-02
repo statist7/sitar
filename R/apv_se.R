@@ -56,8 +56,7 @@ apv_se <- function(object,
       opt = 'v',
       returndata = TRUE
     ), edots))
-  peak <- getP
-  eak(vel)
+  peak <- getPeak(vel)
 
   run_sitar <-
     quote(update(
