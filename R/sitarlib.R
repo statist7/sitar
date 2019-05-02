@@ -100,7 +100,7 @@
     x <- getCovariate(object)
     y <- fitted(object, level=0)
     y <- predict(smooth.spline(unique(cbind(x, y))), x, deriv=1)$y
-    object$apv <- getPeakTrough(x, y)
+    object$apv <- getPeak(x, y)
     object
 }
 

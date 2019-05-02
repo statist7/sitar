@@ -482,7 +482,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
   if (apv) {
 # single curve
       xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns),
-                     setNames(getPeakTrough(.x, .y), c('apv', 'pv')))
+                     setNames(getPeak(.x, .y), c('apv', 'pv')))
     print(signif(xy$apv, 4))
     if (any(optmult[opts])) {
 # multiple curves
@@ -503,7 +503,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
         . <- vapply(ids, function(z) {
           newdata$.id <- z
           vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
-          getPeakTrough(xfun(xt), vt)
+          getPeak(xfun(xt), vt)
         }, numeric(2))
         xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
       }

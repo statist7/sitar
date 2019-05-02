@@ -104,207 +104,269 @@
 #' ##  both a (size) and b (tempo) are positively associated with age at menarche
 #' amen <- abs(heights$men)
 #' (m2 <- update(m1, a.form=~amen, b.form=~amen, c.form=~amen))
-#' @import nlme splines
+#' @import nlme
+#' @importFrom splines ns
 #' @importFrom stats AIC BIC as.formula coef cor fitted lag lm logLik
 #' mad model.frame model.matrix na.fail na.omit pnorm predict qnorm quantile
 #' residuals sd setNames smooth.spline spline update update.formula
 #' @export sitar
-	sitar <- function(x, y, id, data, df, knots, fixed=random, random='a+b+c',
-	                  a.formula=~1, b.formula=~1, c.formula=~1, bounds=0.04, start, xoffset='mean', bstart=xoffset,
-	                  returndata=FALSE, verbose=FALSE, correlation=NULL, weights=NULL, subset=NULL, method='ML',
-	                  na.action=na.fail, control = nlmeControl(msMaxIter=100, returnObject=TRUE))
-{
-	b.origin <- function(b) {
-		if (b == 'mean') return(mean(x))
-		if (b == 'apv') {
-			spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-			return(getPeakTrough(x, predict(smooth.spline(x, fitted(spline.lm)), x, deriv=1)$y)[1])
-		}
-		if (!is.numeric(b)) stop('must be "mean" or "apv" or numeric')
-		b
-	}
+sitar <-
+  function(x,
+           y,
+           id,
+           data,
+           df,
+           knots,
+           fixed = random,
+           random = 'a+b+c',
+           a.formula =  ~ 1,
+           b.formula =  ~ 1,
+           c.formula =  ~ 1,
+           bounds = 0.04,
+           start,
+           xoffset = 'mean',
+           bstart = xoffset,
+           returndata = FALSE,
+           verbose = FALSE,
+           correlation = NULL,
+           weights = NULL,
+           subset = NULL,
+           method = 'ML',
+           na.action = na.fail,
+           control = nlmeControl(msMaxIter = 100, returnObject = TRUE))
+  {
+    b.origin <- function(b) {
+      if (b == 'mean')
+        return(mean(x))
+      if (b == 'apv') {
+        spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+        return(getPeak(x, predict(
+          smooth.spline(x, fitted(spline.lm)), x, deriv = 1
+        )$y)[1])
+      }
+      if (!is.numeric(b))
+        stop('must be "mean" or "apv" or numeric')
+      b
+    }
 
-# get data
-	mcall <- match.call()
-	data <- eval(mcall$data, parent.frame())
-	subset <- eval(mcall$subset, data)
-	if (!is.null(subset))
-	  data <- data[subset, ]
-	x <- eval(mcall$x, data)
-	y <- eval(mcall$y, data)
-
-# get df, knots and bounds
-	if (missing(df) && missing(knots)) stop("either df or knots must be specified")
-	if (!missing(df) && !missing(knots)) cat("both df and knots specified - df redefined from knots\n")
-	if (missing(knots)) {
-	  df <- round(df)
-	  if (df < 1) stop("df must be 1 or more")
-	  knots <- if (df > 1) quantile(x, (1:(df-1))/df) else numeric(0)
-	} else if (missing(df)) {
-	  if (!identical(range(c(knots, x)), range(x))) stop("knots outside x range")
-	  knots <- knots[order(knots)]
-	  df <- length(knots) + 1
-	}
-	if (nrow(data) <= df) stop("too few data to fit spline curve")
-	if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
-	else if (length(bounds) != 2) stop("bounds should be length 1 or 2")
-
-	xoffset <- b.origin(xoffset)
-	bstart <- b.origin(bstart) - xoffset
-	x <- x - xoffset
-	knots <- knots - xoffset
-	bounds <- bounds - xoffset
-
-# get spline start values
-  spline.lm <- lm(y ~ ns(x, knots=knots, Bound=bounds))
-
-#	if start missing get start values for ss and a
-  if (nostart <- missing(start)) start <- coef(spline.lm)[c(2:(df+1), 1)]
-
-#	force fixed effect for a
-	fix <- fixed
-	if (!grepl('a', fix)) fix <- paste('a', fix, sep='+')
-
-# set up args for fitnlme
-	fixed <- ss <- paste0('s', 1:df)
-	pars <- c('x', ss)
-
-# if subsetted restore data
-  if (!is.null(subset)) {
+    # get data
+    mcall <- match.call()
     data <- eval(mcall$data, parent.frame())
-    x <- eval(mcall$x, data) - xoffset
+    subset <- eval(mcall$subset, data)
+    if (!is.null(subset))
+      data <- data[subset,]
+    x <- eval(mcall$x, data)
     y <- eval(mcall$y, data)
-  } else {
-    subset <- 1:length(x)
+
+    # get df, knots and bounds
+    if (missing(df) &&
+        missing(knots))
+      stop("either df or knots must be specified")
+    if (!missing(df) &&
+        !missing(knots))
+      cat("both df and knots specified - df redefined from knots\n")
+    if (missing(knots)) {
+      df <- round(df)
+      if (df < 1)
+        stop("df must be 1 or more")
+      knots <- if (df > 1)
+        quantile(x, (1:(df - 1)) / df)
+      else
+        numeric(0)
+    } else if (missing(df)) {
+      if (!identical(range(c(knots, x)), range(x)))
+        stop("knots outside x range")
+      knots <- knots[order(knots)]
+      df <- length(knots) + 1
+    }
+    if (nrow(data) <= df)
+      stop("too few data to fit spline curve")
+    if (length(bounds) == 1)
+      bounds <- range(x) + abs(bounds) * c(-1, 1) * diff(range(x))
+    else if (length(bounds) != 2)
+      stop("bounds should be length 1 or 2")
+
+    xoffset <- b.origin(xoffset)
+    bstart <- b.origin(bstart) - xoffset
+    x <- x - xoffset
+    knots <- knots - xoffset
+    bounds <- bounds - xoffset
+
+    # get spline start values
+    spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+
+    #	if start missing get start values for ss and a
+    if (nostart <-
+        missing(start))
+      start <- coef(spline.lm)[c(2:(df + 1), 1)]
+
+    #	force fixed effect for a
+    fix <- fixed
+    if (!grepl('a', fix))
+      fix <- paste('a', fix, sep = '+')
+
+    # set up args for fitnlme
+    fixed <- ss <- paste0('s', 1:df)
+    pars <- c('x', ss)
+
+    # if subsetted restore data
+    if (!is.null(subset)) {
+      data <- eval(mcall$data, parent.frame())
+      x <- eval(mcall$x, data) - xoffset
+      y <- eval(mcall$y, data)
+    } else {
+      subset <- 1:length(x)
+    }
+    id <- eval(mcall$id, data)
+    fulldata <- data.frame(x, y, id, subset)
+
+    #	set up model elements for a, b and c
+    names(model) <- model <- letters[1:3]
+    constant <- mm.formula <- as.formula('~ 1')
+    cmm <- matrix(nrow = nrow(data), ncol = 0)
+    for (l in model) {
+      if (!grepl(l, fix) && !grepl(l, random)) {
+        model[l] <- NA
+        next
+      }
+      pars <- c(pars, l)
+      formula <- get(paste(l, 'formula', sep = '.'))
+      if (formula == as.formula('~ -1') ||
+          formula == as.formula('~ 1-1') || !grepl(l, fix))
+        next
+      if (formula == constant)
+        mm.intercept <- TRUE
+      else {
+        if (formula != mm.formula) {
+          mm <- model.matrix(formula, data)
+          if (nrow(mm) < length(y))
+            stop('Missing values in data')
+          mm.formula <- formula
+          mm.intercept <- colnames(mm)[1] == '(Intercept)'
+          # ensure names are valid
+          colnames(mm) <- make.names(colnames(mm), unique = TRUE)
+          # omit constant columns
+          mm <- mm[, apply(mm, 2, sd) > 0, drop = FALSE]
+        }
+        if (exists('mm'))
+          for (i in 1:ncol(mm)) {
+            var <- colnames(mm)[i]
+            rc <- paste(l, var, sep = '.')
+            pars <- c(pars, rc)
+            fixed <- c(fixed, rc)
+            if (nostart)
+              start <- c(start, 0)
+            model[l] <- paste0(model[l], '+', rc, '*', var)
+            if (!var %in% pars) {
+              pars <- c(pars, var)
+              cmm <- cbind(cmm, mm[, i, drop = FALSE])
+            }
+          }
+      }
+      if (mm.intercept) {
+        fixed <- c(fixed, l)
+        if (nostart) {
+          if (l == 'b')
+            start <- c(start, bstart)
+          else if (l == 'c')
+            start <- c(start, 0)
+        }
+      }
+    }
+    # centre covariate columns
+    cmm <- scale(cmm, scale = FALSE)
+    # combine with data
+    fulldata <- cbind(fulldata, cmm)
+    # save covariate means for predict
+    attr(fulldata, 'scaled:center') <- attr(cmm, 'scaled:center')
+
+    # 	if (!is.null(weights)) {
+    #     if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
+    #       else form <- attr(weights, 'formula')
+    #     if (!is.null(form)) {
+    #       wt <- as.data.frame(model.frame(form, data))
+    #       wt.names <- names(wt)[!names(wt) %in% names(fulldata)]
+    #       wt <- as.data.frame(wt[, wt.names])
+    #       names(wt) <- wt.names
+    #       fulldata <- cbind(fulldata, wt)
+    # 	  }
+    # 	}
+
+    if (returndata)
+      return(invisible(fulldata))
+    pars <- paste(pars, collapse = ',')
+    fixed <- paste(fixed, collapse = '+')
+    sscomma <- paste(ss, collapse = ',')
+
+    #	combine model elements
+    cglue <- function(x, string)
+      ifelse (is.na(x), '', string)
+    nsa <- cglue(model['a'], 'ma+')
+    nsb <- cglue(model['b'], '-mb')
+    nsc <- cglue(model['c'], ')*exp(mc')
+    mat <- matrix(rep(1, df), ncol = 1)
+
+    #	code to parse
+    fitcode <- glue(
+      "fitenv <- new.env()\n",
+      "fitenv$fitnlme <- function(<<pars>>) {\n",
+      "ma <- <<model['a']>>\n",
+      "mb <- <<model['b']>>\n",
+      "mc <- <<model['c']>>\n",
+      "ex <- (x<<nsb>><<nsc>>)\n",
+      "ey <- <<nsa>>drop((cbind(<<sscomma>>)*ns(ex,k=knots,B=bounds))%*%mat)\n",
+      "attr(ey, 'ex') <- ex\n",
+      "ey\n",
+      "}\n",
+      "on.exit(detach(fitenv))\n",
+      "attach(fitenv)\n",
+      "nlme(y ~ fitnlme(<<pars>>),",
+      "fixed = <<fixed>> ~ 1,",
+      "random = <<random>> ~ 1 | id,\n",
+      "data = fulldata,",
+      "start = start, correlation = correlation,",
+      "weights = weights, subset = subset, method = method,\n",
+      "na.action = na.action, control = control, verbose = verbose)",
+      .open = "<<",
+      .close = ">>"
+    )
+
+    #	print values
+    if (verbose) {
+      cat('\nconstructed code', fitcode, sep = '\n')
+      cat(
+        '\ndf',
+        df,
+        'bstart',
+        bstart,
+        'xoffset',
+        xoffset,
+        '\nknots\n',
+        knots,
+        '\nbounds\n',
+        bounds
+      )
+      if (is.list(start)) {
+        cat('\nstarting values\n  fixed effects\n', start$fixed)
+        if (!is.null(start$random)) {
+          cat('\n  random effects\n')
+          print(start$random)
+        }
+      }
+      else
+        cat('\nstarting values\n', start, '\n')
+    }
+
+    #	save fitted model
+    nlme.out <- eval(parse(text = fitcode))
+    class(nlme.out) <- c('sitar', class(nlme.out))
+    nlme.out$fitnlme <- fitenv$fitnlme
+    nlme.out$call.sitar <- mcall
+    nlme.out$xoffset <- xoffset
+    nlme.out$ns <- spline.lm
+    #   if (exists('start.')) rm(start., inherits=TRUE)
+    nlme.out
   }
-  id <- eval(mcall$id, data)
-  fulldata <- data.frame(x, y, id, subset)
-
-#	set up model elements for a, b and c
-	names(model) <- model <- letters[1:3]
-	constant <- mm.formula <- as.formula('~ 1')
-	cmm <- matrix(nrow=nrow(data), ncol=0)
-	for (l in model) {
-		if (!grepl(l, fix) && !grepl(l, random)) {
-			model[l] <- NA
-			next
-		}
-		pars <- c(pars, l)
-		formula <- get(paste(l, 'formula', sep='.'))
-		if (formula == as.formula('~ -1') || formula == as.formula('~ 1-1') || !grepl(l, fix)) next
-		if (formula == constant) mm.intercept <- TRUE
-		else {
-			if (formula != mm.formula) {
-				mm <- model.matrix(formula, data)
-				if (nrow(mm) < length(y))
-					stop('Missing values in data')
-				mm.formula <- formula
-				mm.intercept <- colnames(mm)[1] == '(Intercept)'
-# ensure names are valid
-      	colnames(mm) <- make.names(colnames(mm), unique=TRUE)
-# omit constant columns
-				mm <- mm[, apply(mm, 2, sd) > 0, drop=FALSE]
-			}
-			if (exists('mm')) for (i in 1:ncol(mm)) {
-				var <- colnames(mm)[i]
-				rc <- paste(l, var, sep='.')
-				pars <- c(pars, rc)
-				fixed <- c(fixed, rc)
-				if (nostart) start <- c(start, 0)
-				model[l] <- paste0(model[l], '+', rc, '*', var)
-				if (!var %in% pars) {
-					pars <- c(pars, var)
-					cmm <- cbind(cmm, mm[, i, drop=FALSE])
-				}
-			}
-		}
-		if (mm.intercept) {
-			fixed <- c(fixed, l)
-			if (nostart) {
-			  if (l == 'b') start <- c(start, bstart)
-			    else if (l == 'c') start <- c(start, 0)
-			}
-		}
-	}
-# centre covariate columns
-	cmm <- scale(cmm, scale=FALSE)
-# combine with data
-	fulldata <- cbind(fulldata, cmm)
-# save covariate means for predict
-	attr(fulldata, 'scaled:center') <- attr(cmm, 'scaled:center')
-
-# 	if (!is.null(weights)) {
-#     if (is.list(weights)) form <- asOneFormula(lapply(weights, function(z) attr(z, 'formula')))
-#       else form <- attr(weights, 'formula')
-#     if (!is.null(form)) {
-#       wt <- as.data.frame(model.frame(form, data))
-#       wt.names <- names(wt)[!names(wt) %in% names(fulldata)]
-#       wt <- as.data.frame(wt[, wt.names])
-#       names(wt) <- wt.names
-#       fulldata <- cbind(fulldata, wt)
-# 	  }
-# 	}
-
-	if (returndata)
-	  return(invisible(fulldata))
-	pars <- paste(pars, collapse=',')
-	fixed <- paste(fixed, collapse='+')
-	sscomma <- paste(ss, collapse=',')
-
-#	combine model elements
-	cglue <- function(x, string) ifelse (is.na(x), '', string)
-	nsa <- cglue(model['a'], 'ma+')
-	nsb <- cglue(model['b'], '-mb')
-	nsc <- cglue(model['c'], ')*exp(mc')
-	mat <- matrix(rep(1,df), ncol=1)
-
-#	code to parse
-	fitcode <- glue(
-    "fitenv <- new.env()\n",
-    "fitenv$fitnlme <- function(<<pars>>) {\n",
-    "ma <- <<model['a']>>\n",
-    "mb <- <<model['b']>>\n",
-    "mc <- <<model['c']>>\n",
-    "ex <- (x<<nsb>><<nsc>>)\n",
-    "ey <- <<nsa>>drop((cbind(<<sscomma>>)*ns(ex,k=knots,B=bounds))%*%mat)\n",
-    "attr(ey, 'ex') <- ex\n",
-    "ey\n",
-    "}\n",
-    "on.exit(detach(fitenv))\n",
-    "attach(fitenv)\n",
-    "nlme(y ~ fitnlme(<<pars>>),",
-    "fixed = <<fixed>> ~ 1,",
-    "random = <<random>> ~ 1 | id,\n",
-    "data = fulldata,",
-    "start = start, correlation = correlation,",
-    "weights = weights, subset = subset, method = method,\n",
-    "na.action = na.action, control = control, verbose = verbose)",
-  .open = "<<", .close = ">>")
-
-#	print values
-	if (verbose) {
-		cat('\nconstructed code', fitcode, sep='\n')
-		cat('\ndf', df, 'bstart', bstart, 'xoffset', xoffset, '\nknots\n', knots, '\nbounds\n', bounds)
-		if (is.list(start)) {
-			cat('\nstarting values\n  fixed effects\n', start$fixed)
-			if (!is.null(start$random)) {
-				cat('\n  random effects\n')
-				print(start$random)
-			}
-		}
-		else cat('\nstarting values\n', start, '\n')
-	}
-
-#	save fitted model
-  nlme.out <- eval(parse(text=fitcode))
-	class(nlme.out) <- c('sitar', class(nlme.out))
-  nlme.out$fitnlme <- fitenv$fitnlme
-	nlme.out$call.sitar <- mcall
-	nlme.out$xoffset <- xoffset
-	nlme.out$ns <- spline.lm
-#   if (exists('start.')) rm(start., inherits=TRUE)
-	nlme.out
-}
 
 #' @rdname sitar
 #' @method update sitar
@@ -326,18 +388,46 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   # update args
   mcall[names(extras)] <- extras
   #	add start arg if none of these args specified
-  if (!sum(pmatch(names(extras), c("x", "y", "id", "fixed", "random", "a.formula", "b.formula",
-                                   "c.formula", "start", "returndata"), 0))) {
-    start. <- list(fixed=fixef(object), random=ranef(object))
+  if (!sum(pmatch(
+    names(extras),
+    c(
+      "x",
+      "y",
+      "id",
+      "fixed",
+      "random",
+      "a.formula",
+      "b.formula",
+      "c.formula",
+      "start",
+      "returndata"
+    ),
+    0
+  ))) {
+    start. <- list(fixed = fixef(object), random = ranef(object))
     # update start if any of these args specified
-    if (sum(pmatch(names(extras), c('data', 'subset', 'df', 'knots', 'bounds', 'xoffset', 'bstart'), 0))) {
+    if (sum(pmatch(
+      names(extras),
+      c(
+        'data',
+        'subset',
+        'df',
+        'knots',
+        'bounds',
+        'xoffset',
+        'bstart'
+      ),
+      0
+    ))) {
       # get data etc
       data <- eval(mcall$data)
       subset <- eval(mcall$subset, data)
-      if (!is.null(subset)) data <- data[subset, ]
+      if (!is.null(subset))
+        data <- data[subset,]
       x <- eval(mcall$x, data)
       xoffset <- object$xoffset
-      if (is.null(xoffset)) xoffset <- mean(x)
+      if (is.null(xoffset))
+        xoffset <- mean(x)
       x <- x - xoffset
       df <- object$ns$rank - 1
       knots <- attr(object$ns$model$ns, 'knots')
@@ -348,21 +438,29 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         levels.obj <- levels(getGroups(object))
         if (!identical(levels(id), levels.obj)) {
           #	omit random effects for missing levels in id
-          start.$random <- start.$random[idcheck <- levels.obj %in% levels(id), ]
-          cat(length(levels.obj) - sum(idcheck), 'subjects omitted\n')
+          start.$random <-
+            start.$random[idcheck <- levels.obj %in% levels(id),]
+          cat(length(levels.obj) - sum(idcheck),
+              'subjects omitted\n')
           #	add zero random effects for new levels in id
           newid <- !levels(id) %in% levels.obj
           if (sum(newid) > 0) {
-            newre <- matrix(0, nrow=sum(newid), ncol=dim(ranef(object))[2],
-                            dimnames=list(levels(id)[newid], dimnames(ranef(object))[[2]]))
+            newre <- matrix(
+              0,
+              nrow = sum(newid),
+              ncol = dim(ranef(object))[2],
+              dimnames = list(levels(id)[newid], dimnames(ranef(object))[[2]])
+            )
             start.$random <- rbind(start.$random, newre)
             cat(sum(newid), 'subjects added\n')
           }
         }
       }
       #	update fixed effects
-      if (length(fixef(object)) > df + 1) fixed.extra <- (df+2):length(fixef(object))
-      else fixed.extra <- NULL
+      if (length(fixef(object)) > df + 1)
+        fixed.extra <- (df + 2):length(fixef(object))
+      else
+        fixed.extra <- NULL
       # new arg xoffset
       if (!is.null(extras$xoffset)) {
         xoffset.t <- xoffset
@@ -381,23 +479,29 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       # new arg df
       else if (!is.null(extras$df)) {
         df <- eval(extras$df)
-        knots <- quantile(x, (1:(df-1))/df)
+        knots <- quantile(x, (1:(df - 1)) / df)
         mcall$knots <- NULL
       }
       # new arg bounds
       if (!is.null(extras$bounds)) {
         bounds <- eval(extras$bounds)
-        if (length(bounds) == 1) bounds <- range(x) + abs(bounds) * c(-1,1) * diff(range(x))
-        else bounds <- bounds - xoffset
+        if (length(bounds) == 1)
+          bounds <- range(x) + abs(bounds) * c(-1, 1) * diff(range(x))
+        else
+          bounds <- bounds - xoffset
       }
       #	get spline start values
-      spline.lm <- lm(predict(object, data, level=0) ~ ns(x, knots=knots, Bound=bounds))
-      start.$fixed <- c(coef(spline.lm)[c(2:(df+1), 1)], start.$fixed[fixed.extra])
+      spline.lm <-
+        lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
+      start.$fixed <-
+        c(coef(spline.lm)[c(2:(df + 1), 1)], start.$fixed[fixed.extra])
       # new arg bstart
       if (!is.null(extras$bstart) && !is.null(start.$fixed['b'])) {
         bstart <- eval(extras$bstart)
-        if (bstart == 'mean') bstart <- mean(x)
-        else bstart <- bstart - xoffset
+        if (bstart == 'mean')
+          bstart <- mean(x)
+        else
+          bstart <- bstart - xoffset
         start.$fixed['b'] <- bstart
       }
     }
@@ -407,5 +511,6 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   }
   if (evaluate)
     eval(mcall, parent.frame())
-  else mcall
+  else
+    mcall
 }

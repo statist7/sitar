@@ -16,23 +16,32 @@
 #' data(heights)
 #' dfset(age, height, heights, FUN=BIC, plot=TRUE)
 #' dfset(age, height, heights, FUN=function(a) AIC(a, k=1))
+#' @importFrom splines ns
 #' @export dfset
-  dfset <- function(x, y, data=parent.frame(), FUN=BIC, df=1:15, plot=FALSE, ...) {
+dfset <-
+  function(x,
+           y,
+           data = parent.frame(),
+           FUN = BIC,
+           df = 1:15,
+           plot = FALSE,
+           ...) {
     mc <- match.call()
     x <- eval(mc$x, data)
     y <- eval(mc$y, data)
     fun <- vapply(df, function(i) {
-      obj <- try(lm(y ~ ns(x, df=i)), silent=TRUE)
+      obj <- try(lm(y ~ ns(x, df = i)), silent = TRUE)
       if (inherits(obj, 'lm'))
         FUN(obj)
       else
         NA
     }, 0)
-    xy <- setNames(data.frame(df, fun), c('df', deparse(substitute(FUN))))
-    xymin <- unlist(xy[which.min(fun), , drop=TRUE])
+    xy <-
+      setNames(data.frame(df, fun), c('df', deparse(substitute(FUN))))
+    xymin <- unlist(xy[which.min(fun), , drop = TRUE])
     if (plot) {
       plot(xy, ...)
-      abline(v=xymin[1], h=xymin[2], lty=3)
+      abline(v = xymin[1], h = xymin[2], lty = 3)
     }
     xymin
   }

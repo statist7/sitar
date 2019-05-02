@@ -32,44 +32,70 @@
 #' @importFrom purrr map
 #' @importFrom rlang enquo
 #' @export
-apv_se <- function(object, nboot=10, seed=NULL, plot=FALSE, ...) {
+apv_se <- function(object,
+                   nboot = 10,
+                   seed = NULL,
+                   plot = FALSE,
+                   ...) {
   id <- object$call.sitar$id
   id <- enquo(id)
 
   set.seed(seed)
   bs <- getData(object) %>% # generate bootstrap splits
     nest(-!!id) %>%
-    bootstraps(times=nboot)
-  df <- map(bs$splits, ~as_tibble(.) %>% # generate bootstrap samples
-              unnest(.id='.newid'))
+    bootstraps(times = nboot)
+  df <-
+    map(bs$splits, ~ as_tibble(.) %>% # generate bootstrap samples
+          unnest(.id = '.newid'))
 
   dots <- eval(substitute(alist(...)))
   edots <- lapply(dots, eval, getData(object))
-  vel <- do.call('plot', c(list(x=object, opt='v', returndata=TRUE), edots))
-  peak <- getPeakTrough(vel)
+  vel <-
+    do.call('plot', c(list(
+      x = object,
+      opt = 'v',
+      returndata = TRUE
+    ), edots))
+  peak <- getP
+  eak(vel)
 
-  run_sitar <- quote(update(object, data=.df, id=.newid, start=fixef(object)))
+  run_sitar <-
+    quote(update(
+      object,
+      data = .df,
+      id = .newid,
+      start = fixef(object)
+    ))
 
-  apv <- na.omit(as_tibble(t(vapply(df, function(z) { # fit sitar and extract apv and pv
-    eval(parse(text=".df <<- z"))
-    obj <- try(eval(run_sitar))
-    if (any(class(obj) %in% 'sitar')) {
-      edots <- lapply(dots, eval, getData(obj))
-      vel <- do.call('plot', c(list(x=obj, opt='v', returndata=TRUE), edots))
-      getPeakTrough(vel)
-    } else
-      c(NA, NA)
-  }, vector('numeric', 2)))))
+  apv <-
+    na.omit(as_tibble(t(vapply(df, function(z) {
+      # fit sitar and extract apv and pv
+      eval(parse(text = ".df <<- z"))
+      obj <- try(eval(run_sitar))
+      if (any(class(obj) %in% 'sitar')) {
+        edots <- lapply(dots, eval, getData(obj))
+        vel <-
+          do.call('plot', c(list(
+            x = obj,
+            opt = 'v',
+            returndata = TRUE
+          ), edots))
+        getPeak(vel)
+      } else
+        c(NA, NA)
+    }, vector('numeric', 2)))))
 
   names(apv) <- names(vel) <- names(peak) <- c('apv', 'pv')
 
   if (plot) {
-    localplot <- function(..., subset, abc, xfun, yfun, ns) plot(...)
+    localplot <- function(..., subset, abc, xfun, yfun, ns)
+      plot(...)
     xy <- rbind(vel, apv)
-    ARG <- setNames(lapply(xy, range), c('xlim', 'ylim')) # default plot
-    do.call('localplot', c(list(x=apv), ARG, edots)) # plot apv and pv
-    lines(vel, lwd=2) # add velocity curve
-    abline(v=peak[1], h=peak[2], lty=3)
+    ARG <-
+      setNames(lapply(xy, range), c('xlim', 'ylim')) # default plot
+    do.call('localplot', c(list(x = apv), ARG, edots)) # plot apv and pv
+    lines(vel, lwd = 2) # add velocity curve
+    abline(v = peak[1], h = peak[2], lty = 3)
   }
 
   se <- vapply(apv, sd, 1.0)

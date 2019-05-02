@@ -22,7 +22,7 @@
 #' xy <- plot_v(m1)
 #' points(t(getPeak(xy)), las=1, pch=17)
 #' points(t(getTakeoff(xy)), pch=25, col=2, bg=2)
-#' @export getPeaktakeoff
+#' @export getPeakTakeoff
 	getPeakTakeoff <- function(x, y=NULL, peak=TRUE) {
 #	returns values of x and y at peak/takeoff, i.e. where dy/dx=0
 	xy <- xy.coords(x, y)

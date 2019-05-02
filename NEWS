@@ -1,7 +1,9 @@
 Changes in Version 1.1.2
 
-  o getPeakTrough more reliably identifies peaks and troughs, and the methods
-    getPeak and getTrough are added.
+  o getPeakTrough renamed as getPeakTakeoff, reflecting its use with velocity
+    curves to identify age at peak and age at takeoff.
+
+  o Methods getPeak and getTakeoff are added.
 
 Changes in Version 1.1.1
 
