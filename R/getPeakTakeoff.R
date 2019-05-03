@@ -27,7 +27,7 @@
 getPeakTakeoff <- function(x, y = NULL, peak = TRUE) {
   xy <- xy.coords(x, y)
   # sort data and remove duplicates
-  xy <- unique(as.data.frame(xy[1:2])[order(xy$x), ])
+  xy <- unique(as.data.frame(xy[1:2])[order(xy$x),])
   x <- xy$x
   y <- xy$y
   # find peak
@@ -48,12 +48,9 @@ getPeakTakeoff <- function(x, y = NULL, peak = TRUE) {
   # return if no takeoff
   if (length(tp) == 0)
     return(c(x = NA, y = NA))
-  # region of tp
-  region <- (tp - 1):(tp + 1)
-  x <- x[region]
-  y <- y[region]
   # quadratic in x
-  curve <- lm(y ~ poly(x, 2, raw = TRUE))
+  curve <- with(xy[(tp - 1):(tp + 1),],
+                lm(y ~ poly(x, 2, raw = TRUE)))
   # x and y at tp
   x <- -curve$coef[[2]] / curve$coef[[3]] / 2
   y <- unname(predict(curve, data.frame(x = x)))
@@ -64,11 +61,9 @@ getPeakTakeoff <- function(x, y = NULL, peak = TRUE) {
 getPeak <- function(x, y = NULL, peak = TRUE) {
 
 }
-
 #' @rdname getPeakTakeoff
 #' @export
 getTakeoff <- function(x, y = NULL, peak = FALSE) {
 
 }
-
 body(getTakeoff) <- body(getPeak) <- body(getPeakTakeoff)
