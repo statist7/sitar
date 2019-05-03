@@ -30,7 +30,7 @@ curve \code{y ~ x}.
 }
 \details{
 The takeoff point is defined as the lowest velocity before the peak, so if
-the curve has no peak there can be no takeoff.
+the curve has no peak there is no takeoff.
 }
 \examples{
 ## create mean height velocity curve

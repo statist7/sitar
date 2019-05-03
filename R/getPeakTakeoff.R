@@ -5,7 +5,7 @@
 #' curve \code{y ~ x}.
 #'
 #' The takeoff point is defined as the lowest velocity before the peak, so if
-#' the curve has no peak there can be no takeoff.
+#' the curve has no peak there is no takeoff.
 #'
 #' @param x vector.
 #' @param y vector.
