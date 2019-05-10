@@ -373,10 +373,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       else
         attr(ifun(mcall$x), 'varname')
       labels[1] <- xlab
-    }
-    else
+    } else
       xlab <- labels[1]
-  }
+  } else
+    labels[1] <- xlab
 
 #	if ylab not specified replace with label or y name (depending on yfun)
   if (is.null(ylab)) {
@@ -386,17 +386,18 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
       else
         attr(ifun(mcall$y), 'varname')
       labels[2] <- ylab
-    }
-    else
+    } else
       ylab <- labels[2]
-  }
+  } else
+    labels[2] <- ylab
 
 #	if vlab not specified replace with label or v name
   if (is.null(vlab)) {
     if (labels[3] == '')
       labels[3] <- paste(labels[2], 'velocity')
     vlab <- labels[3]
-  }
+  } else
+    labels[3] <- vlab
 
 # derive xfun and yfun
   if (is.null(xfun))
