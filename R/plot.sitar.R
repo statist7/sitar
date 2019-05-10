@@ -362,8 +362,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=NULL, yfun=NULL, sub
     labels <- vector('character', 3)
   else if (length(labels) < 3)
     labels <- c(labels, '', '')
-  if (labels[3] == '' && labels[2] != '')
-    labels[3] <- paste(labels[2], 'velocity')
 
 #	if xlab not specified replace with label or x name (depending on xfun)
   if (is.null(xlab)) {
