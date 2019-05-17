@@ -66,13 +66,15 @@ obtained using the bootstrap with the function \code{apv_se}.}
 
 \item{xfun}{optional function to be applied to the x variable prior to
 plotting. Defaults to NULL, which translates to \code{ifun(x$call.sitar$x)}
-and inverts any transformation applied to x in the original SITAR model
-call. To plot on the transformed scale set \code{xfun} to \code{I}.}
+and inverts any transformation applied to \code{x} in the original SITAR model
+call. To plot on the transformed scale set \code{xfun} to \code{I}. Any other
+transformation is applied after inverting the original transformation (f any).}
 
 \item{yfun}{optional function to be applied to the y variable prior to
 plotting. Defaults to NULL, which translates to \code{ifun(x$call.sitar$y)}
 and inverts any transformation applied to y in the original SITAR model
-call. To plot on the transformed scale set \code{yfun} to \code{I}.}
+call. To plot on the transformed scale set \code{yfun} to \code{I}. Any other
+transformation is applied after inverting the original transformation (f any).}
 
 \item{subset}{optional logical vector of length \code{x} defining a subset
 of \code{data} rows to be plotted, for \code{x} and \code{data} in the
@@ -98,7 +100,7 @@ new (FALSE). TRUE is equivalent to using \code{lines}.}
 \code{nlme} object, using \code{plot.nlme} arguments.}
 
 \item{returndata}{logical defining whether to plot the data (default FALSE)
-or just return the data for plotting (TRUE).}
+or just return the data for plotting (TRUE). See Details.}
 
 \item{\dots}{Further graphical parameters (see \code{par}) may also be
 supplied as arguments, e.g. line
@@ -148,7 +150,7 @@ To suppress the legend that comes with it set \code{legend = NULL}.
 The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
 \code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
 correspond to the seven plot \code{option}s defined by their last letter,
-and return the data for plotting, e.g. for use with \code{ggplot2}.
+and return the data for plotting as a \code{tibble}, e.g. for use with \code{ggplot2}.
 
 The \code{trim} option allows unsightly long line segments to be omitted
 from plots with options 'a' or 'u'. It ranks the line segments on the basis
