@@ -391,8 +391,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NU
     labels <- vector('character', 3)
 
 #	get axis labels
-  xlab <- getlab(xlab, labels[1], mcall$x, deparse(substitute(xfun)))
-  ylab <- getlab(ylab, labels[2], mcall$y, deparse(substitute(yfun)))
+  xlab <- getlab(xlab, labels[1], mcall$x, paste(deparse(substitute(xfun)), collapse=''))
+  ylab <- getlab(ylab, labels[2], mcall$y, paste(deparse(substitute(yfun)), collapse=''))
   vlab <- getlab(vlab, labels[3], ylab, 'velocity')
 
 # get xfun and yfun
