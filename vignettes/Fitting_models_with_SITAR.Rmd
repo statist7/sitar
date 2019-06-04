@@ -71,7 +71,8 @@ To see the effect of SITAR adjustment in individual curves, the plot (below left
 par(mar = c(4,4,1,1) + 0.1, cex = 0.8)
 plot(fh1, opt = 'u', las = 1, col = 8, lwd = 0.5)
 lines(fh1, opt = 'd', lty = 2)
-lines(fh1, opt = 'ua', col = id, subset = id == 310 | id == 355)
+lines(fh1, opt = 'ua', col = 4, subset = id == 310)
+lines(fh1, opt = 'ua', col = 2, subset = id == 355)
 legend('bottomright', c('id 310', 'mean', 'id 355'), lty = c(1, 2, 1), col = c(4, 1, 2), cex = 0.8, inset=0.04)
 pairs(ranef(fh1), labels = c('size', 'timing', 'intensity'), pch=20)
 ```
