@@ -48,9 +48,17 @@ getPeakTakeoff <- function(x, y = NULL, peak = TRUE) {
   # return if no takeoff
   if (length(tp) == 0)
     return(c(x = NA, y = NA))
-  # quadratic in x
-  curve <- with(xy[(tp - 1):(tp + 1),],
-                lm(y ~ poly(x, 2, raw = TRUE)))
+# quadratic in x
+  n <- 0
+  repeat {
+    n <- n + 1
+    if (tp == n || tp + n > nrow(xy))
+      break
+    curve <- with(xy[(tp - n):(tp + n),],
+                  lm(y ~ poly(x, 2, raw = TRUE)))
+    if (curve$rank == 3)
+      break
+  }
   # x and y at tp
   x <- -curve$coef[[2]] / curve$coef[[3]] / 2
   y <- unname(predict(curve, data.frame(x = x)))
