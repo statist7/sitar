@@ -3,10 +3,10 @@ Changes in Version 1.1.2
   o In plot.sitar transformations of x / y using xfun / yfun are now applied
     after back-transforming x / y to their original scales.
 
-  o getPeakTrough renamed as getPeakTakeoff, reflecting its use with velocity
-    curves to identify age at peak and age at takeoff.
+  o getPeakTrough algorithm improved, and takeoff argument added for use with
+    velocity curves to identify age at takeoff.
 
-  o Methods getPeak and getTakeoff are added.
+  o Methods getPeak, getTrough and getTakeoff are added.
 
 Changes in Version 1.1.1
 

@@ -25,7 +25,7 @@
 #' xy <- plot_v(m1)
 #' points(t(getPeak(xy)), pch=17)
 #' points(t(getTrough(xy)), pch=25, col=2, bg=2)
-#' points(t(getTrough(xy, takeoff=TRUE)), pch=25, col=2, bg=2)
+#' points(t(getTakeoff(xy)), pch=25, col=3, bg=3)
 #' @export getPeakTrough
 getPeakTrough <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
   xy <- xy.coords(x, y)
@@ -37,18 +37,18 @@ getPeakTrough <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
   ddy <- diff(diff(y) > 0)
   # turning point(s)
   tp <- which(ddy == -1) + 1
-  # return if no peak
-  if (length(tp) == 0)
-    return(c(x = NA, y = NA))
   # find highest peak
   tp <- tp[which.max(y[tp])]
+  # return if no peaks and peak or takeoff
+  if (length(tp) == 0 && (peak || takeoff))
+    return(c(x = NA, y = NA))
   # find trough(s)
   if (!peak) {
     # if takeoff, search earlier than peak
     if (!takeoff)
       tp <- length(ddy)
     tp <- which(ddy[seq_len(tp)] == 1) + 1
-    # find lowest takeoff
+    # find lowest trough
     tp <- tp[which.min(y[tp])]
     # return if no trough
     if (length(tp) == 0)
@@ -72,12 +72,12 @@ getPeakTrough <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
 }
 #' @rdname getPeakTrough
 #' @export
-getPeak <- function(x, y = NULL) {
+getPeak <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
 
 }
 #' @rdname getPeakTrough
 #' @export
-getTrough <- function(x, y = NULL, peak = FALSE) {
+getTrough <- function(x, y = NULL, peak = FALSE, takeoff = FALSE) {
 
 }
 #' @rdname getPeakTrough
