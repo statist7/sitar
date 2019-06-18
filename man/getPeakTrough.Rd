@@ -48,7 +48,7 @@ plot(m1, 'v')
 xy <- plot_v(m1)
 points(t(getPeak(xy)), pch=17)
 points(t(getTrough(xy)), pch=25, col=2, bg=2)
-points(t(getTakeoff(xy)), pch=25, col=2, bg=2)
+points(t(getTakeoff(xy)), pch=25, col=3, bg=3)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
