@@ -338,6 +338,7 @@
 #'
 #' outliers <- velout(age, height, id, heights, limit=3)
 #'
+#' @importFrom stats loess
 #' @export velout
 	velout <- function(x, y, id, data, lag=1, velpower=0.5, limit=5, linearise=FALSE)
 #	identifies velocity patterns in growth curve outliers
@@ -357,9 +358,8 @@
 #	sort into id/x order
 	dc <- dc[order(dc[,3], dc[,1]), ]
 	if (linearise) {
-#	fit spline curve to convert y to residual adjusted for x
-# fails if package quantreg not available
-    spline.lm <- quantreg::rq(dc[,2] ~ bs(dc[,1], df=5))
+#	fit loess curve to convert y to residual adjusted for x
+    spline.lm <- loess(dc[,2] ~ dc[,1])
 		dc[,2] <- residuals(spline.lm)
 	}
 #	calculate velocity between successive measurements
