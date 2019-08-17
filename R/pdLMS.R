@@ -40,24 +40,20 @@
 #' @export pdLMS
 pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
                   N = 1000, plot = TRUE, ...) {
-  L[L == 0] <- 1e-7
+  stopifnot(M > 0, S > 0)
   LMS <- data.frame(L, M, S)
-  LSz <- L * S * abs(zlim)
-  xr <- 0:1
-  if (min(1 - LSz) > 0)
-    xr[1] <- min(M * (1 - LSz) ^ (1 / L))
+  x <- cLMS(-abs(zlim), L, M, S)
+  xmin <- ifelse(any(is.na(x) | x < 0), 0, min(x))
   x <- cLMS(abs(zlim), L, M, S)
-  xr[2] <- if (length(which.max(x)) > 0)
-    x[which.max(x)]
-  else
-    M * exp(S * abs(zlim))
-  delta <- (xr[2] - xr[1]) / N
-  x <- xr[1] + delta * (1:N - 0.5)
+  xmax <- ifelse(any(!is.na(x)), max(x, na.rm = TRUE), max(cLMS(abs(zlim), 0, M, S)))
+  delta <- (xmax - xmin) / N
+  x <- xmin + delta * (1:N - 0.5)
   density <- vapply(seq(nrow(LMS)), function(i) {
-    with (LMS[i,], {
+    with (LMS[i, ], {
       z <- zLMS(x, L, M, S)
-      z <- dnorm(z) * x ^ (L - 1)
-      z / sum(z) / delta
+      dzdx <- (x / M) ^ (L - 1) / M / S
+      p <- pnorm(zLMS(0, L, M, S), lower = FALSE)
+      dnorm(z) * dzdx / p
     })
   }, x)
   if (!is.null(zcent)) {
@@ -68,7 +64,7 @@ pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
     centile <- NULL
   if (plot) {
     matplot(x, density, type = "l", ...)
-    abline(h = 0, col = 8)
+    abline(h = 0, v = 0, col = 8)
     if (!is.null(zcent))
       matpoints(centile, rep(0, nrow(centile)), ...)
   }

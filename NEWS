@@ -1,12 +1,15 @@
 Changes in Version 1.1.2
 
+  o pdLMS density calculation corrected.
+
   o In plot.sitar transformations of x / y using xfun / yfun are now applied
     after back-transforming x / y to their original scales.
 
   o getPeakTrough algorithm improved, and takeoff argument added for use with
     velocity curves to identify age at takeoff.
 
-  o Methods getPeak, getTrough and getTakeoff are added.
+  o Methods getPeak, getTrough and getTakeoff are added as special cases of
+    getPeakTrough.
 
 Changes in Version 1.1.1
 
