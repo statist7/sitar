@@ -31,9 +31,12 @@
 #' @param knots vector of values for knots (default \code{df} quantiles of
 #' \code{x} distribution).
 #' @param fixed character string specifying a, b, c fixed effects (default
-#' \code{random}).
+#' \code{random} or the subset of "a+b+c" within \code{random}).
 #' @param random character string specifying a, b, c random effects (default
-#' \code{"a+b+c"}).
+#' \code{"a+b+c"}). Alternatively \code{nlme} formula e.g.
+#' \code{"list(id = pdDiag(a+b+c ~ 1))"}.
+#' @param pdDiag logical which if TRUE fits a diagonal random effects
+#' variance-covariance matrix, or if FALSE (default) a general covariance matrix.
 #' @param a.formula formula for fixed effect a (default \code{~ 1}).
 #' @param b.formula formula for fixed effect b (default \code{~ 1}).
 #' @param c.formula formula for fixed effect c (default \code{~ 1}).
@@ -119,6 +122,7 @@ sitar <-
            knots,
            fixed = random,
            random = 'a+b+c',
+           pdDiag = FALSE,
            a.formula =  ~ 1,
            b.formula =  ~ 1,
            c.formula =  ~ 1,
@@ -200,8 +204,22 @@ sitar <-
         missing(start))
       start <- coef(spline.lm)[c(2:(df + 1), 1)]
 
-    #	force fixed effect for a
+    # if random contains ~ extract a+b+c for random and fixed
     fix <- fixed
+    if (grepl('~', random)) {
+      fullrandom <- random
+      ss <- strsplit(random, '[^a-z]')[[1]] # extract words
+      ss <- paste(ss[nchar(ss) == 1], collapse='+') # combine length-1 words
+      if (fix == random)
+        fix <- ss
+      random <- ss
+    } else {
+      fullrandom <- if (pdDiag)
+        glue::glue('list(id = pdDiag({random} ~ 1))')
+      else
+        NA
+  }
+    #	force fixed effect for a
     if (!grepl('a', fix))
       fix <- paste('a', fix, sep = '+')
 
@@ -306,8 +324,15 @@ sitar <-
     nsc <- cglue(model['c'], ')*exp(mc')
     mat <- matrix(rep(1, df), ncol = 1)
 
+    # expand fixed and if necessary random
+    fixed <- glue::glue('{fixed} ~ 1')
+    random <- if (!is.na(fullrandom))
+      fullrandom
+    else
+      glue::glue('{random} ~ 1 | id')
+
     #	code to parse
-    fitcode <- glue(
+    fitcode <- glue::glue(
       "fitenv <- new.env()\n",
       "fitenv$fitnlme <- function(<<pars>>) {\n",
       "ma <- <<model['a']>>\n",
@@ -321,8 +346,8 @@ sitar <-
       "on.exit(detach(fitenv))\n",
       "attach(fitenv)\n",
       "nlme(y ~ fitnlme(<<pars>>),",
-      "fixed = <<fixed>> ~ 1,",
-      "random = <<random>> ~ 1 | id,\n",
+      "fixed = <<fixed>>,",
+      "random = <<random>>,\n",
       "data = fulldata,",
       "start = start, correlation = correlation,",
       "weights = weights, subset = subset, method = method,\n",
