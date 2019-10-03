@@ -4,10 +4,14 @@
 \alias{apv_se}
 \title{Bootstrap standard errors for SITAR peak velocity and age at peak velocity}
 \usage{
-apv_se(object, nboot = 10, seed = NULL, plot = FALSE, ...)
+apv_se(object, fun = getPeak, nboot = 10, seed = NULL,
+  plot = FALSE, ...)
 }
 \arguments{
 \item{object}{SITAR model.}
+
+\item{fun}{function to extract apv and pv from velocity curve (default getPeak),
+alternative getTakeoff.}
 
 \item{nboot}{number of bootstrap samples (default 10).}
 
@@ -15,21 +19,20 @@ apv_se(object, nboot = 10, seed = NULL, plot = FALSE, ...)
 
 \item{plot}{logical to control plotting (default FALSE).}
 
-\item{\dots}{optional arguments defining the velocity
-curve to be bootstrapped, and the plot. See Details.}
+\item{\dots}{optional arguments defining the velocity curve to be bootstrapped
+(\code{plot.sitar} arguments \code{xfun}, \code{yfun}, \code{subset}, \code{ns}
+or \code{abc}), and graphical \code{par} parameters.}
 }
 \value{
-a 2x2 array giving the mean and se of apv and pv, with attribute "bs"
-a tibble containing the bootstrap estimates of apv and pv, with NAs removed.
+a 2x2 array giving the mean and standard error of apv and pv, with
+attribute "bs" a tibble containing the bootstrap estimates of apv and pv,
+with NAs removed.
 }
 \description{
 \code{apv_se} bootstraps a SITAR model to generate standard errors for
 age at peak velocity (apv) and peak velocity (pv).
 }
 \details{
-The mean velocity curve to be bootstrapped can be modified with
-arguments \code{subset}, \code{abc}, \code{xfun}, \code{yfun} or \code{ns}.
-
 If \code{plot} is TRUE, the original velocity curve is plotted along with
 each bootstrap sample's pv versus apv.
 }

@@ -3,20 +3,21 @@
 #' \code{apv_se} bootstraps a SITAR model to generate standard errors for
 #' age at peak velocity (apv) and peak velocity (pv).
 #'
-#' The mean velocity curve to be bootstrapped can be modified with
-#' arguments \code{subset}, \code{abc}, \code{xfun}, \code{yfun} or \code{ns}.
-#'
 #' If \code{plot} is TRUE, the original velocity curve is plotted along with
 #' each bootstrap sample's pv versus apv.
 #'
 #' @param object SITAR model.
+#' @param fun function to extract apv and pv from velocity curve (default getPeak),
+#' alternative getTakeoff.
 #' @param nboot number of bootstrap samples (default 10).
 #' @param seed integer to initialize the random number generator (default NULL).
 #' @param plot logical to control plotting (default FALSE).
-#' @param \dots optional arguments defining the velocity
-#' curve to be bootstrapped, and the plot. See Details.
-#' @return a 2x2 array giving the mean and se of apv and pv, with attribute "bs"
-#' a tibble containing the bootstrap estimates of apv and pv, with NAs removed.
+#' @param \dots optional arguments defining the velocity curve to be bootstrapped
+#' (\code{plot.sitar} arguments \code{xfun}, \code{yfun}, \code{subset}, \code{ns}
+#' or \code{abc}), and graphical \code{par} parameters.
+#' @return a 2x2 array giving the mean and standard error of apv and pv, with
+#' attribute "bs" a tibble containing the bootstrap estimates of apv and pv,
+#' with NAs removed.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
 #' data(heights)
@@ -33,6 +34,7 @@
 #' @importFrom rlang enquo
 #' @export
 apv_se <- function(object,
+                   fun = getPeak,
                    nboot = 10,
                    seed = NULL,
                    plot = FALSE,
@@ -56,21 +58,25 @@ apv_se <- function(object,
       opt = 'v',
       returndata = TRUE
     ), edots))
-  peak <- getPeak(vel)
+  peak <- fun(vel)
 
   run_sitar <-
-    quote(update(
-      object,
-      data = .df,
-      id = .newid,
-      start = fixef(object)
-    ))
+    quote(
+      try(
+        update(
+          object,
+          data = .df,
+          id = .newid,
+          start = fixef(object)
+        )
+      )
+    )
 
   apv <-
     na.omit(as_tibble(t(vapply(df, function(z) {
       # fit sitar and extract apv and pv
       eval(parse(text = ".df <<- z"))
-      obj <- try(eval(run_sitar))
+      obj <- eval(run_sitar)
       if (any(class(obj) %in% 'sitar')) {
         edots <- lapply(dots, eval, getData(obj))
         vel <-
@@ -79,7 +85,7 @@ apv_se <- function(object,
             opt = 'v',
             returndata = TRUE
           ), edots))
-        getPeak(vel)
+        fun(vel)
       } else
         c(NA, NA)
     }, vector('numeric', 2)))))
