@@ -48,7 +48,7 @@
 #'
 #' @export LMS2z
 LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
-# check sex coded correctly
+  # check sex coded correctly
   test_sex <- function(sex) {
     if (is.numeric(sex))
       return(sex)
@@ -63,33 +63,43 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
     return(as.integer(factor(sex, levels=levsex)))
   }
   xy <- data.frame(x, sex=test_sex(sex))
-	x <- xy$x
-	sex <- xy$sex
-	v <- matrix(nrow=length(x), ncol=3)
-  colnames(v) <- c('L', 'M', 'S')
+  x <- xy$x
+  sex <- xy$sex
+  v <- matrix(nrow=length(x), ncol=3)
+  colnames(v) <- paste(c('L', 'M', 'S'), measure, sep='.')
   if (is.character(ref))
     ref <- get(ref)
   x[x < min(ref$years) | x > max(ref$years)] <- NA
-	for (ix in 1:2) {
-		sexvar <- sex == ix
-		if (any(sexvar)) {
-		  v[sexvar, ] <- vapply(colnames(v), function(j) {
-		    with(ref[ref$sex == ix, ],
-		         spline(years, get(paste(j, measure, sep='.')),
-		                method='natural', xout=x[sexvar])$y)
-		  }, numeric(sum(sexvar)))
-		}
-	}
+  for (ix in 1:2) {
+    sexvar <- sex == ix
+    if (any(sexvar)) {
+      # unique omits duplicated rows in reference
+      refx <- unique(ref[ref$sex == ix, c('years', colnames(v))])
+      # check for duplicated ages
+      dupage <- which(diff(refx$years) == 0)
+      dupage <- c(dupage, nrow(refx))
+      end <- 0
+      for (i in seq(dup)) {
+        start <- end + 1
+        end <- dup[[i]]
+        refrange <- x[sexvar] >= refx$years[[start]] & x[sexvar] <= refx$years[[end]]
+        refrange[is.na(refrange)] <- FALSE
+        v[sexvar, ][refrange, ] <- vapply(colnames(v), function(lms) {
+          with(refx[start:end, ], spline(years, get(lms), method='natural', xout=x[sexvar][refrange])$y)
+        }, numeric(sum(refrange)))
+      }
+    }
+  }
   cz <- do.call(ifelse(toz, 'zLMS', 'cLMS'), list(y, v[, 1], v[, 2], v[, 3]))
   if (is.matrix(cz)) {
-	  dimnames(cz) <- if (toz)
-	    list(x, y)
-	  else
-	    list(x, z2cent(y))
-	}
-	if (LMStable)
-	  attr(cz, 'LMStable') <- as.data.frame(v)
-	cz
+    dimnames(cz) <- if (toz)
+      list(x, y)
+    else
+      list(x, z2cent(y))
+  }
+  if (LMStable)
+    attr(cz, 'LMStable') <- as.data.frame(v)
+  cz
 }
 
 #' LMS conversion to and from z-scores
@@ -139,7 +149,7 @@ cLMS <- function(z, L = 1, M, S) {
          M * (1 + L * S * z) ^ (1/L))
   else
     with(data.frame(L, M, S),
-      M * (1 + L * outer(S, as.vector(z))) ^ (1/L))
+         M * (1 + L * outer(S, as.vector(z))) ^ (1/L))
 }
 
 #' @rdname cLMS
@@ -148,10 +158,10 @@ zLMS <- function(x, L = 1, M, S) {
   L[L == 0] <- 1e-7
   if (is.vector(x))
     with(data.frame(x, L, M, S),
-      ((x/M) ^ L - 1) / L / S)
+         ((x/M) ^ L - 1) / L / S)
   else
     with(data.frame(L, M, S),
-      (t(outer(as.vector(x), M, `/`)) ^ L - 1) / L / S)
+         (t(outer(as.vector(x), M, `/`)) ^ L - 1) / L / S)
 }
 
 #' Express z-scores as centile character strings for plotting
@@ -175,12 +185,12 @@ zLMS <- function(x, L = 1, M, S) {
 #'
 #' @export z2cent
 z2cent <- function(z) {
-	np <- abs(z) > qnorm(0.99)
-	ct <- round(pnorm(z) * 100, np)
-	mod10 <- ifelse(np, 0, floor(ct %% 10))
-	th <- ifelse(mod10 == 0 | mod10 > 4 | (ct > 10 & ct < 14), 4, mod10)
-	th <- paste0(ct, c('st', 'nd', 'rd', 'th')[th])
-	th[th == '0th'] <- paste0('SDS', round(z[th == '0th'], 1))
-	th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
-	th
+  np <- abs(z) > qnorm(0.99)
+  ct <- round(pnorm(z) * 100, np)
+  mod10 <- ifelse(np, 0, floor(ct %% 10))
+  th <- ifelse(mod10 == 0 | mod10 > 4 | (ct > 10 & ct < 14), 4, mod10)
+  th <- paste0(ct, c('st', 'nd', 'rd', 'th')[th])
+  th[th == '0th'] <- paste0('SDS', round(z[th == '0th'], 1))
+  th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
+  th
 }
