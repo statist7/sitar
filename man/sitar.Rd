@@ -38,7 +38,7 @@ sitar(x, y, id, data, df, knots, fixed = random, random = "a+b+c",
 \code{"list(id = pdDiag(a+b+c ~ 1))"}.}
 
 \item{pdDiag}{logical which if TRUE fits a diagonal random effects
-variance-covariance matrix, or if FALSE (default) a general covariance matrix.}
+covariance matrix, or if FALSE (default) a general covariance matrix.}
 
 \item{a.formula}{formula for fixed effect a (default \code{~ 1}).}
 

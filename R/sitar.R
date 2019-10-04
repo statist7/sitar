@@ -36,7 +36,7 @@
 #' \code{"a+b+c"}). Alternatively \code{nlme} formula e.g.
 #' \code{"list(id = pdDiag(a+b+c ~ 1))"}.
 #' @param pdDiag logical which if TRUE fits a diagonal random effects
-#' variance-covariance matrix, or if FALSE (default) a general covariance matrix.
+#' covariance matrix, or if FALSE (default) a general covariance matrix.
 #' @param a.formula formula for fixed effect a (default \code{~ 1}).
 #' @param b.formula formula for fixed effect b (default \code{~ 1}).
 #' @param c.formula formula for fixed effect c (default \code{~ 1}).
