@@ -7,44 +7,56 @@
 LMS2z(x, y, sex, measure, ref, toz = TRUE, LMStable = FALSE)
 }
 \arguments{
-\item{x}{vector of ages.}
+\item{x}{vector of ages in units of years.}
 
 \item{y}{vector or one-column matrix of either measurements or z-scores,
 depending on the value of \code{toz}.}
 
 \item{sex}{vector where 1/2 = males/females = boys/girls = TRUE/FALSE, based
-on the uppercase first character of the string.}
+on the uppercased first character of the string.}
 
-\item{measure}{measurement name, as character string, the choice
-depending on the choice of \code{ref} (see e.g. references \code{uk90},
-\code{who06} and \code{ukwhopt}).}
+\item{measure}{measurement name, as character string, the choice depending on
+the choice of \code{ref} (see e.g. references \code{uk90}, \code{who06} and
+\code{ukwhopt}).}
 
-\item{ref}{growth reference, either as name or character string, available
-as a \code{data} object or data frame.}
+\item{ref}{growth reference, either as name or character string, available as
+a \code{data} object or data frame (e.g. \code{uk90}, \code{who06} or
+\code{ukwhopt}).}
 
-\item{toz}{logical set to TRUE for conversion from measurement to z-score,
-or FALSE for the reverse.}
+\item{toz}{logical set to TRUE for conversion from measurement to z-score, or
+FALSE for the reverse.}
 
-\item{LMStable}{logical set to TRUE to return the associated LMS table as
-a data frame in attribute \code{LMStable}.}
+\item{LMStable}{logical set to TRUE to return the associated LMS table as a
+data frame in attribute \code{LMStable}.}
 }
 \value{
-A vector or matrix containing the transformed values. If \code{y}
-is a vector then a vector is returned, else if \code{y} is a one-column matrix
-then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
-columns. The matrix row names are set to \code{x}, and the column names to
-either \code{y} or if \code{toz} is FALSE, \code{z2cent(y)}. If LMStable is
-TRUE the associated LMS table is returned as a data frame in attribute
-\code{LMStable}.
+A vector or matrix containing the transformed values. If \code{y} is
+  a vector then a vector is returned, else if \code{y} is a one-column matrix
+  then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
+  columns. The matrix row names are set to \code{x}, and the column names to
+  either \code{y} or if \code{toz} is FALSE, \code{z2cent(y)}. If LMStable is
+  TRUE the associated LMS table is returned as a data frame in attribute
+  \code{LMStable}.
 }
 \description{
 A function to convert between measurements and z-scores using a growth
 reference previously fitted by the LMS method.
 }
 \details{
-Vectors of L, M and S corresponding to \code{x} and \code{sex} are extracted
-using cubic interpolation and passed to either \code{\link{cLMS}} or
-\code{\link{zLMS}}, depending on \code{toz}.
+Growth references fitted by the LMS method consist of a table of L, M and S
+values by age and sex. Vectors of L, M and S corresponding to \code{x} and
+\code{sex} are extracted using cubic interpolation and passed to either
+\code{\link{cLMS}} or \code{\link{zLMS}}, depending on \code{toz}.
+
+Disjunct references are supported, where there is a disjunction in the
+centiles at a particular age. This may be because the measurement changes,
+e.g. from length to height, or because two different references have been
+joined together. The disjunction is flagged by including two rows at the
+common age, but with different L, M and S values, and measurements at this
+age are ascribed to the older reference. For example the \code{who06}
+reference has a dysjunction at 2 years reflecting the switch from length to
+height. As a result height at just below and just above 2 years returns a
+different z-score.
 }
 \examples{
 
@@ -61,9 +73,9 @@ LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06, toz = FALSE)
 
 }
 \seealso{
-\code{\link{z2cent}}. The LMS method can be fitted to data using
-the package \code{gamlss} with the \code{BCCG} or \code{BCCGo} family,
-where nu (originally lambda), mu and sigma correspond to L, M and S respectively.
+\code{\link{z2cent}}. The LMS method can be fitted to data using the
+  package \code{gamlss} with the \code{BCCG} or \code{BCCGo} family, where nu
+  (originally lambda), mu and sigma correspond to L, M and S respectively.
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
