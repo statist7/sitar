@@ -1,5 +1,12 @@
 Changes in Version 1.1.2
 
+  o LMS2z is extended to handle disjunct references, where the centiles have a
+    break or disjunction.
+
+  o sitar has a new argument pdDiag, which forces the random effects covariance
+    matrix to be diagonal. Convergence can be much quicker, though the model may
+    fit less well.
+
   o pdLMS density calculation corrected.
 
   o In plot.sitar transformations of x / y using xfun / yfun are now applied
