@@ -1,11 +1,12 @@
 #' UK-WHO growth reference including preterm
 #'
-#' The UK 1990 revised growth reference (Cole et al 2011) for birth length,
-#' weight and head circumference, fitted by the LMS method and summarised by
-#' values of L, M and S by sex from 23 to 42 weeks gestation.
+#' The UK-WHO growth reference for height, weight, BMI and head circumference
+#' (see Wright et al 2010), fitted by the LMS method and summarised by values of
+#' L, M and S by sex from 23 weeks gestation to 20 years.
 #'
-#' The growth reference is the birth section of the UK-WHO growth reference
-#' (see Wright et al 2010).
+#' The growth reference combines the birth section of the UK-WHO growth reference
+#' (Cole et al 2011) from 23 to 42 weeks gestation, the WHO growth standard
+#' from 2 postnatal weeks to 4 years, and the UK 1990 reference from 4 to 20 years.
 #'
 #' The L, M and S values for each measurement correspond respectively to the
 #' Box-Cox power, median and coefficient of variation of the distribution by
@@ -18,7 +19,7 @@
 #'
 #' @name ukwhopt
 #' @docType data
-#' @format A data frame with 40 observations on the following 12 variables:
+#' @format A data frame with 548 observations on the following 15 variables:
 #' \describe{
 #' \item{weeks}{numeric vector}
 #' \item{years}{numeric vector}
@@ -40,13 +41,14 @@
 #' 2011;38:7-11.
 #'
 #' Wright CM, Williams AF, Elliman D, et al. Using the new UK-WHO growth
-#' charts. BMJ 2010;\-340:c1140.
+#' charts. BMJ 2010;340:c1140.
 #' @source The values are tabulated in the Excel spreadsheet UK_WHO_preterm.xls
 #' provided with the Excel add-in LMSgrowth from
 #' \url{http://www.healthforallchildren.com/?product_cat=software}.
 #' @keywords datasets
 #' @examples
 #' data(ukwhopt)
-#' ## calculate median birth weight in girls from 23 to 42 weeks gestation
-#' LMS2z(x = (23:42-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt', ref = 'ukwhopt', toz = FALSE)
+#' ## calculate median birth weight (kg) in girls from 23 to 44 weeks gestation
+#' v <- LMS2z(x = (23:44-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt', ref = 'ukwhopt', toz = FALSE)
+#' setNames(v, 23:44)
 "ukwhopt"
