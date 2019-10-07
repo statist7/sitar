@@ -14,7 +14,7 @@
 #' joined together. The disjunction is flagged by including two rows at the
 #' common age, but with different L, M and S values, and measurements at this
 #' age are ascribed to the older reference. For example the \code{who06}
-#' reference has a dysjunction at 2 years reflecting the switch from length to
+#' reference has a disjunction at 2 years reflecting the switch from length to
 #' height. As a result height at just below and just above 2 years returns a
 #' different z-score.
 #'
@@ -34,12 +34,12 @@
 #' @param LMStable logical set to TRUE to return the associated LMS table as a
 #'   data frame in attribute \code{LMStable}.
 #' @return A vector or matrix containing the transformed values. If \code{y} is
-#'   a vector then a vector is returned, else if \code{y} is a one-column matrix
-#'   then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
-#'   columns. The matrix row names are set to \code{x}, and the column names to
-#'   either \code{y} or if \code{toz} is FALSE, \code{z2cent(y)}. If LMStable is
-#'   TRUE the associated LMS table is returned as a data frame in attribute
-#'   \code{LMStable}.
+#'   a vector then a vector of \code{length(x)} is returned, else if \code{y} is
+#'   a one-column matrix then a matrix is returned, with \code{length(x)} rows
+#'   and \code{length(y)} columns. The matrix row names are set to \code{x}, and
+#'   the column names to either \code{y} or if \code{toz} is FALSE,
+#'   \code{z2cent(y)}. If LMStable is TRUE the associated LMS table is returned
+#'   as a data frame in attribute \code{LMStable}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{z2cent}}. The LMS method can be fitted to data using the
 #'   package \code{gamlss} with the \code{BCCG} or \code{BCCGo} family, where nu
@@ -52,11 +52,12 @@
 #' data(uk90)
 #' with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 #'
-#' ## construct table of boys weight centiles by age for WHO standard
+#' ## construct table of boys' weight centiles by age for WHO standard
 #' data(who06)
-#' zs <- -4:4*2/3 # z-scores for centiles
-#' ages <- 0:12/4 # 3-month ages
-#' LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06, toz = FALSE)
+#' zs <- -4:4*2/3 # z-scores for 9 centiles
+#' ages <- 0:20/4 # 3-month ages to 5 years
+#' LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06,
+#'   toz = FALSE, LMStable = TRUE)
 #'
 #' @export LMS2z
 LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
@@ -77,44 +78,49 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
   xy <- data.frame(x, sex=test_sex(sex))
   x <- xy$x
   sex <- xy$sex
-  v <- matrix(nrow=length(x), ncol=3)
-  colnames(v) <- paste(c('L', 'M', 'S'), measure, sep='.')
+  LMS <- c('L', 'M', 'S')
+  LMSnames <- paste(LMS, measure, sep='.')
   if (is.character(ref))
     ref <- get(ref)
   x[x < min(ref$years) | x > max(ref$years)] <- NA
   for (ix in 1:2) {
     sexvar <- sex == ix
     if (any(sexvar)) {
-      # unique omits duplicated rows in reference
-      refx <- unique(ref[ref$sex == ix, c('years', colnames(v))])
+      # unique omits duplicated rows # na.omit omits blank rows
+      refx <- na.omit(unique(ref[ref$sex == ix, c('years', LMSnames)]))
       # check for location of any duplicated ages
       nref <- which(diff(refx$years) == 0)
       nref <- c(nref, nrow(refx))
-      end <- 0
+      end <- 0L
       for (i in seq_along(nref)) {
-        start <- end + 1
+        start <- end + 1L
         end <- nref[[i]]
         # age range from start to end
         # if age duplicated end value is overwritten by start value on next pass
         refrange <- x[sexvar] >= refx$years[[start]] & x[sexvar] <= refx$years[[end]]
         refrange[is.na(refrange)] <- FALSE
+        refrange <- which(sexvar)[refrange]
+        if (length(refrange) > 0L) {
         # cubic interpolation oF L, M and S
-        v[sexvar, ][refrange, ] <- vapply(colnames(v), function(lms) {
-          with(refx[start:end, ], spline(years, get(lms), method='natural',
-                                         xout=x[sexvar][refrange])$y)
-        }, numeric(sum(refrange)))
+          xy[refrange, LMS] <- lapply(LMSnames, function(lms) {
+              with(refx[start:end, ], spline(years, get(lms), method='natural',
+                                           xout=x[refrange])$y)
+          })
+        }
       }
     }
   }
-  cz <- do.call(ifelse(toz, 'zLMS', 'cLMS'), list(y, v[, 1], v[, 2], v[, 3]))
+  cz <- do.call(ifelse(toz, 'zLMS', 'cLMS'), c(list(y), xy[, LMS]))
   if (is.matrix(cz)) {
     dimnames(cz) <- if (toz)
       list(x, y)
     else
       list(x, z2cent(y))
   }
-  if (LMStable)
-    attr(cz, 'LMStable') <- as.data.frame(v)
+  if (LMStable) {
+    names(xy)[[1L]] <- 'years'
+    attr(cz, 'LMStable') <- xy
+  }
   cz
 }
 

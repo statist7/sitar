@@ -31,12 +31,12 @@ data frame in attribute \code{LMStable}.}
 }
 \value{
 A vector or matrix containing the transformed values. If \code{y} is
-  a vector then a vector is returned, else if \code{y} is a one-column matrix
-  then a matrix is returned, with \code{length(x)} rows and \code{length(y)}
-  columns. The matrix row names are set to \code{x}, and the column names to
-  either \code{y} or if \code{toz} is FALSE, \code{z2cent(y)}. If LMStable is
-  TRUE the associated LMS table is returned as a data frame in attribute
-  \code{LMStable}.
+  a vector then a vector of \code{length(x)} is returned, else if \code{y} is
+  a one-column matrix then a matrix is returned, with \code{length(x)} rows
+  and \code{length(y)} columns. The matrix row names are set to \code{x}, and
+  the column names to either \code{y} or if \code{toz} is FALSE,
+  \code{z2cent(y)}. If LMStable is TRUE the associated LMS table is returned
+  as a data frame in attribute \code{LMStable}.
 }
 \description{
 A function to convert between measurements and z-scores using a growth
@@ -54,7 +54,7 @@ e.g. from length to height, or because two different references have been
 joined together. The disjunction is flagged by including two rows at the
 common age, but with different L, M and S values, and measurements at this
 age are ascribed to the older reference. For example the \code{who06}
-reference has a dysjunction at 2 years reflecting the switch from length to
+reference has a disjunction at 2 years reflecting the switch from length to
 height. As a result height at just below and just above 2 years returns a
 different z-score.
 }
@@ -65,11 +65,12 @@ data(heights)
 data(uk90)
 with(heights, LMS2z(age, height, sex = 2, measure = 'ht', ref = 'uk90'))
 
-## construct table of boys weight centiles by age for WHO standard
+## construct table of boys' weight centiles by age for WHO standard
 data(who06)
-zs <- -4:4*2/3 # z-scores for centiles
-ages <- 0:12/4 # 3-month ages
-LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06, toz = FALSE)
+zs <- -4:4*2/3 # z-scores for 9 centiles
+ages <- 0:20/4 # 3-month ages to 5 years
+LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06,
+  toz = FALSE, LMStable = TRUE)
 
 }
 \seealso{
