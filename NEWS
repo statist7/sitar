@@ -1,7 +1,7 @@
 Changes in Version 1.1.2
 
   o LMS2z is extended to handle disjunct references, where the centiles have a
-    break or disjunction.
+    break or disjunction. Sex is also checked for more carefully.
 
   o sitar has a new argument pdDiag, which forces the random effects covariance
     matrix to be diagonal. Convergence can be much quicker, though the model may
