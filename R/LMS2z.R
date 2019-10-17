@@ -63,17 +63,11 @@
 LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
   # check sex coded correctly
   test_sex <- function(sex) {
-    if (is.numeric(sex))
-      return(sex)
-    sex <- toupper(substr(sex, 1, 1))
-    levsex <- levels(factor(sex))
-    if (length(levsex) < 2) {
-      levsex <- c(levsex, '?')
-    } else if (length(levsex) > 2)
-      cat('sex has >2 levels:', levsex, '\n')
-    if (levsex[1] == '2' || levsex[1] == 'F' || identical(levsex[1:2], c('G', '?')))
-      levsex[1:2] <- levsex[2:1]
-    return(as.integer(factor(sex, levels=levsex)))
+    # check sex contains only 1/M/B or 2/F/G
+    fsex <- toupper(substr(sex, 1, 1))
+    fsex <- factor(fsex, levels = c(1:2, 'M', 'F', 'B', 'G', 'T'))
+    levels(fsex) <- c(rep(1:2, 3), 1)
+    as.numeric(fsex)
   }
   xy <- data.frame(x, sex=test_sex(sex))
   x <- xy$x
