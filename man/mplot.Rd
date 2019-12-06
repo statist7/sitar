@@ -4,8 +4,7 @@
 \alias{mplot}
 \title{Plot multiple growth curves}
 \usage{
-mplot(x, y, id, data = parent.frame(), subset = NULL, add = FALSE,
-  ...)
+mplot(x, y, id, data = parent.frame(), subset = NULL, add = FALSE, ...)
 }
 \arguments{
 \item{x}{vector of x coordinates.}

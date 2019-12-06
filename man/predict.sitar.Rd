@@ -4,9 +4,16 @@
 \alias{predict.sitar}
 \title{Predict SITAR model}
 \usage{
-\method{predict}{sitar}(object, newdata = getData(object), level = 1L,
-  ..., deriv = 0L, abc = NULL, xfun = function(x) x,
-  yfun = function(y) y)
+\method{predict}{sitar}(
+  object,
+  newdata = getData(object),
+  level = 1L,
+  ...,
+  deriv = 0L,
+  abc = NULL,
+  xfun = function(x) x,
+  yfun = function(y) y
+)
 }
 \arguments{
 \item{object}{an object inheriting from class \code{sitar}.}

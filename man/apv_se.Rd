@@ -4,8 +4,7 @@
 \alias{apv_se}
 \title{Bootstrap standard errors for SITAR peak velocity and age at peak velocity}
 \usage{
-apv_se(object, fun = getPeak, nboot = 10, seed = NULL,
-  plot = FALSE, ...)
+apv_se(object, fun = getPeak, nboot = 10, seed = NULL, plot = FALSE, ...)
 }
 \arguments{
 \item{object}{SITAR model.}

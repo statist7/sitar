@@ -4,19 +4,26 @@
 \name{ukwhopt}
 \alias{ukwhopt}
 \title{UK-WHO growth reference including preterm}
-\format{A data frame with 548 observations on the following 15 variables:
+\format{A tibble with 542 observations on the following 17 variables:
 \describe{
-\item{weeks}{numeric vector}
-\item{years}{numeric vector}
+\item{age_wm}{numeric vector - age in weeks or months - see \code{wm}}
+\item{wm}{three-level factor indicating weeks or months: wkga = gestational
+weeks, wk = postnatal weeks, mth = postnatal months}
+\item{years}{numeric vector - age in years}
 \item{L.ht}{numeric vector}
 \item{M.ht}{numeric vector}
 \item{S.ht}{numeric vector}
 \item{L.wt}{numeric vector}
 \item{M.wt}{numeric vector}
 \item{S.wt}{numeric vector}
+\item{L.bmi}{numeric vector}
+\item{M.bmi}{numeric vector}
+\item{S.bmi}{numeric vector}
 \item{L.head}{numeric vector}
 \item{M.head}{numeric vector}
 \item{S.head}{numeric vector}
+\item{origin}{two-level factor indicating the provenance of the data, with
+levels British1990 and WHO2006}
 \item{sex}{two-level factor with level 1 male and level 2 female} }}
 \source{
 The values are tabulated in the Excel spreadsheet UK_WHO_preterm.xls
@@ -29,27 +36,29 @@ ukwhopt
 \description{
 The UK-WHO growth reference for height, weight, BMI and head circumference
 (see Wright et al 2010), fitted by the LMS method and summarised by values of
-L, M and S by sex from 23 weeks gestation to 20 years.
+L, M and S by sex from 26 weeks gestation to 20 years.
 }
 \details{
-The growth reference combines the birth section of the UK-WHO growth reference
-(Cole et al 2011) from 23 to 42 weeks gestation, the WHO growth standard
-from 2 postnatal weeks to 4 years, and the UK 1990 reference from 4 to 20 years.
+The growth reference combines the birth section of the British 1990 growth
+reference (Cole et al 2011) from 26 to 42 weeks gestation, the WHO growth
+standard from 2 postnatal weeks to 4 years, and the British 1990 reference
+from 4 to 20 years.
 
 The L, M and S values for each measurement correspond respectively to the
 Box-Cox power, median and coefficient of variation of the distribution by
-age and sex (Cole & Green 1992). The short names for each measurement (see
-\code{\link{LMS2z}}) are as follows: height (ht), weight (wt) and head
-circumference (head).
+age and sex (Cole & Green 1992). The measurement short names and units (see
+\code{\link{LMS2z}}) are as follows: height (ht, cm), weight (wt, kg),
+BMI (bmi, kg/m2) and head circumference (head, cm).
 
 Age is measured in \code{weeks} gestation and \code{years} post-term, where
 0 years corresponds to 40 weeks gestation.
 }
 \examples{
 data(ukwhopt)
-## calculate median birth weight (kg) in girls from 23 to 44 weeks gestation
-v <- LMS2z(x = (23:44-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt', ref = 'ukwhopt', toz = FALSE)
-setNames(v, 23:44)
+## calculate median birth weight (kg) in girls from 26 to 44 weeks gestation
+v <- LMS2z(x = (26:44-40) * 7 / 365.25, y = 0, sex = 2, measure = 'wt',
+  ref = 'ukwhopt', toz = FALSE)
+setNames(v, 26:44)
 }
 \references{
 Cole TJ, Green PJ. Smoothing reference centile curves: the LMS

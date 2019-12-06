@@ -4,8 +4,15 @@
 \alias{plotclean}
 \title{Plot multiple growth curves to identify outliers}
 \usage{
-plotclean(x, y, id = NULL, data = parent.frame(), n = length(x),
-  par.out = list(pch = 20), ...)
+plotclean(
+  x,
+  y,
+  id = NULL,
+  data = parent.frame(),
+  n = length(x),
+  par.out = list(pch = 20),
+  ...
+)
 }
 \arguments{
 \item{x}{vector of x coordinates.}

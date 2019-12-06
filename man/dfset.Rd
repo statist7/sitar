@@ -4,8 +4,7 @@
 \alias{dfset}
 \title{Find degrees of freedom for a natural spline curve to minimise BIC or AIC}
 \usage{
-dfset(x, y, data = parent.frame(), FUN = BIC, df = 1:15,
-  plot = FALSE, ...)
+dfset(x, y, data = parent.frame(), FUN = BIC, df = 1:15, plot = FALSE, ...)
 }
 \arguments{
 \item{x}{vector of x coordinates.}

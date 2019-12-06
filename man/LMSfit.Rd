@@ -4,8 +4,17 @@
 \alias{LMSfit}
 \title{Estimate LMS curves from tabulated growth reference centiles}
 \usage{
-LMSfit(x, y, sex, data = parent.frame(), centiles = c(3, 10, 25, 50,
-  75, 90, 97), df = c(6, 10, 8), L1 = FALSE, plot = TRUE, ...)
+LMSfit(
+  x,
+  y,
+  sex,
+  data = parent.frame(),
+  centiles = c(3, 10, 25, 50, 75, 90, 97),
+  df = c(6, 10, 8),
+  L1 = FALSE,
+  plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{vector of tabulated ages.}

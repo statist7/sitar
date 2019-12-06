@@ -4,8 +4,16 @@
 \alias{anova.sitar}
 \title{Compare Likelihoods of Fitted SITAR Objects}
 \usage{
-\method{anova}{sitar}(object, ..., test = TRUE, type = c("sequential",
-  "marginal"), adjustSigma = TRUE, Terms, L, verbose = FALSE)
+\method{anova}{sitar}(
+  object,
+  ...,
+  test = TRUE,
+  type = c("sequential", "marginal"),
+  adjustSigma = TRUE,
+  Terms,
+  L,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{object}{an object inheriting from class \code{sitar}.}

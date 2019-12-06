@@ -4,8 +4,7 @@
 \alias{velout}
 \title{Identify outliers with abnormal velocity in growth curves}
 \usage{
-velout(x, y, id, data, lag = 1, velpower = 0.5, limit = 5,
-  linearise = FALSE)
+velout(x, y, id, data, lag = 1, velpower = 0.5, limit = 5, linearise = FALSE)
 }
 \arguments{
 \item{x}{age vector.}

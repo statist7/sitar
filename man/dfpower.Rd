@@ -4,8 +4,15 @@
 \alias{dfpower}
 \title{Tabulate BIC of SITAR models by degrees of freedom and xy power transformations}
 \usage{
-dfpower(model, df, xpowers, ypowers, FUN = BICadj,
-  maxIter = nlmeControl()$maxIter, verbose = FALSE)
+dfpower(
+  model,
+  df,
+  xpowers,
+  ypowers,
+  FUN = BICadj,
+  maxIter = nlmeControl()$maxIter,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{model}{fitted \pkg{sitar} model to be updated.}

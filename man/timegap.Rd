@@ -8,11 +8,24 @@
 \usage{
 timegap(age, gap, tol = 0.1 * gap, multiple = FALSE)
 
-timegap.id(age, id, data = parent.frame(), gap, tol = 0.1 * gap,
-  multiple = FALSE)
+timegap.id(
+  age,
+  id,
+  data = parent.frame(),
+  gap,
+  tol = 0.1 * gap,
+  multiple = FALSE
+)
 
-diffid(age, id, data = parent.frame(), lag = 1, differences = 1,
-  sort = FALSE, keepNA = FALSE)
+diffid(
+  age,
+  id,
+  data = parent.frame(),
+  lag = 1,
+  differences = 1,
+  sort = FALSE,
+  keepNA = FALSE
+)
 }
 \arguments{
 \item{age}{vector of ages.}

@@ -12,12 +12,29 @@
 \alias{plot_c}
 \title{Plot SITAR model}
 \usage{
-\method{plot}{sitar}(x, opt = "dv", labels, apv = FALSE, xfun = I,
-  yfun = I, subset = NULL, ns = 101, abc = NULL, trim = 0,
-  add = FALSE, nlme = FALSE, returndata = FALSE, ..., xlab = NULL,
-  ylab = NULL, vlab = NULL, xlim = c(NA, NA), ylim = c(NA, NA),
-  vlim = c(NA, NA), legend = list(x = "topleft", inset = 0.04, bty =
-  "o"))
+\method{plot}{sitar}(
+  x,
+  opt = "dv",
+  labels,
+  apv = FALSE,
+  xfun = I,
+  yfun = I,
+  subset = NULL,
+  ns = 101,
+  abc = NULL,
+  trim = 0,
+  add = FALSE,
+  nlme = FALSE,
+  returndata = FALSE,
+  ...,
+  xlab = NULL,
+  ylab = NULL,
+  vlab = NULL,
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
+  vlim = c(NA, NA),
+  legend = list(x = "topleft", inset = 0.04, bty = "o")
+)
 
 \method{lines}{sitar}(x, ...)
 
