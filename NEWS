@@ -1,5 +1,7 @@
 Changes in Version 1.1.2
 
+  o apv_se is updated to work with the latest version of rtidy.
+
   o LMS2z is extended to handle disjunct references, where the centiles have a
     break or disjunction. Sex is also checked for more carefully.
 

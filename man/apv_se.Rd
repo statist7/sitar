@@ -10,7 +10,7 @@ apv_se(object, fun = getPeak, nboot = 10, seed = NULL, plot = FALSE, ...)
 \item{object}{SITAR model.}
 
 \item{fun}{function to extract apv and pv from velocity curve (default getPeak),
-alternative getTakeoff.}
+alternative getTakeoff or getTrough.}
 
 \item{nboot}{number of bootstrap samples (default 10).}
 
