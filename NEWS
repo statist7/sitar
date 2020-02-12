@@ -1,5 +1,9 @@
 Changes in Version 1.1.2
 
+  o The ukwhoterm dataset is added, similar to ukwhopt.
+
+  o The ukwhopt dataset is extended to cover age 26 weeks gestation to 20 years.
+
   o apv_se is updated to work with the latest version of rtidy.
 
   o LMS2z is extended to handle disjunct references, where the centiles have a
