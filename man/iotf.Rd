@@ -59,10 +59,6 @@ Cole TJ, Flegal KM, Nicholls D, Jackson AA. Body mass index cut offs to
 define thinness in children and adolescents: international survey.
 BMJ 2007;335:194-7.
 
-Cole TJ, Williams AF, Wright CM, et al. Revised birth centiles for weight,
-length and head circumference in the UK-WHO growth charts. Ann Hum Biol
-2011;38:7-11.
-
 Cole TJ, Lobstein T. Extended international (IOTF) body mass index cut-offs
 for thinness, overweight and obesity. Ped Obes 2012;7:284-94.
 }
