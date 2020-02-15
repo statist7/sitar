@@ -7,14 +7,14 @@
 #'
 #' The L, M and S values for each measurement correspond respectively to the
 #' Box-Cox power, median and coefficient of variation of the distribution by
-#' age and sex (Cole & Green 1992). The short names for each measurement (see
-#' \code{\link{LMS2z}}) are as follows: height (ht), weight (wt), body mass
-#' index (bmi), head circumference (head), sitting height (sitht), leg length
-#' (leglen), waist circumference (waist) and percent body fat (fat).
+#' age and sex (Cole & Green 1992). The short names and units for each measurement (see
+#' \code{\link{LMS2z}}) are as follows: height (ht, cm), weight (wt, kg), body mass
+#' index (bmi, kg/m2), head circumference (head, cm), sitting height (sitht, cm), leg length
+#' (leglen, cm), waist circumference (waist, cm) and percent body fat (fat, %).
 #'
 #' @name uk90
 #' @docType data
-#' @format A data frame with 588 observations on the following 26 variables:
+#' @format A tibble with 588 observations on the following 26 variables:
 #' \describe{
 #' \item{years}{numeric vector}
 #' \item{L.ht}{numeric vector}

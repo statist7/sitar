@@ -30,9 +30,9 @@ summarised by values of L, M and S by sex from birth to 19 years.
 \details{
 The L, M and S values for each measurement correspond respectively to the
 Box-Cox power, median and coefficient of variation of the distribution by
-age and sex (Cole & Green 1992). The short names for each measurement (see
-\code{\link{LMS2z}}) are as follows: height (ht), weight (wt) and body mass
-index (bmi).
+age and sex (Cole & Green 1992). The short names and units for each measurement (see
+\code{\link{LMS2z}}) are as follows: height (ht, cm), weight (wt, kg) and body mass
+index (bmi, kg/m2).
 }
 \examples{
 data(who0607)

@@ -44,14 +44,15 @@ reference (Cole et al 2011) from 26 to 42 weeks gestation, the WHO growth
 standard from 2 postnatal weeks to 4 years, and the British 1990 reference
 from 4 to 20 years.
 
+Age is measured in years, where 40 weeks gestation is 0 years. The conversion
+from weeks gestation to years is:
+\code{years = (weeks - 40) * 7 / 365.25}.
+
 The L, M and S values for each measurement correspond respectively to the
 Box-Cox power, median and coefficient of variation of the distribution by
 age and sex (Cole & Green 1992). The measurement short names and units (see
 \code{\link{LMS2z}}) are as follows: height (ht, cm), weight (wt, kg),
 BMI (bmi, kg/m2) and head circumference (head, cm).
-
-Age is measured in \code{weeks} gestation and \code{years} post-term, where
-0 years corresponds to 40 weeks gestation.
 }
 \examples{
 data(ukwhopt)

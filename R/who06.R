@@ -6,14 +6,14 @@
 #'
 #' The L, M and S values for each measurement correspond respectively to the
 #' Box-Cox power, median and coefficient of variation of the distribution by
-#' age and sex (Cole & Green 1992). The short names for each measurement (see
-#' \code{\link{LMS2z}}) are as follows: height (ht), weight (wt), body mass
-#' index (bmi), head circumference (head), arm circumference (arm), subscapular
-#' skinfold (subscap), and tricep skinfold (tricep).
+#' age and sex (Cole & Green 1992). The short names and units for each measurement (see
+#' \code{\link{LMS2z}}) are as follows: height (ht, cm), weight (wt, kg), body mass
+#' index (bmi, kg/m2), head circumference (head, cm), arm circumference (arm, cm), subscapular
+#' skinfold (subscap, mm), and tricep skinfold (tricep, mm).
 #'
 #' @name who06
 #' @docType data
-#' @format A data frame with 150 observations on the following 23 variables:
+#' @format A tibble with 150 observations on the following 23 variables:
 #' \describe{ \item{years}{age from 0 to 5 years}
 #' \item{L.ht}{numeric vector}
 #' \item{M.ht}{numeric vector}

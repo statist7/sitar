@@ -41,7 +41,7 @@ reference (Cole et al 2011), the WHO growth standard from 2 postnatal weeks
 to 4 years, and the British 1990 reference from 4 to 20 years.
 
 Age is measured in years, and term birth corresponds to ages between 37 and
-42 weeks gestation, where 40 weeks gestation is age 0. The conversion is:
+42 weeks gestation, where 40 weeks gestation is 0 years. The conversion is:
 \code{years = (weeks - 40) * 7 / 365.25}.
 
 The L, M and S values for each measurement correspond respectively to the
