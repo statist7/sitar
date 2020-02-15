@@ -64,7 +64,7 @@ apv_se <- function(object,
 
   df <- df %>%
     # generate bootstrap splits
-    nest(data = c(everything(), -id)) %>%
+    nest(data = -id) %>%
     bootstraps(times = nboot) %>%
     # generate bootstrap samples
     mutate(model = map(.data$splits, fit_sitar_on_bootstrap))
