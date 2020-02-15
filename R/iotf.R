@@ -1,6 +1,6 @@
 #' IOTF international body mass index reference
 #'
-#' The IOTF international BMI growth reference
+#' The IOTF (International Obesity TaskForce) BMI growth reference
 #' (Cole and Lobstein 2012), fitted by the LMS method and summarised by values
 #' of L, M and S by sex and postnatal age from 2 to 18 years.
 #'
@@ -10,8 +10,8 @@
 #'
 #' The L, M and S values for each measurement correspond respectively to the
 #' Box-Cox power, median and coefficient of variation of the distribution by
-#' age and sex (Cole & Green 1992). The measurement short name and units for BMI
-#' are bmi (kg/m2).
+#' age and sex (Cole & Green 1992). The measurement short name and units
+#' for \code{\link{LMS2z}} are bmi (kg/m2).
 #'
 #' @name iotf
 #' @docType data
@@ -44,12 +44,12 @@
 #' data(iotf)
 #' ## calculate z-scores by sex corresponding to IOTF cutoffs for thinness,
 #' ## overweight and obesity
-#' cutoff <- setNames(c(16, 17, 18.5, 25, 30),
-#'   c('thinness 3', 'thinness 2', 'thinness 1',
+#' co <- data.frame(cutoff = c(16, 17, 18.5, 25, 30),
+#'   grade = c('thinness 3', 'thinness 2', 'thinness 1',
 #'     'overweight', 'obesity'))
-#' map_dfc(setNames(1:2, c('boys', 'girls')),
-#'         ~ LMS2z(x = 18, y = cutoff, sex = .x,
-#'                 measure = 'bmi', ref ='iotf')) %>%
-#'   mutate(grade = names(cutoff), cutoff = cutoff) %>%
-#'   dplyr::select(grade, cutoff, everything())
+#' sexes <- c('boys', 'girls')
+#' with(co,
+#'   cbind(co, lapply(setNames(sexes, sexes), function(x)
+#'     LMS2z(x = 18, y = cutoff, sex = x,
+#'           measure = 'bmi', ref = 'iotf'))))
 "iotf"
