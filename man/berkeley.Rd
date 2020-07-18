@@ -4,7 +4,8 @@
 \name{berkeley}
 \alias{berkeley}
 \title{The Berkeley Child Guidance Study}
-\format{A data frame with 4884 observations on the following 10 variables:
+\format{
+A data frame with 4884 observations on the following 10 variables:
 \describe{
 \item{id}{factor with levels 201-278 male and 301-385 female}
 \item{age}{years, numeric vector}
@@ -16,7 +17,8 @@
 \item{leg.circ}{cm, numeric vector}
 \item{strength}{lb, numeric vector}
 \item{sex}{factor with level 1 male and level 2 female}
-}}
+}
+}
 \usage{
 berkeley
 }

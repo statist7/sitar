@@ -4,7 +4,8 @@
 \name{who06}
 \alias{who06}
 \title{The WHO 2006 growth standard}
-\format{A tibble with 150 observations on the following 23 variables:
+\format{
+A tibble with 150 observations on the following 23 variables:
 \describe{ \item{years}{age from 0 to 5 years}
 \item{L.ht}{numeric vector}
 \item{M.ht}{numeric vector}
@@ -27,7 +28,8 @@
 \item{L.tricep}{numeric vector}
 \item{M.tricep}{numeric vector}
 \item{S.tricep}{numeric vector}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \source{
 \url{http://www.who.int/childgrowth/en/}
 }

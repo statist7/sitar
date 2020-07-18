@@ -4,13 +4,15 @@
 \name{heights}
 \alias{heights}
 \title{Serial heights measured in 12 girls}
-\format{A data frame with 124 observations on the following 4 variables:
+\format{
+A data frame with 124 observations on the following 4 variables:
 \describe{
 \item{id}{factor of subject ids (levels 1:12).}
 \item{age}{vector of ages (years).}
 \item{height}{vector of heights (cm).}
 \item{men}{vector of ages at menarche (years), where negative values
-are right censored.} }}
+are right censored.} }
+}
 \usage{
 heights
 }

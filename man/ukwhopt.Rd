@@ -4,7 +4,8 @@
 \name{ukwhopt}
 \alias{ukwhopt}
 \title{UK-WHO growth reference including preterm}
-\format{A tibble with 542 observations on the following 17 variables:
+\format{
+A tibble with 542 observations on the following 17 variables:
 \describe{
 \item{age_wm}{numeric vector - age in weeks or months - see \code{wm}}
 \item{wm}{three-level factor indicating weeks or months: wkga = gestational
@@ -24,7 +25,8 @@ weeks, wk = postnatal weeks, mth = postnatal months}
 \item{S.head}{numeric vector}
 \item{origin}{two-level factor indicating the provenance of the data, with
 levels British1990 and WHO2006}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \source{
 The values are tabulated in the Excel spreadsheet UK_WHO_preterm.xls
 provided with the Excel add-in LMSgrowth from

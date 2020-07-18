@@ -4,13 +4,15 @@
 \name{iotf}
 \alias{iotf}
 \title{IOTF international body mass index reference}
-\format{A tibble with 66 observations on the following 5 variables:
+\format{
+A tibble with 66 observations on the following 5 variables:
 \describe{
 \item{years}{numeric vector - postnatal age in years}
 \item{L.bmi}{numeric vector}
 \item{M.bmi}{numeric vector}
 \item{S.bmi}{numeric vector}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \source{
 The values are tabulated in the Excel spreadsheet IOTF_LMS.xls
 provided with the Excel add-in LMSgrowth from

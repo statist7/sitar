@@ -4,7 +4,8 @@
 \name{who0607}
 \alias{who0607}
 \title{The WHO 2006 growth standard and WHO 2007 growth reference}
-\format{A tibble with 486 observations on the following 11 variables:
+\format{
+A tibble with 486 observations on the following 11 variables:
 \describe{ \item{years}{age from 0 to 19 years}
 \item{L.ht}{numeric vector}
 \item{M.ht}{numeric vector}
@@ -15,7 +16,8 @@
 \item{L.bmi}{numeric vector}
 \item{M.bmi}{numeric vector}
 \item{S.bmi}{numeric vector}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \source{
 \url{http://www.who.int/childgrowth/en/}
 }

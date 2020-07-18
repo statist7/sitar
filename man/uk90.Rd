@@ -4,7 +4,8 @@
 \name{uk90}
 \alias{uk90}
 \title{UK 1990 growth reference}
-\format{A tibble with 588 observations on the following 26 variables:
+\format{
+A tibble with 588 observations on the following 26 variables:
 \describe{
 \item{years}{numeric vector}
 \item{L.ht}{numeric vector}
@@ -31,7 +32,8 @@
 \item{L.bfat}{numeric vector}
 \item{M.bfat}{numeric vector}
 \item{S.bfat}{numeric vector}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \source{
 The values are tabulated in the spreadsheet British1990.xls provided
 with the Excel add-in LMSgrowth from:

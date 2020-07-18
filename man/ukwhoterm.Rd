@@ -4,7 +4,8 @@
 \name{ukwhoterm}
 \alias{ukwhoterm}
 \title{UK-WHO growth reference omitting preterm data}
-\format{A tibble with 512 observations on the following 15 variables:
+\format{
+A tibble with 512 observations on the following 15 variables:
 \describe{
 \item{years}{numeric vector - postnatal age in years}
 \item{L.ht}{numeric vector}
@@ -21,7 +22,8 @@
 \item{S.head}{numeric vector}
 \item{origin}{two-level factor indicating the provenance of the data, with
 levels British1990 and WHO2006}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \source{
 The values are tabulated in the Excel spreadsheet UK_WHO_preterm.xls
 provided with the Excel add-in LMSgrowth from

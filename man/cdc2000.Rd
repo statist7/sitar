@@ -4,7 +4,8 @@
 \name{cdc2000}
 \alias{cdc2000}
 \title{The CDC 2000 growth reference}
-\format{A tibble with 484 observations on the following 14 variables:
+\format{
+A tibble with 484 observations on the following 14 variables:
 \describe{ \item{years}{age from 0 to 19 years}
 \item{L.ht}{numeric vector}
 \item{M.ht}{numeric vector}
@@ -18,7 +19,8 @@
 \item{L.hc}{numeric vector}
 \item{M.hc}{numeric vector}
 \item{S.hc}{numeric vector}
-\item{sex}{two-level factor with level 1 male and level 2 female} }}
+\item{sex}{two-level factor with level 1 male and level 2 female} }
+}
 \usage{
 cdc2000
 }
