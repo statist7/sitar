@@ -205,7 +205,7 @@ z2cent <- function(z) {
   ct <- round(pnorm(z) * 100, np)
   mod10 <- ifelse(np, 0, floor(ct %% 10))
   th <- ifelse(mod10 == 0 | mod10 > 4 | (ct > 10 & ct < 14), 4, mod10)
-  th <- paste0(ct, c('st', 'nd', 'rd', 'th')[th])
+  th <- ifelse(is.na(th), 'NA', paste0(ct, c('st', 'nd', 'rd', 'th')[th]))
   th[th == '0th'] <- paste0('SDS', round(z[th == '0th'], 1))
   th[th == '100th'] <- paste('SDS', round(z[th == '100th'], 1), sep='+')
   th
