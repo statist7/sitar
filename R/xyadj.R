@@ -52,19 +52,17 @@ xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
     abc <- re[match(id, rownames(re)), , drop=FALSE]
   }
   abc <- as.data.frame(abc)
-  if (ncol(abc) < 3) {
-    . <- matrix(0, nrow=nrow(abc), ncol=3-ncol(abc),
-                dimnames=list(NULL, letters[1:3][!letters[1:3] %in% names(abc)]))
-    abc <- cbind(abc, .)
-  }
+  for (i in letters[1:4])
+    if (!i %in% names(abc))
+      abc[, i] <- 0
   xoffset <- object$xoffset
   if (!is.na(b0 <- fixef(object)['b'])) xoffset <- xoffset + b0
   if (tomean) {
     x.adj <- (x - xoffset - abc$b) * exp(abc$c) + xoffset
-    y.adj <- y - abc$a
+    y.adj <- y - abc$a - abc$d * (x - xoffset)
   } else {
     x.adj <- (x - xoffset) / exp(abc$c) + xoffset + abc$b
-    y.adj <- y + abc$a
+    y.adj <- y + abc$a + abc$d * (x - xoffset)
   }
   return(list(x=x.adj, y=y.adj))
 }
