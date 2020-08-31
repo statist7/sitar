@@ -11,7 +11,7 @@
 #' \code{knots} and \code{bounds} are offset by \code{xoffset} for fitting
 #' purposes, and similarly for fixed effect \code{b}.
 #'
-#' The formulae \code{a.formula}, \code{b.formula} and \code{c.formula} can
+#' The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and \code{d.formula} can
 #' include functions and interactions, but \code{\link{make.names}} is used to
 #' ensure that the names of the corresponding model terms are valid. The
 #' modified not the original names need to be specified in \code{predict.sitar}.
@@ -30,16 +30,17 @@
 #' @param df degrees of freedom for cubic regression spline (1 or more).
 #' @param knots vector of values for knots (default \code{df} quantiles of
 #' \code{x} distribution).
-#' @param fixed character string specifying a, b, c fixed effects (default
-#' \code{random} or the subset of "a+b+c" within \code{random}).
-#' @param random character string specifying a, b, c random effects (default
+#' @param fixed character string specifying a, b, c, d fixed effects (default
+#' \code{random} or the subset of "a + b + c + d" within \code{random}).
+#' @param random character string specifying a, b, c, d random effects (default
 #' \code{"a+b+c"}). Alternatively \code{nlme} formula e.g.
-#' \code{"list(id = pdDiag(a+b+c ~ 1))"}.
+#' \code{"list(id = pdDiag(a + b + c ~ 1))"}.
 #' @param pdDiag logical which if TRUE fits a diagonal random effects
 #' covariance matrix, or if FALSE (default) a general covariance matrix.
 #' @param a.formula formula for fixed effect a (default \code{~ 1}).
 #' @param b.formula formula for fixed effect b (default \code{~ 1}).
 #' @param c.formula formula for fixed effect c (default \code{~ 1}).
+#' @param d.formula formula for fixed effect d (default \code{~ 1}).
 #' @param bounds span of \code{x} for regression spline, or fractional
 #' extension of range (default 0.04).
 #' @param start optional numeric vector of initial estimates for the fixed
@@ -67,7 +68,7 @@
 #' @param na.action function for when the data contain NAs (see
 #' \code{\link{nlme}}).
 #' @param control list of control values for the estimation algorithm (see
-#' \code{\link{nlme}}) (default {nlmeControl(returnObject=TRUE)}).
+#' \code{\link{nlme}}) (default {nlmeControl(returnObject = TRUE)}).
 #' @param object object of class \code{sitar}.
 #' @param \dots further parameters for \code{update} consisting of any of the
 #' above \code{sitar} parameters.
@@ -104,10 +105,11 @@
 #' (m1 <- sitar(x=age, y=height, id=id, data=heights, df=5))
 #'
 #' ##  relate random effects to age at menarche (with censored values +ve)
-#' ##  both a (size) and b (tempo) are positively associated with age at menarche
+#' ##  both a (size) and b (timing) are positively associated with age at menarche
 #' amen <- abs(heights$men)
 #' (m2 <- update(m1, a.form=~amen, b.form=~amen, c.form=~amen))
 #' @import nlme
+#' @importFrom glue glue
 #' @importFrom splines ns
 #' @importFrom stats AIC BIC as.formula coef cor fitted lag lm logLik
 #' mad model.frame model.matrix na.fail na.omit pnorm predict qnorm quantile
@@ -120,12 +122,13 @@ sitar <-
            data,
            df,
            knots,
-           fixed = random,
-           random = 'a+b+c',
+           fixed = NULL,
+           random = 'a + b + c',
            pdDiag = FALSE,
            a.formula =  ~ 1,
            b.formula =  ~ 1,
            c.formula =  ~ 1,
+           d.formula =  ~ 1,
            bounds = 0.04,
            start,
            xoffset = 'mean',
@@ -196,35 +199,69 @@ sitar <-
     knots <- knots - xoffset
     bounds <- bounds - xoffset
 
-    # get spline start values
-    spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+    # extract and format random and fixed
+    extract <- function(x, set = letters[1:4]) {
+      x <- paste(as.character(x), collapse = ' ')
+      x <- unique(strsplit(x, '[^a-z]')[[1]]) # extract words
+      paste(x[x %in% set], collapse = ' + ') # combine selected
+    }
 
-    #	if start missing get start values for ss and a
-    if (nostart <-
-        missing(start))
-      start <- coef(spline.lm)[c(2:(df + 1), 1)]
-
-    # if random contains ~ extract a+b+c for random and fixed
-    fix <- fixed
-    if (grepl('~', random)) {
-      fullrandom <- random
-      ss <- strsplit(random, '[^a-z]')[[1]] # extract words
-      ss <- paste(ss[nchar(ss) == 1], collapse='+') # combine length-1 words
-      if (fix == random)
-        fix <- ss
-      random <- ss
+    # if random contains ~ extract effects from formula
+    if (any(grepl('~', random))) {
+      fullrandom <- ifelse(is.character(random),
+                           random,
+                           deparse(random))
+      random <- extract(random)
     } else {
-      fullrandom <- if (pdDiag)
-        glue::glue('list(id = pdDiag({random} ~ 1))')
-      else
-        NA
-  }
+      fullrandom <- ifelse (pdDiag,
+                            glue('list(id = pdDiag({random} ~ 1))'),
+                            NA)
+    }
+
+    # default fixed effects
+    if (is.null(fixed))
+      fixed <- random
+    # if fixed contains ~ drop it
+    else if (any(grepl('~', fixed)))
+      fixed <- as.character(as.formula(fixed))[-1]
+
     #	force fixed effect for a
-    if (!grepl('a', fix))
-      fix <- paste('a', fix, sep = '+')
+    if (!grepl('a', fixed))
+      fixed <- paste('a', fixed, sep = '+')
+
+    if (df > 1) {
+      ss <- paste0('s', 1:df)
+    #	if start missing get start values for ss and a
+      spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+      if (nostart <- missing(start)) {
+        start <- coef(spline.lm)[c(2:(df + 1), 1)]
+      }
+    # drop fixed effect for d if df > 1
+      if (grepl('d', fixed))
+        fixed <- extract(fixed, letters[1:3])
+    } else {
+      # 1 df so no spline
+      ss <- character(0)
+      #	if start missing get start values for a and d
+      spline.lm <- lm(y ~ x)
+      if (nostart <- missing(start)) {
+        start <- coef(spline.lm)
+      }
+      # omit b and change c to d
+      if (grepl('[bc]', random)) {
+        random <- sub('c', 'd', random)
+        random <- extract(random, letters[c(1, 4)])
+        if (nchar(random) == 0)
+          stop('no random effects')
+        else
+          warning('random effect(s) ', random)
+      }
+      fixed <- 'a + d'
+    }
 
     # set up args for fitnlme
-    fixed <- ss <- paste0('s', 1:df)
+    fix <- fixed
+    fixed <- ss
     pars <- c('x', ss)
 
     # if subsetted restore data
@@ -238,8 +275,8 @@ sitar <-
     id <- eval(mcall$id, data)
     fulldata <- data.frame(x, y, id, subset)
 
-    #	set up model elements for a, b and c
-    names(model) <- model <- letters[1:3]
+    #	set up model elements for a, b, c and d
+    names(model) <- model <- letters[1:4]
     constant <- mm.formula <- as.formula('~ 1')
     cmm <- matrix(nrow = nrow(data), ncol = 0)
     for (l in model) {
@@ -312,36 +349,36 @@ sitar <-
 
     if (returndata)
       return(invisible(fulldata))
-    pars <- paste(pars, collapse = ',')
+    if (nostart)
+      names(start) <- fixed
     fixed <- paste(fixed, collapse = '+')
-    sscomma <- paste(ss, collapse = ',')
+    pars <- paste(pars, collapse = ',')
+    ss <- paste(ss, collapse = ',')
 
     #	combine model elements
-    cglue <- function(x, string)
-      ifelse (is.na(x), '', string)
-    nsa <- cglue(model['a'], 'ma+')
-    nsb <- cglue(model['b'], '-mb')
-    nsc <- cglue(model['c'], ')*exp(mc')
+    cglue <- function(x, start, end)
+      ifelse (is.na(x) || x == '' || length(x) == 0,
+              '',
+              glue(start, x, end))
+
+    nsa <- cglue(model['a'], '', '')
+    nsb <- cglue(model['b'], '-(', ')')
+    nsc <- cglue(model['c'], ')*exp(', '')
+    nsd <- cglue(model['d'], '+(', ')*x')
+    ex <- glue('(x{nsb}{nsc})')
+    spline <- glue(cglue(ss, '+drop((cbind(', ')*ns({ex},k=knots,B=bounds))%*%mat)'))
     mat <- matrix(rep(1, df), ncol = 1)
 
     # expand fixed and if necessary random
-    fixed <- glue::glue('{fixed} ~ 1')
-    random <- if (!is.na(fullrandom))
-      fullrandom
-    else
-      glue::glue('{random} ~ 1 | id')
+    fixed <- glue('{fixed} ~ 1')
+    random <- ifelse (!is.na(fullrandom), fullrandom,
+                      glue('{random} ~ 1 | id'))
 
     #	code to parse
-    fitcode <- glue::glue(
+    fitcode <- glue(
       "fitenv <- new.env()\n",
       "fitenv$fitnlme <- function(<<pars>>) {\n",
-      "ma <- <<model['a']>>\n",
-      "mb <- <<model['b']>>\n",
-      "mc <- <<model['c']>>\n",
-      "ex <- (x<<nsb>><<nsc>>)\n",
-      "ey <- <<nsa>>drop((cbind(<<sscomma>>)*ns(ex,k=knots,B=bounds))%*%mat)\n",
-      "attr(ey, 'ex') <- ex\n",
-      "ey\n",
+      "<<nsa>><<spline>><<nsd>>\n",
       "}\n",
       "on.exit(detach(fitenv))\n",
       "attach(fitenv)\n",
@@ -424,6 +461,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       "a.formula",
       "b.formula",
       "c.formula",
+      "d.formula",
       "start",
       "returndata"
     ),
@@ -499,12 +537,11 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       if (!is.null(extras$knots)) {
         knots <- eval(extras$knots) - xoffset
         df <- length(knots) + 1
-        mcall$df <- NULL
-      }
+         mcall$df <- NULL
+     }
       # new arg df
       else if (!is.null(extras$df)) {
         df <- eval(extras$df)
-        knots <- quantile(x, (1:(df - 1)) / df)
         mcall$knots <- NULL
       }
       # new arg bounds
@@ -515,24 +552,27 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         else
           bounds <- bounds - xoffset
       }
-      #	get spline start values
-      spline.lm <-
-        lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
-      start.$fixed <-
-        c(coef(spline.lm)[c(2:(df + 1), 1)], start.$fixed[fixed.extra])
-      # new arg bstart
-      if (!is.null(extras$bstart) && !is.null(start.$fixed['b'])) {
-        bstart <- eval(extras$bstart)
-        if (bstart == 'mean')
-          bstart <- mean(x)
-        else
-          bstart <- bstart - xoffset
-        start.$fixed['b'] <- bstart
+      if (df > 1) {
+        knots <- quantile(x, (1:(df - 1)) / df)
+        #	get spline start values
+        spline.lm <-
+          lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
+        start.$fixed <-
+          c(coef(spline.lm)[c(2:(df + 1), 1)], start.$fixed[fixed.extra])
+        # new arg bstart
+        if (!is.null(extras$bstart) && !is.null(start.$fixed['b'])) {
+          bstart <- eval(extras$bstart)
+          if (bstart == 'mean')
+            bstart <- mean(x)
+          else
+            bstart <- bstart - xoffset
+          start.$fixed['b'] <- bstart
+        }
+        #	save start. object
+        assign('start.', start., parent.frame())
+        mcall[['start']] <- quote(start.)
       }
     }
-    #	save start. object
-    assign('start.', start., parent.frame())
-    mcall[['start']] <- quote(start.)
   }
   if (evaluate)
     eval(mcall, parent.frame())

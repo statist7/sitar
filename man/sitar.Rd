@@ -12,12 +12,13 @@ sitar(
   data,
   df,
   knots,
-  fixed = random,
-  random = "a+b+c",
+  fixed = NULL,
+  random = "a + b + c",
   pdDiag = FALSE,
   a.formula = ~1,
   b.formula = ~1,
   c.formula = ~1,
+  d.formula = ~1,
   bounds = 0.04,
   start,
   xoffset = "mean",
@@ -49,12 +50,12 @@ sitar(
 \item{knots}{vector of values for knots (default \code{df} quantiles of
 \code{x} distribution).}
 
-\item{fixed}{character string specifying a, b, c fixed effects (default
-\code{random} or the subset of "a+b+c" within \code{random}).}
+\item{fixed}{character string specifying a, b, c, d fixed effects (default
+\code{random} or the subset of "a + b + c + d" within \code{random}).}
 
-\item{random}{character string specifying a, b, c random effects (default
+\item{random}{character string specifying a, b, c, d random effects (default
 \code{"a+b+c"}). Alternatively \code{nlme} formula e.g.
-\code{"list(id = pdDiag(a+b+c ~ 1))"}.}
+\code{"list(id = pdDiag(a + b + c ~ 1))"}.}
 
 \item{pdDiag}{logical which if TRUE fits a diagonal random effects
 covariance matrix, or if FALSE (default) a general covariance matrix.}
@@ -64,6 +65,8 @@ covariance matrix, or if FALSE (default) a general covariance matrix.}
 \item{b.formula}{formula for fixed effect b (default \code{~ 1}).}
 
 \item{c.formula}{formula for fixed effect c (default \code{~ 1}).}
+
+\item{d.formula}{formula for fixed effect d (default \code{~ 1}).}
 
 \item{bounds}{span of \code{x} for regression spline, or fractional
 extension of range (default 0.04).}
@@ -103,7 +106,7 @@ that should be used in the fit (see \code{\link{nlme}}).}
 \code{\link{nlme}}).}
 
 \item{control}{list of control values for the estimation algorithm (see
-\code{\link{nlme}}) (default {nlmeControl(returnObject=TRUE)}).}
+\code{\link{nlme}}) (default {nlmeControl(returnObject = TRUE)}).}
 
 \item{object}{object of class \code{sitar}.}
 
@@ -150,7 +153,7 @@ affect the model fit and particularly \code{b}. The values of \code{bstart},
 \code{knots} and \code{bounds} are offset by \code{xoffset} for fitting
 purposes, and similarly for fixed effect \code{b}.
 
-The formulae \code{a.formula}, \code{b.formula} and \code{c.formula} can
+The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and \code{d.formula} can
 include functions and interactions, but \code{\link{make.names}} is used to
 ensure that the names of the corresponding model terms are valid. The
 modified not the original names need to be specified in \code{predict.sitar}.
@@ -167,7 +170,7 @@ data(heights)
 (m1 <- sitar(x=age, y=height, id=id, data=heights, df=5))
 
 ##  relate random effects to age at menarche (with censored values +ve)
-##  both a (size) and b (tempo) are positively associated with age at menarche
+##  both a (size) and b (timing) are positively associated with age at menarche
 amen <- abs(heights$men)
 (m2 <- update(m1, a.form=~amen, b.form=~amen, c.form=~amen))
 }
