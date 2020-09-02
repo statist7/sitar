@@ -2,8 +2,16 @@
 #'
 #' SITAR is a method of growth curve analysis, based on \pkg{nlme}, that
 #' summarises a set of growth curves with a mean growth curve as a regression
-#' spline, plus a set of up to three fixed and random effects (a, b and c)
+#' spline, plus a set of up to four fixed and random effects (a, b, c and d)
 #' defining how individual growth curves differ from the mean curve.
+#'
+#' The SITAR model usually has up to three random effects (a, b and c), termed
+#' size, timing and intensity respectively. \code{df} sets the degrees of freedom
+#' for the mean spline curve, taking values from 1 (i.e. linear) upwards. In
+#' addition there is a random effect for the slope, d, which is fitted when
+#' \code{df = 0} and - with a - it provides the classic random intercept random
+#' slope model. In addition d can be fitted, along with a, b and c, to extend
+#' SITAR to model variability in the adult slope of the growth curve.
 #'
 #' \code{xoffset} allows the origin of \code{x} to be varied, while
 #' \code{bstart} specifies the starting value for \code{b}, both of which can
@@ -12,7 +20,7 @@
 #' purposes, and similarly for fixed effect \code{b}.
 #'
 #' The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and \code{d.formula} can
-#' include functions and interactions, but \code{\link{make.names}} is used to
+#' include functions and interactions. \code{\link{make.names}} is used to
 #' ensure that the names of the corresponding model terms are valid. The
 #' modified not the original names need to be specified in \code{predict.sitar}.
 #'
@@ -27,7 +35,7 @@
 #' @param id factor of subject identifiers.
 #' @param data data frame containing variables \code{x}, \code{y} and
 #' \code{id}.
-#' @param df degrees of freedom for cubic regression spline (1 or more).
+#' @param df degrees of freedom for cubic regression spline (0 or more, see Details).
 #' @param knots vector of values for knots (default \code{df} quantiles of
 #' \code{x} distribution).
 #' @param fixed character string specifying a, b, c, d fixed effects (default
@@ -75,6 +83,7 @@
 #' @param evaluate logical to control evaluation.  If TRUE (default) the
 #' expanded \code{update} call is passed to \code{sitar} for evaluation, while
 #' if FALSE the expanded call itself is returned.
+#'
 #' @return An object inheriting from class \code{sitar} representing the
 #' nonlinear mixed-effects model fit, with all the components returned by
 #' \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
@@ -107,7 +116,7 @@
 #' ##  relate random effects to age at menarche (with censored values +ve)
 #' ##  both a (size) and b (timing) are positively associated with age at menarche
 #' amen <- abs(heights$men)
-#' (m2 <- update(m1, a.form=~amen, b.form=~amen, c.form=~amen))
+#' (m2 <- update(m1, a.formula = ~amen, b.formula = ~amen, c.formula = ~amen))
 #' @import nlme
 #' @importFrom glue glue
 #' @importFrom splines ns
