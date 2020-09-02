@@ -180,8 +180,14 @@ sitar <-
       stop("either df or knots must be specified")
     if (!missing(df) &&
         !missing(knots))
-      cat("both df and knots specified - df redefined from knots\n")
-    if (missing(knots)) {
+      warning("both df and knots specified - df redefined from knots\n")
+    if (!missing(knots)) {
+      if (!identical(range(c(knots, x)), range(x)))
+        stop("knots outside x range")
+      knots <- sort(knots)
+      df <- length(knots) + 1
+      mcall$df <- NULL
+    } else {
       df <- round(df)
       if (df < 0)
         stop("df must be 0 or more")
@@ -189,11 +195,6 @@ sitar <-
         quantile(x, (1:(df - 1)) / df)
       else
         numeric(0)
-    } else if (missing(df)) {
-      if (!identical(range(c(knots, x)), range(x)))
-        stop("knots outside x range")
-      knots <- knots[order(knots)]
-      df <- length(knots) + 1
     }
     if (nrow(data) <= df)
       stop("too few data to fit spline curve")
@@ -295,7 +296,8 @@ sitar <-
       pars <- c(pars, l)
       formula <- get(paste(l, 'formula', sep = '.'))
       if (formula == as.formula('~ -1') ||
-          formula == as.formula('~ 1-1') || !grepl(l, fix))
+          formula == as.formula('~ 1-1') ||
+          !grepl(l, fix))
         next
       if (formula == constant)
         mm.intercept <- TRUE
@@ -551,7 +553,6 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       # new arg df
       else if (!is.null(extras$df)) {
         df <- eval(extras$df)
-        knots <- quantile(x, (1:(df - 1)) / df)
         mcall$knots <- NULL
       }
       # new arg bounds
@@ -563,6 +564,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
           bounds <- bounds - xoffset
       }
       if (df > 1 && object$ns$rank > 2) { # omit start if df was/is [01]
+        knots <- quantile(x, (1:(df - 1)) / df)
         #	get spline start values
         spline.lm <-
           lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
