@@ -174,8 +174,8 @@ sitar <-
       cat("both df and knots specified - df redefined from knots\n")
     if (missing(knots)) {
       df <- round(df)
-      if (df < 1)
-        stop("df must be 1 or more")
+      if (df < 0)
+        stop("df must be 0 or more")
       knots <- if (df > 1)
         quantile(x, (1:(df - 1)) / df)
       else
@@ -226,38 +226,37 @@ sitar <-
       fixed <- as.character(as.formula(fixed))[-1]
 
     #	force fixed effect for a
-    if (!grepl('a', fixed))
-      fixed <- paste('a', fixed, sep = '+')
+    fixed <- extract(paste('a', fixed))
 
-    if (df > 1) {
+    # adjust fixed and random for df = [01] and set start
+    if (df > 0) { # fit spline
       ss <- paste0('s', 1:df)
     #	if start missing get start values for ss and a
       spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
-      if (nostart <- missing(start)) {
+      if (nostart <- missing(start))
         start <- coef(spline.lm)[c(2:(df + 1), 1)]
+    # if df = 1 set fixed to a and random to [ac]
+      if (df == 1) {
+        fixed <- 'a'
+        random <- extract(random, letters[c(1, 3)])
       }
-    # drop fixed effect for d if df > 1
-      if (grepl('d', fixed))
-        fixed <- extract(fixed, letters[1:3])
-    } else {
-      # 1 df so no spline
+    # drop fixed effect for d
+      fixed <- extract(fixed, letters[1:3])
+    } else { # 0 df for spline so fit y ~ x
       ss <- character(0)
-      #	if start missing get start values for a and d
+      #	if start missing get start values for [ad]
       spline.lm <- lm(y ~ x)
-      if (nostart <- missing(start)) {
+      if (nostart <- missing(start))
         start <- coef(spline.lm)
-      }
-      # omit b and change c to d
-      if (grepl('[bc]', random)) {
-        random <- sub('c', 'd', random)
-        random <- extract(random, letters[c(1, 4)])
-        if (nchar(random) == 0)
-          stop('no random effects')
-        else
-          warning('random effect(s) ', random)
-      }
+      # force fixed and random
       fixed <- 'a + d'
+      if (!'random' %in% names(mcall))
+        random <- fixed
+      else
+        random <- extract(random, letters[c(1, 4)])
     }
+    if (nchar(random) == 0)
+      stop('no random effects')
 
     # set up args for fitnlme
     fix <- fixed
@@ -371,8 +370,9 @@ sitar <-
 
     # expand fixed and if necessary random
     fixed <- glue('{fixed} ~ 1')
-    random <- ifelse (!is.na(fullrandom), fullrandom,
-                      glue('{random} ~ 1 | id'))
+    random <- ifelse (is.na(fullrandom),
+                      glue('{random} ~ 1 | id'),
+                      fullrandom)
 
     #	code to parse
     fitcode <- glue(
@@ -442,7 +442,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   mcall$start <- NULL
   #	expand formulae
   if (any(grep('formula', names(extras)))) {
-    for (n in paste0(letters[1:3], '.formula')) {
+    for (n in paste0(letters[1:4], '.formula')) {
       if (!is.null(extras[[n]]) && !is.null(mcall[[n]]))
         extras[[n]] <- update.formula(mcall[[n]], extras[[n]])
     }
@@ -542,6 +542,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       # new arg df
       else if (!is.null(extras$df)) {
         df <- eval(extras$df)
+        knots <- quantile(x, (1:(df - 1)) / df)
         mcall$knots <- NULL
       }
       # new arg bounds
@@ -552,8 +553,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         else
           bounds <- bounds - xoffset
       }
-      if (df > 1) {
-        knots <- quantile(x, (1:(df - 1)) / df)
+      if (df > 1 && object$ns$rank > 2) { # omit start if df was/is [01]
         #	get spline start values
         spline.lm <-
           lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
