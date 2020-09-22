@@ -23,10 +23,10 @@
 #'   depending on the value of \code{toz}.
 #' @param sex vector where 1/2 = males/females = boys/girls = TRUE/FALSE, based
 #'   on the uppercased first character of the string.
-#' @param measure measurement name, as character string, the choice depending on
+#' @param measure unique measurement name, as character string, the choice depending on
 #'   the choice of \code{ref} (see e.g. references \code{uk90}, \code{who06} and
 #'   \code{ukwhopt}).
-#' @param ref growth reference, either as name or character string, available as
+#' @param ref unique growth reference, either as name or character string, available as
 #'   a \code{data} object or data frame (e.g. \code{uk90}, \code{who06} or
 #'   \code{ukwhopt}).
 #' @param toz logical set to TRUE for conversion from measurement to z-score, or
@@ -69,13 +69,19 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
     levels(fsex) <- c(rep(1:2, 3), 1)
     as.numeric(fsex)
   }
+  measure <- unique(measure)
+  stopifnot('measure not unique' = length(measure) == 1L)
   xy <- data.frame(x, sex=test_sex(sex))
   x <- xy$x
   sex <- xy$sex
   LMS <- c('L', 'M', 'S')
   LMSnames <- paste(LMS, measure, sep='.')
-  if (is.character(ref))
+  if (is.character(ref)) {
+    ref <- unique(ref)
+    if (length(ref) != 1)
+      stop('ref not unique')
     ref <- get(ref)
+  }
   x[x < min(ref$years) | x > max(ref$years)] <- NA
   for (ix in 1:2) {
     sexvar <- sex == ix
@@ -95,7 +101,7 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
         refrange[is.na(refrange)] <- FALSE
         refrange <- which(sexvar)[refrange]
         if (length(refrange) > 0L) {
-        # cubic interpolation oF L, M and S
+        # cubic interpolation of L, M and S
           xy[refrange, LMS] <- lapply(LMSnames, function(lms) {
               with(refx[start:end, ], spline(years, get(lms), method='natural',
                                            xout=x[refrange])$y)

@@ -15,11 +15,11 @@ depending on the value of \code{toz}.}
 \item{sex}{vector where 1/2 = males/females = boys/girls = TRUE/FALSE, based
 on the uppercased first character of the string.}
 
-\item{measure}{measurement name, as character string, the choice depending on
+\item{measure}{unique measurement name, as character string, the choice depending on
 the choice of \code{ref} (see e.g. references \code{uk90}, \code{who06} and
 \code{ukwhopt}).}
 
-\item{ref}{growth reference, either as name or character string, available as
+\item{ref}{unique growth reference, either as name or character string, available as
 a \code{data} object or data frame (e.g. \code{uk90}, \code{who06} or
 \code{ukwhopt}).}
 
