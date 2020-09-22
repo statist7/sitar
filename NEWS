@@ -1,4 +1,9 @@
-Changes in Version 1.1.2
+Changes in Version 1.2.0
+
+  o A major extension to the SITAR model is to add a fourth random effect
+    called d, which is the age slope. It allows the simple random intercept
+    random slope model to be fitted, but it also extends the usual SITAR model by
+    allowing the adult portion of the growth curve to vary in slope.
 
   o The uscdc2000 and iotf datasets are added.
 

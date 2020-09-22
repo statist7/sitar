@@ -151,8 +151,9 @@ The SITAR model usually has up to three random effects (a, b and c), termed
 size, timing and intensity respectively. \code{df} sets the degrees of freedom
 for the mean spline curve, taking values from 1 (i.e. linear) upwards. In
 addition there is a random effect for the slope, d, which is fitted when
-\code{df = 0} and - with a - it provides the classic random intercept random
-slope model. In addition d can be fitted, along with a, b and c, to extend
+\code{df = 0}, and combined with a, it provides the classic random intercept random
+slope model, which is similar to the 1 df spline model. In addition d can be
+fitted, along with a, b and c, to extend
 SITAR to model variability in the adult slope of the growth curve.
 
 \code{xoffset} allows the origin of \code{x} to be varied, while
