@@ -30,7 +30,8 @@ Imports:
     rsample,
     stats,
     tibble,
-    tidyr
+    tidyr,
+    magrittr
 Suggests: 
     knitr,
     rmarkdown
