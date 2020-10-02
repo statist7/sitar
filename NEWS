@@ -5,6 +5,10 @@ Changes in Version 1.2.0
     random slope model to be fitted, but it also extends the usual SITAR model by
     allowing the adult portion of the growth curve to vary in slope.
 
+  o Two functions optimal_design and nagegp are added for the optimal design of
+    group reference centile studies - see Cole (Statistical Methods in Medical
+    Research, 2020).
+
   o The uscdc2000 and iotf datasets are added.
 
   o The who0607 dataset is added, extending who06 to age 19 for height, weight

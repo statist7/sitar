@@ -4,9 +4,9 @@
 #' when constructing growth reference centiles.
 #'
 #' Studies to construct growth reference centiles using \code{GAMLSS} need to
-#' be of optimal size. Cole (2020) has shown that
+#' be of optimal size. Cole (SMMR, 2020) has shown that
 #' the sample composition, i.e. the age distribution of the measurements,
-#' needs to be optimised as well as sample size. Sample composition is defined in terms of the age power
+#' needs to be optimised as well as the sample size. Sample composition is defined in terms of the age power
 #' lambda which determines the degree of infant oversampling.
 #'
 #' There are two criteria that determine the optimal sample size and sample
@@ -14,8 +14,8 @@
 #' of precision for that centile (as the z-score standard error SEz).
 #'
 #' @aliases optimal_design nagegp
-#' @param z z-score on which to base the design. The default -2
-#' equates to the 2nd centile, or if NA, optimal z is calculated from lambda.
+#' @param z z-score on which to base the design, with default -2 which
+#' equates to the 2nd centile. If NA, optimal z is calculated from lambda.
 #' @param lambda power of age that defines the sample composition.
 #' The default NA means calculate optimal lambda from z.
 #' @param N total sample size per sex. The default NA means calculate from
@@ -27,39 +27,51 @@
 #' @param minage youngest age (default 0).
 #' @param maxage oldest age (default 20).
 #' @param n_groups number of age groups (default 20).
-#' @return For optimal_design, a tibble with columns z, lambda, N, SEz and age as above, plus p, plo
-#' and phi, the centile corresponding to z with its 95% confidence interval.
-#' nagegp extends optimal_design by giving the numbers of measurements per age group, where the groups are of equal width.
-#' For nagegp, a tibble with columns n_varying, numbers for equal width age groups,
-#' age, mean ages for equal width age groups,
-#' n, number for each unequal width age group (only for longitudinal studies), and
-#' age_varying, target ages for unequal width age groups (only for longitudinal studies).
+#'
+#' @return For optimal_design, a tibble with columns:
+#' \item{z}{as above.}
+#' \item{lambda}{as above.}
+#' \item{N}{as above.}
+#' \item{SEz}{as above.}
+#' \item{age}{as above.}
+#' \item{p}{the centile corresponding to z.}
+#' \item{plo}{lower 95\% confidence interval for p.}
+#' \item{phi}{upper 95\% confidence interval for p.}
+#'
+#' For nagegp, a tibble giving the numbers of measurements to be collected
+#' per equal width age group, with columns:
+#' \item{n_varying}{numbers for equal width age groups.}
+#' \item{age}{mean ages for equal width age groups.}
+#' \item{n}{number for each unequal width age group (only for longitudinal studies).}
+#' \item{age_varying}{target ages for unequal width age groups (only for longitudinal studies).}
+#'
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @seealso The centiles can be fitted to data using the package \code{gamlss}
+#' @seealso \code{gamlss} to fit the centiles
 #' with the \code{BCCG}, \code{BCT} or \code{BCPE} family.
 #' @examples
-#'
 #' ## estimate optimal sample composition lambda and precision SEz for 9 centiles
 #' ## spaced 2/3 of a z-score apart, based on a sample of 10,000 children
+#'
 #' optimal_design(z = -4:4*2/3, N = 10000)
 #'
 #' ## calculate age group sizes optimised for centiles from the 50th to the 99.6th
 #' ## (or equivalently from the 50th to the 0.4th)
-#' with a sample of 10,000 children from 0 to 20 years in one-year groups
+#' ## with a sample of 10,000 children from 0 to 20 years in one-year groups
 #'
-#' map_dfc(0:4*2/3, ~{
+#' purrr::map_dfc(0:4*2/3, ~{
 #'   nagegp(z = .x, N = 10000) %>%
-#'       select(!!z2cent(.x) := n_varying)
+#'       dplyr::select(!!z2cent(.x) := n_varying)
 #'       }) %>%
-#'         bind_cols(tibble(age = paste(0:19, 1:20, sep='-')), .)
-#'
+#'         dplyr::bind_cols(tibble::tibble(age = paste(0:19, 1:20, sep='-')), .)
+#' @importFrom dplyr select bind_cols
 #' @importFrom purrr map_dfc
+#' @importFrom rlang .data !! :=
 #' @importFrom stats pnorm
 #' @importFrom tibble tibble
 #' @export optimal_design
 optimal_design <- function(z = -2, lambda = NA, N = NA, SEz = NA,
                            age = 10) {
-  stopifnot(!(is.na(z) && is.na(lambda)))
+  stopifnot(!(any(is.na(z) & is.na(lambda))))
   N0 <- 6878
   coef <- c(`(Intercept)` = -3.0878266723299, age = 0.0231399511712584,
             fz2 = 0.536999348905583, lambda = -0.283052090744945,
@@ -87,6 +99,11 @@ optimal_design <- function(z = -2, lambda = NA, N = NA, SEz = NA,
   tibble(z = z, lambda = lambda, N = N, SEz = SEz, age = age, p = z2cent(z), plo = plo, phi = phi)
 }
 
+if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "!!", ":="))
+
+#' @importFrom dplyr select
+#' @importFrom purrr map_dfc
+#' @importFrom tibble tibble
 #' @rdname optimal_design
 #' @export
 nagegp <- function(z = -2, lambda = NA, N = NA, SEz = NA, minage = 0, maxage = 20, n_groups = 20) {
@@ -100,19 +117,19 @@ nagegp <- function(z = -2, lambda = NA, N = NA, SEz = NA, minage = 0, maxage = 2
                   even = 1:(2 * n_groups + 1) %% 2 == 0, # TRUE design age, FALSE age group boundary
                   age = seq(minage, # equal width groups
                             maxage,
-                            length = length(even)),
+                            length = length(.data$even)),
                   age0 = seq(minage^lambda, # unequal width groups
                              maxage^lambda,
-                             length = length(even))^(1/lambda)) %>%
-    mutate(n0 = age^lambda - lag(age^lambda, 2),
-           n0 = ifelse(even, 0, n0),
-           n0 = N * n0 / sum(n0, na.rm=TRUE),
-           n0 = round(lead(n0))) %>%
-    filter(even) %>% # age group means
-    select(n_varying = n0,
-                  age,
-                  n,
-                  age_varying = age0)
+                             length = length(.data$even))^(1/lambda)) %>%
+    mutate(n0 = .data$age^lambda - dplyr::lag(.data$age^lambda, 2),
+           n0 = ifelse(.data$even, 0, .data$n0),
+           n0 = N * .data$n0 / sum(.data$n0, na.rm=TRUE),
+           n0 = round(dplyr::lead(.data$n0))) %>%
+    filter(.data$even) %>% # age group means
+    select(n_varying = .data$n0,
+           age = .data$age,
+           n = .data$n,
+           age_varying = .data$age0)
   return(table)
 }
 

@@ -18,8 +18,8 @@ nagegp(
 )
 }
 \arguments{
-\item{z}{z-score on which to base the design. The default -2
-equates to the 2nd centile, or if NA, optimal z is calculated from lambda.}
+\item{z}{z-score on which to base the design, with default -2 which
+equates to the 2nd centile. If NA, optimal z is calculated from lambda.}
 
 \item{lambda}{power of age that defines the sample composition.
 The default NA means calculate optimal lambda from z.}
@@ -40,13 +40,22 @@ and if z or lambda are optimal SEz is independent of age.}
 \item{n_groups}{number of age groups (default 20).}
 }
 \value{
-For optimal_design, a tibble with columns z, lambda, N, SEz and age as above, plus p, plo
-and phi, the centile corresponding to z with its 95% confidence interval.
-nagegp extends optimal_design by giving the numbers of measurements per age group, where the groups are of equal width.
-For nagegp, a tibble with columns n_varying, numbers for equal width age groups,
-age, mean ages for equal width age groups,
-n, number for each unequal width age group (only for longitudinal studies), and
-age_varying, target ages for unequal width age groups (only for longitudinal studies).
+For optimal_design, a tibble with columns:
+\item{z}{as above.}
+\item{lambda}{as above.}
+\item{N}{as above.}
+\item{SEz}{as above.}
+\item{age}{as above.}
+\item{p}{the centile corresponding to z.}
+\item{plo}{lower 95\% confidence interval for p.}
+\item{phi}{upper 95\% confidence interval for p.}
+
+For nagegp, a tibble giving the numbers of measurements to be collected
+per equal width age group, with columns:
+\item{n_varying}{numbers for equal width age groups.}
+\item{age}{mean ages for equal width age groups.}
+\item{n}{number for each unequal width age group (only for longitudinal studies).}
+\item{age_varying}{target ages for unequal width age groups (only for longitudinal studies).}
 }
 \description{
 Two functions for estimating optimal sample size and sample composition
@@ -54,9 +63,9 @@ when constructing growth reference centiles.
 }
 \details{
 Studies to construct growth reference centiles using \code{GAMLSS} need to
-be of optimal size. Cole (2020) has shown that
+be of optimal size. Cole (SMMR, 2020) has shown that
 the sample composition, i.e. the age distribution of the measurements,
-needs to be optimised as well as sample size. Sample composition is defined in terms of the age power
+needs to be optimised as well as the sample size. Sample composition is defined in terms of the age power
 lambda which determines the degree of infant oversampling.
 
 There are two criteria that determine the optimal sample size and sample
@@ -64,24 +73,23 @@ composition: the centile of interest (as z-score z) and the required level
 of precision for that centile (as the z-score standard error SEz).
 }
 \examples{
-
 ## estimate optimal sample composition lambda and precision SEz for 9 centiles
 ## spaced 2/3 of a z-score apart, based on a sample of 10,000 children
+
 optimal_design(z = -4:4*2/3, N = 10000)
 
 ## calculate age group sizes optimised for centiles from the 50th to the 99.6th
 ## (or equivalently from the 50th to the 0.4th)
-with a sample of 10,000 children from 0 to 20 years in one-year groups
+## with a sample of 10,000 children from 0 to 20 years in one-year groups
 
-map_dfc(0:4*2/3, ~{
+purrr::map_dfc(0:4*2/3, ~{
   nagegp(z = .x, N = 10000) \%>\%
-      select(!!z2cent(.x) := n_varying)
+      dplyr::select(!!z2cent(.x) := n_varying)
       }) \%>\%
-        bind_cols(tibble(age = paste(0:19, 1:20, sep='-')), .)
-
+        dplyr::bind_cols(tibble::tibble(age = paste(0:19, 1:20, sep='-')), .)
 }
 \seealso{
-The centiles can be fitted to data using the package \code{gamlss}
+\code{gamlss} to fit the centiles
 with the \code{BCCG}, \code{BCT} or \code{BCPE} family.
 }
 \author{
