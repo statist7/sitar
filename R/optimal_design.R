@@ -13,7 +13,7 @@
 #' composition: the centile of interest (as z-score z) and the required level
 #' of precision for that centile (as the z-score standard error SEz).
 #'
-#' @aliases optimal_design nagegp
+#' @aliases optimal_design n_agegp
 #' @param z z-score on which to base the design, with default -2 which
 #' equates to the 2nd centile. If NA, optimal z is calculated from lambda.
 #' @param lambda power of age that defines the sample composition.
@@ -38,7 +38,7 @@
 #' \item{plo}{lower 95\% confidence interval for p.}
 #' \item{phi}{upper 95\% confidence interval for p.}
 #'
-#' For nagegp, a tibble giving the numbers of measurements to be collected
+#' For n_agegp, a tibble giving the numbers of measurements to be collected
 #' per equal width age group, with columns:
 #' \item{n_varying}{numbers for equal width age groups.}
 #' \item{age}{mean ages for equal width age groups.}
@@ -59,7 +59,7 @@
 #' ## with a sample of 10,000 children from 0 to 20 years in one-year groups
 #'
 #' purrr::map_dfc(0:4*2/3, ~{
-#'   nagegp(z = .x, N = 10000) %>%
+#'   n_agegp(z = .x, N = 10000) %>%
 #'       dplyr::select(!!z2cent(.x) := n_varying)
 #'       }) %>%
 #'         dplyr::bind_cols(tibble::tibble(age = paste(0:19, 1:20, sep='-')), .)
@@ -106,7 +106,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "!!", ":="))
 #' @importFrom tibble tibble
 #' @rdname optimal_design
 #' @export
-nagegp <- function(z = -2, lambda = NA, N = NA, SEz = NA, minage = 0, maxage = 20, n_groups = 20) {
+n_agegp <- function(z = -2, lambda = NA, N = NA, SEz = NA, minage = 0, maxage = 20, n_groups = 20) {
   results <- optimal_design(z, lambda, N, SEz)
   if (is.na(lambda))
     lambda <- results$lambda

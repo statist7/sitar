@@ -2,12 +2,12 @@
 % Please edit documentation in R/optimal_design.R
 \name{optimal_design}
 \alias{optimal_design}
-\alias{nagegp}
+\alias{n_agegp}
 \title{Optimal design for growth reference centile studies}
 \usage{
 optimal_design(z = -2, lambda = NA, N = NA, SEz = NA, age = 10)
 
-nagegp(
+n_agegp(
   z = -2,
   lambda = NA,
   N = NA,
@@ -50,7 +50,7 @@ For optimal_design, a tibble with columns:
 \item{plo}{lower 95\% confidence interval for p.}
 \item{phi}{upper 95\% confidence interval for p.}
 
-For nagegp, a tibble giving the numbers of measurements to be collected
+For n_agegp, a tibble giving the numbers of measurements to be collected
 per equal width age group, with columns:
 \item{n_varying}{numbers for equal width age groups.}
 \item{age}{mean ages for equal width age groups.}
@@ -83,7 +83,7 @@ optimal_design(z = -4:4*2/3, N = 10000)
 ## with a sample of 10,000 children from 0 to 20 years in one-year groups
 
 purrr::map_dfc(0:4*2/3, ~{
-  nagegp(z = .x, N = 10000) \%>\%
+  n_agegp(z = .x, N = 10000) \%>\%
       dplyr::select(!!z2cent(.x) := n_varying)
       }) \%>\%
         dplyr::bind_cols(tibble::tibble(age = paste(0:19, 1:20, sep='-')), .)
