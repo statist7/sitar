@@ -63,6 +63,8 @@
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,
                             xfun=function(x) x, yfun=function(y) y) {
+# ensure level integral
+    level <- as.integer(level)
 # create x in newdata
     oc <- object$call.sitar
     x <- if ('.x' %in% names(newdata))
@@ -88,12 +90,12 @@
         else
           stop('abc unrecognised as id')
       } else {
-# check abc as length 3 vector or data frame
+# check abc as length 4 vector or data frame
         if (is.vector(abc))
           abc <- data.frame(t(abc))
-        if (!all(names(abc) %in% letters[1:3]))
+        if (!all(names(abc) %in% letters[1:4]))
           stop('abc unrecognised as data frame')
-        abc[, letters[1:3][!letters[1:3] %in% names(abc)]] <- 0 # fill with zeros
+        abc[, letters[1:4][!letters[1:4] %in% names(abc)]] <- 0 # fill with zeros
       }
     }
 # create id in newdata
@@ -143,7 +145,7 @@
       re <- ranef(object)
       abc <- apply(re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE], 2, mean)
       abc <- data.frame(t(abc))
-      level <- 1
+      level <- 1L
 # set to mean gd, covariates not in newdata
       if (exists('notnames') && length(notnames) > 0) {
         if (!exists('gd'))
@@ -202,7 +204,7 @@
       }
     }
 # return data frame if level 0:1
-    if (length(level) > 1)
+    if (length(level) > 1L)
       return(data.frame(id=factor(id), predict.fixed=pred0, predict.id=pred))
 # add names or split by id if level 1
     if (level == 0L)
