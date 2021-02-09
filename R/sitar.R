@@ -236,8 +236,9 @@ sitar <-
     else if (any(grepl('~', fixed)))
       fixed <- as.character(as.formula(fixed))[-1]
 
-    #	force fixed effect for a
+    #	force fixed effect and intercept for a
     fixed <- extract(paste('a', fixed))
+    a.formula <- update.formula(a.formula, ~. + 1)
 
     # adjust fixed and random for df = [01] and set start
     if (df > 0) { # fit spline
@@ -272,7 +273,12 @@ sitar <-
     # set up args for fitnlme
     fix <- fixed
     fixed <- ss
-    pars <- c('x', ss)
+    random.names <- all.names(as.formula(paste0('~', random)), functions = FALSE)
+    pars <- c('x', random.names, ss)
+
+    #	set up model elements for a, b, c and d
+    model <- setNames(letters[1:4], letters[1:4])
+    model[!names(model) %in% random.names] <- ''
 
     # if subsetted restore data
     if (!is.null(subset)) {
@@ -285,22 +291,13 @@ sitar <-
     id <- eval(mcall$id, data)
     fulldata <- data.frame(x, y, id, subset)
 
-    #	set up model elements for a, b, c and d
-    names(model) <- model <- letters[1:4]
-    constant <- mm.formula <- as.formula('~ 1')
+    mm.formula <- ~1
     cmm <- matrix(nrow = nrow(data), ncol = 0)
-    for (l in model) {
-      if (!grepl(l, fix) && !grepl(l, random)) {
-        model[l] <- NA
+    for (l in names(model)) {
+      formula <- update.formula(get(paste(l, 'formula', sep = '.')), ~.)
+      if ((!grepl(l, fix) && formula == ~1) || formula == ~1 - 1)
         next
-      }
-      pars <- c(pars, l)
-      formula <- get(paste(l, 'formula', sep = '.'))
-      if (formula == as.formula('~ -1') ||
-          formula == as.formula('~ 1-1') ||
-          !grepl(l, fix))
-        next
-      if (formula == constant)
+      if (formula == ~1)
         mm.intercept <- TRUE
       else {
         if (formula != mm.formula) {
@@ -331,6 +328,10 @@ sitar <-
       }
       if (mm.intercept) {
         fixed <- c(fixed, l)
+        if (!l %in% pars) {
+          pars <- c(pars, l)
+          model[l] <- paste0(l, model[l])
+        }
         if (nostart) {
           if (l == 'b')
             start <- c(start, bstart)
@@ -368,9 +369,7 @@ sitar <-
 
     #	combine model elements
     cglue <- function(x, start, end)
-      ifelse (is.na(x) || x == '' || length(x) == 0,
-              '',
-              glue(start, x, end))
+      ifelse (x == '', x, glue(start, x, end))
 
     nsa <- cglue(model['a'], '', '')
     nsb <- cglue(model['b'], '-(', ')')
