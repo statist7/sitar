@@ -5,9 +5,9 @@
 #'
 #' When tomean = TRUE the x and y values are adjusted to \deqn{(x - xoffset -
 #' b<fixed> - b<random>) * exp(c<random>) + xoffset + b<fixed>} \deqn{y -
-#' a<random>} When tomean = FALSE they are adjusted to \deqn{(x - xoffset -
+#' a<random> - d<random> * x} When tomean = FALSE they are adjusted to \deqn{(x - xoffset -
 #' b<fixed>) / exp(c<random>) + xoffset + b<fixed> + b<random>} \deqn{y +
-#' a<random>} In each case missing values of the fixed or random effects are
+#' a<random> + d<random> * x} In each case missing values of the fixed or random effects are
 #' set to zero.
 #'
 #' @param object a SITAR model.
@@ -16,7 +16,7 @@
 #' @param y a vector of y coordinates (default NULL).
 #' @param id a factor denoting the subject levels corresponding to \code{x} and
 #' \code{y}.
-#' @param abc a data frame containing random effects for a, b and c (default
+#' @param abc a data frame containing random effects for a, b, c and d (default
 #' \code{ranef(object)[id, ]}).
 #' @param tomean a logical defining the direction of adjustment. TRUE (default)
 #' indicates that individual curves are translated and rotated to match the
@@ -57,12 +57,13 @@ xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
       abc[, i] <- 0
   xoffset <- object$xoffset
   if (!is.na(b0 <- fixef(object)['b'])) xoffset <- xoffset + b0
+  x <- x - xoffset
   if (tomean) {
-    x.adj <- (x - xoffset - abc$b) * exp(abc$c) + xoffset
-    y.adj <- y - abc$a - abc$d * (x - xoffset)
+    x.adj <- (x - abc$b) * exp(abc$c) + xoffset
+    y.adj <- y - abc$a - abc$d * x
   } else {
-    x.adj <- (x - xoffset) / exp(abc$c) + xoffset + abc$b
-    y.adj <- y + abc$a + abc$d * (x - xoffset)
+    x.adj <- x / exp(abc$c) + abc$b + xoffset
+    y.adj <- y + abc$a + abc$d * x
   }
   return(list(x=x.adj, y=y.adj))
 }

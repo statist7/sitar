@@ -17,7 +17,7 @@ xyadj(object, x, y = NULL, id, abc = NULL, tomean = TRUE)
 \item{id}{a factor denoting the subject levels corresponding to \code{x} and
 \code{y}.}
 
-\item{abc}{a data frame containing random effects for a, b and c (default
+\item{abc}{a data frame containing random effects for a, b, c and d (default
 \code{ranef(object)[id, ]}).}
 
 \item{tomean}{a logical defining the direction of adjustment. TRUE (default)
@@ -36,9 +36,9 @@ random effects from a SITAR model.
 \details{
 When tomean = TRUE the x and y values are adjusted to \deqn{(x - xoffset -
 b<fixed> - b<random>) * exp(c<random>) + xoffset + b<fixed>} \deqn{y -
-a<random>} When tomean = FALSE they are adjusted to \deqn{(x - xoffset -
+a<random> - d<random> * x} When tomean = FALSE they are adjusted to \deqn{(x - xoffset -
 b<fixed>) / exp(c<random>) + xoffset + b<fixed> + b<random>} \deqn{y +
-a<random>} In each case missing values of the fixed or random effects are
+a<random> + d<random> * x} In each case missing values of the fixed or random effects are
 set to zero.
 }
 \examples{
