@@ -63,8 +63,17 @@
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,
                             xfun=function(x) x, yfun=function(y) y) {
-# ensure level integral
-    level <- as.integer(level)
+# random effects
+    re <- ranef(object)
+# check if newdata subsetted (from plot)
+    subset <- attr(newdata, 'subset')
+    if (!is.null(subset)) {
+      if (!is.null(abc))
+        stop('use subset or abc but not both')
+# subset re
+      re <- re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE]
+      level <- 1L
+    }
 # create x in newdata
     oc <- object$call.sitar
     x <- if ('.x' %in% names(newdata))
@@ -76,40 +85,50 @@
       warning('xoffset set to mean(x) - best to refit model')
     }
     newdata$x <- x - xoffset
-# check abc as id
-    id <- rownames(ranef(object))
-    if (all(level == 0L))
-      abc <- NULL
-    else
-    if (!is.null(abc)) {
-      if (is.null(names(abc))) {
-        if (is.vector(abc) && length(abc) == 1 && as.character(abc) %in% id) {
-          newdata$id <- abc
-          newdata$.id <- abc <- NULL
-        }
-        else
-          stop('abc unrecognised as id')
-      } else {
-# check abc as length 4 vector or data frame
-        if (is.vector(abc))
-          abc <- data.frame(t(abc))
-        if (!all(names(abc) %in% letters[1:4]))
-          stop('abc unrecognised as data frame')
-        abc[, letters[1:4][!letters[1:4] %in% names(abc)]] <- 0 # fill with zeros
-      }
-    }
+# ensure level is integral
+    level <- as.integer(level)
 # create id in newdata
+    id <- rownames(re)
     newdata$id <- if ('.id' %in% names(newdata))
       newdata$.id
     else {
-      if (any(level == 1L) && (is.null(abc) || nrow(abc) > 1))
+      if (any(level == 1L) && (is.null(abc) || nrow(abc) > 1)) # abc not set yet
         eval(oc$id, newdata)
       else
         factor(1, labels=id[1])
     }
+# check if abc is id
+    if (all(level == 0L))
+      abc <- NULL
+    else if (!is.null(abc)) {
+      if (is.null(names(abc))) {
+        if (is.vector(abc) && length(abc) == 1 && as.character(abc) %in% rownames(re)) {
+          newdata$id <- abc
+          abc <- NULL
+        }
+        else
+          stop('abc unrecognised as id')
+      }
+    }
     id <- newdata$id
-    if (!is.null(abc))
-      abc <- abc[id, ] # expand with id
+# check abc is named vector or data frame
+    if (!is.null(abc)) {
+      if (is.vector(abc))
+        abc <- data.frame(t(abc))
+    }
+# derive mean ranef to centre data
+    mean.abc <- data.frame(t(apply(re, 2, mean)))
+    null.abc <- is.null(abc)
+    if (null.abc)
+      abc <- mean.abc
+    else
+      abc <- abc + mean.abc
+# check letters in abc
+    if (!all(names(abc) %in% letters[1:4]))
+      stop('abc unrecognised as data frame')
+    abc[, letters[1:4][!letters[1:4] %in% names(abc)]] <- 0 # fill with zeros
+# expand abc with id
+    abc <- abc[id, ]
 # check if old-style object lacking fitnlme
     if (!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')
@@ -136,17 +155,8 @@
 	        newdata[, i] <- newdata[, i] - covmeans[i]
       }
     }
-# check if newdata subsetted (from plot)
-    subset <- attr(newdata, 'subset')
+# centre covariates not in newdata to mean gd
     if (!is.null(subset)) {
-      if (!is.null(abc))
-        stop('use subset or abc but not both')
-# create abc for subset
-      re <- ranef(object)
-      abc <- apply(re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE], 2, mean)
-      abc <- data.frame(t(abc))
-      level <- 1L
-# set to mean gd, covariates not in newdata
       if (exists('notnames') && length(notnames) > 0) {
         if (!exists('gd'))
           gd <- update(object, returndata=TRUE)
@@ -154,13 +164,8 @@
           newdata[, i] <- mean(gd[subset, i])
       }
     }
-# set class to nlme
+# set class to nlme to use predict.nlme
     class(object) <- class(object)[-1]
-# ensure deriv integral
-    deriv <- as.integer(deriv)
-# simple prediction
-    if (all(deriv == 0L) && is.null(abc))
-      return(yfun(predict(object, newdata, level=level, ...)))
 # DISTANCE
 # level 0 prediction
     pred0 <- yfun(predict(object, newdata, level=0L))
@@ -168,6 +173,10 @@
 # level 1 prediction
     newdata$x <- xy.id$x - xoffset
     pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+    if (null.abc)
+      pred0 <- pred
+# ensure deriv is integral
+    deriv <- as.integer(deriv)
     if (any(deriv > 0L)) {
 # VELOCITY
 # level 0 prediction
@@ -181,8 +190,8 @@
             body(yfun) == as.name('x')) {
 # x and y untransformed
             vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
-            if (is.null(abc))
-              abc <- ranef(object)[id, , drop=FALSE]
+            if (null.abc)
+              abc <- re[id, , drop=FALSE]
             if (!is.null(abc$c))
               vel <- vel * exp(abc$c)
           } else {
