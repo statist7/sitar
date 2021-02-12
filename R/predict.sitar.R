@@ -65,16 +65,23 @@
                             xfun=function(x) x, yfun=function(y) y) {
 # random effects
     re <- ranef(object)
-# check if newdata subsetted (from plot)
-    subset <- attr(newdata, 'subset')
-    if (!is.null(subset)) {
-      if (!is.null(abc))
-        stop('use subset or abc but not both')
+# check if subset in call
+    subset <- eval(match.call()$subset)
+    if (!is.null(subset) && length(subset) == nrow(newdata))
+      newdata <- subset(newdata, subset)
+# check if subset from plot
+    else
+      subset <- attr(newdata, 'subset')
 # subset re
+    if (!is.null(subset)) {
       re <- re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE]
       level <- 1L
     }
-# create x in newdata
+# centre random effects
+    re <- scale(re, scale = FALSE)
+    re.mean <- data.frame(t(attr(re, 'scaled:center')))
+    re.mean <- re.mean[rep(1, nrow(newdata)), , drop = FALSE]
+    # create x in newdata
     oc <- object$call.sitar
     x <- if ('.x' %in% names(newdata))
       newdata$.x
@@ -92,7 +99,7 @@
     newdata$id <- if ('.id' %in% names(newdata))
       newdata$.id
     else {
-      if (any(level == 1L) && (is.null(abc) || nrow(abc) > 1)) # abc not set yet
+      if (any(level == 1L) && is.null(abc))
         eval(oc$id, newdata)
       else
         factor(1, labels=id[1])
@@ -100,35 +107,23 @@
 # check if abc is id
     if (all(level == 0L))
       abc <- NULL
-    else if (!is.null(abc)) {
-      if (is.null(names(abc))) {
-        if (is.vector(abc) && length(abc) == 1 && as.character(abc) %in% rownames(re)) {
-          newdata$id <- abc
-          abc <- NULL
-        }
-        else
-          stop('abc unrecognised as id')
-      }
+    else if (!is.null(abc) && is.null(names(abc)) &&
+             length(abc) == 1 && as.character(abc) %in% rownames(re)) {
+      newdata$id <- abc
+      abc <- NULL
     }
     id <- newdata$id
-# check abc is named vector or data frame
+# adjust abc for mean ranef
     if (!is.null(abc)) {
-      if (is.vector(abc))
-        abc <- data.frame(t(abc))
+      abc.t <- re.mean
+      for (i in names(re.mean)) {
+        abc.t[, i] <- if (is.na(abc[i]))
+          re.mean[, i]
+        else
+          re.mean[, i] + abc[i]
+      }
+      abc <- abc.t
     }
-# derive mean ranef to centre data
-    mean.abc <- data.frame(t(apply(re, 2, mean)))
-    null.abc <- is.null(abc)
-    if (null.abc)
-      abc <- mean.abc
-    else
-      abc <- abc + mean.abc
-# check letters in abc
-    if (!all(names(abc) %in% letters[1:4]))
-      stop('abc unrecognised as data frame')
-    abc[, letters[1:4][!letters[1:4] %in% names(abc)]] <- 0 # fill with zeros
-# expand abc with id
-    abc <- abc[id, ]
 # check if old-style object lacking fitnlme
     if (!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')
@@ -167,21 +162,25 @@
 # set class to nlme to use predict.nlme
     class(object) <- class(object)[-1]
 # DISTANCE
-# level 0 prediction
-    pred0 <- yfun(predict(object, newdata, level=0L))
-    xy.id <- xyadj(object, x=x, y=0, id=id, abc=abc)
 # level 1 prediction
+    if (is.null(abc))
+      pred <- yfun(predict(object, newdata))
+    else {
+      xy.id <- xyadj(object, x=x, y=0, id=id, abc=abc)
+      newdata$x <- xy.id$x - xoffset
+      pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+    }
+# level 0 prediction
+    xy.id <- xyadj(object, x=x, y=0, id=id, abc=re.mean)
     newdata$x <- xy.id$x - xoffset
-    pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
-    if (null.abc)
-      pred0 <- pred
-# ensure deriv is integral
-    deriv <- as.integer(deriv)
-    if (any(deriv > 0L)) {
+    pred0 <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+# ensure deriv is unique and integral
+    deriv <- as.integer(max(deriv))
+    if (deriv > 0L) {
 # VELOCITY
 # level 0 prediction
       ss0 <- smooth.spline(xfun(x), pred0)
-      vel0 <- predict(ss0, xfun(x), deriv=max(deriv))
+      vel0 <- predict(ss0, xfun(x), deriv=deriv)
       pred0 <- vel0$y
 # velocity curve on back-transformed axes
       if (any(level == 1L)) {
@@ -190,8 +189,6 @@
             body(yfun) == as.name('x')) {
 # x and y untransformed
             vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
-            if (null.abc)
-              abc <- re[id, , drop=FALSE]
             if (!is.null(abc$c))
               vel <- vel * exp(abc$c)
           } else {
@@ -202,9 +199,9 @@
             with(z, {
               if (length(xorig) >= 4) {
                 ss <- smooth.spline(xorig, pred, df=min(20, length(xorig)))
-                predict(ss, xorig, deriv=max(deriv))$y
+                predict(ss, xorig, deriv=deriv)$y
               } else
-                predict(ss0, xorig, deriv=max(deriv))$y
+                predict(ss0, xorig, deriv=deriv)$y
             })
           })
           vel <- do.call('c', as.list(vel))
