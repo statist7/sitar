@@ -9,6 +9,9 @@ Changes in Version 1.2.0
     group reference centile studies - see Cole (Statistical Methods in Medical
     Research, 2020).
 
+  o A breaking change is to fix the prediction and plotting of mean curves for models
+  	where one or more of the b-c-d fixed effects are omitted.
+
   o The uscdc2000 and iotf datasets are added.
 
   o The who0607 dataset is added, extending who06 to age 19 for height, weight
