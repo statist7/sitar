@@ -20,8 +20,9 @@
 #' \code{knots} and \code{bounds} are offset by \code{xoffset} for fitting
 #' purposes, and similarly for fixed effect \code{b}.
 #'
-#' The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and \code{d.formula} can
-#' include functions and interactions. \code{\link{make.names}} is used to
+#' The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and \code{d.formula}
+#' allow for cov.names and
+#' can include functions and interactions. \code{\link{make.names}} is used to
 #' ensure that the names of the corresponding model terms are valid. The
 #' modified not the original names need to be specified in \code{predict.sitar}.
 #'
@@ -90,22 +91,19 @@
 #' \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
 #' following components:
 #' \item{fitnlme}{the function returning the predicted value of \code{y}.}
+#' \item{constants}{data frame of mean a-b-c-d values for unique combinations
+#' of covariates (excluding age).}
 #' \item{call.sitar}{the internal \code{sitar} call that produced the object.}
 #' \item{xoffset}{the value of \code{xoffset}.}
 #' \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
 #'
 #' Generic functions such as \code{print}, \code{plot}, \code{anova} and
 #' \code{summary} have methods to show the results of the fit. The functions
-#' \code{resid}, \code{coef}, \code{fitted}, \code{fixed.effects},
+#' \code{residuals}, \code{coef}, \code{fitted}, \code{fixed.effects},
 #' \code{random.effects}, \code{predict}, \code{getData}, \code{getGroups},
 #' \code{getCovariate} and \code{getVarCov} can be used to extract some of its
 #' components.
 #'
-#' Note that versions of \code{sitar} prior to 1.0.4 did not return
-#' \code{fitnlme}. Both \code{plot} and \code{predict} may require it, in which
-#' case they \code{update} the SITAR object on the fly, with a message. Also
-#' version 1.0.5 altered the defaults for \code{xoffset} and \code{bstart}.
-#' Models fitted with versions prior to 1.0.5 need refitting.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @keywords package nonlinear regression models
 #' @examples
@@ -433,9 +431,43 @@ sitar <-
     #	save fitted model
     nlme.out <- eval(parse(text = fitcode))
     class(nlme.out) <- c('sitar', class(nlme.out))
+    # save fitnlme
     nlme.out$fitnlme <- fitenv$fitnlme
+    # save constants
+    model <- lapply(model, function(x)
+      if (x == '')
+        NULL
+      else
+        as.formula(paste0('~', x)))
+    model <- model[!sapply(model, is.null)]
+    cov.names <- unique(unlist(lapply(names(model), function(x)
+      all.names(get(paste0(x, '.formula')), functions = FALSE)
+    )))
+    random.mean <- if (is.data.frame(ranef(nlme.out)))
+      apply(ranef(nlme.out), 2, mean)
+    else # fudge for random as list
+      setNames(rep(0, length(random.names)), random.names)
+    fixed <- fixef(nlme.out)
+    fixed[random.names[!random.names %in% names(fixed)]] <- 0
+    fixed[random.names] <- fixed[random.names] + random.mean
+    newdata <- data.frame(fulldata, t(fixed))
+    model <- as.data.frame(lapply(model, function(x) eval(x[[2]], newdata)))
+    if (length(cov.names) > 0L) {
+      newdata <- setNames(as.data.frame(lapply(cov.names, function(x) with(data, get(x)))),
+                          cov.names)
+      newdata <- cbind(newdata, model)
+      for (i in rev(seq.int(cov.names)))
+        newdata <- newdata[order(newdata[, i]), ]
+    } else
+      newdata <- model
+    newdata <- unique(newdata)
+    rownames(newdata) <- 1:nrow(newdata)
+    nlme.out$constants <- newdata
+    # save call
     nlme.out$call.sitar <- mcall
+    # save xoffset
     nlme.out$xoffset <- xoffset
+    # save ns curve
     nlme.out$ns <- spline.lm
     #   if (exists('start.')) rm(start., inherits=TRUE)
     nlme.out

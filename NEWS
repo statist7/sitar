@@ -5,12 +5,16 @@ Changes in Version 1.2.0
     random slope model to be fitted, but it also extends the usual SITAR model by
     allowing the adult portion of the growth curve to vary in slope.
 
+  o A breaking change fixes the prediction and plotting of mean curves for models
+  	where one or more of the b-c-d fixed effects are omitted.
+
+  o The fitted SITAR model now includes an element 'constants', a data frame
+    giving the mean values of a-b-c-d indexed by unique levels of covariates
+    where fitted. Can be useful for models with complex fixed effects.
+
   o Two functions optimal_design and nagegp are added for the optimal design of
     group reference centile studies - see Cole (Statistical Methods in Medical
     Research, 2020).
-
-  o A breaking change is to fix the prediction and plotting of mean curves for models
-  	where one or more of the b-c-d fixed effects are omitted.
 
   o The uscdc2000 and iotf datasets are added.
 
