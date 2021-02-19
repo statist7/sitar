@@ -2,57 +2,79 @@
 % Please edit documentation in R/dfpower.R
 \name{dfpower}
 \alias{dfpower}
-\title{Tabulate BIC of SITAR models by degrees of freedom and xy power transformations}
+\title{Tabulate BIC of SITAR models by degrees of freedom, fixed effects and xy power transformations}
 \usage{
 dfpower(
-  model,
+  object,
   df,
+  fixed,
   xpowers,
   ypowers,
   FUN = BICadj,
-  maxIter = nlmeControl()$maxIter,
+  maxIter = 50,
+  drop = TRUE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{model}{fitted \pkg{sitar} model to be updated.}
+\item{object}{fitted \pkg{sitar} model to be updated.}
 
-\item{df}{vector of degrees of freedom to be fitted (defaults to df in \code{model}).}
+\item{df}{vector of integer spline degrees of freedom to be fitted (defaults to \code{df} in \code{object}).}
 
-\item{xpowers}{vector of powers to apply to x (defaults to x power in \code{model}).}
+\item{fixed}{character vector of fixed effects to be included
+(defaults to \code{fixed} in \code{object}, typically 'a + b + c').}
 
-\item{ypowers}{vector of powers to apply to y (defaults to y power in \code{model}).}
+\item{xpowers}{vector of powers to apply to x (defaults to the power of x in \code{object}).}
 
-\item{FUN}{function to be tabulated (default BICadj, or e.g. AICadj or varexp).}
+\item{ypowers}{vector of powers to apply to y (defaults to the power of y in \code{object}).}
 
-\item{maxIter}{maximum number of iterations per fit.}
+\item{FUN}{function to be tabulated (default \code{BICadj}).}
 
-\item{verbose}{logical controlling monitoring.}
+\item{maxIter}{maximum number of iterations per fit (default \code{nlmeControl()$maxIter}).}
+
+\item{drop}{logical which if TRUE (default) drops redundant dimensions and labels from the returned array.}
+
+\item{verbose}{logical controlling monitoring, which gives \code{numIter} for each model.}
 }
 \value{
-Table or vector of returned values.
+Four-way array of returned values, ranked with the largest dimensions first,
+and by default with single-level dimensions dropped.
+
+Values are returned with changed sign if the model fit generates a warning, or as
+NA if there is an error.
 }
 \description{
-\code{dfpower} fits a series of SITAR models tabulated by specified degrees of freedom
-and power transformations of x and y, returning a table of function values (e.g. BIC)
-applied to each model.
+\code{dfpower} fits a series of \pkg{sitar} models tabulated by combinations of
+a) specified degrees of freedom for the spline curve,
+b) specified fixed effects a, b, c, d,
+c) specified power transformations of x, and
+d) specified power transformations of y,
+returning a four-way array of function values (e.g. BIC) applied to each model.
+The function provides a convenient way to optimise the model.
 }
 \details{
-The function provides a convenient way to optimise the model's degrees of freedom
-and explore transformations of x and y, based by default on adjusted BIC.
-The function value is returned with changed sign if there is a warning, or as
-NA if there is an error. The run-time can be shortened by reducing \code{maxIter},
-as the models that converge do so in relatively few iterations, and much of
-the run-time is spent on models that fail to converge.
+\code{xpowers} and \code{ypowers} treat power 0 as \code{log}. The formula for
+\code{x} in \code{object} must be of the form \code{x^power} or \code{fun(x)}, e.g.
+\code{x}, \code{x^0.5} or \code{log(x)}. More complex formulae e.g. \code{log(x + 1)}
+will fail. In this case fit the model with the variable \code{x1 = x + 1} instead.
 
-\code{FUN} can be any function returning a single numerical value.
+\code{FUN} can be any function returning a single numerical value, e.g.
+\code{BICadj}, \code{BIC}, \code{AIC}, \code{varexp} or \code{sigma}.
 
-The returned table can be rearranged using \code{\link{aperm}}.
+Other fixed effects in \code{object} for covariates in \code{a.formula}, \code{b.formula},
+\code{c.formula} or \code{d.formula} are propagated through all the models.
+
+The run-time can be shortened by reducing \code{maxIter},
+as models often converge quickly or not at all.
 }
 \examples{
 data(heights)
 m1 <- sitar(log(age), height, id, heights, 4)
-dfpower(m1, df=4:5, xpowers=0:1, maxIter=4)
+dfpower(m1, df=4:5, fixed = 'a+c', xpowers=0:1, maxIter=5)
+}
+\seealso{
+\code{\link{aperm}} transposes the returned array;
+\code{\link{addmargins}} adds margins.
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}

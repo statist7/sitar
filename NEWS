@@ -1,12 +1,16 @@
 Changes in Version 1.2.0
 
+  o dfpower is extended to include fixed effects for a-b-c-d as well as spline
+    degrees of freedom and powers of x and y.
+
   o A major extension to the SITAR model is to add a fourth random effect
     called d, which is the age slope. It allows the simple random intercept
     random slope model to be fitted, but it also extends the usual SITAR model by
     allowing the adult portion of the growth curve to vary in slope.
 
   o A breaking change fixes the prediction and plotting of mean curves for models
-  	where one or more of the b-c-d fixed effects are omitted.
+  	where one or more of the b-c-d fixed effects are omitted. The mean curve now
+  	now corresponds to the mean of the fitted random effects.
 
   o The fitted SITAR model now includes an element 'constants', a data frame
     giving the mean values of a-b-c-d indexed by unique levels of covariates
