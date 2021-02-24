@@ -49,10 +49,9 @@ These are the three growth patterns that SITAR focuses on, which are labelled si
 
 The SITAR model estimates size, timing and intensity for each individual as random effects, and then uses the values to adjust individual curves to the average. The graph (above right) shows the girls' curves after they have been SITAR-adjusted, and they are now all superimposed - most of the inter-individual variability has been removed.
 
-It has achieved this by shifting the high curves down and the low curves up (i.e. adjusting for size), and shifting the early curves later and the late curves earlier (timing). For intensity, the steep curves are made shallower by stretching them along the age scale, and the shallow curves are made 
-steeper by shrinking them along the age scale.
+It has achieved this by shifting the high curves down and the low curves up (i.e. adjusting for size), and shifting the early curves later and the late curves earlier (timing). For intensity, the steep curves are made shallower by stretching them along the age scale, and the shallow curves are made steeper by shrinking them along the age scale.
 
-This explains the name SITAR - SuperImposition by Translation And Rotation. The curve adjustment involves translatiion (shifting the curves up/down and left/right) and rotation (making them steeper or shallower), and the effect is to superimpose the curves.
+This explains the name SITAR - SuperImposition by Translation And Rotation. The curve adjustment involves translation (shifting the curves up/down and left/right) and rotation (making them steeper or shallower), and the effect is to superimpose the curves.
 
 ## Mean curve
 
