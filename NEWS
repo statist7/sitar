@@ -1,5 +1,8 @@
 Changes in Version 1.2.0
 
+  o A function ob_convertr is added which converts child prevalence rates for
+    underweight, overweight or obesity from one reference cutoff to another.
+
   o dfpower is extended to include fixed effects for a-b-c-d as well as spline
     degrees of freedom and powers of x and y.
 
