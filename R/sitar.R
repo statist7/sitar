@@ -119,7 +119,7 @@
 #' @import nlme
 #' @importFrom glue glue
 #' @importFrom splines ns
-#' @importFrom stats AIC BIC as.formula coef cor fitted lag lm logLik
+#' @importFrom stats AIC BIC as.formula coef cor fitted lm logLik
 #' mad model.frame model.matrix na.fail na.omit pnorm predict qnorm quantile
 #' residuals sd setNames smooth.spline spline update update.formula
 #' @export sitar
