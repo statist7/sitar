@@ -12,8 +12,9 @@ Changes in Version 1.2.0
     allowing the adult portion of the growth curve to vary in slope.
 
   o A breaking change fixes the prediction and plotting of mean curves for models
-  	where one or more of the b-c-d fixed effects are omitted. The mean curve now
-  	now corresponds to the mean of the fitted random effects.
+  	with fewer fixed effects than random effects, e.g. random = 'a + b + c' and
+  	fixed = 'a + b'. The mean curve now corresponds to the mean of the fitted
+  	random effects, whereas before it did not.
 
   o The fitted SITAR model now includes an element 'constants', a data frame
     giving the mean values of a-b-c-d indexed by unique levels of covariates
@@ -21,9 +22,9 @@ Changes in Version 1.2.0
 
   o Two functions optimal_design and nagegp are added for the optimal design of
     group reference centile studies - see Cole (Statistical Methods in Medical
-    Research, 2020).
+    Research, 2020). A vignette has also been added describing how to use them.
 
-  o The uscdc2000 and iotf datasets are added.
+  o The cdc2000 and iotf datasets are added.
 
   o The who0607 dataset is added, extending who06 to age 19 for height, weight
     and BMI.
@@ -44,7 +45,7 @@ Changes in Version 1.2.0
 
   o pdLMS density calculation corrected.
 
-  o In plot.sitar transformations of x / y using xfun / yfun are now applied
+  o In plot.sitar, transformations of x / y using xfun / yfun are now applied
     after back-transforming x / y to their original scales.
 
   o getPeakTrough algorithm improved, and takeoff argument added for use with
