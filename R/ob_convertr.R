@@ -31,6 +31,9 @@
 #' based on the LMS method, which allows prevalence to be converted to a common
 #' BMI centile and z-score scale.
 #'
+#' The algorithm is commutative, which means that converting a prevalence rate
+#' from cutoff A to cutoff B and then from B to A returns the original value.
+#'
 #' @param prev vector of age-sex-specific percentage prevalence rates.
 #' @param age vector of ages between 2 and 18 years corresponding to each rate.
 #' @param sex vector of the sexes corresponding to each rate, coded as either

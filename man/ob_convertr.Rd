@@ -84,6 +84,9 @@ originally defined.
 The conversion algorithm exploits the fact that all three references are
 based on the LMS method, which allows prevalence to be converted to a common
 BMI centile and z-score scale.
+
+The algorithm is commutative, which means that converting a prevalence rate
+from cutoff A to cutoff B and then from B to A returns the original value.
 }
 \examples{
 ## convert 10\% IOTF overweight prevalence (cutoff IOTF25) in 8-year-old boys
