@@ -2,7 +2,8 @@
 % Please edit documentation in R/ob_convertr.R
 \name{ob_convertr}
 \alias{ob_convertr}
-\title{Convert between IOTF, WHO and CDC prevalence rates for child underweight, overweight and obesity}
+\title{Convert between IOTF, WHO and CDC prevalence rates for child thinness,
+overweight and obesity}
 \usage{
 ob_convertr(
   prev = 50,
@@ -17,52 +18,72 @@ ob_convertr(
 )
 }
 \arguments{
-\item{prev}{vector of percentage prevalence rates in groups of children.}
+\item{prev}{vector of age-sex-specific percentage prevalence rates.}
 
-\item{age}{vector of mean ages in years corresponding to each rate.}
+\item{age}{vector of ages between 2 and 18 years corresponding to each rate.}
 
-\item{sex}{vector of the sexes corresponding to each rate, coded as either 'boys/girls'
-or 'male/female' or '1/2' (only the first character in each case counts).}
+\item{sex}{vector of the sexes corresponding to each rate, coded as either
+'boys/girls' or 'male/female' or '1/2' (upper or lower case, and only the
+first character considered).}
 
-\item{from}{the BMI cutoff (see below) on which prevalence \code{prev} of
-underweight, overweight or obesity is based.}
+\item{from}{the BMI cutoff (see Details) on which the prevalence is based.}
 
-\item{to}{the BMI cutoff to be used to convert the prevalence to.}
+\item{to}{the BMI cutoff (see Details) on which to base the converted
+prevalence.}
 
-\item{prev_true}{optional vector of known prevalence rates corresponding to cutoff \code{to},
-for comparison purposes.}
+\item{prev_true}{optional vector of known percentage prevalence rates
+corresponding to \code{to}, for validation purposes.}
 
 \item{report}{character controlling the format of the returned data: 'vector'
-for the estimated prevalence rates, 'wider' for the working tibble in wide format,
-i.e. the 'from' and 'to' data side by side, and 'longer' for the tibble in
-long format, i.e. two rows, one for 'from' and one for 'to'.}
+for the estimated prevalence rates, 'wider' for the working tibble in wide
+format, i.e. the \code{from} and \code{to} data side by side, or 'longer'
+for the tibble in long format, i.e. two rows per rate, one for \code{from}
+and one for \code{to}.}
 
 \item{plot}{character controlling what if anything is plotted: 'no' for no
-plot, 'density' to compare the BMI distributions and cutoffs corresponding
-to \code{from} and \code{to}, or 'compare' to compare the estimated prevalence
-rates with the true rates in \code{prev_true}.}
+plot, 'density' to display the BMI density distributions and cutoffs
+corresponding to \code{from} and \code{to}, or 'compare' to display the
+predicted prevalence rates plotted against the observed rates in
+\code{prev_true}.}
 
-\item{data}{data frame containing prev, age, sex and optionally prev_true.}
+\item{data}{data frame containing \code{prev}, \code{age}, \code{sex} and
+\code{prev_true}.}
 }
 \value{
-Either the estimated prevalence rates based on cutoff \code{to}, or a plot
-visualizing the findings, depending on the \code{report} and \code{plot} settings.
+Either the converted prevalence rates or a plot visualizing the
+  findings, depending on the \code{report} and \code{plot} settings.
 }
 \description{
-Child thinness, overweight and obesity are defined by the child's body mass index (BMI) exceeding
-(above or below) a pre-specified reference cutoff. Three references are considered:
-IOTF (International Obesity Task Force), WHO (World Health Organization) and CDC
-(US Centers for Disease Control and Prevention). They each have separate cutoffs
-for thinness, overweight and obesity. \code{ob_convertr} takes age-sex-specific
-prevalence rates based on one reference cutoff and estimates what the rates would be
-if based on a different cutoff, using a novel algorithm.
+Child thinness, overweight and obesity are defined as the child's body mass
+index (BMI) lying beyond a pre-specified reference cutoff. Three references
+are compared here: IOTF (International Obesity Task Force), WHO (World Health
+Organization) and CDC (US Centers for Disease Control and Prevention), each
+of which have their own cutoffs. \code{ob_convertr} takes age-sex-specific
+prevalence rates of thinness, overweight and obesity based on one cutoff, and
+converts them to rates based on a different cutoff, using a novel estimation
+algorithm.
 }
 \details{
-Each reference has cutoffs corresponding to respectively underweight, overweight and obesity.
-They are referred to here as "IOTF16", "IOTF17", "IOTF18.5", "IOTF25", "IOTF30", "IOTF35",
-"WHO-2", "WHO-1", "WHO+1", "WHO+2", "CDC5", "CDC85" and "CDC95".
+The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18:
+IOTF35 (morbid obesity), IOTF30 (obesity), IOTF25 (overweight), IOTF18.5
+(grade 1 thinness), IOTF17 (grade 2 thinness) and IOTF16 (grade 3 thinness).
 
-See ... for an explanation of how the conversion calculation is done.
+The WHO cutoffs correspond to BMI z_scores: WHO+2 (obesity), WHO+1
+(overweight), WHO-1 (mild thinness) and WHO-2 (thinness).
+
+The CDC cutoffs correspond to BMI centiles: CDC95 (obesity), CDC85
+(overweight) and CDC5 (thinness).
+
+Note 1: the overweight category needs to be analysed as overweight plus obesity.
+To predict overweight excluding obesity, first calculate predicted overweight
+plus obesity then subtract predicted obesity.
+
+Note 2: the category labels are harmonised and not necessarily as
+originally defined.
+
+The conversion algorithm exploits the fact that all three references are
+based on the LMS method, which allows prevalence to be converted to a common
+BMI centile and z-score scale.
 }
 \examples{
 ## convert 10\% IOTF overweight prevalence (cutoff IOTF25) in 8-year-old boys
@@ -70,7 +91,8 @@ See ... for an explanation of how the conversion calculation is done.
 ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1')
 
 ## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
-ob_convertr(10, 8, 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
+ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
+
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}

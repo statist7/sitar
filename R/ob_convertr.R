@@ -1,43 +1,61 @@
-#' Convert between IOTF, WHO and CDC prevalence rates for child underweight, overweight and obesity
+#' Convert between IOTF, WHO and CDC prevalence rates for child thinness,
+#' overweight and obesity
 #'
-#' Child thinness, overweight and obesity are defined by the child's body mass index (BMI) exceeding
-#' (above or below) a pre-specified reference cutoff. Three references are considered:
-#' IOTF (International Obesity Task Force), WHO (World Health Organization) and CDC
-#' (US Centers for Disease Control and Prevention). They each have separate cutoffs
-#' for thinness, overweight and obesity. \code{ob_convertr} takes age-sex-specific
-#' prevalence rates based on one reference cutoff and estimates what the rates would be
-#' if based on a different cutoff, using a novel algorithm.
+#' Child thinness, overweight and obesity are defined as the child's body mass
+#' index (BMI) lying beyond a pre-specified reference cutoff. Three references
+#' are compared here: IOTF (International Obesity Task Force), WHO (World Health
+#' Organization) and CDC (US Centers for Disease Control and Prevention), each
+#' of which have their own cutoffs. \code{ob_convertr} takes age-sex-specific
+#' prevalence rates of thinness, overweight and obesity based on one cutoff, and
+#' converts them to rates based on a different cutoff, using a novel estimation
+#' algorithm.
 #'
-#' Each reference has cutoffs corresponding to respectively underweight, overweight and obesity.
-#' They are "IOTF16", "IOTF17", "IOTF18.5", "IOTF25", "IOTF30", "IOTF35",
-#' "WHO-2", "WHO-1", "WHO+1", "WHO+2", "CDC5", "CDC85" and "CDC95".
+#' The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18:
+#' IOTF35 (morbid obesity), IOTF30 (obesity), IOTF25 (overweight), IOTF18.5
+#' (grade 1 thinness), IOTF17 (grade 2 thinness) and IOTF16 (grade 3 thinness).
 #'
-#' See ... for an explanation of how the conversion calculation is done.
+#' The WHO cutoffs correspond to BMI z_scores: WHO+2 (obesity), WHO+1
+#' (overweight), WHO-1 (mild thinness) and WHO-2 (thinness).
 #'
-#' @param prev vector of percentage prevalence rates in groups of children.
-#' @param age vector of mean ages in years corresponding to each rate.
-#' @param sex vector of the sexes corresponding to each rate, coded as either 'boys/girls'
-#' or 'male/female' or '1/2' (only the first character in each case counts).
-#' @param from name of the BMI cutoff (see below) on which \code{prev} is based.
-#' @param to name of the BMI cutoff to be used to convert the prevalence to.
-#' @param prev_true optional vector of known prevalence rates corresponding to cutoff \code{to},
-#' for comparison purposes.
+#' The CDC cutoffs correspond to BMI centiles: CDC95 (obesity), CDC85
+#' (overweight) and CDC5 (thinness).
+#'
+#' Note 1: the overweight category needs to be analysed as overweight plus obesity.
+#' To predict overweight excluding obesity, first calculate predicted overweight
+#' plus obesity then subtract predicted obesity.
+#'
+#' Note 2: the category labels are harmonised and not necessarily as
+#' originally defined.
+#'
+#' The conversion algorithm exploits the fact that all three references are
+#' based on the LMS method, which allows prevalence to be converted to a common
+#' BMI centile and z-score scale.
+#'
+#' @param prev vector of age-sex-specific percentage prevalence rates.
+#' @param age vector of ages between 2 and 18 years corresponding to each rate.
+#' @param sex vector of the sexes corresponding to each rate, coded as either
+#'   'boys/girls' or 'male/female' or '1/2' (upper or lower case, and only the
+#'   first character considered).
+#' @param from the BMI cutoff (see Details) on which the prevalence is based.
+#' @param to the BMI cutoff (see Details) on which to base the converted
+#'   prevalence.
+#' @param prev_true optional vector of known percentage prevalence rates
+#'   corresponding to \code{to}, for validation purposes.
 #' @param report character controlling the format of the returned data: 'vector'
-#' for the estimated prevalence rates, 'wider' for the working tibble in wide format,
-#' i.e. the 'from' and 'to' data side by side, and 'longer' for the tibble in
-#' long format, i.e. two rows, one for 'from' and one for 'to'.
+#'   for the estimated prevalence rates, 'wider' for the working tibble in wide
+#'   format, i.e. the \code{from} and \code{to} data side by side, or 'longer'
+#'   for the tibble in long format, i.e. two rows per rate, one for \code{from}
+#'   and one for \code{to}.
 #' @param plot character controlling what if anything is plotted: 'no' for no
-#' plot, 'density' to compare the BMI distributions and cutoffs corresponding
-#' to \code{from} and \code{to}, or 'compare' to compare the estimated prevalence
-#' rates with the true rates in \code{prev_true}.
-#' @param data data frame containing prev, age, sex and optionally prev_true.
+#'   plot, 'density' to display the BMI density distributions and cutoffs
+#'   corresponding to \code{from} and \code{to}, or 'compare' to display the
+#'   predicted prevalence rates plotted against the observed rates in
+#'   \code{prev_true}.
+#' @param data data frame containing \code{prev}, \code{age}, \code{sex} and
+#'   \code{prev_true}.
 #'
-#' @return Either the estimated prevalence rates or a plot
-#' visualizing the findings, depending on the \code{report} and \code{plot} settings.
-#'
-#' Note that \code{from} and \code{to} cannot be the same, but they can be based on the
-#' same reference, e.g. IOTF25 and IOTF30. They must be from the same tail of the distribution
-#' (i.e. both thinness or both overweight/obesity) except when \code{plot = density}.
+#' @return Either the converted prevalence rates or a plot visualizing the
+#'   findings, depending on the \code{report} and \code{plot} settings.
 #'
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
@@ -46,27 +64,26 @@
 #' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1')
 #'
 #' ## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
-#' ob_convertr(10, 8, 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
-#' @importFrom utils globalVariables
+#' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
+#'
 #' @importFrom forcats fct_inorder fct_collapse
-#' @importFrom ggplot2 ggplot xlab ylab geom_path geom_point geom_vline geom_abline scale_x_continuous scale_y_continuous aes
-#' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter transmute bind_rows bind_cols select across left_join pull contains starts_with ends_with if_else lead
-#' @importFrom rlang .data as_label enquo
+#' @importFrom ggplot2 ggplot xlab ylab geom_path geom_point geom_vline
+#'   geom_abline scale_x_continuous scale_y_continuous aes
+#' @importFrom tibble tibble
+#' @importFrom dplyr mutate rename filter transmute bind_rows bind_cols select
+#'   across left_join pull contains starts_with ends_with if_else
+#' @importFrom rlang .data enquo
 #' @importFrom stats pnorm qnorm
 #' @importFrom tidyr pivot_wider pivot_longer drop_na
 #' @export ob_convertr
 ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = c('vector', 'wider', 'longer'),
                      plot = c('no', 'density', 'compare'), data = parent.frame()) {
 
-
   cutoffs <- tibble(ref = c(rep('IOTF', 6), rep('WHO', 4), rep('CDC', 3)),
                     cutoff = c(16:17, 18.5, 25, 30, 35, "-2", "-1", "+1", "+2", centile <- c(5, 85, 95)),
                     boys = c(-2.565, -1.877, -1.014, 1.31, 2.288, 2.93, -2:-1, 1:2, qnorm(centile / 100)),
                     girls = c(-2.436, -1.789, -0.975, 1.244, 2.192, 2.822, -2:-1, 1:2, qnorm(centile / 100))) %>%
     mutate(cutoff = paste0(.data$ref, .data$cutoff))
-
-  # globalVariables(c('!!', '.', 'iotf', 'who0607', 'cdc2000'))
 
   # check sex contains only 1/M/B/TRUE or 2/F/G
   test_sex <- function(sex) {
@@ -93,11 +110,12 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
   if (max(data$prev) <= 1)
     warning('\nis prevalence fractional? - should be percentage\n')
 
-  from <- toupper(from)
-  to <- toupper(to)
+  from <- unique(toupper(from))
+  to <- unique(toupper(to))
   stopifnot('`from` not recognised' = from %in% cutoffs$cutoff,
             '`to` not recognised' = to %in% cutoffs$cutoff,
-            '`from` and `to` the same' = from != to)
+            '`from` should be length 1' = length(from) == 1L,
+            '`to` should be length 1' = length(to) == 1L)
 
   # check for plot
   report <- match.arg(report)
@@ -114,25 +132,25 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
 
   # z-score cutoffs by sex and ref
   cutoffs <- cutoffs %>%
-    filter(.data$cutoff == from | .data$cutoff == to) %>%
-    mutate(co = if_else(.data$cutoff == from, 'from', 'to')) %>%
+    filter(.data$cutoff == from) %>%
+    mutate(co = 'from') %>%
+    bind_rows(cutoffs %>%
+                filter(.data$cutoff == to) %>%
+                mutate(co = 'to')) %>%
     pivot_longer(c(.data$boys, .data$girls), names_to = 'sex', values_to = 'z')
-
-  stopifnot('cannot compare lower and upper tail cutoffs' = sign(min(cutoffs$z)) == sign(max(cutoffs$z)) |
-              plot == 'density')
 
   # LMS data by ref sex and age
   refdata <- sitar::iotf %>%
     mutate(ref = 'IOTF') %>%
     bind_rows(sitar::who0607 %>%
                 select(c(.data$years, .data$sex, ends_with('bmi'))) %>%
-                filter(lead(.data$years) > .data$years) %>%
+                filter(dplyr::lead(.data$years) > .data$years) %>%
                 mutate(ref = 'WHO'),
               sitar::cdc2000 %>%
                 select(c(.data$years, .data$sex, ends_with('bmi'))) %>%
                 drop_na %>%
                 mutate(years = round(.data$years * 24) / 24,
-                       across(everything(), ~{(.x + lag(.x)) / 2}),
+                       across(everything(), ~{(.x + dplyr::lag(.x)) / 2}),
                        ref = 'CDC')) %>%
     rename(age = .data$years,
            L = .data$L.bmi,
@@ -167,9 +185,9 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
            bmi_to = .data$bmi_from) %>%
     rename(bmi_from = .data$bmi) %>%
     # calculate delta z-score and adjust prevalence
-    mutate(dz = (.data$z_to - .data$z_from + .data$zrev_from - .data$zrev_to) / 2 * -sign(.data$z_from),
-           prev_new = qnorm(prev / 100),
-           prev_new = pnorm(.data$prev_new + .data$dz) * 100) %>%
+    mutate(dz = (.data$z_to - .data$z_from + .data$zrev_from - .data$zrev_to) / 2,
+           prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
+           prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100) %>%
     select(c(.data$age, .data$sex, .data$prev, .data$prev_new, .data$prev_true, contains('z'),
                     starts_with('bmi'), everything()))
 
@@ -208,7 +226,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
          compare = {
            # compare true and estimated prevalence (output with report = 'wider')
            ggplot(data, aes(prev_true, .data$prev_new, group = sex, colour = sex)) +
-             xlab('true prevalence (%)') + ylab('estimated prevalence (%)') +
+             xlab('observed prevalence (%)') + ylab('predicted prevalence (%)') +
              geom_point() +
              geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray') +
              scale_x_continuous(trans='log2') +
