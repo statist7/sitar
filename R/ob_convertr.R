@@ -10,22 +10,23 @@
 #' converts them to rates based on a different cutoff, using a novel estimation
 #' algorithm.
 #'
-#' The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18:
-#' IOTF35 (morbid obesity), IOTF30 (obesity), IOTF25 (overweight), IOTF18.5
-#' (grade 1 thinness), IOTF17 (grade 2 thinness) and IOTF16 (grade 3 thinness).
+#' The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF35
+#' (morbid obesity), IOTF30 (obesity), IOTF25 (overweight), IOTF18.5 (grade 1
+#' thinness), IOTF17 (grade 2 thinness) and IOTF16 (grade 3 thinness).
 #'
-#' The WHO cutoffs correspond to BMI z_scores: WHO+2 (obesity), WHO+1
-#' (overweight), WHO-1 (mild thinness) and WHO-2 (thinness).
+#' The WHO cutoffs correspond to BMI z_scores. Age 5-19 years, WHO+2 (obesity),
+#' WHO+1 (overweight) and WHO-2 (thinness). Age 0-5 years, WHO+3 (obesity),
+#' WHO+2 (overweight) and WHO-2 (thinness).
 #'
 #' The CDC cutoffs correspond to BMI centiles: CDC95 (obesity), CDC85
 #' (overweight) and CDC5 (thinness).
 #'
-#' Note 1: the overweight category needs to be analysed as overweight plus obesity.
-#' To predict overweight excluding obesity, first calculate predicted overweight
-#' plus obesity then subtract predicted obesity.
+#' Note 1: the overweight category needs to be analysed as overweight plus
+#' obesity. To predict overweight excluding obesity, first calculate predicted
+#' overweight plus obesity then subtract predicted obesity.
 #'
-#' Note 2: the category labels are harmonised and not necessarily as
-#' originally defined.
+#' Note 2: the category labels are harmonised and not necessarily as originally
+#' defined.
 #'
 #' The conversion algorithm exploits the fact that all three references are
 #' based on the LMS method, which allows prevalence to be converted to a common
@@ -82,10 +83,10 @@
 ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = c('vector', 'wider', 'longer'),
                      plot = c('no', 'density', 'compare'), data = parent.frame()) {
 
-  cutoffs <- tibble(ref = c(rep('IOTF', 6), rep('WHO', 4), rep('CDC', 3)),
-                    cutoff = c(16:17, 18.5, 25, 30, 35, "-2", "-1", "+1", "+2", centile <- c(5, 85, 95)),
-                    boys = c(-2.565, -1.877, -1.014, 1.31, 2.288, 2.93, -2:-1, 1:2, qnorm(centile / 100)),
-                    girls = c(-2.436, -1.789, -0.975, 1.244, 2.192, 2.822, -2:-1, 1:2, qnorm(centile / 100))) %>%
+  cutoffs <- tibble(ref = c(rep('IOTF', 6), rep('WHO', 5), rep('CDC', 3)),
+                    cutoff = c(16:17, 18.5, 25, 30, 35, "-2", "-1", "+1", "+2", "+3", centile <- c(5, 85, 95)),
+                    boys = c(-2.565, -1.877, -1.014, 1.31, 2.288, 2.93, -2:-1, 1:3, qnorm(centile / 100)),
+                    girls = c(-2.436, -1.789, -0.975, 1.244, 2.192, 2.822, -2:-1, 1:3, qnorm(centile / 100))) %>%
     mutate(cutoff = paste0(.data$ref, .data$cutoff))
 
   # check sex contains only 1/M/B/TRUE or 2/F/G
