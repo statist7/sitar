@@ -70,12 +70,22 @@
 #' ## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
 #' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
 #'
+#'#' ## convert IOTF overweight prevalence to WHO overweight prevalence
+#' ## and compare with true value - boys and girls age 7-17
+#' ## note the need to first add obesity prevalence to overweight prevalence
+#' data(deren)
+#' deren <- within(deren, {
+#'   IOTF25 = IOTF25 + IOTF30
+#'   `WHO+1` = `WHO+1` + `WHO+2`})
+#' ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF25', to = 'WHO+1',
+#'    prev_true = `WHO+1`, data = deren, plot = 'compare')
+
 #' @importFrom forcats fct_inorder fct_collapse
 #' @importFrom ggplot2 ggplot xlab ylab geom_path geom_point geom_vline
 #'   geom_abline scale_x_continuous scale_y_continuous aes
 #' @importFrom tibble tibble
 #' @importFrom dplyr mutate rename filter transmute bind_rows bind_cols select
-#'   across left_join pull contains starts_with ends_with if_else
+#'   across left_join pull contains starts_with ends_with if_else n
 #' @importFrom rlang .data enquo
 #' @importFrom stats pnorm qnorm
 #' @importFrom tidyr pivot_wider pivot_longer drop_na
@@ -197,7 +207,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
            prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
            n = NULL) %>%
     select(c(.data$age:.data$prev, .data$prev_new, .data$prev_true, contains('z'),
-                    bmi_from, bmi_to, everything()))
+             .data$bmi_from, .data$bmi_to, everything()))
 
   # format prevalence as vector or tibble
   data <- switch(report,

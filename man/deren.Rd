@@ -30,16 +30,16 @@ deren
 Age-sex-specific prevalence rates of thinness, overweight and obesity in
 Ukraine children based on body mass index and IOTF, WHO and CDC cut-offs.
 }
+\details{
+Note that the overweight prevalences are for overweight not obesity, i.e. the
+prevalence between the overweight and obesity cutoffs.
+}
 \examples{
-## convert IOTF overweight prevalence to WHO overweight prevalence
-## and compare with true value - boys and girls age 7-17
+## convert IOTF obesity prevalence to WHO obesity prevalence
+## and compare with true WHO obesity prevalence - boys and girls age 7-17
 data(deren)
-deren \%>\%
-  mutate(IOTF25 = IOTF25 + IOTF30,
-  `WHO+1` = `WHO+1` + `WHO+2`) \%>\%
-  ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF25', to = 'WHO+1',
-    prev_true = `WHO+1`, data = ., plot = 'compare')
-
+  ob_convertr(prev = IOTF30, age = Age, sex = Sex, from = 'IOTF30',
+    to = 'WHO+2', prev_true = `WHO+2`, data = deren, plot = 'compare')
 }
 \references{
 Deren K, Wyszynska J, Nyankovskyy S, Nyankovska O, Yatsula M,
