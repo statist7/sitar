@@ -167,7 +167,10 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
   # combine prevalence, z-score cutoffs and LMS data
   data <- left_join(data, cutoffs, by = "sex") %>%
     # round age to half-years
-    mutate(age = round(age * 2) / 2) %>%
+    # add count to ensure unique rows
+    mutate(age = round(age * 2) / 2,
+           n = (1:n() + 1) %/% 2) %>%
+    select(age, n, everything()) %>%
     left_join(refdata, by = c("age", "sex", "ref"))
 
   stopifnot('no data' = nrow(data %>% select(-prev_true) %>% drop_na) > 0L)
@@ -181,7 +184,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
            bmi_to = .data$bmi_from) %>%
     rename(bmi_from = .data$bmi) %>%
     # calculate z-scores for swapped bmi
-    pivot_longer(-c(age, sex, prev, prev_true), names_to = c('.value', 'co'), names_sep = '_') %>%
+    pivot_longer(-c(age:prev_true), names_to = c('.value', 'co'), names_sep = '_') %>%
     mutate(zrev = ((.data$bmi / .data$M)^.data$L - 1) / (.data$L * .data$S)) %>%
     # swap bmi back again
     pivot_wider(names_from = .data$co, values_from = .data$ref:.data$zrev) %>%
@@ -191,9 +194,10 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
     # calculate delta z-score and adjust prevalence
     mutate(dz = (.data$z_to - .data$z_from + .data$zrev_from - .data$zrev_to) / 2,
            prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
-           prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100) %>%
-    select(c(.data$age, .data$sex, .data$prev, .data$prev_new, .data$prev_true, contains('z'),
-                    starts_with('bmi'), everything()))
+           prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
+           n = NULL) %>%
+    select(c(.data$age:.data$prev, .data$prev_new, .data$prev_true, contains('z'),
+                    bmi_from, bmi_to, everything()))
 
   # format prevalence as vector or tibble
   data <- switch(report,
