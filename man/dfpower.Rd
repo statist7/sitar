@@ -63,6 +63,7 @@ will fail. In this case fit the model with the variable \code{x1 = x + 1} instea
 
 Other fixed effects in \code{object} for covariates in \code{a.formula}, \code{b.formula},
 \code{c.formula} or \code{d.formula} are propagated through all the models.
+This also applies to the \code{control} argument if set in \code{object}.
 
 The run-time can be shortened by reducing \code{maxIter},
 as models often converge quickly or not at all.
