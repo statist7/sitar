@@ -117,6 +117,14 @@ dfpower <- function(object, df, fixed, xpowers, ypowers, FUN=BICadj,
   if (missing(ypowers))
     ypowers <- getL(cs$y)
   ypowers <- ypowers[!is.na(ypowers)]
+  if (is.null(cs$control))
+    control <- nlmeControl(maxIter=maxIter, returnObject=TRUE)
+  else {
+    control <- as.list(cs$control)
+    control$maxIter <- maxIter
+    control$returnObject <- TRUE
+    control <- as.call(control)
+  }
   stopifnot('df not non-negative integer(s)' = all(df >= 0L) & length(df) > 0L,
             'fixed not character(s)' = is.character(fixed) & length(fixed) > 0L,
             'no valid xpowers' = length(xpowers) > 0L,
@@ -124,7 +132,6 @@ dfpower <- function(object, df, fixed, xpowers, ypowers, FUN=BICadj,
             'verbose not logical' = is.logical(verbose))
   mat <- array(dim=c(length(df), length(fixed), length(xpowers), length(ypowers)),
                dimnames=list(df, fixed, power.tidy(xlab, xpowers), power.tidy(ylab, ypowers)))
-  control <- nlmeControl(maxIter=maxIter, returnObject=TRUE)
   expr <- quote(runWarn(update(object, fixed=fixed, df=df, y=y, x=x, control=control)))
   if (verbose)
     cat('df', 'iter', 'fixed', 'y ~ x', deparse(substitute(FUN)), '\n')
@@ -136,14 +143,8 @@ dfpower <- function(object, df, fixed, xpowers, ypowers, FUN=BICadj,
         xp <- dimnames(mat)[[3]][ix]
         for (ifix in seq_along(fixed)) {
           fixt <- fixed[ifix]
-          if (dft == df0 && fixt == fixed0 && yp == ylab0 && xp == xlab0) {
-            . <- list()
-            .$value <- object
-          }
-          else {
-            . <- eval(do.call('substitute', list(
-              expr, list(df=dft, fixed=fixt, y=as.lang(yp), x=as.lang(xp)))))
-          }
+          . <- eval(do.call('substitute', list(
+            expr, list(df=dft, fixed=fixt, y=as.lang(yp), x=as.lang(xp)))))
           if (!inherits(., 'error')) {
             B <- FUN(.$value)
             if (length(.$warnings) > 0L) {

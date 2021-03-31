@@ -6,7 +6,8 @@ Changes in Version 1.2.0
     underweight, overweight or obesity from one reference cutoff to another.
 
   o dfpower is extended to include fixed effects for a-b-c-d as well as spline
-    degrees of freedom and powers of x and y.
+    degrees of freedom and powers of x and y. It also now passes the control
+    arg if set and refits the target object.
 
   o A major extension to the SITAR model is to add a fourth random effect
     called d, which is the age slope. It allows the simple random intercept
