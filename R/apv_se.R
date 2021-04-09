@@ -57,7 +57,7 @@ apv_se <- function(object,
       vel <- do.call('plot_v', c(list(x = obj), edots))
       fun(vel)
     } else
-      c(NA, NA)
+      c(x = NA_real_, y = NA_real_)
   }
 
   set.seed(seed)
@@ -71,7 +71,7 @@ apv_se <- function(object,
 
   # extract apv and pv
   apv <- map_dfr(df$model, ~ as_tibble(t(.x))) %>%
-    drop_na()
+    drop_na
 
   vel <- do.call('plot_v', c(list(x = object), edots))
   peak <- fun(vel)
@@ -88,7 +88,7 @@ apv_se <- function(object,
     abline(v = peak[1], h = peak[2], lty = 3)
   }
 
-  se <- vapply(apv, sd, na.rm = TRUE, 1.0)
+  se <- vapply(apv, sd, na.rm = TRUE, 1)
   output <- rbind(peak, se)
   attr(output, 'bs') <- apv
   return(output)
