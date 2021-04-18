@@ -222,6 +222,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NU
       .x=xfun(.x),
       .y=predict(model, newdata, level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
     )
+    .
   }
 
   Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
