@@ -43,7 +43,7 @@
 #'
 #' Cole TJ, Green PJ. Smoothing reference centile curves: the LMS method and
 #' penalized likelihood. Stat Med 1992;11:1305-19.
-#' @source \url{http://www.who.int/childgrowth/en/}
+#' @source \url{https://www.who.int/toolkits/child-growth-standards}
 #' @keywords datasets
 #' @examples
 #' data(who06)

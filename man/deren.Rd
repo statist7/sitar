@@ -50,24 +50,24 @@ international criteria-A cross-sectional study. PLoS ONE 15.
 The IOTF reference for children aged 2-18 years is: Cole TJ, Bellizzi MC,
 Flegal KM, Dietz WH. Establishing a standard definition for child overweight
 and obesity worldwide: international survey. BMJ 2000; 320: 1240-5. Available
-at \url{http://bmj.bmjjournals.com/cgi/reprint/320/7244/1240}
+at \doi{10.1136/bmj.320.7244.1240}
 
 The WHO reference for children aged 0-5 years is: WHO Child Growth Standards:
 Length/height-for-age, weight-for-age, weight-for-length, weight-for-height
 and body mass index-for-age: Methods and development. Geneva: World Health
 Organization, 2006. Available at:
-\url{http://www.who.int/childgrowth/standards/en/}
+\url{https://www.who.int/toolkits/child-growth-standards/standards}
 
 The WHO reference for children aged 5-19 years is: de Onis M, Onyango AW,
 Borghi E, Siyam A, Nishida C, Siekmann J. Development of a WHO growth
 reference for school-aged children and adolescents. Bulletin of the World
 Health Organization 2007; 85: 660-7. Available at:
-\url{http://www.who.int/growthref/growthref_who_bull/en/index.html}
+\url{https://www.who.int/growthref/growthref_who_bull/en/}
 
 The CDC reference for children aged 2-20 years is: Must A, Dallal GE, Dietz
 WH. Reference data for obesity: 85th and 95th percentiles of body mass index
 (wt/ht2) and triceps skinfold thickness. American Journal of Clinical
 Nutrition 1991; 53: 839-46. Available at:
-\url{https://doi.org/10.1093/ajcn/53.4.839}
+\url{https://academic.oup.com/ajcn/article/53/4/839/4715058}
 }
 \keyword{datasets}

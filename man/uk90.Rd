@@ -38,7 +38,7 @@ A tibble with 588 observations on the following 26 variables:
 The values are tabulated in the spreadsheet British1990.xls provided
 with the Excel add-in LMSgrowth from:
 
-\url{http://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
+\url{https://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
 }
 \usage{
 uk90

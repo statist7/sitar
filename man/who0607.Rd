@@ -19,7 +19,7 @@ A tibble with 486 observations on the following 11 variables:
 \item{sex}{two-level factor with level 1 male and level 2 female} }
 }
 \source{
-\url{http://www.who.int/childgrowth/en/}
+\url{https://www.who.int/growthref/growthref_who_bull/en/}
 }
 \usage{
 who0607

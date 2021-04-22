@@ -34,7 +34,7 @@
 #' de Onis M, Onyango AW, Borghi E, Siyam A, Nishida C, Siekmann J. Development
 #' of a WHO growth reference for school-aged children and adolescents.
 #' Bull WHO 2007;85:660-7.
-#' @source \url{http://www.who.int/childgrowth/en/}
+#' @source \url{https://www.who.int/growthref/growthref_who_bull/en/}
 #' @keywords datasets
 #' @examples
 #' data(who0607)

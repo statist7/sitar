@@ -7,7 +7,8 @@
 \description{
 SITAR is a method of growth curve analysis, based on \pkg{nlme}, that
 estimates a single mean growth curve as a regression B-spline, plus a set of
-up to three fixed and random effects (a, b and c) defining how individual
+up to four fixed and random effects (a, b, c and d) (d was added in version 1.2.0)
+defining how individual
 growth curves differ from the mean curve. SITAR stands for SuperImposition
 by Translation And Rotation.
 }
@@ -21,8 +22,9 @@ measures size, and is a random intercept relative to the spline curve
 intercept. Effect b (or beta) measures tempo, the timing of the growth
 process, and reflects a shift on the x scale relative to the mean. Effect c
 (or gamma) is velocity, and indicates how the x scale is stretched or shrunk
-reflecting the rate at which 'time' passes for individuals. The aim is for
-individual curves, adjusted for a, b and c, to lie on top of (i.e. be
+reflecting the rate at which 'time' passes for individuals. Effect d is a
+rotation in the plane. The aim is for
+individual curves, adjusted for {abcd} to lie on top of (i.e. be
 superimposed on) the mean curve.
 
 The package creates an object of class \code{sitar}, based on \pkg{nlme},

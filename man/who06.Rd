@@ -31,7 +31,7 @@ A tibble with 150 observations on the following 23 variables:
 \item{sex}{two-level factor with level 1 male and level 2 female} }
 }
 \source{
-\url{http://www.who.int/childgrowth/en/}
+\url{https://www.who.int/toolkits/child-growth-standards}
 }
 \usage{
 who06

@@ -38,7 +38,7 @@
 
 #' @source The values are tabulated in the Excel spreadsheet IOTF_LMS.xls
 #' provided with the Excel add-in LMSgrowth from
-#' \url{http://www.healthforallchildren.com/?product_cat=software}.
+#' \url{https://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
 #' @keywords datasets
 #' @examples
 #' data(iotf)
