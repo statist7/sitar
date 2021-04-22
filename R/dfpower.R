@@ -47,8 +47,14 @@
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
 #' data(heights)
-#' m1 <- sitar(log(age), height, id, heights, 4)
-#' dfpower(m1, df=4:5, fixed = 'a+c', xpowers=0:1, maxIter=5)
+#' m1 <- sitar(x = age, y = height, id = id, data = heights, df = 4)
+#' \dontshow{
+#' dfpower(m1, df = 4:5, fixed = 'a+c', xpowers = 0, maxIter = 4)
+#' }
+#' \donttest{
+#' dfpower(m1, df = 4:6, fixed = c('a', 'a+b', 'a+c', 'a+b+c'),
+#'   xpowers = 0:1, ypowers = 0:1, maxIter = 8)
+#' }
 #' @export dfpower
 #' @md
 dfpower <- function(object, df, fixed, xpowers, ypowers, FUN=BICadj,
