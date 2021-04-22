@@ -1,24 +1,37 @@
 ## Test environments
 * local MacOS install, R 4.0.5
-* ubuntu 12.04 (on travis-ci), R 3.1.2
-* win-builder (devel and release)
+* windows-x86_64-devel (r-devel)
+* ubuntu-gcc-release (r-release)
+* debian-gcc-release (r-release)
 
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
 
-There was 1 NOTE:
+There were 2 NOTEs:
 
-* checking dependencies in R code ... NOTE
-  Namespace in Imports field not imported from: 'R6'
+> On windows-x86_64-devel (r-devel), ubuntu-gcc-release (r-release), debian-gcc-release (r-release)
+* checking CRAN incoming feasibility ... NOTE
+  Maintainer: 'Tim Cole <tim.cole@ucl.ac.uk>'
+  
+  Found the following (possibly) invalid URLs:
+    URL: https://academic.oup.com/ajcn/article/53/4/839/4715058
+      From: man/deren.Rd
+      Status: 403
+      Message: Forbidden
+      From: man/deren.Rd
+      Message: Forbidden
+    URL: https://doi.org/10.1136/bmj.320.7244.1240
+  
+  Found the following (possibly) invalid DOIs:
+    DOI: 10.1093/ije/dyq115
+      From: DESCRIPTION
+      Status: Forbidden
+      Message: 403
+      Status: 403
 
-  R6 is a build-time dependency.
-
-## Downstream dependencies
-I have also run R CMD check on downstream dependencies of httr 
-(https://github.com/wch/checkresults/blob/master/httr/r-release). 
-All packages that I could install passed except:
-
-* Ecoengine: this appears to be a failure related to config on 
-  that machine. I couldn't reproduce it locally, and it doesn't 
-  seem to be related to changes in httr (the same problem exists 
-  with httr 0.4).
+  I've checked the URLs and DOI and am mystified why they are flagged
+  
+> On ubuntu-gcc-release (r-release)
+* checking for future file timestamps ... NOTE
+  unable to verify current time
+  

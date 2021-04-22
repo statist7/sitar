@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-.DS_Store
+^\.DS_Store$
 ^doc$
 ^Meta$
+^cran-comments\.md$
