@@ -12,6 +12,7 @@
 #'   \describe{
 #'   \item{Age}{postnatal age from 7 to 17 completed years}
 #'   \item{Sex}{two-level factor - Boys and Girls}
+#'   \item{N}{integer - group sample size}
 #'   \item{IOTF18.5}{thinness prevalence based on IOTF reference and 18.5 cutoff}
 #'   \item{WHO-2}{thinness prevalence based on WHO reference and -2 cutoff}
 #'   \item{CDC5}{thinness prevalence based on CDC reference and 5 cutoff}
