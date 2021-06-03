@@ -203,6 +203,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
     rename(bmi_from = .data$bmi) %>%
     # calculate delta z-score and adjust prevalence
     mutate(dz = (.data$z_to - .data$z_from + .data$zrev_from - .data$zrev_to) / 2,
+           dzdz = round(.data$z_to - .data$z_from - .data$zrev_from + .data$zrev_to, 6) / 2,
            prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
            prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
            n = NULL) %>%
