@@ -21,7 +21,7 @@ A tibble with 22 observations on the following 11 variables:
   \item{CDC95}{obesity prevalence based on CDC reference and 95 cutoff} }
 }
 \source{
-The values are obtained from Table 2 of Deren et al (2020).
+The values are obtained from Table 2 of Deren et al (2020), recalculated to full accuracy.
   \url{https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0244300}.
 }
 \usage{
@@ -32,8 +32,8 @@ Age-sex-specific prevalence rates of thinness, overweight and obesity in
 Ukraine children based on body mass index and IOTF, WHO and CDC cut-offs.
 }
 \details{
-Note that the overweight prevalences are for overweight not obesity, i.e. the
-prevalence between the overweight and obesity cutoffs.
+Note that the overweight prevalences are for overweight excluding obesity,
+i.e. the prevalence for BMI between the overweight and obesity cutoffs.
 }
 \examples{
 ## convert IOTF obesity prevalence to WHO obesity prevalence
