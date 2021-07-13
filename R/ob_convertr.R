@@ -97,7 +97,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                     cutoff = c(16:17, 18.5, 25, 30, 35, "-2", "-1", "+1", "+2", "+3", centile <- c(5, 85, 95)),
                     boys = c(-2.565, -1.877, -1.014, 1.31, 2.288, 2.93, -2:-1, 1:3, qnorm(centile / 100)),
                     girls = c(-2.436, -1.789, -0.975, 1.244, 2.192, 2.822, -2:-1, 1:3, qnorm(centile / 100))) %>%
-    mutate(cutoff = paste0(.data$ref, .data$cutoff))
+    mutate(cutoff = paste(.data$ref, .data$cutoff))
 
   # check sex contains only 1/M/B/TRUE or 2/F/G
   test_sex <- function(sex) {
