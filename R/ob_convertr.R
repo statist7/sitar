@@ -77,7 +77,7 @@
 #' deren <- within(deren, {
 #'   IOTF25 = IOTF25 + IOTF30
 #'   `WHO+1` = `WHO+1` + `WHO+2`})
-#' ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF25', to = 'WHO+1',
+#' ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF 25', to = 'WHO +1',
 #'    prev_true = `WHO+1`, data = deren, plot = 'compare')
 
 #' @importFrom forcats fct_inorder fct_collapse
