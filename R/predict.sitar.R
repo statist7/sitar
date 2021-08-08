@@ -75,7 +75,6 @@
 # subset re
     if (!is.null(subset)) {
       re <- re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE]
-      level <- 1L
     }
 # centre random effects
     re <- scale(re, scale = FALSE)
