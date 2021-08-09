@@ -39,8 +39,8 @@ i.e. the prevalence for BMI between the overweight and obesity cutoffs.
 ## convert IOTF obesity prevalence to WHO obesity prevalence
 ## and compare with true WHO obesity prevalence - boys and girls age 7-17
 data(deren)
-  ob_convertr(prev = IOTF30, age = Age, sex = Sex, from = 'IOTF30',
-    to = 'WHO+2', prev_true = `WHO+2`, data = deren, plot = 'compare')
+  ob_convertr(prev = IOTF30, age = Age, sex = Sex, from = 'IOTF 30',
+    to = 'WHO +2', prev_true = `WHO+2`, data = deren, plot = 'compare')
 }
 \references{
 Deren K, Wyszynska J, Nyankovskyy S, Nyankovska O, Yatsula M,

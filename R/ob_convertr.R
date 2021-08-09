@@ -65,10 +65,10 @@
 #' @examples
 #' ## convert 10% IOTF overweight prevalence (cutoff IOTF25) in 8-year-old boys
 #' ## to the overweight prevalence based on WHO, i.e. cutoff WHO+1
-#' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1')
+#' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1')
 #'
 #' ## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
-#' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
+#' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
 #'
 #'#' ## convert IOTF overweight prevalence to WHO overweight prevalence
 #' ## and compare with true value - boys and girls age 7-17

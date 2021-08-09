@@ -92,10 +92,10 @@ from cutoff A to cutoff B and then from B to A returns the original value.
 \examples{
 ## convert 10\% IOTF overweight prevalence (cutoff IOTF25) in 8-year-old boys
 ## to the overweight prevalence based on WHO, i.e. cutoff WHO+1
-ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1')
+ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1')
 
 ## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
-ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF25', to = 'WHO+1', plot = 'density')
+ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
 
 #' ## convert IOTF overweight prevalence to WHO overweight prevalence
 ## and compare with true value - boys and girls age 7-17
@@ -104,7 +104,7 @@ data(deren)
 deren <- within(deren, {
   IOTF25 = IOTF25 + IOTF30
   `WHO+1` = `WHO+1` + `WHO+2`})
-ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF25', to = 'WHO+1',
+ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF 25', to = 'WHO +1',
    prev_true = `WHO+1`, data = deren, plot = 'compare')
 }
 \author{
