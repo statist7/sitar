@@ -17,8 +17,8 @@
   opt = "dv",
   labels,
   apv = FALSE,
-  xfun = I,
-  yfun = I,
+  xfun = identity,
+  yfun = identity,
   subset = NULL,
   ns = 101,
   abc = NULL,
@@ -82,10 +82,10 @@ peak velocity, is printed and returned. NB their standard errors can be
 obtained using the bootstrap with the function \code{apv_se}.}
 
 \item{xfun}{optional function to be applied to the x variable prior to
-plotting (default I, see Details).}
+plotting (default identity, see Details).}
 
 \item{yfun}{optional function to be applied to the y variable prior to
-plotting (default I, see Details).}
+plotting (default identity, see Details).}
 
 \item{subset}{optional logical vector of length \code{x} defining a subset
 of \code{data} rows to be plotted, for \code{x} and \code{data} in the
@@ -161,7 +161,7 @@ To suppress the legend that comes with it set \code{legend = NULL}.
 The transformations \code{xfun} and \code{yfun} are applied to the x and y
 variables after inverting any transformations applied in the original SITAR
 call. So for example if \code{y = log(height)} in the SITAR call, then \code{yfun}
-is applied to \code{height}. Thus the default \code{yfun = I} has the effect of
+is applied to \code{height}. Thus the default \code{yfun = identity} has the effect of
 inverting the transformation. This is achieved by setting
 \code{yfun = yfun(ifun(x$call.sitar$y))}.
 For no transformation set \code{yfun = NULL}.
@@ -200,6 +200,25 @@ lines(m1, opt='d', col='red', lwd=2)
 
 ## add mean curve for a, b, c = -1 SD
 lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
+
+## use subset to plot mean curves by group
+## compare curves for early versus late menarche
+heights <- within(sitar::heights, {
+  men <- abs(men)
+    late <- factor(men > median(men))
+  })
+# fit model where size and timing differ by early vs late menarche
+object <- sitar(log(age), height, id, heights, 5,
+  a.formula = ~late, b.formula = ~late)
+## early group
+plot(object, subset = late == FALSE, col = 4, lwd = 3,
+  y2par = list(col = 4, lwd = 2), ylim = range(heights$height))
+## late group
+lines(object, subset = late == TRUE, col = 2, lwd = 3,
+  y2par = list(col = 2, lwd = 2))
+## add legend
+legend('right', paste(c('early', 'late'), 'menarche'),
+  lty = 1, col = c(4, 2), inset = 0.04)
 
 ## draw fitted height distance curves coloured by subject, using ggplot
 \dontrun{

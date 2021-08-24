@@ -12,7 +12,7 @@
 #' The transformations \code{xfun} and \code{yfun} are applied to the x and y
 #' variables after inverting any transformations applied in the original SITAR
 #' call. So for example if \code{y = log(height)} in the SITAR call, then \code{yfun}
-#' is applied to \code{height}. Thus the default \code{yfun = I} has the effect of
+#' is applied to \code{height}. Thus the default \code{yfun = identity} has the effect of
 #' inverting the transformation. This is achieved by setting
 #' \code{yfun = yfun(ifun(x$call.sitar$y))}.
 #' For no transformation set \code{yfun = NULL}.
@@ -55,9 +55,9 @@
 #' peak velocity, is printed and returned. NB their standard errors can be
 #' obtained using the bootstrap with the function \code{apv_se}.
 #' @param xfun optional function to be applied to the x variable prior to
-#' plotting (default I, see Details).
+#' plotting (default identity, see Details).
 #' @param yfun optional function to be applied to the y variable prior to
-#' plotting (default I, see Details).
+#' plotting (default identity, see Details).
 #' @param subset optional logical vector of length \code{x} defining a subset
 #' of \code{data} rows to be plotted, for \code{x} and \code{data} in the
 #' original \code{sitar} call.
@@ -130,6 +130,25 @@
 #' ## add mean curve for a, b, c = -1 SD
 #' lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
 #'
+#' ## use subset to plot mean curves by group
+#' ## compare curves for early versus late menarche
+#' heights <- within(sitar::heights, {
+#'   men <- abs(men)
+#'     late <- factor(men > median(men))
+#'   })
+#' # fit model where size and timing differ by early vs late menarche
+#' object <- sitar(log(age), height, id, heights, 5,
+#'   a.formula = ~late, b.formula = ~late)
+#' ## early group
+#' plot(object, subset = late == FALSE, col = 4, lwd = 3,
+#'   y2par = list(col = 4, lwd = 2), ylim = range(heights$height))
+#' ## late group
+#' lines(object, subset = late == TRUE, col = 2, lwd = 3,
+#'   y2par = list(col = 2, lwd = 2))
+#' ## add legend
+#' legend('right', paste(c('early', 'late'), 'menarche'),
+#'   lty = 1, col = c(4, 2), inset = 0.04)
+#'
 #' ## draw fitted height distance curves coloured by subject, using ggplot
 #' \dontrun{
 #' require(ggplot2)
@@ -145,7 +164,7 @@
 #' @importFrom rlang .data as_label
 #' @importFrom glue glue
 #' @export
-plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NULL,
+plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=identity, subset=NULL,
                        ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
                        returndata=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
@@ -213,8 +232,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NU
 # generate x values across the range to plot mean spline curve
     dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
-    .x <- getCovariate(model)[subset]
-    .x <- xseq(.x, ns)
+    .x <- xseq(getCovariate(model), ns)
     newdata <- tibble(.x)
     if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
     level <- ifelse(is.null(abc), 0, 1)
@@ -343,7 +361,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NU
       return(deparse(call))
     icall <- ifun(call)
     lab <- attr(icall, 'varname')
-    if (fun == 'I')
+    if (fun == 'identity')
       return(lab)
     labfun <- ifelse(grepl('\\(', fun), paste0('(', fun, ')'), fun)
     paste0(labfun, '(', lab, ')')
@@ -455,12 +473,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=I, yfun=I, subset=NU
     ARG0 <- ARG
 # data frame extended, extend ARG
     if (optmult[opt] && nrow(.) != model$dims$N && !is.null(dots)) {
-      names(.) <- unlist(as.list(mcall[2:(length(.) + 1)]))
+      names(.) <- as.character(unlist(as.list(mcall[2:(length(.) + 1)])))
       ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
     }
 # select distance or velocity axis
     if (optaxis[opt] == 1 || dv < 3) {
-      fun <- I
+      fun <- identity
       ARG0 <- ARG0[names(ARG0) != 'y2par']
     } else {
       fun <- v2d(ylim, vlim)
