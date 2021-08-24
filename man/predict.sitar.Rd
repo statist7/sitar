@@ -11,8 +11,8 @@
   ...,
   deriv = 0L,
   abc = NULL,
-  xfun = function(x) x,
-  yfun = function(y) y
+  xfun = identity,
+  yfun = identity
 )
 }
 \arguments{

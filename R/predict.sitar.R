@@ -62,26 +62,69 @@
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,
-                            xfun=function(x) x, yfun=function(y) y) {
+                            xfun=identity, yfun=identity) {
+    mc <- match.call()
+# match call for sitar
+    oc <- object$call.sitar
 # random effects
     re <- ranef(object)
-# check if subset in call
-    subset <- eval(match.call()$subset)
-    if (!is.null(subset) && length(subset) == nrow(newdata))
-      newdata <- subset(newdata, subset)
+# ensure level is integral
+    level <- as.integer(level)
+# ensure deriv is integral and unique
+    deriv <- as.integer(max(deriv))
+# check if old-style object lacking fitnlme
+    if (!'fitnlme' %in% names(object)) {
+      warning('fitnlme missing - best to refit model')
+      object <- update(object, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
+    }
+# attach object for fitnlme
+    on.exit(detach(object))
+    eval(parse(text='attach(object)'))
+# identify sitar formula covariates in newdata
+    covnames <- all.vars(asOneFormula(oc$a.formula, oc$b.formula, oc$c.formula, oc$d.formula))
+    covnames <- covnames[covnames %in% names(newdata)]
+# if factors add linear contrasts to newdata
+    factornames <- covnames[unlist(lapply(newdata[, covnames], is.factor))]
+    if (length(factornames) > 0L) {
+      extra <- eval(parse(text = paste("~-1 +", paste(factornames, collapse = "+")))[[1]])
+      extra <- as_tibble(model.matrix(extra, newdata))
+      newdata <- bind_cols(newdata, extra)
+      covnames <- c(covnames, names(extra))
+    }
+# identify covariates in model (not x or coef)
+    argnames <- names(formals(fitnlme))
+    argnames <- argnames[!argnames %in% names(coef(object))][-1]
+    if (length(argnames) > 0) {
+# drop any factors in covnames
+      covnames <- names(newdata)
+      covnames <- covnames[covnames %in% argnames]
+# set to 0 covariates not in newdata
+      notnames <- argnames[!argnames %in% covnames]
+      newdata[, notnames] <- 0
+# centre covariates in newdata (using means from sitar)
+      if (length(covnames) > 0) {
+        gd <- update(object, returndata=TRUE)
+        covmeans <- attr(gd, 'scaled:center')
+        for (i in covnames)
+          newdata[, i] <- newdata[, i] - covmeans[i]
+      }
+    }
 # check if subset from plot
-    else
-      subset <- attr(newdata, 'subset')
-# subset re
+    subset <- attr(newdata, 'subset')
+# centre covariates not in newdata to mean gd
     if (!is.null(subset)) {
-      re <- re[rownames(re) %in% getGroups(object)[subset], , drop=FALSE]
+      if (exists('notnames') && length(notnames) > 0) {
+        if (!exists('gd'))
+          gd <- update(object, returndata=TRUE)
+        for (i in notnames)
+          newdata[, i] <- mean(gd[subset, i])
+      }
     }
 # centre random effects
     re <- scale(re, scale = FALSE)
     re.mean <- data.frame(t(attr(re, 'scaled:center')))
     re.mean <- re.mean[rep(1, nrow(newdata)), , drop = FALSE]
-    # create x in newdata
-    oc <- object$call.sitar
+# create x in newdata
     x <- if ('.x' %in% names(newdata))
       newdata$.x
     else
@@ -91,8 +134,6 @@
       warning('xoffset set to mean(x) - best to refit model')
     }
     newdata$x <- x - xoffset
-# ensure level is integral
-    level <- as.integer(level)
 # create id in newdata
     id <- rownames(re)
     newdata$id <- if ('.id' %in% names(newdata))
@@ -123,41 +164,6 @@
       }
       abc <- abc.t
     }
-# check if old-style object lacking fitnlme
-    if (!'fitnlme' %in% names(object)) {
-      warning('fitnlme missing - best to refit model')
-      object <- update(object, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
-    }
-# attach object for fitnlme
-    on.exit(detach(object))
-    eval(parse(text='attach(object)'))
-# identify covariates in model (not x or coef)
-    argnames <- names(formals(fitnlme))
-    argnames <- argnames[!argnames %in% names(coef(object))][-1]
-    if (length(argnames) > 0) {
-# identify model covariates in newdata
-  		covnames <- names(newdata)
-  		covnames <- covnames[covnames %in% argnames]
-# set to 0 covariates not in newdata
-  		notnames <- argnames[!argnames %in% covnames]
-  		newdata[, notnames] <- 0
-# centre covariates in newdata (using means from sitar)
-  		if (length(covnames) > 0) {
-		    gd <- update(object, returndata=TRUE)
-  		  covmeans <- attr(gd, 'scaled:center')
-  		  for (i in covnames)
-	        newdata[, i] <- newdata[, i] - covmeans[i]
-      }
-    }
-# centre covariates not in newdata to mean gd
-    if (!is.null(subset)) {
-      if (exists('notnames') && length(notnames) > 0) {
-        if (!exists('gd'))
-          gd <- update(object, returndata=TRUE)
-        for (i in notnames)
-          newdata[, i] <- mean(gd[subset, i])
-      }
-    }
 # set class to nlme to use predict.nlme
     class(object) <- class(object)[-1]
 # DISTANCE
@@ -173,8 +179,6 @@
     xy.id <- xyadj(object, x=x, y=0, id=id, abc=re.mean)
     newdata$x <- xy.id$x - xoffset
     pred0 <- yfun(predict(object, newdata, level=0L) - xy.id$y)
-# ensure deriv is unique and integral
-    deriv <- as.integer(max(deriv))
     if (deriv > 0L) {
 # VELOCITY
 # level 0 prediction
@@ -184,8 +188,7 @@
 # velocity curve on back-transformed axes
       if (any(level == 1L)) {
 # level 1 prediction
-        if (body(xfun) == as.name('x') &&
-            body(yfun) == as.name('x')) {
+        if (identical(xfun, identity) && identical(yfun, identity)) {
 # x and y untransformed
             vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
             if (!is.null(abc$c))
@@ -214,7 +217,7 @@
 # add names or split by id if level 1
     if (level == 0L)
       pred <- pred0
-    asList <- ifelse(is.null(asList <- list(...)$asList), FALSE, asList)
+    asList <- ifelse(is.null(asList <- eval(mc$asList)), FALSE, asList)
     if (asList)
       pred <- split(pred, id)
     else
