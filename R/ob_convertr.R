@@ -121,7 +121,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
       transmute(age = !!age, sex = test_sex(!!sex), prev = !!prev, prev_true = !!prev_true)
   }
 
-  if (max(data$prev) <= 1)
+  if (max(data$prev, na.rm = TRUE) <= 1)
     warning('\nis prevalence fractional? - should be percentage\n')
 
   from <- unique(toupper(from))
@@ -202,12 +202,13 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
            bmi_to = .data$bmi_from) %>%
     rename(bmi_from = .data$bmi) %>%
     # calculate delta z-score and adjust prevalence
-    mutate(dz = (.data$z_to - .data$z_from + .data$zrev_from - .data$zrev_to) / 2,
-           dzdz = round(.data$z_to - .data$z_from - .data$zrev_from + .data$zrev_to, 6) / 2,
+    mutate(zmean_to =   (.data$z_to + .data$zrev_from) / 2,
+           zmean_from = (.data$z_from + .data$zrev_to) / 2,
+           dz = .data$zmean_to - .data$zmean_from,
            prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
            prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
            n = NULL) %>%
-    select(c(.data$age:.data$prev, .data$prev_new, .data$prev_true, contains('z'),
+    select(c(.data$age:.data$prev, .data$prev_new, .data$prev_true, .data$dz, contains('z'),
              .data$bmi_from, .data$bmi_to, everything()))
 
   # format prevalence as vector or tibble
