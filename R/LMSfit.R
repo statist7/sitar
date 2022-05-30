@@ -80,6 +80,8 @@ LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,
 		Mopt[i] <- .[1] ^ (1/Lopt[i])
 		Sopt[i] <- .[2] / .[1] / Lopt[i]
 	}
+	if (length(x) == 1)
+	  return(data.frame(sex, x, Lopt, Mopt, Sopt))
 	mf <- c("Male", "Female")
 	LMStitle <- c("L", "M", "S")
 	for (sx in 1:2) {
