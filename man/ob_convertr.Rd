@@ -64,16 +64,16 @@ converts them to rates based on a different cutoff, using a novel estimation
 algorithm.
 }
 \details{
-The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF35
-(morbid obesity), IOTF30 (obesity), IOTF25 (overweight), IOTF18.5 (grade 1
-thinness), IOTF17 (grade 2 thinness) and IOTF16 (grade 3 thinness).
+The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF 35
+(morbid obesity), IOTF 30 (obesity), IOTF 25 (overweight), IOTF 18.5 (grade 1
+thinness), IOTF 17 (grade 2 thinness) and IOTF 16 (grade 3 thinness).
 
-The WHO cutoffs correspond to BMI z_scores. Age 5-19 years, WHO+2 (obesity),
-WHO+1 (overweight) and WHO-2 (thinness). Age 0-5 years, WHO+3 (obesity),
-WHO+2 (overweight) and WHO-2 (thinness).
+The WHO cutoffs correspond to BMI z_scores. Age 5-19 years, WHO +2 (obesity),
+WHO +1 (overweight) and WHO -2 (thinness). Age 0-5 years, WHO +3 (obesity),
+WHO +2 (overweight) and WHO -2 (thinness).
 
-The CDC cutoffs correspond to BMI centiles: CDC95 (obesity), CDC85
-(overweight) and CDC5 (thinness).
+The CDC cutoffs correspond to BMI centiles: CDC 95 (obesity), CDC 85
+(overweight) and CDC 5 (thinness).
 
 Note 1: the overweight category needs to be analysed as overweight plus
 obesity. To predict overweight excluding obesity, first calculate predicted
@@ -90,14 +90,14 @@ The algorithm is commutative, which means that converting a prevalence rate
 from cutoff A to cutoff B and then from B to A returns the original value.
 }
 \examples{
-## convert 10\% IOTF overweight prevalence (cutoff IOTF25) in 8-year-old boys
-## to the overweight prevalence based on WHO, i.e. cutoff WHO+1
+## convert 10\% IOTF overweight prevalence (cutoff IOTF 25) in 8-year-old boys
+## to the overweight prevalence based on WHO, i.e. cutoff WHO +1
 ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1')
 
-## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
+## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
 ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
 
-#' ## convert IOTF overweight prevalence to WHO overweight prevalence
+## convert IOTF overweight prevalence to WHO overweight prevalence
 ## and compare with true value - boys and girls age 7-17
 ## note the need to first add obesity prevalence to overweight prevalence
 data(deren)

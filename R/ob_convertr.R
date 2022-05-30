@@ -10,16 +10,16 @@
 #' converts them to rates based on a different cutoff, using a novel estimation
 #' algorithm.
 #'
-#' The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF35
-#' (morbid obesity), IOTF30 (obesity), IOTF25 (overweight), IOTF18.5 (grade 1
-#' thinness), IOTF17 (grade 2 thinness) and IOTF16 (grade 3 thinness).
+#' The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF 35
+#' (morbid obesity), IOTF 30 (obesity), IOTF 25 (overweight), IOTF 18.5 (grade 1
+#' thinness), IOTF 17 (grade 2 thinness) and IOTF 16 (grade 3 thinness).
 #'
-#' The WHO cutoffs correspond to BMI z_scores. Age 5-19 years, WHO+2 (obesity),
-#' WHO+1 (overweight) and WHO-2 (thinness). Age 0-5 years, WHO+3 (obesity),
-#' WHO+2 (overweight) and WHO-2 (thinness).
+#' The WHO cutoffs correspond to BMI z_scores. Age 5-19 years, WHO +2 (obesity),
+#' WHO +1 (overweight) and WHO -2 (thinness). Age 0-5 years, WHO +3 (obesity),
+#' WHO +2 (overweight) and WHO -2 (thinness).
 #'
-#' The CDC cutoffs correspond to BMI centiles: CDC95 (obesity), CDC85
-#' (overweight) and CDC5 (thinness).
+#' The CDC cutoffs correspond to BMI centiles: CDC 95 (obesity), CDC 85
+#' (overweight) and CDC 5 (thinness).
 #'
 #' Note 1: the overweight category needs to be analysed as overweight plus
 #' obesity. To predict overweight excluding obesity, first calculate predicted
@@ -63,14 +63,14 @@
 #'
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
-#' ## convert 10% IOTF overweight prevalence (cutoff IOTF25) in 8-year-old boys
-#' ## to the overweight prevalence based on WHO, i.e. cutoff WHO+1
+#' ## convert 10% IOTF overweight prevalence (cutoff IOTF 25) in 8-year-old boys
+#' ## to the overweight prevalence based on WHO, i.e. cutoff WHO +1
 #' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1')
 #'
-#' ## compare the BMI density functions and cutoffs for IOTF25 and WHO+1
+#' ## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
 #' ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
 #'
-#'#' ## convert IOTF overweight prevalence to WHO overweight prevalence
+#' ## convert IOTF overweight prevalence to WHO overweight prevalence
 #' ## and compare with true value - boys and girls age 7-17
 #' ## note the need to first add obesity prevalence to overweight prevalence
 #' data(deren)
@@ -80,24 +80,19 @@
 #' ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF 25', to = 'WHO +1',
 #'    prev_true = `WHO+1`, data = deren, plot = 'compare')
 
-#' @importFrom forcats fct_inorder fct_collapse
+#' @importFrom forcats fct_inorder fct_collapse fct_relabel
 #' @importFrom ggplot2 ggplot xlab ylab geom_path geom_point geom_vline
 #'   geom_abline scale_x_continuous scale_y_continuous aes
-#' @importFrom tibble tibble
+#' @importFrom tibble tibble column_to_rownames
 #' @importFrom dplyr mutate rename filter transmute bind_rows bind_cols select
-#'   across left_join pull contains starts_with ends_with if_else n
+#'   across left_join pull contains starts_with ends_with if_else n rowwise
+#'   group_by ungroup
 #' @importFrom rlang .data enquo
 #' @importFrom stats pnorm qnorm
 #' @importFrom tidyr pivot_wider pivot_longer drop_na
 #' @export ob_convertr
 ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = c('vector', 'wider', 'longer'),
                      plot = c('no', 'density', 'compare'), data = parent.frame()) {
-
-  cutoffs <- tibble(ref = c(rep('IOTF', 6), rep('WHO', 5), rep('CDC', 3)),
-                    cutoff = c(16:17, 18.5, 25, 30, 35, "-2", "-1", "+1", "+2", "+3", centile <- c(5, 85, 95)),
-                    boys = c(-2.565, -1.877, -1.014, 1.31, 2.288, 2.93, -2:-1, 1:3, qnorm(centile / 100)),
-                    girls = c(-2.436, -1.789, -0.975, 1.244, 2.192, 2.822, -2:-1, 1:3, qnorm(centile / 100))) %>%
-    mutate(cutoff = paste(.data$ref, .data$cutoff))
 
   # check sex contains only 1/M/B/TRUE or 2/F/G
   test_sex <- function(sex) {
@@ -108,28 +103,85 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
     droplevels(fsex)
   }
 
+  # return sitar code for reference
+  ref_sitar <- function(x) {
+    x <- unique(x)
+    stopifnot('cutoff not unique' = length(x) == 1L)
+    x <- sub('^(.*) .*$', '\\1', x) # drop any cutoff
+    f <- factor(x, levels = c('CDC', 'IOTF', 'WHO'))
+    levels(f) <- c('cdc2000', 'iotf', 'who0607')
+    as.character(f)
+  }
+
+  # create cutoffs matrix
+  ref <- cutoff <- f <- LMS <- L <- M <- S <- NULL
+  cutoffs <- tibble(ref = c('CDC', 'IOTF', 'WHO'),
+                    cutoff = list(c(5, 85, '95'),
+                                  c(16:17, 18.5, 25, 30, '35'),
+                                  c(-2:-1, paste0('+', 1:3))),
+                    f = list(function(cutoff, sex) qnorm(cutoff / 100),
+                             function(cutoff, sex) LMS2z(18, cutoff, sex, 'bmi', 'iotf'),
+                             function(cutoff, sex) cutoff),
+                    sex = list(c('boys', 'girls'))) %>%
+    unnest(cutoff) %>% unnest(sex) %>% rowwise %>%
+    mutate(z = do.call(.data$f, list(as.numeric(.data$cutoff), sex)),
+           cutoff = paste(.data$ref, .data$cutoff)) %>%
+    select(-c(ref, f)) %>%
+    pivot_wider(names_from = sex, values_from = 'z') %>%
+    column_to_rownames('cutoff') %>%
+    as.matrix
+
+  # check from and to
+  from <- unique(toupper(from))
+  to <- unique(toupper(to))
+  stopifnot('`from` should be length 1' = length(from) == 1L,
+            '`to` should be length 1' = length(to) == 1L,
+            '`to` is the same as `from`' = to != from,
+            '`from` not recognised' = from %in% dimnames(cutoffs)[[1]],
+            '`to` not recognised' = to %in% dimnames(cutoffs)[[1]])
+
   # create tibble of age sex and prev
-  if (identical(data, parent.frame())) {
-    data <- eval.parent(substitute(
+  data <- if (identical(data, parent.frame())) {
+    eval.parent(substitute(
       data.frame(age = age, sex = test_sex(sex), prev = prev, prev_true = prev_true)))
   } else {
     prev <- enquo(prev)
     age <- enquo(age)
     sex <- enquo(sex)
     prev_true <- enquo(prev_true)
-    data <- data %>%
+    data %>%
       transmute(age = !!age, sex = test_sex(!!sex), prev = !!prev, prev_true = !!prev_true)
   }
 
   if (max(data$prev, na.rm = TRUE) <= 1)
     warning('\nis prevalence fractional? - should be percentage\n')
 
-  from <- unique(toupper(from))
-  to <- unique(toupper(to))
-  stopifnot('`from` not recognised' = from %in% cutoffs$cutoff,
-            '`to` not recognised' = to %in% cutoffs$cutoff,
-            '`from` should be length 1' = length(from) == 1L,
-            '`to` should be length 1' = length(to) == 1L)
+  # create meanz dz and LMS
+  data <- data %>%
+    mutate(from = !!from,
+           to = !!to,
+           age = round(age * 2) / 2,
+           n = 1:n()) %>%
+           select(age, n, everything()) %>%
+    pivot_longer(c(from, to), values_to = 'cutoff', names_to = NULL) %>%
+    mutate(z = diag(cutoffs[.data$cutoff, .data$sex]),
+           cor = fct_relabel(fct_inorder(.data$cutoff), ~c(!!to, !!from))) %>%
+    group_by(cutoff, sex) %>%
+    mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE),
+           zrev = LMS2z(.data$age, .data$bmi, .data$sex, 'bmi', ref_sitar(cor)),
+           LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE, TRUE), 'LMStable')) %>%
+    ungroup %>%
+    mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c('from', 'to')),
+           zmean = (.data$z + .data$zrev) / 2) %>%
+    bind_cols(.$LMS %>%
+                select(c(L, M, S))) %>%
+    select(-c(LMS, cor)) %>%
+    pivot_wider(names_from = .data$cutoff, values_from = .data$z:.data$S) %>%
+    mutate(dz = .data$zmean_to - .data$zmean_from,
+           prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
+           prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
+           n = NULL) %>%
+    select(age, sex, starts_with('prev'), contains('z'), starts_with('bmi'), everything())
 
   # check for plot
   report <- match.arg(report)
@@ -144,73 +196,6 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
     report <- 'wider'
   }
 
-  # z-score cutoffs by sex and ref
-  cutoffs <- cutoffs %>%
-    filter(.data$cutoff == from) %>%
-    mutate(co = 'from') %>%
-    bind_rows(cutoffs %>%
-                filter(.data$cutoff == to) %>%
-                mutate(co = 'to')) %>%
-    pivot_longer(c(.data$boys, .data$girls), names_to = 'sex', values_to = 'z')
-
-  # LMS data by ref sex and age
-  refdata <- sitar::iotf %>%
-    mutate(ref = 'IOTF') %>%
-    bind_rows(sitar::who0607 %>%
-                select(c(.data$years, .data$sex, ends_with('bmi'))) %>%
-                filter(dplyr::lead(.data$years) > .data$years) %>%
-                mutate(ref = 'WHO'),
-              sitar::cdc2000 %>%
-                select(c(.data$years, .data$sex, ends_with('bmi'))) %>%
-                drop_na %>%
-                mutate(years = round(.data$years * 24) / 24,
-                       across(everything(), ~{(.x + dplyr::lag(.x)) / 2}),
-                       ref = 'CDC')) %>%
-    rename(age = .data$years,
-           L = .data$L.bmi,
-           M = .data$M.bmi,
-           S = .data$S.bmi) %>%
-    filter(age >= 2, age <= 18, age == (round(age * 2) / 2)) %>%
-    mutate(across(c(sex, .data$ref), factor),
-           sex = test_sex(.data$sex))
-
-  # combine prevalence, z-score cutoffs and LMS data
-  data <- left_join(data, cutoffs, by = "sex") %>%
-    # round age to half-years
-    # add count to ensure unique rows
-    mutate(age = round(age * 2) / 2,
-           n = (1:n() + 1) %/% 2) %>%
-    select(age, n, everything()) %>%
-    left_join(refdata, by = c("age", "sex", "ref"))
-
-  stopifnot('no data' = nrow(data %>% select(-prev_true) %>% drop_na) > 0L)
-
-  data <- data %>%
-    # calculate bmi from LMS
-    mutate(bmi = .data$M * (1 + .data$L * .data$S * .data$z)^(1/.data$L)) %>%
-    # swap bmi from and to
-    pivot_wider(names_from = .data$co, values_from = c(.data$ref:.data$cutoff, .data$z:.data$bmi)) %>%
-    rename(bmi = .data$bmi_to,
-           bmi_to = .data$bmi_from) %>%
-    rename(bmi_from = .data$bmi) %>%
-    # calculate z-scores for swapped bmi
-    pivot_longer(-c(age:prev_true), names_to = c('.value', 'co'), names_sep = '_') %>%
-    mutate(zrev = ((.data$bmi / .data$M)^.data$L - 1) / (.data$L * .data$S)) %>%
-    # swap bmi back again
-    pivot_wider(names_from = .data$co, values_from = .data$ref:.data$zrev) %>%
-    rename(bmi = .data$bmi_to,
-           bmi_to = .data$bmi_from) %>%
-    rename(bmi_from = .data$bmi) %>%
-    # calculate delta z-score and adjust prevalence
-    mutate(zmean_to =   (.data$z_to + .data$zrev_from) / 2,
-           zmean_from = (.data$z_from + .data$zrev_to) / 2,
-           dz = .data$zmean_to - .data$zmean_from,
-           prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
-           prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
-           n = NULL) %>%
-    select(c(.data$age:.data$prev, .data$prev_new, .data$prev_true, .data$dz, contains('z'),
-             .data$bmi_from, .data$bmi_to, everything()))
-
   # format prevalence as vector or tibble
   data <- switch(report,
                  # vector
@@ -221,7 +206,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                  # longer
                  longer = data %>%
                    pivot_longer(ends_with(c('_from', 'to')),
-                                names_to = c('.value', 'co'), names_sep = '_')
+                                names_to = c('.value', 'cutoff'), names_sep = '_')
   )
 
   # return data or plot
@@ -231,7 +216,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
          # density plot
          density = {
            with(with(data, pdLMS(L, M, S, plot = FALSE)), {
-             dimnames(density)[[2]] = data$cutoff
+             dimnames(density)[[2]] = paste0(data$cutoff, seq_along(data$cutoff))
              tibble(x) %>%
                bind_cols(as.data.frame(density))
            }) %>%
