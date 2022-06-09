@@ -177,6 +177,8 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
     mutate(dz = .data$zmean_to - .data$zmean_from,
            prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
            prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
+           from = !!from,
+           to = !!to,
            n = NULL) %>%
     select(age, sex, starts_with('prev'), contains('z'), starts_with('bmi'), everything())
 
@@ -202,8 +204,9 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                  wider = data,
                  # longer
                  longer = data %>%
-                   pivot_longer(ends_with(c('_from', 'to')),
+                   pivot_longer(ends_with(c('_from', '_to')),
                                 names_to = c('.value', 'cutoff'), names_sep = '_') %>%
+                   select(-c(from, to)) %>%
                    mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c(!!from, !!to))))
 
   # return data or plot
