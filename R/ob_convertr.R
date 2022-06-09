@@ -114,7 +114,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
   }
 
   # create cutoffs matrix
-  ref <- cutoff <- f <- LMS <- L <- M <- S <- NULL
+  ref <- cutoff <- f <- NULL
   cutoffs <- tibble(ref = c('CDC', 'IOTF', 'WHO'),
                     cutoff = list(c(5, 85, '95'),
                                   c(16:17, 18.5, 25, 30, '35'),
@@ -123,8 +123,8 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                              function(cutoff, sex) LMS2z(18, cutoff, sex, 'bmi', 'iotf'),
                              function(cutoff, sex) cutoff),
                     sex = list(c('boys', 'girls'))) %>%
-    unnest(cutoff) %>% unnest(sex) %>% rowwise %>%
-    mutate(z = do.call(.data$f, list(as.numeric(.data$cutoff), sex)),
+    unnest(.data$cutoff) %>% unnest(.data$sex) %>% rowwise %>%
+    mutate(z = do.call(.data$f, list(as.numeric(.data$cutoff), .data$sex)),
            cutoff = paste(.data$ref, .data$cutoff)) %>%
     select(-c(ref, f)) %>%
     pivot_wider(names_from = sex, values_from = 'z') %>%
@@ -156,7 +156,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
   if (max(data$prev, na.rm = TRUE) <= 1)
     warning('\nis prevalence fractional? - should be percentage\n')
 
-  # create meanz dz and LMS
+  # create meanz and dz and prev_new
   data <- data %>%
     mutate(from = !!from,
            to = !!to,
@@ -217,12 +217,13 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
          density = {
            data %>%
              group_by(cutoff) %>%
-             mutate(LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
+             mutate(LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff),
+                                     toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
              ungroup %>%
              rowwise %>%
-             mutate(density = with(LMS, list(as_tibble(pdLMS(L, M, S, plot=F)[1:2])))) %>%
-             unnest(density) %>%
-             mutate(density = drop(density)) %>%
+             mutate(density = with(.data$LMS, list(as_tibble(pdLMS(L, M, S, plot=F)[c('x', 'density')])))) %>%
+             unnest(.data$density) %>%
+             mutate(density = drop(.data$density)) %>%
              ggplot(aes(.data$x, .data$density, colour = .data$cutoff)) +
              xlab(expression(body~mass~index~~(kg/m^2))) +
              geom_path() +
@@ -231,7 +232,7 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
          # comparison plot
          compare = {
            # compare true and estimated prevalence (output with report = 'wider')
-           ggplot(data, aes(prev_true, .data$prev_new, group = sex, colour = sex)) +
+           ggplot(data, aes(.data$prev_true, .data$prev_new, colour = .data$sex)) +
              xlab('observed prevalence (%)') + ylab('predicted prevalence (%)') +
              geom_point() +
              geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray') +
