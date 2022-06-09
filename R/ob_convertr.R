@@ -166,17 +166,14 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
     pivot_longer(c(from, to), values_to = 'cutoff', names_to = NULL) %>%
     mutate(z = diag(cutoffs[.data$cutoff, .data$sex]),
            cor = fct_relabel(fct_inorder(.data$cutoff), ~c(!!to, !!from))) %>%
-    group_by(cutoff, sex) %>%
+    group_by(cutoff) %>%
     mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE),
-           zrev = LMS2z(.data$age, .data$bmi, .data$sex, 'bmi', ref_sitar(cor)),
-           LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE, TRUE), 'LMStable')) %>%
+           zrev = LMS2z(.data$age, .data$bmi, .data$sex, 'bmi', ref_sitar(cor))) %>%
     ungroup %>%
     mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c('from', 'to')),
-           zmean = (.data$z + .data$zrev) / 2) %>%
-    bind_cols(.$LMS %>%
-                select(c(L, M, S))) %>%
-    select(-c(LMS, cor)) %>%
-    pivot_wider(names_from = .data$cutoff, values_from = .data$z:.data$S) %>%
+           zmean = (.data$z + .data$zrev) / 2,
+           cor = NULL) %>%
+    pivot_wider(names_from = .data$cutoff, values_from = .data$z:.data$zmean) %>%
     mutate(dz = .data$zmean_to - .data$zmean_from,
            prev_new = .data$dz + qnorm(prev / 100) * -sign(.data$z_from),
            prev_new = pnorm(.data$prev_new * -sign(.data$z_to)) * 100,
@@ -206,8 +203,8 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                  # longer
                  longer = data %>%
                    pivot_longer(ends_with(c('_from', 'to')),
-                                names_to = c('.value', 'cutoff'), names_sep = '_')
-  )
+                                names_to = c('.value', 'cutoff'), names_sep = '_') %>%
+                   mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c(!!from, !!to))))
 
   # return data or plot
   switch(plot,
@@ -215,16 +212,17 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
          no = return(data),
          # density plot
          density = {
-           with(with(data, pdLMS(L, M, S, plot = FALSE)), {
-             dimnames(density)[[2]] = paste0(data$cutoff, seq_along(data$cutoff))
-             tibble(x) %>%
-               bind_cols(as.data.frame(density))
-           }) %>%
-             pivot_longer(-.data$x, names_to = 'cutoff', values_to = 'density') %>%
-             mutate(cutoff = fct_inorder(.data$cutoff)) %>%
-             ggplot(aes(.data$x, .data$density, group = .data$cutoff)) +
+           data %>%
+             group_by(cutoff) %>%
+             mutate(LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
+             ungroup %>%
+             rowwise %>%
+             mutate(density = with(LMS, list(as_tibble(pdLMS(L, M, S, plot=F)[1:2])))) %>%
+             unnest(density) %>%
+             mutate(density = drop(density)) %>%
+             ggplot(aes(.data$x, .data$density, colour = .data$cutoff)) +
              xlab(expression(body~mass~index~~(kg/m^2))) +
-             geom_path(aes(colour = .data$cutoff)) +
+             geom_path() +
              geom_vline(aes(xintercept = .data$bmi, colour = .data$cutoff), data = data, linetype = 2)
          },
          # comparison plot
