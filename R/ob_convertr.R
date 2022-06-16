@@ -114,7 +114,6 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
   }
 
   # create cutoffs matrix
-  ref <- cutoff <- f <- NULL
   cutoffs <- tibble(ref = c('CDC', 'IOTF', 'WHO'),
                     cutoff = list(c(5, 85, '95'),
                                   c(16:17, 18.5, 25, 30, '35'),
@@ -123,13 +122,12 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                              function(cutoff, sex) LMS2z(18, cutoff, sex, 'bmi', 'iotf'),
                              function(cutoff, sex) cutoff),
                     sex = list(c('boys', 'girls'))) %>%
-    unnest(.data$cutoff) %>% unnest(.data$sex) %>% rowwise %>%
-    mutate(z = do.call(.data$f, list(as.numeric(.data$cutoff), .data$sex)),
-           cutoff = paste(.data$ref, .data$cutoff)) %>%
-    select(-c(ref, f)) %>%
-    pivot_wider(names_from = sex, values_from = 'z') %>%
-    column_to_rownames('cutoff') %>%
-    as.matrix
+    unnest(.data$cutoff) %>%
+    unnest(.data$sex) %>%
+    rowwise %>%
+    mutate(z = do.call(.data$f, list(as.numeric(.data$cutoff), .data$sex)), # apply function to cutoffs
+           cutoff = paste(.data$ref, .data$cutoff),
+           cutoff_sex = paste(.data$cutoff, .data$sex))
 
   # check from and to
   from <- unique(toupper(from))
@@ -137,8 +135,8 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
   stopifnot('`from` should be length 1' = length(from) == 1L,
             '`to` should be length 1' = length(to) == 1L,
             '`to` is the same as `from`' = to != from,
-            '`from` not recognised' = from %in% dimnames(cutoffs)[[1]],
-            '`to` not recognised' = to %in% dimnames(cutoffs)[[1]])
+            '`from` not recognised' = from %in% cutoffs$cutoff,
+            '`to` not recognised' = to %in% cutoffs$cutoff)
 
   # create tibble of age sex and prev
   data <- if (identical(data, parent.frame())) {
@@ -164,10 +162,10 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
            n = 1:n()) %>%
            select(age, n, everything()) %>%
     pivot_longer(c(from, to), values_to = 'cutoff', names_to = NULL) %>%
-    mutate(z = diag(cutoffs[.data$cutoff, .data$sex]),
+    mutate(z = cutoffs$z[factor(paste(.data$cutoff, .data$sex), levels = cutoffs$cutoff_sex)],
            cor = fct_relabel(fct_inorder(.data$cutoff), ~c(!!to, !!from))) %>%
-    group_by(cutoff) %>%
-    mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff), toz = FALSE),
+    group_by(.data$cutoff) %>%
+    mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$cutoff), toz = FALSE),
            zrev = LMS2z(.data$age, .data$bmi, .data$sex, 'bmi', ref_sitar(cor))) %>%
     ungroup %>%
     mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c('from', 'to')),
@@ -216,8 +214,8 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
          # density plot
          density = {
            data %>%
-             group_by(cutoff) %>%
-             mutate(LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(cutoff),
+             group_by(.data$cutoff) %>%
+             mutate(LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$cutoff),
                                      toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
              ungroup %>%
              rowwise %>%
