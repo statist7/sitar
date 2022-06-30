@@ -118,14 +118,14 @@ ob_convertr <- function(prev = 50, age, sex, from, to, prev_true = NA, report = 
                     cutoff = list(c(5, 85, '95'),
                                   c(16:17, 18.5, 25, 30, '35'),
                                   c(-2:-1, paste0('+', 1:3))),
+                    sex = list(c('boys', 'girls')),
                     f = list(function(cutoff, sex) qnorm(cutoff / 100),
                              function(cutoff, sex) LMS2z(18, cutoff, sex, 'bmi', 'iotf'),
-                             function(cutoff, sex) cutoff),
-                    sex = list(c('boys', 'girls'))) %>%
+                             function(cutoff, sex) cutoff)) %>%
     unnest(.data$cutoff) %>%
     unnest(.data$sex) %>%
     rowwise %>%
-    mutate(z = do.call(.data$f, list(as.numeric(.data$cutoff), .data$sex)), # apply function to cutoffs
+    mutate(z = .data$f(as.numeric(.data$cutoff), .data$sex), # apply function to cutoffs
            cutoff = paste(.data$ref, .data$cutoff),
            cutoff_sex = paste(.data$cutoff, .data$sex))
 
