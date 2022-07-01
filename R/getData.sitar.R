@@ -13,7 +13,7 @@
 #' @export
   getData.sitar <- function(object) {
     object$call <- object$call.sitar
-    class(object) <- class(object)[-1]
+    class(object) <- 'lme'
     getData(object)
   }
 
