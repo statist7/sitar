@@ -79,6 +79,8 @@
 #' \code{\link{nlme}}).
 #' @param control list of control values for the estimation algorithm (see
 #' \code{\link{nlme}}) (default {nlmeControl(returnObject = TRUE)}).
+#' @param keep.data logical to control saving \code{data} as part of the model
+#' object (default TRUE).
 #' @param object object of class \code{sitar}.
 #' @param \dots further parameters for \code{update} consisting of any of the
 #' above \code{sitar} parameters.
@@ -91,8 +93,9 @@
 #' \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
 #' following components:
 #' \item{fitnlme}{the function returning the predicted value of \code{y}.}
+#' \item{data}{copy of \code{data} (if \code{keep.data} true).}
 #' \item{constants}{data frame of mean a-b-c-d values for unique combinations
-#' of covariates (excluding age).}
+#' of covariates (excluding \code{x}).}
 #' \item{call.sitar}{the internal \code{sitar} call that produced the object.}
 #' \item{xoffset}{the value of \code{xoffset}.}
 #' \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
@@ -114,8 +117,7 @@
 #'
 #' ##  relate random effects to age at menarche (with censored values +ve)
 #' ##  both a (size) and b (timing) are positively associated with age at menarche
-#' amen <- abs(heights$men)
-#' (m2 <- update(m1, a.formula = ~amen, b.formula = ~amen, c.formula = ~amen))
+#' (m2 <- update(m1, a.formula = ~abs(men), b.formula = ~abs(men), c.formula = ~abs(men)))
 #' @import nlme
 #' @importFrom glue glue
 #' @importFrom splines ns
@@ -148,7 +150,8 @@ sitar <-
            subset = NULL,
            method = 'ML',
            na.action = na.fail,
-           control = nlmeControl(msMaxIter = 100, returnObject = TRUE))
+           control = nlmeControl(msMaxIter = 100, returnObject = TRUE),
+           keep.data = TRUE)
   {
     b.origin <- function(b) {
       if (b == 'mean')
@@ -275,18 +278,12 @@ sitar <-
     pars <- c('x', random.names, ss)
 
     #	set up model elements for a, b, c and d
-    model <- setNames(letters[1:4], letters[1:4])
+    model <- setNames(nm = letters[1:4])
     model[!names(model) %in% random.names] <- ''
 
-    # if subsetted restore data
-    if (!is.null(subset)) {
-      data <- eval(mcall$data, parent.frame())
-      x <- eval(mcall$x, data) - xoffset
-      y <- eval(mcall$y, data)
-    } else {
-      subset <- 1:length(x)
-    }
+    # set up fulldata
     id <- eval(mcall$id, data)
+    subset <- 1:length(x)
     fulldata <- data.frame(x, y, id, subset)
 
     mm.formula <- ~1
@@ -433,6 +430,9 @@ sitar <-
     class(nlme.out) <- c('sitar', class(nlme.out))
     # save fitnlme
     nlme.out$fitnlme <- fitenv$fitnlme
+    # save data
+    if (keep.data)
+      nlme.out$data <- data
     # save constants
     model <- lapply(model, function(x)
       if (x == '')
@@ -526,10 +526,13 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       0
     ))) {
       # get data etc
-      data <- eval(mcall$data)
-      subset <- eval(mcall$subset, data)
-      if (!is.null(subset))
-        data <- data[subset,]
+      if (any(c('data', 'subset') %in% names(extras))) {
+        data <- eval(mcall$data)
+        subset <- eval(mcall$subset, data)
+        if (!is.null(subset))
+          data <- data[subset,]
+      } else
+        data <- getData(object)
       x <- eval(mcall$x, data)
       xoffset <- object$xoffset
       if (is.null(xoffset))
@@ -539,7 +542,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       knots <- attr(object$ns$model$ns, 'knots')
       bounds <- attr(object$ns$model$ns, 'Boundary.knots')
       # update random effects
-      if (!is.null(extras$data) || !is.null(extras$subset)) {
+      if (any(c('data', 'subset') %in% names(extras))) {
         id <- factor(eval(mcall$id, data))
         levels.obj <- levels(getGroups(object))
         if (!identical(levels(id), levels.obj)) {

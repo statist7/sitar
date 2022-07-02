@@ -30,7 +30,8 @@ sitar(
   subset = NULL,
   method = "ML",
   na.action = na.fail,
-  control = nlmeControl(msMaxIter = 100, returnObject = TRUE)
+  control = nlmeControl(msMaxIter = 100, returnObject = TRUE),
+  keep.data = TRUE
 )
 
 \method{update}{sitar}(object, ..., evaluate = TRUE)
@@ -108,6 +109,9 @@ that should be used in the fit (see \code{\link{nlme}}).}
 \item{control}{list of control values for the estimation algorithm (see
 \code{\link{nlme}}) (default {nlmeControl(returnObject = TRUE)}).}
 
+\item{keep.data}{logical to control saving \code{data} as part of the model
+object (default TRUE).}
+
 \item{object}{object of class \code{sitar}.}
 
 \item{\dots}{further parameters for \code{update} consisting of any of the
@@ -123,8 +127,9 @@ nonlinear mixed-effects model fit, with all the components returned by
 \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
 following components:
 \item{fitnlme}{the function returning the predicted value of \code{y}.}
+\item{data}{copy of \code{data} (if \code{keep.data} true).}
 \item{constants}{data frame of mean a-b-c-d values for unique combinations
-of covariates (excluding age).}
+of covariates (excluding \code{x}).}
 \item{call.sitar}{the internal \code{sitar} call that produced the object.}
 \item{xoffset}{the value of \code{xoffset}.}
 \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
@@ -177,8 +182,7 @@ data(heights)
 
 ##  relate random effects to age at menarche (with censored values +ve)
 ##  both a (size) and b (timing) are positively associated with age at menarche
-amen <- abs(heights$men)
-(m2 <- update(m1, a.formula = ~amen, b.formula = ~amen, c.formula = ~amen))
+(m2 <- update(m1, a.formula = ~abs(men), b.formula = ~abs(men), c.formula = ~abs(men)))
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}

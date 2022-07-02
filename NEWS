@@ -1,5 +1,10 @@
 Changes in Version 1.2.0.9000
 
+  o The argument keep.data is added to sitar with default TRUE. This saves a
+    copy of the data in the object, which avoids environment issues.
+
+  o ob_convertr is rewritten to be much faster.
+
 Changes in Version 1.2.0
 
   o The dataset deren is added for use with ob_convertr.
