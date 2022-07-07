@@ -1,5 +1,7 @@
 Changes in Version 1.2.0.9000
 
+  o Typos in the berkeley dataset reported as issue #7 are fixed.
+
   o The argument keep.data is added to sitar with default TRUE. This saves a
     copy of the data in the object, which avoids environment issues.
 

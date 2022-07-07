@@ -35,6 +35,7 @@ The children were measured for height, weight (undressed), stem length, biacromi
 bi-iliac diameter, leg circumference, and dynamometric strength.
 The data were provided as an appendix to the book by Tuddenham and Snyder (1954),
 and a few transcription errors are corrected here.
+A further 19 errors in height and weight as reported in \code{sitar} issue #7 are also now corrected.
 The \code{growth} dataset in the \code{fda} package uses heights from the same study.
 }
 \examples{
