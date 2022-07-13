@@ -57,6 +57,6 @@
 #' ## convert IOTF obesity prevalence to WHO obesity prevalence
 #' ## and compare with true WHO obesity prevalence - boys and girls age 7-17
 #' data(deren)
-#'   ob_convertr(prev = IOTF30, age = Age, sex = Sex, from = 'IOTF 30',
-#'     to = 'WHO +2', prev_true = `WHO+2`, data = deren, plot = 'compare')
+#'   ob_convertr(age = Age, sex = Sex, from = 'IOTF 30', to = 'WHO +2',
+#'     pfrom = IOTF30, pto = `WHO+2`, data = deren, plot = 'compare')
 "deren"
