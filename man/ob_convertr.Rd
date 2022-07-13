@@ -2,37 +2,55 @@
 % Please edit documentation in R/ob_convertr.R
 \name{ob_convertr}
 \alias{ob_convertr}
+\alias{ob_convertr2}
 \title{Convert between IOTF, WHO and CDC prevalence rates for child thinness,
 overweight and obesity}
 \usage{
 ob_convertr(
-  prev = 50,
   age,
   sex,
   from,
   to,
-  prev_true = NA,
+  pfrom = 50,
+  pto = NA,
+  data = parent.frame(),
   report = c("vector", "wider", "longer"),
-  plot = c("no", "density", "compare"),
-  data = parent.frame()
+  plot = c("no", "density", "compare")
+)
+
+ob_convertr2(
+  age,
+  sex,
+  from,
+  to,
+  pfrom,
+  pto = NA,
+  data = parent.frame(),
+  report = c("vector", "wider", "longer")
 )
 }
 \arguments{
-\item{prev}{vector of age-sex-specific percentage prevalence rates.}
-
 \item{age}{vector of ages between 2 and 18 years corresponding to each rate.}
 
 \item{sex}{vector of the sexes corresponding to each rate, coded as either
 'boys/girls' or 'male/female' or '1/2' (upper or lower case, and only the
 first character considered).}
 
-\item{from}{the BMI cutoff (see Details) on which the prevalence is based.}
+\item{from}{name(s) of the BMI cutoff(s) (see Details) on which the prevalence
+is based.}
 
-\item{to}{the BMI cutoff (see Details) on which to base the converted
-prevalence.}
+\item{to}{name(s) of the BMI cutoff(s) (see Details) on which to base the
+predicted prevalence.}
 
-\item{prev_true}{optional vector of known percentage prevalence rates
-corresponding to \code{to}, for validation purposes.}
+\item{pfrom}{vector of age-sex-specific percentage prevalence rates
+based on \code{from}, or the names of two or more such prevalence rates.}
+
+\item{pto}{optional vector of known percentage prevalence rates
+based on \code{to}, or the names of two or more such prevalence rates
+(for validation purposes).}
+
+\item{data}{data frame containing \code{pfrom}, \code{age}, \code{sex} and
+\code{pto}.}
 
 \item{report}{character controlling the format of the returned data: 'vector'
 for the estimated prevalence rates, 'wider' for the working tibble in wide
@@ -44,13 +62,10 @@ and one for \code{to}.}
 plot, 'density' to display the BMI density distributions and cutoffs
 corresponding to \code{from} and \code{to}, or 'compare' to display the
 predicted prevalence rates plotted against the observed rates in
-\code{prev_true}.}
-
-\item{data}{data frame containing \code{prev}, \code{age}, \code{sex} and
-\code{prev_true}.}
+\code{pto}.}
 }
 \value{
-Either the converted prevalence rates or a plot visualizing the
+Either the predicted prevalence rates or a plot visualizing the
   findings, depending on the \code{report} and \code{plot} settings.
 }
 \description{
@@ -59,8 +74,8 @@ index (BMI) lying beyond a pre-specified reference cutoff. Three references
 are compared here: IOTF (International Obesity Task Force), WHO (World Health
 Organization) and CDC (US Centers for Disease Control and Prevention), each
 of which have their own cutoffs. \code{ob_convertr} takes age-sex-specific
-prevalence rates of thinness, overweight and obesity based on one cutoff, and
-converts them to rates based on a different cutoff, using a novel estimation
+prevalence rates of thinness, overweight or obesity based on one cutoff, and
+converts them to rates based on a different cutoff, using a novel prediction
 algorithm.
 }
 \details{
@@ -75,37 +90,100 @@ WHO +2 (overweight) and WHO -2 (thinness).
 The CDC cutoffs correspond to BMI centiles: CDC 95 (obesity), CDC 85
 (overweight) and CDC 5 (thinness).
 
-Note 1: the overweight category needs to be analysed as overweight plus
-obesity. To predict overweight excluding obesity, first calculate predicted
+Note 1: the overweight category needs to be analysed as overweight prevalence plus
+obesity prevalence. To predict overweight excluding obesity, first calculate predicted
 overweight plus obesity then subtract predicted obesity.
 
 Note 2: the category labels are harmonised and not necessarily as originally
-defined.
+described.
 
 The conversion algorithm exploits the fact that all three references are
 based on the LMS method, which allows prevalence to be converted to a common
 BMI centile and z-score scale.
 
-The algorithm is commutative, which means that converting a prevalence rate
-from cutoff A to cutoff B and then from B to A returns the original value.
+The algorithm is actually two distinct algorithms, depending on the number
+of prevalence rates used for the prediction. In the simpler case
+(Cole and Lobstein, 2022) just one
+rate is used, in which case the algorithm is commutative, meaning that
+converting a prevalence rate from cutoff A to cutoff B and then from B to A
+returns the original value. For this algorithm \code{from} and \code{to} are
+the names of the cutoffs, and \code{pfrom} and optionally \code{pto} are vectors.
+
+The alternative algorithm  (Cole and Lobstein, 2023) uses two known prevalence rates,
+typically overweight and obesity based on one reference, and returning the corresponding
+rates based on another reference. Here \code{from} and \code{to} are
+the names of the cutoffs as length-2
+character strings, while \code{pfrom} and optionally \code{pto}
+are character strings giving the names of the corresponding vector prevalence rates.
+For convenience the \code{from} or \code{to} names 'CDC', 'IOTF' or 'WHO'
+expand to the corresponding pairs of cutoffs for overweight and obesity,
+e.g. 'CDC' expands to c('CDC 85', 'CDC 95').
+
+Alternatively the latter algorithm can be used to interpolate or extrapolate
+to a specified z-score cutoff assuming the same reference for all cutoffs.
+Here the values of \code{from} and \code{to} are numerical z-score cutoffs,
+with at least two for \code{from}. See the final example.
 }
 \examples{
 ## convert 10\% IOTF overweight prevalence (cutoff IOTF 25) in 8-year-old boys
 ## to the overweight prevalence based on WHO, i.e. cutoff WHO +1
-ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1')
+ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10)
 
 ## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
-ob_convertr(prev = 10, age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
+ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10, plot = 'density')
 
 ## convert IOTF overweight prevalence to WHO overweight prevalence
-## and compare with true value - boys and girls age 7-17
+## and compare with true value - boys and girls aged 7-17 (22 groups)
 ## note the need to first add obesity prevalence to overweight prevalence
 data(deren)
 deren <- within(deren, {
+  CDC85 = CDC85 + CDC95
   IOTF25 = IOTF25 + IOTF30
   `WHO+1` = `WHO+1` + `WHO+2`})
-ob_convertr(prev = IOTF25, age = Age, sex = Sex, from = 'IOTF 25', to = 'WHO +1',
-   prev_true = `WHO+1`, data = deren, plot = 'compare')
+ob_convertr(age = Age, sex = Sex, from = 'IOTF 25', to = 'WHO +1',
+  pfrom = IOTF25, pto = `WHO+1`, data = deren, plot = 'compare')
+
+## convert IOTF overweight and obesity prevalence to WHO using
+## \code{ob_convertr2} which is more accurate than \code{ob_convertr}
+ob_convertr2(age = Age, sex = Sex, from = 'IOTF', to = 'WHO',
+  pfrom = c('IOTF25', 'IOTF30'), pto = c('WHO+1', 'WHO+2'), data = deren, report = 'wider')
+
+## extrapolate WHO overweight and obesity prevalence (cutoffs +1 and +2)
+## to severe obesity prevalence based on cutoff +3
+ob_convertr2(Age, Sex, from = 1:2, to = 3,
+  pfrom = c('WHO+1', 'WHO+2'), data = deren, report = 'wider')
+
+}
+\references{
+Cole TJ, Lobstein T. Exploring an algorithm to harmonize International Obesity
+Task Force and World Health Organization child overweight and obesity prevalence
+rates. Pediatr Obes 2022;In press.
+
+Cole TJ, Lobstein T. An improved algorithm to harmonize child overweight and
+obesity prevalence rates. Pediatr Obes 2023;In press.
+
+The CDC reference for children aged 2-20 years is: Must A, Dallal GE, Dietz
+WH. Reference data for obesity: 85th and 95th percentiles of body mass index
+(wt/ht2) and triceps skinfold thickness. American Journal of Clinical
+Nutrition 1991; 53: 839-46. Available at:
+\url{https://academic.oup.com/ajcn/article/53/4/839/4715058}
+
+The IOTF reference for children aged 2-18 years is: Cole TJ, Bellizzi MC,
+Flegal KM, Dietz WH. Establishing a standard definition for child overweight
+and obesity worldwide: international survey. BMJ 2000; 320: 1240-5. Available
+at \doi{10.1136/bmj.320.7244.1240}
+
+The WHO reference for children aged 0-5 years is: WHO Child Growth Standards:
+Length/height-for-age, weight-for-age, weight-for-length, weight-for-height
+and body mass index-for-age: Methods and development. Geneva: World Health
+Organization, 2006. Available at:
+\url{https://www.who.int/toolkits/child-growth-standards/standards}
+
+The WHO reference for children aged 5-19 years is: de Onis M, Onyango AW,
+Borghi E, Siyam A, Nishida C, Siekmann J. Development of a WHO growth
+reference for school-aged children and adolescents. Bulletin of the World
+Health Organization 2007; 85: 660-7. Available at:
+\url{https://www.who.int/growthref/growthref_who_bull/en/}
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
