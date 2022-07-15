@@ -32,33 +32,36 @@ ob_convertr2(
 \arguments{
 \item{age}{vector of ages between 2 and 18 years corresponding to each rate.}
 
-\item{sex}{vector of the sexes corresponding to each rate, coded as either
-'boys/girls' or 'male/female' or '1/2' (upper or lower case, and only the
-first character considered).}
+\item{sex}{vector of sexes corresponding to each rate, coded as either
+'boys/girls' or 'male/female' or '1/2' (upper or lower case, based on the
+first character).}
 
-\item{from}{name(s) of the BMI cutoff(s) (see Details) on which the prevalence
-is based.}
+\item{from}{name(s) of the BMI cutoff(s) on which the prevalence
+is based (see Details).}
 
-\item{to}{name(s) of the BMI cutoff(s) (see Details) on which to base the
-predicted prevalence.}
+\item{to}{name(s) of the BMI cutoff(s) on which to base the
+predicted prevalence (see Details).}
 
 \item{pfrom}{vector of age-sex-specific percentage prevalence rates
-based on \code{from}, or the names of two or more such prevalence rates.}
+based on \code{from} (\code{ob_convertr}) or the names of two or more such
+prevalence rates (\code{ob_convertr2}).}
 
 \item{pto}{optional vector of known percentage prevalence rates
-based on \code{to}, or the names of two or more such prevalence rates
-(for validation purposes).}
+based on \code{to} (\code{ob_convertr}) or the names of two or more such
+prevalence rates (for validation purposes) (\code{ob_convertr2}).}
 
-\item{data}{data frame containing \code{pfrom}, \code{age}, \code{sex} and
+\item{data}{data frame containing \code{age}, \code{sex}, \code{pfrom} and
 \code{pto}.}
 
 \item{report}{character controlling the format of the returned data: 'vector'
 for the estimated prevalence rates, 'wider' for the working tibble in wide
 format, i.e. the \code{from} and \code{to} data side by side, or 'longer'
 for the tibble in long format, i.e. two rows per rate, one for \code{from}
-and one for \code{to}.}
+and one for \code{to}. For \code{ob_convertr2} the three settings return
+progressively more information.}
 
-\item{plot}{character controlling what if anything is plotted: 'no' for no
+\item{plot}{character controlling what if anything is plotted (\code{ob_convertr}
+only): 'no' for no
 plot, 'density' to display the BMI density distributions and cutoffs
 corresponding to \code{from} and \code{to}, or 'compare' to display the
 predicted prevalence rates plotted against the observed rates in
@@ -67,6 +70,11 @@ predicted prevalence rates plotted against the observed rates in
 \value{
 Either the predicted prevalence rates or a plot visualizing the
   findings, depending on the \code{report} and \code{plot} settings.
+
+  In addition, with \code{report} set to "wider" or "longer", extra information
+  is returned reflecting the internal workings of the algorithms. In particular
+  \code{ob_convertr2} returns \code{b} the regression coefficient of z-score
+  prevalence on z-score cutoff as described in Cole & Lobstein (2023).
 }
 \description{
 Child thinness, overweight and obesity are defined as the child's body mass
@@ -75,8 +83,9 @@ are compared here: IOTF (International Obesity Task Force), WHO (World Health
 Organization) and CDC (US Centers for Disease Control and Prevention), each
 of which have their own cutoffs. \code{ob_convertr} takes age-sex-specific
 prevalence rates of thinness, overweight or obesity based on one cutoff, and
-converts them to rates based on a different cutoff, using a novel prediction
-algorithm.
+converts them to the corresponding rates based on a different cutoff.
+\code{ob_convertr2} uses paired prevalence rates of overweight and obesity on
+one cutoff to estimate those based on another cutoff.
 }
 \details{
 The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF 35
@@ -90,28 +99,23 @@ WHO +2 (overweight) and WHO -2 (thinness).
 The CDC cutoffs correspond to BMI centiles: CDC 95 (obesity), CDC 85
 (overweight) and CDC 5 (thinness).
 
-Note 1: the overweight category needs to be analysed as overweight prevalence plus
+Note: the overweight category needs to be analysed as overweight prevalence plus
 obesity prevalence. To predict overweight excluding obesity, first calculate predicted
 overweight plus obesity then subtract predicted obesity.
 
-Note 2: the category labels are harmonised and not necessarily as originally
-described.
-
-The conversion algorithm exploits the fact that all three references are
-based on the LMS method, which allows prevalence to be converted to a common
-BMI centile and z-score scale.
-
-The algorithm is actually two distinct algorithms, depending on the number
-of prevalence rates used for the prediction. In the simpler case
-(Cole and Lobstein, 2022) just one
+The algorithms for \code{ob_convertr} and \code{ob_convertr2} are distinguished
+by the number of prevalence rates used for the prediction. For \code{ob_convertr}
+(Cole & Lobstein, 2022) just one
 rate is used, in which case the algorithm is commutative, meaning that
 converting a prevalence rate from cutoff A to cutoff B and then from B to A
-returns the original value. For this algorithm \code{from} and \code{to} are
-the names of the cutoffs, and \code{pfrom} and optionally \code{pto} are vectors.
+returns the original value. Here \code{from} and \code{to} are
+the names of the cutoffs, and \code{pfrom} and optionally \code{pto} are vectors
+of percentage prevalence rates.
 
-The alternative algorithm  (Cole and Lobstein, 2023) uses two known prevalence rates,
-typically overweight and obesity based on one reference, and returning the corresponding
-rates based on another reference. Here \code{from} and \code{to} are
+\code{ob_convertr2} uses two known prevalence rates (Cole & Lobstein, 2023),
+typically overweight and obesity based on one reference, returning the corresponding
+rates based on another reference. Unlike \code{ob_convertr}, \code{ob_convertr2}
+is not exactly commutative, but close to it. Here \code{from} and \code{to} are
 the names of the cutoffs as length-2
 character strings, while \code{pfrom} and optionally \code{pto}
 are character strings giving the names of the corresponding vector prevalence rates.
@@ -119,18 +123,19 @@ For convenience the \code{from} or \code{to} names 'CDC', 'IOTF' or 'WHO'
 expand to the corresponding pairs of cutoffs for overweight and obesity,
 e.g. 'CDC' expands to c('CDC 85', 'CDC 95').
 
-Alternatively the latter algorithm can be used to interpolate or extrapolate
-to a specified z-score cutoff assuming the same reference for all cutoffs.
+Alternatively \code{ob_convertr2} can be used to interpolate or extrapolate
+to one or more specified z-score cutoffs assuming the same reference for all cutoffs.
 Here the values of \code{from} and \code{to} are numerical z-score cutoffs,
-with at least two for \code{from}. See the final example.
+with at least two for \code{from}. See the final examples.
 }
 \examples{
-## convert 10\% IOTF overweight prevalence (cutoff IOTF 25) in 8-year-old boys
-## to the overweight prevalence based on WHO, i.e. cutoff WHO +1
+## convert 10\% IOTF overweight prevalence (cutoff IOTF 25, including obesity)
+## in 8-year-old boys to overweight prevalence for cutoff WHO +1
 ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10)
 
 ## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
-ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10, plot = 'density')
+## in 8-year-old boys
+ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
 
 ## convert IOTF overweight prevalence to WHO overweight prevalence
 ## and compare with true value - boys and girls aged 7-17 (22 groups)
@@ -144,13 +149,13 @@ ob_convertr(age = Age, sex = Sex, from = 'IOTF 25', to = 'WHO +1',
   pfrom = IOTF25, pto = `WHO+1`, data = deren, plot = 'compare')
 
 ## convert IOTF overweight and obesity prevalence to WHO using
-## \code{ob_convertr2} which is more accurate than \code{ob_convertr}
+## ob_convertr2 which is more accurate than ob_convertr
 ob_convertr2(age = Age, sex = Sex, from = 'IOTF', to = 'WHO',
-  pfrom = c('IOTF25', 'IOTF30'), pto = c('WHO+1', 'WHO+2'), data = deren, report = 'wider')
+  pfrom = c('IOTF25', 'IOTF30'), pto = c('WHO+1', 'WHO+2'), data = deren)
 
 ## extrapolate WHO overweight and obesity prevalence (cutoffs +1 and +2)
-## to severe obesity prevalence based on cutoff +3
-ob_convertr2(Age, Sex, from = 1:2, to = 3,
+## to severe obesity prevalence based on cutoffs +2.5 or +3
+ob_convertr2(Age, Sex, from = 1:2, to = c(2.5, 3),
   pfrom = c('WHO+1', 'WHO+2'), data = deren, report = 'wider')
 
 }
