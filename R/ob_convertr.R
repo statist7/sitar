@@ -157,11 +157,11 @@
 #'   across left_join pull contains starts_with ends_with if_else n rowwise
 #'   group_by ungroup rename_with c_across
 #' @importFrom purrr map_dfc map_dfr
-#' @importFrom rlang .data enquo quo quo_is_null sym
+#' @importFrom rlang .data enquo quo_is_null sym
 #' @importFrom stats pnorm qnorm lm cor coef
 #' @importFrom tidyr pivot_wider pivot_longer drop_na all_of any_of everything
 #' @export
-ob_convertr <- function(age, sex, from, to, pfrom = 50, pto = NA, data = parent.frame(),
+ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.frame(),
                         report = c('vector', 'wider', 'longer'),
                         plot = c('no', 'density', 'compare')) {
 
@@ -211,35 +211,36 @@ ob_convertr <- function(age, sex, from, to, pfrom = 50, pto = NA, data = parent.
 
   # create tibble of age sex and pfrom
   data <- if (identical(data, parent.frame())) {
-    eval.parent(substitute(
-      data.frame(age = age, sex = test_sex(sex), pfrom = pfrom, pto = pto)))
+    tibble(age = {{age}}, sex = test_sex({{sex}}), from = {{from}}, to = {{to}},
+           pfrom = {{pfrom}}, pto = {{pto}})
   } else {
-    age <- enquo(age)
-    sex <- enquo(sex)
-    pfrom <- enquo(pfrom)
-    pto <- enquo(pto)
     data %>%
-      transmute(age = !!age, sex = test_sex(!!sex), pfrom = !!pfrom, pto = !!pto)
+      transmute(age = {{age}}, sex = test_sex({{sex}}), from = {{from}}, to = {{to}},
+                pfrom = {{pfrom}}, pto = {{pto}})
   }
+  if (is.na(quo_name(enquo(pto))))
+    data <- data %>% mutate(pto = NULL)
 
   # check for out of range prevalences
-  data <- data %>%
-    mutate(pfrom = if_else(pfrom * (100 - pfrom) <= 0, as.numeric(NA), pfrom))
-
-  if (length(na.omit(data$pfrom) > 0))
-    if (max(data$pfrom, na.rm = TRUE) <= 1)
-      warning('is prevalence fractional? - should be percentage\n')
+  if (length(na.omit(data$pfrom)) > 0) {
+    if (with(data, min(pfrom * (100 - pfrom), na.rm = TRUE) <= 0)) {
+      warning('prevalences <= 0 or >= 100 set missing')
+      data <- data %>%
+        mutate(pfrom = if_else(pfrom * (100 - pfrom) <= 0, as.numeric(NA), pfrom))
+    }
+    if (length(na.omit(data$pfrom)) > 0)
+      if(max(data$pfrom, na.rm = TRUE) <= 1)
+        warning('is prevalence fractional? - should be percentage\n')
+  }
 
   # create meanz and dz and epto
   data <- data %>%
-    mutate(from = !!from,
-           to = !!to,
-           age = round(age * 2) / 2,
+    mutate(age = round(age * 2) / 2,
            n = 1:n()) %>%
            select(age, n, everything()) %>%
     pivot_longer(c(from, to), values_to = 'cutoff', names_to = NULL) %>%
     mutate(z = cutoffs$z[factor(paste(.data$cutoff, .data$sex), levels = cutoffs$cutoff_sex)],
-           cor = fct_relabel(fct_inorder(.data$cutoff), ~c(!!to, !!from))) %>%
+           cor = fct_relabel(fct_inorder(.data$cutoff), ~c(to, from))) %>%
     group_by(.data$cutoff) %>%
     mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$cutoff), toz = FALSE),
            zrev = LMS2z(.data$age, .data$bmi, .data$sex, 'bmi', ref_sitar(cor))) %>%
@@ -248,76 +249,81 @@ ob_convertr <- function(age, sex, from, to, pfrom = 50, pto = NA, data = parent.
            zmean = (.data$z + .data$zrev) / 2,
            cor = NULL) %>%
     pivot_wider(names_from = .data$cutoff, values_from = .data$z:.data$zmean) %>%
-    mutate(dz = .data$zmean_to - .data$zmean_from,
+    mutate(from = from,
+           to = to,
+           dz = .data$zmean_to - .data$zmean_from,
            epto = .data$dz + qnorm(pfrom / 100) * -sign(.data$z_from),
            epto = pnorm(.data$epto * -sign(.data$z_to)) * 100,
-           from = !!from,
-           to = !!to,
            n = NULL) %>%
-    select(age, sex, starts_with('pfrom'), contains('z'), starts_with('bmi'), everything())
+    select(age, sex, from, to, epto, starts_with('p'), dz, starts_with('zmean'), contains('z'), everything())
 
-  # check for plot
-  report <- match.arg(report)
-  plot <- match.arg(plot)
-  if (plot == 'density') {
-    if (nrow(data) > 1L)
-      cat('\ndensity plot is best with just one row of data\n')
-    report <- 'longer'
-  }
-  else if (plot == 'compare') {
-    stopifnot('compare plot needs pto set' = !any(is.na(data$pto)))
-    report <- 'wider'
+  # longer data format
+  data.longer <- function(data) {
+    data %>%
+      pivot_longer(ends_with(c('_from', '_to')),
+                   names_to = c('.value', 'cutoff'), names_sep = '_') %>%
+      select(-c(from, to)) %>%
+      mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c(from, to))) %>%
+      select(age, sex, cutoff, epto, starts_with('p'), dz, zmean, contains('z'), everything())
   }
 
-  # format prevalence as vector or tibble
-  data <- switch(report,
-                 vector = data %>%
-                   pull(.data$epto),
-                 wider = data %>%
-                   rename_with(~paste0(to, '_pred'), .cols = epto),
-                 longer = data %>%
-                   rename_with(~paste0(to, '_pred'), .cols = epto) %>%
-                   pivot_longer(ends_with(c('_from', '_to')),
-                                names_to = c('.value', 'cutoff'), names_sep = '_') %>%
-                   select(-c(from, to)) %>%
-                   mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c(!!from, !!to))))
-
-  # return data or plot
-  switch(plot,
-         # return data
-         no = return(data),
-         # density plot
+  # return data ± plot
+  switch(match.arg(plot),
+         # return data only
+         no = {
+           data <- switch(match.arg(report),
+                  vector = return(data %>%
+                                    pull(epto)),
+                  wider = data,
+                  longer = data.longer(data)
+                  )
+           data <- data %>%
+             rename_with(~paste(to, 'pred'), .cols = epto) %>%
+             rename_with(~quo_name(enquo(pfrom)), .cols = pfrom)
+           if ('pto' %in% names(data))
+             data <- data %>%
+             rename_with(~quo_name(enquo(pto)), .cols = pto)
+           return(data)
+           },
+         # density plot plus data in longer format
          density = {
-           data %>%
+           data <- data.longer(data) %>%
              group_by(.data$cutoff) %>%
              mutate(LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$cutoff),
                                      toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
              ungroup %>%
              rowwise %>%
-             mutate(density = with(.data$LMS, list(as_tibble(pdLMS(L, M, S, plot=F)[c('x', 'density')])))) %>%
+             mutate(density = with(.data$LMS,
+                                   list(as_tibble(pdLMS(L, M, S, plot = FALSE)[c('x', 'density')])))) %>%
              unnest(.data$density) %>%
-             mutate(density = drop(.data$density)) %>%
+             mutate(density = drop(.data$density))
+           plot <- data %>%
              ggplot(aes(.data$x, .data$density, colour = .data$cutoff)) +
              xlab(expression(body~mass~index~~(kg/m^2))) +
              geom_path() +
              geom_vline(aes(xintercept = .data$bmi, colour = .data$cutoff), data = data, linetype = 2)
+           print(plot)
+           invisible(list(data = data, plot = plot))
          },
-         # comparison plot
+         # comparison plot plus data in wider format
          compare = {
-           # compare true and estimated prevalence (output with report = 'wider')
-           ggplot(data, aes(.data$pto, .data$epto, colour = .data$sex)) +
-             xlab('observed prevalence (%)') + ylab('predicted prevalence (%)') +
+           stopifnot('compare plot needs pto set' = !any(is.na(data$pto)))
+           plot <- ggplot(data, aes(.data$pto, .data$epto, colour = .data$sex)) +
+             xlab('observed prevalence (%)') +
+             ylab('predicted prevalence (%)') +
              geom_point() +
              geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray') +
              scale_x_continuous(trans='log2') +
              scale_y_continuous(trans='log2')
+           print(plot)
+           invisible(list(data = data, plot = plot))
          }
   )
 }
 
 #' @rdname ob_convertr
 #' @export
-ob_convertr2 <- function(age, sex, from, to, pfrom, pto = NA,
+ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
                          data = parent.frame(),
                          report = c('vector', 'wider', 'longer')) {
 
@@ -332,26 +338,24 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = NA,
   to_p <- function(z) pnorm(-z) * 100
   to_z <- function(p) -qnorm(p / 100)
 
-  # read data
+  pto_na <- length(pto) == 0L
   if (identical(data, parent.frame())) {
-    data <- tibble(age = !!age, sex = !!sex) %>%
-      bind_cols(as_tibble(t(pfrom)))
-    age <- quo(data$age)
-    sex <- quo(data$sex)
+    data <- tibble(age = {{age}}, sex = {{sex}}) %>%
+      bind_cols(as_tibble(t(pfrom))) %>%
+      bind_cols(as_tibble(t(pto)))
     pfrom <- names(pfrom)
+    pto <- names(pto)
   } else {
-    age <- enquo(age)
-    sex <- enquo(sex)
-    stopifnot('`pfrom` not found' = all(pfrom %in% names(data)))
-    if (any(!is.na(pto)))
-      stopifnot('`pto` not found' = all(pto %in% names(data)))
+    stopifnot('`pfrom` not found' = all(pfrom %in% names(data)),
+              '`pto` not found' = all(pto %in% names(data)))
+    data <- data %>%
+      select({{age}}, {{sex}}, pfrom, pto)
   }
 
   stopifnot('`from` and `to` should both be either character or numeric' =
               identical(mode(from), mode(to)) && (is.character(to) || is.numeric(to)))
 
   # set up from, to, pto and epto
-  pto_na <- any(is.na(pto))
   if (is.character(from)) {
     if (length(from) == 1)
       from <- wic(toupper(from))
@@ -360,10 +364,10 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = NA,
     stopifnot('`from` should be length 2 or more' = length(from) > 1L,
               '`to` should be length 2 or more' = length(to) > 1L)
     if (pto_na) {
-      pto = paste0(to, '_to')
+      pto = paste(to, 'to')
       data[, pto] <- 50
     }
-    epto <- paste0(to, '_pred')
+    epto <- paste(to, 'pred')
   } else {
     if (pto_na) {
       pto = paste0('z', sprintf('%.2g', to), '_to')
@@ -378,12 +382,12 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = NA,
 
   # set up zfrom and zto
   if (is.character(from)) {
-    stopifnot('age and/or sex missing' = !(quo_is_null(age) | quo_is_null(sex)))
+    stopifnot('age and/or sex missing' = !(quo_is_null(enquo(age)) | quo_is_null(enquo(sex))))
     data <- data %>%
       bind_cols({
         map_dfc(seq_along(from), ~ {
           dotx <- .x # ? bug not recognising .x in rename_with()
-          ob_convertr(!!age, !!sex, from = from[.x], to = to[.x], !!sym(pfrom[.x]),
+          ob_convertr({{age}}, {{sex}}, from = from[.x], to = to[.x], get(pfrom[.x]),
                       data = data, report = 'wider') %>%
             select(zmean_from, zmean_to) %>%
             rename_with(~ paste0(c('zfrom', 'zto'), dotx))
@@ -401,7 +405,7 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = NA,
     data
   } else {
     weights <- c(rep(1, length(from)), rep(0, length(to)))
-    models_all <- b <- b_all <- r <- NULL # to satisfy R CMD CHECK
+    models_all <- b <- b_all <- r <- NULL # to satisfy R CMD check
     data %>%
       rowwise %>%
       mutate(x = list(c_across(c(starts_with(c('zfrom', 'zto'))))),

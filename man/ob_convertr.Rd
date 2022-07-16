@@ -11,7 +11,7 @@ ob_convertr(
   sex,
   from,
   to,
-  pfrom = 50,
+  pfrom = NA,
   pto = NA,
   data = parent.frame(),
   report = c("vector", "wider", "longer"),
