@@ -3,15 +3,16 @@
 #'
 #' Child thinness, overweight and obesity are defined as the child's body mass
 #' index (BMI) lying beyond a pre-specified reference cutoff. Three references
-#' are compared here: IOTF (International Obesity Task Force), WHO (World Health
+#' are compared: IOTF (International Obesity Task Force), WHO (World Health
 #' Organization) and CDC (US Centers for Disease Control and Prevention), each
 #' of which have their own cutoffs. \code{ob_convertr} takes age-sex-specific
-#' prevalence rates of thinness, overweight or obesity based on one cutoff, and
-#' converts them to the corresponding rates based on a different cutoff.
+#' prevalence rates of thinness, overweight or obesity based on one of the cutoffs,
+#' and converts them to the corresponding rates based on a different cutoff.
 #' \code{ob_convertr2} uses paired prevalence rates of overweight and obesity on
 #' one cutoff to estimate those based on another cutoff.
 #'
-#' The IOTF cutoffs correspond to the value of BMI (kg/m^2) at age 18: IOTF 35
+#' The IOTF cutoffs correspond to the value of BMI
+#' (\ifelse{html}{\out{kg/m<sup>2</sup>}}{\eqn{kg/m^2}}) at age 18: IOTF 35
 #' (morbid obesity), IOTF 30 (obesity), IOTF 25 (overweight), IOTF 18.5 (grade 1
 #' thinness), IOTF 17 (grade 2 thinness) and IOTF 16 (grade 3 thinness).
 #'
@@ -23,25 +24,25 @@
 #' (overweight) and CDC 5 (thinness).
 #'
 #' Note: the overweight category needs to be analysed as overweight prevalence plus
-#' obesity prevalence. To predict overweight excluding obesity, first calculate predicted
-#' overweight plus obesity then subtract predicted obesity.
+#' obesity prevalence, i.e. the prevalence above the overweight cutoff. To predict
+#' overweight prevalence excluding obesity prevalence, first calculate predicted
+#' overweight prevalence including obesity then subtract predicted obesity prevalence.
 #'
 #' The algorithms for \code{ob_convertr} and \code{ob_convertr2} are distinguished
 #' by the number of prevalence rates used for the prediction. For \code{ob_convertr}
 #' (Cole & Lobstein, 2022) just one
-#' rate is used, in which case the algorithm is commutative, meaning that
+#' rate is used -- in this case the algorithm is commutative, meaning that
 #' converting a prevalence rate from cutoff A to cutoff B and then from B to A
-#' returns the original value. Here \code{from} and \code{to} are
+#' returns the original value. \code{from} and \code{to} are
 #' the names of the cutoffs, and \code{pfrom} and optionally \code{pto} are vectors
 #' of percentage prevalence rates.
 #'
 #' \code{ob_convertr2} uses two known prevalence rates (Cole & Lobstein, 2023),
 #' typically overweight and obesity based on one reference, returning the corresponding
-#' rates based on another reference. Unlike \code{ob_convertr}, \code{ob_convertr2}
-#' is not exactly commutative, but close to it. Here \code{from} and \code{to} are
-#' the names of the cutoffs as length-2
-#' character strings, while \code{pfrom} and optionally \code{pto}
-#' are character strings giving the names of the corresponding vector prevalence rates.
+#' rates based on another reference. It is more accurate than \code{ob_convertr} though
+#' not exactly commutative. \code{from} and \code{to} are the names of the cutoffs as length-2
+#' character strings, while \code{pfrom} and optionally \code{pto} are length-2
+#' character strings giving the names of the corresponding vector prevalence rates.
 #' For convenience the \code{from} or \code{to} names 'CDC', 'IOTF' or 'WHO'
 #' expand to the corresponding pairs of cutoffs for overweight and obesity,
 #' e.g. 'CDC' expands to c('CDC 85', 'CDC 95').
@@ -49,22 +50,22 @@
 #' Alternatively \code{ob_convertr2} can be used to interpolate or extrapolate
 #' to one or more specified z-score cutoffs assuming the same reference for all cutoffs.
 #' Here the values of \code{from} and \code{to} are numerical z-score cutoffs,
-#' with at least two for \code{from}. See the final examples.
+#' with at least two for \code{from}. See the final example.
 #'
-#' @param age vector of ages between 2 and 18 years corresponding to each rate.
-#' @param sex vector of sexes corresponding to each rate, coded as either
+#' @param age vector of ages between 2 and 18 years corresponding to prevalence rates \code{pfrom}.
+#' @param sex vector of sexes corresponding to \code{pfrom}, coded as either
 #'   'boys/girls' or 'male/female' or '1/2' (upper or lower case, based on the
 #'   first character).
-#' @param from name(s) of the BMI cutoff(s) on which the prevalence
+#' @param from name(s) of the BMI cutoff(s) on which the prevalence \code{pfrom}
 #' is based (see Details).
 #' @param to name(s) of the BMI cutoff(s) on which to base the
 #' predicted prevalence (see Details).
 #' @param pfrom vector of age-sex-specific percentage prevalence rates
 #' based on \code{from} (\code{ob_convertr}) or the names of two or more such
 #' prevalence rates (\code{ob_convertr2}).
-#' @param pto optional vector of known percentage prevalence rates
+#' @param pto vector (needed for \code{plot = "compare"}) of known percentage prevalence rates
 #'   based on \code{to} (\code{ob_convertr}) or the names of two or more such
-#'   prevalence rates (for validation purposes) (\code{ob_convertr2}).
+#'   prevalence rates (\code{ob_convertr2}).
 #' @param report character controlling the format of the returned data: 'vector'
 #'   for the estimated prevalence rates, 'wider' for the working tibble in wide
 #'   format, i.e. the \code{from} and \code{to} data side by side, or 'longer'
@@ -77,16 +78,20 @@
 #'   corresponding to \code{from} and \code{to}, or 'compare' to display the
 #'   predicted prevalence rates plotted against the observed rates in
 #'   \code{pto}.
-#' @param data data frame containing \code{age}, \code{sex}, \code{pfrom} and
+#' @param data optional data frame containing \code{age}, \code{sex}, \code{pfrom} and
 #'   \code{pto}.
 #'
-#' @return Either the predicted prevalence rates or a plot visualizing the
-#'   findings, depending on the \code{report} and \code{plot} settings.
+#' @return The predicted prevalence rates, optionally with a plot visualizing the
+#'   findings, depending on the \code{report} and \code{plot} settings. Each
+#'   predicted rate is given the name of the relevant cutoff followed by " pred".
 #'
-#'   In addition, with \code{report} set to "wider" or "longer", extra information
+#'   With \code{report} set to "wider" or "longer", extra information
 #'   is returned reflecting the internal workings of the algorithms. In particular
 #'   \code{ob_convertr2} returns \code{b} the regression coefficient of z-score
 #'   prevalence on z-score cutoff as described in Cole & Lobstein (2023).
+#'
+#'   If a \code{plot} is selected, the underlying data and plot are returned
+#'   invisibly with names \code{data} and \code{plot}.
 #'
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @references
@@ -218,8 +223,10 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
       transmute(age = {{age}}, sex = test_sex({{sex}}), from = {{from}}, to = {{to}},
                 pfrom = {{pfrom}}, pto = {{pto}})
   }
-  if (is.na(quo_name(enquo(pto))))
-    data <- data %>% mutate(pto = NULL)
+  data <- data %>%
+    select(where(~!all(is.na(.))))
+  stopifnot('`age` or `sex` missing' = all(c('age', 'sex') %in% names(data)),
+            '`pfrom` missing' = 'pfrom' %in% names(data))
 
   # check for out of range prevalences
   if (length(na.omit(data$pfrom)) > 0) {
@@ -325,7 +332,8 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
 #' @export
 ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
                          data = parent.frame(),
-                         report = c('vector', 'wider', 'longer')) {
+                         report = c('vector', 'wider', 'longer'),
+                         plot = c('no', 'density', 'compare')) {
 
   wic <- function(type = c("WHO", "IOTF", "CDC")) {
     type <- match.arg(type)
@@ -389,8 +397,8 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
           dotx <- .x # ? bug not recognising .x in rename_with()
           ob_convertr({{age}}, {{sex}}, from = from[.x], to = to[.x], get(pfrom[.x]),
                       data = data, report = 'wider') %>%
-            select(zmean_from, zmean_to) %>%
-            rename_with(~ paste0(c('zfrom', 'zto'), dotx))
+            select(z_from, z_to, zmean_from, zmean_to) %>%
+            rename_with(~ paste0(c('z0from', 'z0to', 'zfrom', 'zto'), dotx))
         })
       })
   } else {
@@ -408,7 +416,8 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
     models_all <- b <- b_all <- r <- NULL # to satisfy R CMD check
     data %>%
       rowwise %>%
-      mutate(x = list(c_across(c(starts_with(c('zfrom', 'zto'))))),
+      mutate(z = list(c_across(c(starts_with(c('z0from', 'z0to'))))),
+             x = list(c_across(c(starts_with(c('zfrom', 'zto'))))),
              y = list(c_across(all_of(c(pfrom, pto)))),
              y = list(if_else(.data$y * (100 - .data$y) > 0, .data$y,
                               as.numeric(NA))), # out of range prevalences NA
@@ -426,14 +435,64 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
     data <- data %>%
     select(-c(all_of(pto), models_all, b_all, r))
 
-  # report
-  report <- match.arg(report)
-  switch(report,
-         vector = data %>%
-           select(any_of(epto)),
-         wider = data %>%
-           select(1:2, any_of(epto), all_of(pfrom), any_of(pto), b),
-         longer = data %>%
-           select(1:2, any_of(epto), all_of(pfrom), any_of(pto), b, everything()))
+  # return data ± plot
+  switch(match.arg(plot),
+         # return data only
+         no = {
+           data <- switch(match.arg(report),
+                          vector = data %>%
+                            select(any_of(epto)),
+                          wider = data %>%
+                            select(1:2, any_of(epto), all_of(pfrom), any_of(pto), b),
+                          longer = data %>%
+                            select(1:2, any_of(epto), all_of(pfrom), any_of(pto), b, everything()))
+           return(data)
+         },
+         # density plot plus data in longer format
+         density = {
+           co2ref <- function(x) map_chr(strsplit(x, ' '), ~.x[1])
+           data <- data %>%
+             select(1:2, z) %>%
+             unnest(z) %>%
+             mutate(cutoff = c(from, to),
+                    reference = fct_inorder(factor(co2ref(.data$cutoff))),
+                    level = c(rep(c('overweight', 'obesity'), 2)),
+                    level = fct_inorder(level)) %>%
+             group_by(.data$reference) %>%
+             mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$reference),
+                                toz = FALSE),
+                    LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$reference),
+                                     toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
+             ungroup %>%
+             rowwise %>%
+             mutate(density = with(.data$LMS,
+                                   list(as_tibble(pdLMS(L, M, S, plot = FALSE)[c('x', 'density')])))) %>%
+             unnest(.data$density) %>%
+             mutate(density = drop(.data$density))
+           plot <- data %>%
+             ggplot(aes(.data$x, .data$density, group = .data$reference, colour = .data$reference)) +
+             xlab(expression(body~mass~index~~(kg/m^2))) +
+             geom_path(data = data %>% filter(level == 'overweight')) +
+             geom_vline(aes(xintercept = .data$bmi, linetype = .data$level, colour = .data$reference),
+                        data = data %>% nest(data = c(x, density)))
+           print(plot)
+           invisible(list(data = data, plot = plot))
+         },
+         # comparison plot plus data in wider format
+         compare = {
+           stopifnot('compare plot needs pto set' = !pto_na)
+           plot <- ggplot(data, aes(.data$pto, .data$epto, colour = .data$sex)) +
+             xlab('observed prevalence (%)') +
+             ylab('predicted prevalence (%)') +
+             geom_point() +
+             geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray') +
+             scale_x_continuous(trans='log2') +
+             scale_y_continuous(trans='log2')
+           print(plot)
+           invisible(list(data = data, plot = plot))
+         }
+  )
+
 }
+
 
