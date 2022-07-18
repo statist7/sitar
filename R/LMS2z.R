@@ -74,6 +74,7 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
   xy <- data.frame(x, sex=test_sex(sex))
   x <- xy$x
   sex <- xy$sex
+  stopifnot('x or sex missing' = any(!is.na(x)) & any(!is.na(sex)))
   LMS <- c('L', 'M', 'S')
   LMSnames <- paste(LMS, measure, sep='.')
   if (is.character(ref)) {
