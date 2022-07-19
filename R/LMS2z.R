@@ -59,7 +59,7 @@
 #' LMS2z(ages, as.matrix(zs), sex = 'm', measure = 'wt', ref = who06,
 #'   toz = FALSE, LMStable = TRUE)
 #'
-#' @export LMS2z
+#' @export
 LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
   # check sex coded correctly
   test_sex <- function(sex) {
@@ -164,7 +164,7 @@ LMS2z <- function(x, y, sex, measure, ref, toz=TRUE, LMStable=FALSE) {
 #' cLMS(z = as.matrix(0:2), L = 1:-1, M = 7, S = 0.1)
 #' zLMS(x = 6.5, L = 1:-1, M = 5:7, S = rep(0.1, 3))
 #'
-#' @export cLMS
+#' @export
 cLMS <- function(z, L = 1, M, S) {
   L[L == 0] <- 1e-7
   if (is.vector(z))
@@ -206,7 +206,7 @@ zLMS <- function(x, L = 1, M, S) {
 #' z2cent(-4:4)
 #' z2cent(qnorm(0:100/100))
 #'
-#' @export z2cent
+#' @export
 z2cent <- function(z) {
   np <- abs(z) > qnorm(0.99)
   ct <- round(pnorm(z) * 100, np)
