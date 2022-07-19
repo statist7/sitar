@@ -23,8 +23,8 @@ ob_convertr2(
   sex,
   from,
   to,
-  pfrom,
-  pto = character(),
+  pfrom = NA,
+  pto = NA,
   data = parent.frame(),
   report = c("vector", "wider", "longer"),
   plot = c("no", "density", "compare")
@@ -61,12 +61,10 @@ for the tibble in long format, i.e. two rows per rate, one for \code{from}
 and one for \code{to}. For \code{ob_convertr2} the three settings return
 progressively more information.}
 
-\item{plot}{character controlling what if anything is plotted (\code{ob_convertr}
-only): 'no' for no
+\item{plot}{character controlling what if anything is plotted: 'no' for no
 plot, 'density' to display the BMI density distributions and cutoffs
 corresponding to \code{from} and \code{to}, or 'compare' to display the
-predicted prevalence rates plotted against the observed rates in
-\code{pto}.}
+predicted prevalence rates plotted against the observed rates (\code{pto}).}
 }
 \value{
 The predicted prevalence rates, optionally with a plot visualizing the
@@ -133,6 +131,9 @@ Alternatively \code{ob_convertr2} can be used to interpolate or extrapolate
 to one or more specified z-score cutoffs assuming the same reference for all cutoffs.
 Here the values of \code{from} and \code{to} are numerical z-score cutoffs,
 with at least two for \code{from}. See the final example.
+
+The algorithms require the prevalences of obesity and overweight net of obesity
+to be non-zero, and if they are zero they are set to missing.
 }
 \examples{
 ## convert 10\% IOTF overweight prevalence (cutoff IOTF 25, including obesity)
@@ -141,7 +142,8 @@ ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10)
 
 ## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
 ## in 8-year-old boys
-ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
+ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10,
+  plot = 'density')
 
 ## convert IOTF overweight prevalence to WHO overweight prevalence
 ## and compare with true value - boys and girls aged 7-17 (22 groups)

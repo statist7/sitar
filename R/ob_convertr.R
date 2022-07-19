@@ -52,6 +52,9 @@
 #' Here the values of \code{from} and \code{to} are numerical z-score cutoffs,
 #' with at least two for \code{from}. See the final example.
 #'
+#' The algorithms require the prevalences of obesity and overweight net of obesity
+#' to be non-zero, and if they are zero they are set to missing.
+#'
 #' @param age vector of ages between 2 and 18 years corresponding to prevalence rates \code{pfrom}.
 #' @param sex vector of sexes corresponding to \code{pfrom}, coded as either
 #'   'boys/girls' or 'male/female' or '1/2' (upper or lower case, based on the
@@ -72,12 +75,10 @@
 #'   for the tibble in long format, i.e. two rows per rate, one for \code{from}
 #'   and one for \code{to}. For \code{ob_convertr2} the three settings return
 #'   progressively more information.
-#' @param plot character controlling what if anything is plotted (\code{ob_convertr}
-#'   only): 'no' for no
+#' @param plot character controlling what if anything is plotted: 'no' for no
 #'   plot, 'density' to display the BMI density distributions and cutoffs
 #'   corresponding to \code{from} and \code{to}, or 'compare' to display the
-#'   predicted prevalence rates plotted against the observed rates in
-#'   \code{pto}.
+#'   predicted prevalence rates plotted against the observed rates (\code{pto}).
 #' @param data optional data frame containing \code{age}, \code{sex}, \code{pfrom} and
 #'   \code{pto}.
 #'
@@ -131,7 +132,8 @@
 #'
 #' ## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
 #' ## in 8-year-old boys
-#' ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', plot = 'density')
+#' ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10,
+#'   plot = 'density')
 #'
 #' ## convert IOTF overweight prevalence to WHO overweight prevalence
 #' ## and compare with true value - boys and girls aged 7-17 (22 groups)
@@ -157,36 +159,29 @@
 #' @importFrom forcats fct_inorder fct_collapse fct_relabel
 #' @importFrom ggplot2 ggplot xlab ylab geom_path geom_point geom_vline
 #'   geom_abline scale_x_continuous scale_y_continuous aes
-#' @importFrom tibble tibble column_to_rownames as_tibble
-#' @importFrom dplyr mutate rename filter transmute bind_rows bind_cols select
-#'   across left_join pull contains starts_with ends_with if_else n rowwise
-#'   group_by ungroup rename_with c_across
-#' @importFrom purrr map_dfc map_dfr
-#' @importFrom rlang .data enquo quo_is_null sym
+#' @importFrom tibble tibble as_tibble
+#' @importFrom dplyr mutate rename filter transmute bind_cols select
+#'   across pull contains starts_with ends_with if_else n rowwise
+#'   group_by ungroup rename_with c_across matches
+#' @importFrom purrr map_chr map_dfc map_dfr
+#' @importFrom rlang .data enquo quo_name
 #' @importFrom stats pnorm qnorm lm cor coef
-#' @importFrom tidyr pivot_wider pivot_longer drop_na all_of any_of everything
+#' @importFrom tidyr pivot_wider pivot_longer all_of any_of everything
+#' @importFrom glue glue
 #' @export
 ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.frame(),
                         report = c('vector', 'wider', 'longer'),
                         plot = c('no', 'density', 'compare')) {
 
-  # check sex contains only 1/M/B/TRUE or 2/F/G
-  test_sex <- function(sex) {
-    fsex <- toupper(substr(sex, 1, 1))
-    fsex <- factor(fsex, levels = c(1:2, 'M', 'F', 'B', 'G', 'T'))
-    levels(fsex) <- c(rep(1:2, 3), 1)
-    fsex <- fct_collapse(fsex, boys = '1', girls = '2')
-    droplevels(fsex)
-  }
-
-  # return sitar code for reference
-  ref_sitar <- function(x) {
-    x <- unique(x)
-    stopifnot('cutoff not unique' = length(x) == 1L)
-    x <- sub('^(.*) .*$', '\\1', x) # drop any cutoff
-    f <- factor(x, levels = c('CDC', 'IOTF', 'WHO'))
-    levels(f) <- c('cdc2000', 'iotf', 'who0607')
-    as.character(f)
+  # longer data format
+  data.longer <- function(data) {
+    data %>%
+      pivot_longer(ends_with(c('_from', '_to')),
+                   names_to = c('.value', 'cutoff'), names_sep = '_') %>%
+      select(-c(from, to)) %>%
+      mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c(from, to))) %>%
+      select(.data$age, .data$sex, .data$cutoff, .data$epto, starts_with('p'),
+             .data$dz, .data$zmean, contains('z'), everything())
   }
 
   # create cutoffs matrix
@@ -205,14 +200,15 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
            cutoff = paste(.data$ref, .data$cutoff),
            cutoff_sex = paste(.data$cutoff, .data$sex))
 
-  # check from and to
+  # check from and to, age and sex
   from <- unique(toupper(from))
   to <- unique(toupper(to))
   stopifnot('`from` should be length 1' = length(from) == 1L,
             '`to` should be length 1' = length(to) == 1L,
             '`to` is the same as `from`' = to != from,
             '`from` not recognised' = from %in% cutoffs$cutoff,
-            '`to` not recognised' = to %in% cutoffs$cutoff)
+            '`to` not recognised' = to %in% cutoffs$cutoff,
+            '`age` or `sex` missing' = !missing(age) && !missing(sex))
 
   # create tibble of age sex and pfrom
   data <- if (identical(data, parent.frame())) {
@@ -224,9 +220,8 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
                 pfrom = {{pfrom}}, pto = {{pto}})
   }
   data <- data %>%
-    select(where(~!all(is.na(.))))
-  stopifnot('`age` or `sex` missing' = all(c('age', 'sex') %in% names(data)),
-            '`pfrom` missing' = 'pfrom' %in% names(data))
+    select(pfrom, where(~!all(is.na(.))))
+  stopifnot('`age` or `sex` missing' = all(c('age', 'sex') %in% names(data)))
 
   # check for out of range prevalences
   if (length(na.omit(data$pfrom)) > 0) {
@@ -243,8 +238,9 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
   # create meanz and dz and epto
   data <- data %>%
     mutate(age = round(age * 2) / 2,
+           age = if_else(age < 2 | age > 18, as.numeric(NA), age),
            n = 1:n()) %>%
-           select(age, n, everything()) %>%
+           select(.data$age, .data$n, everything()) %>%
     pivot_longer(c(from, to), values_to = 'cutoff', names_to = NULL) %>%
     mutate(z = cutoffs$z[factor(paste(.data$cutoff, .data$sex), levels = cutoffs$cutoff_sex)],
            cor = fct_relabel(fct_inorder(.data$cutoff), ~c(to, from))) %>%
@@ -262,17 +258,8 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
            epto = .data$dz + qnorm(pfrom / 100) * -sign(.data$z_from),
            epto = pnorm(.data$epto * -sign(.data$z_to)) * 100,
            n = NULL) %>%
-    select(age, sex, from, to, epto, starts_with('p'), dz, starts_with('zmean'), contains('z'), everything())
-
-  # longer data format
-  data.longer <- function(data) {
-    data %>%
-      pivot_longer(ends_with(c('_from', '_to')),
-                   names_to = c('.value', 'cutoff'), names_sep = '_') %>%
-      select(-c(from, to)) %>%
-      mutate(cutoff = fct_relabel(fct_inorder(.data$cutoff), ~c(from, to))) %>%
-      select(age, sex, cutoff, epto, starts_with('p'), dz, zmean, contains('z'), everything())
-  }
+    select(.data$age, .data$sex, .data$from, .data$to, .data$epto, starts_with('p'), .data$dz,
+           starts_with('zmean'), contains('z'), everything())
 
   # return data ± plot
   switch(match.arg(plot),
@@ -280,12 +267,12 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
          no = {
            data <- switch(match.arg(report),
                   vector = return(data %>%
-                                    pull(epto)),
+                                    pull(.data$epto)),
                   wider = data,
                   longer = data.longer(data)
                   )
            data <- data %>%
-             rename_with(~paste(to, 'pred'), .cols = epto) %>%
+             rename_with(~paste(to, 'pred'), .cols = .data$epto) %>%
              rename_with(~quo_name(enquo(pfrom)), .cols = pfrom)
            if ('pto' %in% names(data))
              data <- data %>%
@@ -301,53 +288,71 @@ ob_convertr <- function(age, sex, from, to, pfrom = NA, pto = NA, data = parent.
              ungroup %>%
              rowwise %>%
              mutate(density = with(.data$LMS,
-                                   list(as_tibble(pdLMS(L, M, S, plot = FALSE)[c('x', 'density')])))) %>%
+                                   list(as_tibble(pdLMS(L, M, S, N = 200, plot = FALSE)[c('x', 'density')])))) %>%
              unnest(.data$density) %>%
-             mutate(density = drop(.data$density))
+             mutate(density = drop(.data$density)) %>%
+             select(.data$x, .data$density, .data$cutoff, .data$bmi)
            plot <- data %>%
              ggplot(aes(.data$x, .data$density, colour = .data$cutoff)) +
              xlab(expression(body~mass~index~~(kg/m^2))) +
              geom_path() +
-             geom_vline(aes(xintercept = .data$bmi, colour = .data$cutoff), data = data, linetype = 2)
+             geom_vline(aes(xintercept = .data$bmi, colour = .data$cutoff),
+                        data = data %>% nest(data = c(.data$x, .data$density)), linetype = 2)
            print(plot)
            invisible(list(data = data, plot = plot))
          },
          # comparison plot plus data in wider format
          compare = {
            stopifnot('compare plot needs pto set' = !any(is.na(data$pto)))
-           plot <- ggplot(data, aes(.data$pto, .data$epto, colour = .data$sex)) +
+           data <- data %>%
+             select(.data$age, .data$sex, .data$pfrom, .data$pto, .data$epto)
+           plot <- ggplot(data, aes(.data$pto, .data$epto, shape = .data$sex)) +
              xlab('observed prevalence (%)') +
              ylab('predicted prevalence (%)') +
+             labs(caption = glue('prevalence for {to} predicted from {from}')) +
              geom_point() +
-             geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray') +
-             scale_x_continuous(trans='log2') +
-             scale_y_continuous(trans='log2')
+             geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray')
            print(plot)
            invisible(list(data = data, plot = plot))
          }
   )
 }
 
+utils::globalVariables("where")
+
 #' @rdname ob_convertr
 #' @export
-ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
+ob_convertr2 <- function(age, sex, from, to, pfrom = NA, pto = NA,
                          data = parent.frame(),
                          report = c('vector', 'wider', 'longer'),
                          plot = c('no', 'density', 'compare')) {
 
-  wic <- function(type = c("WHO", "IOTF", "CDC")) {
-    type <- match.arg(type)
-    switch(type,
+  wic <- function(x) {
+    if (length(x) > 1)
+      return(x)
+    x <- match.arg(x, c("WHO", "IOTF", "CDC"))
+    switch(x,
            WHO = c('WHO +1', 'WHO +2'),
            IOTF = c('IOTF 25', 'IOTF 30'),
            CDC = c('CDC 85', 'CDC 95'))
   }
 
   to_p <- function(z) pnorm(-z) * 100
+
   to_z <- function(p) -qnorm(p / 100)
 
-  pto_na <- length(pto) == 0L
+  co2ref <- function(x) map_chr(strsplit(x, ' '), ~.x[1])
+
+  stopifnot('`age` or `sex` missing' = !missing(age) && !missing(sex))
+  if (any(is.na(pfrom))) {
+    stopifnot('`pfrom` not found' = match.arg(plot) == 'density')
+    pfrom <- setNames(2:1*30, wic(from)) # distinct dummy values
+  }
+  if (any(is.na(pto)))
+    pto <- character()
   if (identical(data, parent.frame())) {
+    if (is.null(names(pfrom)))
+      names(pfrom) <- wic(from)
     data <- tibble(age = {{age}}, sex = {{sex}}) %>%
       bind_cols(as_tibble(t(pfrom))) %>%
       bind_cols(as_tibble(t(pto)))
@@ -357,29 +362,34 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
     stopifnot('`pfrom` not found' = all(pfrom %in% names(data)),
               '`pto` not found' = all(pto %in% names(data)))
     data <- data %>%
-      select({{age}}, {{sex}}, pfrom, pto)
+      select(age = {{age}}, sex = {{sex}}, pfrom, pto) %>%
+      mutate(sex = test_sex(.data$sex))
   }
+
+  # check for equal pfrom values
+  data <- data %>%
+    mutate(across(pfrom[2], ~if_else(get(pfrom[2]) == get(pfrom[1]),
+                                 as.numeric(NA), .x)))
 
   stopifnot('`from` and `to` should both be either character or numeric' =
               identical(mode(from), mode(to)) && (is.character(to) || is.numeric(to)))
 
   # set up from, to, pto and epto
+  pto_na <- length(pto) == 0L
   if (is.character(from)) {
-    if (length(from) == 1)
-      from <- wic(toupper(from))
-    if (length(to) == 1)
-      to <- wic(toupper(to))
+    from <- wic(toupper(from))
+    to <- wic(toupper(to))
     stopifnot('`from` should be length 2 or more' = length(from) > 1L,
               '`to` should be length 2 or more' = length(to) > 1L)
     if (pto_na) {
       pto = paste(to, 'to')
-      data[, pto] <- 50
+      data[, pto] <- t(50 + seq_along(to))
     }
     epto <- paste(to, 'pred')
   } else {
     if (pto_na) {
       pto = paste0('z', sprintf('%.2g', to), '_to')
-      data[, pto] <- 50
+      data[, pto] <- t(50 + seq_along(to))
     }
     epto <- paste0('z', sprintf('%.2g', to), '_pred')
   }
@@ -390,14 +400,13 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
 
   # set up zfrom and zto
   if (is.character(from)) {
-    stopifnot('age and/or sex missing' = !(quo_is_null(enquo(age)) | quo_is_null(enquo(sex))))
     data <- data %>%
       bind_cols({
         map_dfc(seq_along(from), ~ {
           dotx <- .x # ? bug not recognising .x in rename_with()
-          ob_convertr({{age}}, {{sex}}, from = from[.x], to = to[.x], get(pfrom[.x]),
+          ob_convertr(age, sex, from = from[.x], to = to[.x], get(pfrom[.x]),
                       data = data, report = 'wider') %>%
-            select(z_from, z_to, zmean_from, zmean_to) %>%
+            select(.data$z_from, .data$z_to, .data$zmean_from, .data$zmean_to) %>%
             rename_with(~ paste0(c('z0from', 'z0to', 'zfrom', 'zto'), dotx))
         })
       })
@@ -413,7 +422,6 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
     data
   } else {
     weights <- c(rep(1, length(from)), rep(0, length(to)))
-    models_all <- b <- b_all <- r <- NULL # to satisfy R CMD check
     data %>%
       rowwise %>%
       mutate(z = list(c_across(c(starts_with(c('z0from', 'z0to'))))),
@@ -428,12 +436,13 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
              r = cor(.data$models_all$model)[1, 2]) %>%
       bind_cols(map_dfr(.$models, ~{to_p(fitted(.x))[!weights]}) %>%
                   rename_with(~all_of(epto))) %>%
-      mutate(across(all_of(epto), ~if_else(is.na(b), as.numeric(NA), .x))) %>%
+      select(-matches(c('from.', 'to.'))) %>%
+      mutate(across(all_of(epto), ~if_else(is.na(.data$b), as.numeric(NA), .x))) %>%
       ungroup
   }
   if (pto_na)
     data <- data %>%
-    select(-c(all_of(pto), models_all, b_all, r))
+    select(-c(all_of(pto), .data$models_all, .data$b_all, .data$r))
 
   # return data ± plot
   switch(match.arg(plot),
@@ -443,56 +452,60 @@ ob_convertr2 <- function(age, sex, from, to, pfrom, pto = character(),
                           vector = data %>%
                             select(any_of(epto)),
                           wider = data %>%
-                            select(1:2, any_of(epto), all_of(pfrom), any_of(pto), b),
+                            select(1:2, any_of(epto), all_of(pfrom), any_of(pto), .data$b),
                           longer = data %>%
-                            select(1:2, any_of(epto), all_of(pfrom), any_of(pto), b, everything()))
+                            select(1:2, any_of(epto), all_of(pfrom), any_of(pto), .data$b, everything()))
            return(data)
          },
          # density plot plus data in longer format
          density = {
-           co2ref <- function(x) map_chr(strsplit(x, ' '), ~.x[1])
            data <- data %>%
-             select(1:2, z) %>%
-             unnest(z) %>%
+             select(1:2, .data$z) %>%
+             unnest(.data$z) %>%
              mutate(cutoff = c(from, to),
                     reference = fct_inorder(factor(co2ref(.data$cutoff))),
                     level = c(rep(c('overweight', 'obesity'), 2)),
-                    level = fct_inorder(level)) %>%
+                    level = fct_inorder(.data$level)) %>%
              group_by(.data$reference) %>%
              mutate(bmi = LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$reference),
-                                toz = FALSE),
-                    LMS = attr(LMS2z(.data$age, .data$z, .data$sex, 'bmi', ref_sitar(.data$reference),
-                                     toz = FALSE, LMStable = TRUE), 'LMStable')) %>%
+                                toz = FALSE, LMStable = TRUE),
+                    LMS = attr(.data$bmi, 'LMStable')) %>%
              ungroup %>%
              rowwise %>%
              mutate(density = with(.data$LMS,
-                                   list(as_tibble(pdLMS(L, M, S, plot = FALSE)[c('x', 'density')])))) %>%
+                                   list(as_tibble(pdLMS(L, M, S, N = 200, plot = FALSE)[c('x', 'density')])))) %>%
              unnest(.data$density) %>%
-             mutate(density = drop(.data$density))
+             mutate(density = drop(.data$density)) %>%
+             select(.data$x, .data$density, .data$reference, .data$level, .data$cutoff, .data$bmi)
            plot <- data %>%
              ggplot(aes(.data$x, .data$density, group = .data$reference, colour = .data$reference)) +
              xlab(expression(body~mass~index~~(kg/m^2))) +
-             geom_path(data = data %>% filter(level == 'overweight')) +
+             geom_path(data = data %>% filter(.data$level == 'overweight')) +
              geom_vline(aes(xintercept = .data$bmi, linetype = .data$level, colour = .data$reference),
-                        data = data %>% nest(data = c(x, density)))
+                        data = data %>% nest(data = c(.data$x, .data$density)))
            print(plot)
            invisible(list(data = data, plot = plot))
          },
          # comparison plot plus data in wider format
          compare = {
            stopifnot('compare plot needs pto set' = !pto_na)
-           plot <- ggplot(data, aes(.data$pto, .data$epto, colour = .data$sex)) +
+           owob <- c('overweight', 'obesity')
+           data <- data %>%
+             select(-(.data$z:.data$r)) %>%
+             rename_with(~c(t(outer(c('pfrom', 'pto', 'epto'), owob,
+                                    paste, sep = '_'))), .cols = c(pfrom, pto, epto)) %>%
+             pivot_longer(ends_with(owob), names_to = c('.value', 'level'), names_sep = '_') %>%
+             mutate(level = fct_inorder(.data$level))
+           plot <- ggplot(data, aes(.data$pto, .data$epto, colour = .data$level, shape = .data$sex)) +
              xlab('observed prevalence (%)') +
              ylab('predicted prevalence (%)') +
+             labs(caption = glue('prevalence for {to[1]} / {to[2]} predicted from {from[1]} / {from[2]}')) +
              geom_point() +
-             geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray') +
-             scale_x_continuous(trans='log2') +
-             scale_y_continuous(trans='log2')
+             geom_abline(intercept = 0, slope = 1, linetype = 2, colour = 'gray')
            print(plot)
            invisible(list(data = data, plot = plot))
          }
   )
-
 }
 
 
