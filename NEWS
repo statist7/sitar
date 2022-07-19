@@ -1,15 +1,15 @@
-Changes in Version 1.2.0.9000
+Changes in Version 1.3.0
 
   o Typos in the berkeley dataset reported as issue #7 are fixed.
 
   o The argument keep.data is added to sitar with default TRUE. This saves a
-    copy of the data in the object, which avoids environment issues.
+    copy of the data in the object, which avoids some environment issues.
 
-  o ob_convertr is extended with the addition of ob_convertr2, and is rewritten 
-  	to be much faster. As a result the interface is altered - a breaking change.
-  	
+  o ob_convertr is rewritten and extended with the addition of ob_convertr2, and
+    is now much faster. As a result the interface is altered - a breaking change.
+
   o The dataset deren example is updated to match the revised ob_convertr.
-  
+
 Changes in Version 1.2.0
 
   o The dataset deren is added for use with ob_convertr.

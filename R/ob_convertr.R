@@ -130,10 +130,9 @@
 #' ## in 8-year-old boys to overweight prevalence for cutoff WHO +1
 #' ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10)
 #'
-#' ## compare the BMI density functions and cutoffs for IOTF 25 and WHO +1
+#' ## compare the BMI density functions and cutoffs for IOTF and WHO
 #' ## in 8-year-old boys
-#' ob_convertr(age = 8, sex = 'boys', from = 'IOTF 25', to = 'WHO +1', pfrom = 10,
-#'   plot = 'density')
+#' ob_convertr2(age = 8, sex = 'boys', from = 'IOTF', to = 'WHO', plot = 'density')
 #'
 #' ## convert IOTF overweight prevalence to WHO overweight prevalence
 #' ## and compare with true value - boys and girls aged 7-17 (22 groups)
@@ -147,9 +146,10 @@
 #'   pfrom = IOTF25, pto = `WHO+1`, data = deren, plot = 'compare')
 #'
 #' ## convert IOTF overweight and obesity prevalence to WHO using
-#' ## ob_convertr2 which is more accurate than ob_convertr
+#' ## ob_convertr2 - which is more accurate than ob_convertr
 #' ob_convertr2(age = Age, sex = Sex, from = 'IOTF', to = 'WHO',
-#'   pfrom = c('IOTF25', 'IOTF30'), pto = c('WHO+1', 'WHO+2'), data = deren)
+#'   pfrom = c('IOTF25', 'IOTF30'), pto = c('WHO+1', 'WHO+2'),
+#'   data = deren, plot = 'compare')
 #'
 #' ## extrapolate WHO overweight and obesity prevalence (cutoffs +1 and +2)
 #' ## to severe obesity prevalence based on cutoffs +2.5 or +3
@@ -158,7 +158,7 @@
 #'
 #' @importFrom forcats fct_inorder fct_collapse fct_relabel
 #' @importFrom ggplot2 ggplot xlab ylab geom_path geom_point geom_vline
-#'   geom_abline scale_x_continuous scale_y_continuous aes
+#'   geom_abline labs scale_x_continuous scale_y_continuous aes
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr mutate rename filter transmute bind_cols select
 #'   across pull contains starts_with ends_with if_else n rowwise
