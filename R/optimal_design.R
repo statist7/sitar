@@ -68,7 +68,7 @@
 #' @importFrom rlang .data !! :=
 #' @importFrom stats pnorm
 #' @importFrom tibble tibble
-#' @export optimal_design
+#' @export
 optimal_design <- function(z = -2, lambda = NA, N = NA, SEz = NA,
                            age = 10) {
   stopifnot(!(any(is.na(z) & is.na(lambda))))

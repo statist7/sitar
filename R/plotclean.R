@@ -1,11 +1,11 @@
 #' Plot multiple growth curves to identify outliers
-#' 
+#'
 #' A version of \code{mplot} to plot growth curves and identify outliers. When
 #' outliers are clicked on, and if id is specified, the corresponding growth
 #' curve is highlighted.  If id is not specified the selected point is
 #' highlighted. Use right-click to exit.
-#' 
-#' 
+#'
+#'
 #' @param x vector of x coordinates.
 #' @param y vector of y coordinates.
 #' @param id factor of subject levels indexing each growth curve.
@@ -22,10 +22,10 @@
 #' \code{rows}, and columns \code{id}, \code{x} and \code{y}.}
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
-#' 
+#'
 #' if (interactive()) plotclean(age, height, id, heights)
-#' 
-#' @export plotclean
+#'
+#' @export
 	plotclean <- function(x, y, id=NULL, data=parent.frame(), n=length(x), par.out=list(pch=20), ...) {
 #	plot growth curves to identify outlying points and curves
 #	plot y ~ x by id with data
@@ -71,11 +71,11 @@
 			idt <- id==id[ans]
 			ox <- order(x[idt])
 			do.call('lines', c(list(x[idt][ox], y[idt][ox]), par.out))
-		}	
+		}
 		sel[ans] <- TRUE
 		res <- c(res, ans)
 	}
 	res <- res[order(res)]
-	if (data.null) res 
+	if (data.null) res
 	else list(rows=res, data=data[res, c(idlab, xlab, ylab)])
 }

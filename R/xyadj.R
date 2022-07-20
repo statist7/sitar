@@ -37,7 +37,7 @@
 #' ## overplot with adjusted data as points
 #' with(heights, points(xyadj(m1), col='red', pch=19))
 #'
-#' @export xyadj
+#' @export
 xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
 #	returns x and y adjusted for random effects a, b and c
   if (missing(x))

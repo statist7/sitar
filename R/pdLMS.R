@@ -37,7 +37,7 @@
 #' pdLMS(L=-2:3, M=2:3, S=1:3/10, zcent=3, lty=1)
 #'
 #' @importFrom graphics matplot matpoints
-#' @export pdLMS
+#' @export
 pdLMS <- function(L = 1, M = 1, S = 0.2, zcent = NULL, zlim = 3.5,
                   N = 1000, plot = TRUE, ...) {
   stopifnot(M > 0, S > 0)

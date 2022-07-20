@@ -208,7 +208,7 @@
 #' @param inverse logical
 #' @return Returns a vector of length v.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @export funcall
+#' @export
 	funcall <- function(v, vcall, inverse=FALSE)
 #	returns v transformed according to vcall
 #	v - vector
@@ -271,7 +271,7 @@
 #' m2 <- update(m1, bstart=bupdate(m1), df=6)
 #' print(fixef(m2)['b'])
 #'
-#' @export bupdate
+#' @export
 	bupdate <- function(x) {
 	cov <- getVarCov(x)
 	fixef(x)['b'] + x$xoffset + cov[2,3] / cov[3,3]
@@ -339,7 +339,7 @@
 #' outliers <- velout(age, height, id, heights, limit=3)
 #'
 #' @importFrom stats loess
-#' @export velout
+#' @export
 	velout <- function(x, y, id, data, lag=1, velpower=0.5, limit=5, linearise=FALSE)
 #	identifies velocity patterns in growth curve outliers
 #	returns id, x and code for errors, plus coded velocities relative to neighbours
@@ -463,7 +463,7 @@
 #' ## set the 8 outliers missing
 #' newheights <- zapvelout(outliers, icode=6)
 #'
-#' @export codeplot
+#' @export
 	codeplot <- function(outliers, icode=4, ..., print=TRUE)
 {
 #	plots growth curves with outliers identified by velout
@@ -578,7 +578,7 @@
 #' @return Returns the dataframe \code{data} with the \code{from} rows of
 #' \code{xc} and \code{yc} recalibrated.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @export recalib
+#' @export
 	recalib <- function(xc, yc, id=NULL, data, xcnew=NULL, ycnew=NULL, model, from, to)
 #	xc - column names of x data to be recalibrated
 #	yc - column names of y data to be recalibrated
@@ -662,14 +662,14 @@
 #' ## force axis extremes to be -3 and 3
 #' plot(x, y, pch=19, xlim=xaxsd(c(-3,3)), ylim=yaxsd(c(-3,3)))
 #'
-#' @export xaxsd
+#' @export
 xaxsd <- function(usr=par()$usr[1:2]) {
   if (!missing(usr) && par('xlog')) usr <- log10(usr)
   usr <- (usr + mean(usr) * 0.08) / 1.08
 	if (par('xlog')) 10 ^ usr else usr
 }
 #' @rdname xaxsd
-#' @export yaxsd
+#' @export
 yaxsd <- function(usr=par()$usr[3:4]) {
   if (!missing(usr) && par('ylog')) usr <- log10(usr)
 	usr <- (usr + mean(usr) * 0.08) / 1.08
@@ -725,7 +725,7 @@ yaxsd <- function(usr=par()$usr[3:4]) {
 #' ## truncate age range to 7-12 for 50% of subjects
 #' t50 <- subsample(age, id, heights, prob=0.5, xlim=c(7, 12))
 #'
-#' @export subsample
+#' @export
 	subsample <- function(x, id, data, prob = 1, xlim = NULL)
 {
 #	selects subset for sitar model design

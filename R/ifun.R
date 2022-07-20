@@ -85,7 +85,7 @@
 #' ## compare mean curves for the two models where x & y are on the original scales
 #' plot(m1, 'd', las=1)
 #' lines(m2, 'd', col=2)
-#' @export ifun
+#' @export
 ifun <- function(expr, verbose=FALSE) {
 
 # returns number of names in expression ignoring pi

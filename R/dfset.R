@@ -17,7 +17,7 @@
 #' dfset(age, height, heights, FUN=BIC, plot=TRUE)
 #' dfset(age, height, heights, FUN=function(a) AIC(a, k=1))
 #' @importFrom splines ns
-#' @export dfset
+#' @export
 dfset <-
   function(x,
            y,

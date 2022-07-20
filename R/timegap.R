@@ -51,7 +51,7 @@
 #'
 #' ## most time intervals close to 1 year
 #' summary(diffid(age, id, heights[tg1, ], lag=1))
-#' @export timegap
+#' @export
 timegap <- function(age, gap, tol=0.1*gap, multiple=FALSE) {
 # age, a vector of ages
 # gap, target time gap between measurements

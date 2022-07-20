@@ -55,7 +55,7 @@
 #' dfpower(m1, df = 4:6, fixed = c('a', 'a+b', 'a+c', 'a+b+c'),
 #'   xpowers = 0:1, ypowers = 0:1, maxIter = 8)
 #' }
-#' @export dfpower
+#' @export
 #' @md
 dfpower <- function(object, df, fixed, xpowers, ypowers, FUN=BICadj,
                     maxIter=50, drop = TRUE, verbose=FALSE) {

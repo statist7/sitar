@@ -50,7 +50,7 @@
 #' ## then back-calculate the original LMS curves and display summary statistics
 #' LMSfit(x=ages, y=v, sex=1, centiles=pnorm(zs)*100, plot=FALSE)
 #'
-#' @export LMSfit
+#' @export
 LMSfit <- function(x, y, sex, data = parent.frame(), centiles = c(3,10,25,50,75,90,97), df = c(6,10,8), L1 = FALSE, plot=TRUE, ...) {
 #	x is a vector of ages, separately by sex
 #	y is a matrix, nrows = length(x), ncols = length(centiles)

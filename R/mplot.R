@@ -23,7 +23,7 @@
 #'
 #' mplot(age, height, id, heights, col=id)
 #'
-#' @export mplot
+#' @export
 	mplot <- function(x, y, id, data=parent.frame(), subset=NULL, add=FALSE, ...) {
 #	plots y ~ x by id with data
 #	x and y can be name or character

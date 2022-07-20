@@ -58,7 +58,7 @@
 #'
 #' ## find what power height is raised to
 #' getL(quote(sqrt(sqrt(height))))
-#' @export BICadj
+#' @export
 BICadj <- function(..., pattern=NULL)
 {	ARG <- match.call(expand.dots=FALSE)$...
 if (!is.null(pattern)) pattern <- ls(envir=parent.frame(), pattern=pattern)
