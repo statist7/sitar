@@ -196,7 +196,7 @@ The WHO reference for children aged 5-19 years is: de Onis M, Onyango AW,
 Borghi E, Siyam A, Nishida C, Siekmann J. Development of a WHO growth
 reference for school-aged children and adolescents. Bulletin of the World
 Health Organization 2007; 85: 660-7. Available at:
-\url{https://www.who.int/growthref/growthref_who_bull/en/}
+\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2636412/pdf/07-043497.pdf/}
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}

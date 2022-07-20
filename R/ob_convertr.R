@@ -124,7 +124,7 @@
 #' Borghi E, Siyam A, Nishida C, Siekmann J. Development of a WHO growth
 #' reference for school-aged children and adolescents. Bulletin of the World
 #' Health Organization 2007; 85: 660-7. Available at:
-#' \url{https://www.who.int/growthref/growthref_who_bull/en/}
+#' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2636412/pdf/07-043497.pdf/}
 #' @examples
 #' ## convert 10% IOTF overweight prevalence (cutoff IOTF 25, including obesity)
 #' ## in 8-year-old boys to overweight prevalence for cutoff WHO +1
