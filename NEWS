@@ -1,6 +1,6 @@
 Changes in Version 1.3.0.9000
 
-  o
+  o A bug in ob_convertr2 handling missing data is fixed.
 
 Changes in Version 1.3.0
 
