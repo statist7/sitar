@@ -371,8 +371,7 @@ sitar <-
     nsc <- cglue(model['c'], ')*exp(', '')
     nsd <- cglue(model['d'], '+(', ')*x')
     ex <- glue('(x{nsb}{nsc})')
-    spline <- glue(cglue(ss, '+drop((cbind(', ')*ns({ex},k=knots,B=bounds))%*%mat)'))
-    mat <- matrix(rep(1, df), ncol = 1)
+    spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns({ex},k=knots,B=bounds)))'))
 
     # expand fixed and if necessary random
     fixed <- glue('{fixed} ~ 1')
