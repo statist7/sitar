@@ -73,9 +73,13 @@ dev <- sapply(ARG, function(obj) {
   else if (!is.null(obj$call$model)) ycall <- obj$call$model[[2]]
   else if (!is.null(obj$call$formula)) ycall <- obj$call$formula[[2]]
   else return(NA)
-  data <- eval(obj$call$data)
-  if (!is.null(obj$call$subset))
-    data <- data[eval(obj$call$subset, data), ]
+  data <- if ('sitar' %in% class(obj))
+    getData(obj)
+  else {
+    eval(obj$call$data)
+    if (!is.null(obj$call$subset))
+      data <- data[eval(obj$call$subset, data), ]
+  }
   y <- eval(as.name(all.vars(ycall)), data)
   lambda <- getL(ycall)
   sly <- ifelse(lambda == 1, 0, sum(log(y)))
