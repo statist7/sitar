@@ -83,10 +83,10 @@
 # identify sitar formula covariates in newdata
     covnames <- all.vars(asOneFormula(oc$a.formula, oc$b.formula, oc$c.formula, oc$d.formula))
     covnames <- covnames[covnames %in% names(newdata)]
-# if factors add linear contrasts to newdata
-    factornames <- covnames[unlist(lapply(newdata[, covnames], is.factor))]
+# if non-numeric add linear contrasts to newdata
+    factornames <- covnames[unlist(lapply(covnames, function(x) !is.numeric(newdata[, x])))]
     if (length(factornames) > 0L) {
-      extra <- eval(parse(text = paste("~-1 +", paste(factornames, collapse = "+")))[[1]])
+      extra <- eval(parse(text = paste(c("~0", factornames), collapse = "+"))[[1]])
       extra <- as_tibble(model.matrix(extra, newdata))
       newdata <- bind_cols(newdata, extra)
       covnames <- c(covnames, names(extra))
