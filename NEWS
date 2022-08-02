@@ -1,5 +1,7 @@
 Changes in Version 1.3.0.9000
 
+  o An egregious bug with factor covariates in predict.sitar is fixed.
+
   o The fitnlme function in sitar is simplified.
 
   o A bug in ob_convertr2 handling missing data is fixed.
