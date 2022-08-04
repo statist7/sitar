@@ -526,6 +526,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     ))) {
       # get data etc
       if (any(c('data', 'subset') %in% names(extras))) {
+        stopifnot('data missing' = all(exists(all.vars(mcall$data))))
         data <- eval(mcall$data)
         subset <- eval(mcall$subset, data)
         if (!is.null(subset))
@@ -615,12 +616,21 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         }
         #	save start. object
         assign('start.', start., parent.frame())
-        mcall[['start']] <- quote(start.)
+        mcall$start <- quote(start.)
       }
     }
   }
-  if (evaluate)
+  if (evaluate) {
+    # if data stored in object and either unchanging or original unavailable
+    # put a copy in globalenv
+    if (!is.null(object$data) &&
+        (!'data' %in% names(extras) ||
+         !all(exists(all.vars(mcall$data))))) {
+      .data. <<- object$data
+      mcall$data <- quote(.data.)
+    }
     eval(mcall, parent.frame())
+  }
   else
     mcall
 }

@@ -1,6 +1,6 @@
 Changes in Version 1.3.0.9000
 
-  o A bug in BICadj relating to the keep.data argument is fixed.
+  o Bugs in update.sitar and BICadj relating to the keep.data argument are fixed.
 
   o An egregious bug with factor covariates in predict.sitar is fixed.
 
