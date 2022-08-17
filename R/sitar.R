@@ -526,8 +526,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     ))) {
       # get data etc
       if (any(c('data', 'subset') %in% names(extras))) {
-        stopifnot('data missing' = all(exists(all.vars(mcall$data))))
-        data <- eval(mcall$data)
+        data <- eval(mcall$data, parent.frame())
         subset <- eval(mcall$subset, data)
         if (!is.null(subset))
           data <- data[subset,]
