@@ -1,5 +1,7 @@
 Changes in Version 1.3.0.9000
 
+  o the function identity is now recognised by ifun
+
   o Bugs in update.sitar and BICadj relating to the keep.data argument are fixed.
 
   o An egregious bug with factor covariates in predict.sitar is fixed.

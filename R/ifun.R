@@ -5,8 +5,8 @@
 #'
 #' \code{ifun} returns the inverting function such that
 #' \code{ifun(expr)(eval(expr)) = varname}, where
-#' \code{expr} can include any of the invertible functions in the 'Math' and 'Ops'
-#' groups.
+#' \code{expr} can include any of the invertible functions in the \code{Math} and \code{Ops}
+#' groups, plus \code{identity} and \code{I}.
 #'
 #' To illustrate its use, consider variants of the \code{sitar} model
 #' \code{height ~ age} where \code{age} and/or \code{height} are transformed,
@@ -169,6 +169,7 @@ ifun <- function(expr, verbose=FALSE) {
     n/x, n/x,
     +x, +x,
     -x, -x,
+    identity(x), identity(x),
     I(x), I(x),
     cos(x), acos(x),
     sin(x), asin(x),
