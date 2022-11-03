@@ -624,7 +624,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     # put a copy in globalenv
     if (!is.null(object$data) &&
         (!'data' %in% names(extras) ||
-         !all(exists(all.vars(mcall$data))))) {
+         !all(vapply(all.vars(mcall$data), exists, TRUE)))) {
       .data. <<- object$data
       mcall$data <- quote(.data.)
     }
