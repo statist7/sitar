@@ -248,20 +248,17 @@ sitar <-
       spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
       if (nostart <- missing(start))
         start <- coef(spline.lm)[c(2:(df + 1), 1)]
-    # if df = 1 set fixed to a and random to [ac]
+    # if df = 1 exclude b and d
       if (df == 1) {
-        fixed <- 'a'
+        fixed <- 'a' # s1 = c
         random <- extract(random, letters[c(1, 3)])
       }
-    # drop fixed effect for d
-      fixed <- extract(fixed, letters[1:3])
     } else { # 0 df for spline so fit y ~ x
       ss <- character(0)
       #	if start missing get start values for [ad]
       spline.lm <- lm(y ~ x)
       if (nostart <- missing(start))
         start <- coef(spline.lm)
-      # force fixed and random
       fixed <- 'a + d'
       if (!'random' %in% names(mcall))
         random <- fixed
