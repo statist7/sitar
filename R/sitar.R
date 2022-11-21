@@ -232,7 +232,11 @@ sitar <-
 
     # default fixed effects
     if (is.null(fixed))
-      fixed <- random
+      # drop d from fixed if fixed missing and d in random and df > 1
+      if (grepl('d', random) && df > 1)
+        fixed <- extract(random, letters[1:3])
+      else
+        fixed <- random
     # if fixed contains ~ drop it
     else if (any(grepl('~', fixed)))
       fixed <- as.character(as.formula(fixed))[-1]
