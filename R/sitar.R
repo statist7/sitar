@@ -181,8 +181,12 @@ sitar <-
         missing(knots))
       stop("either df or knots must be specified")
     if (!missing(df) &&
-        !missing(knots))
-      warning("both df and knots specified - df redefined from knots\n")
+        !missing(knots)) {
+      if (df == 0)
+        knots <- NULL
+      else
+        warning("both df and knots specified - df redefined from knots\n")
+    }
     if (!missing(knots)) {
       if (!identical(range(c(knots, x)), range(x)))
         stop("knots outside x range")
@@ -492,7 +496,15 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   }
   # update args
   mcall[names(extras)] <- extras
-  #	add start arg if none of these args specified
+  # check if mean curve is/was a spline
+  fo <- fixef(object)
+  ro <- ranef(object)
+  spline <- !is.na(fo['s1']) && (is.null(extras$df) || eval(extras$df) > 0)
+  # if df = 0 drop knots & bounds
+  if (!is.null(mcall$df) && eval(mcall$df) == 0) {
+    mcall$knots <- mcall$bounds <- NULL
+  }
+  #	add start arg if none of these args specified and is/was a spline
   if (!sum(pmatch(
     names(extras),
     c(
@@ -509,8 +521,8 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       "returndata"
     ),
     0
-  ))) {
-    start. <- list(fixed = fixef(object), random = ranef(object))
+  )) && spline) {
+    start. <- list(fixed = fo, random = ro)
     # update start if any of these args specified
     if (sum(pmatch(
       names(extras),
@@ -557,8 +569,8 @@ update.sitar <- function (object, ..., evaluate = TRUE)
             newre <- matrix(
               0,
               nrow = sum(newid),
-              ncol = dim(ranef(object))[2],
-              dimnames = list(levels(id)[newid], dimnames(ranef(object))[[2]])
+              ncol = dim(ro)[2],
+              dimnames = list(levels(id)[newid], dimnames(ro)[[2]])
             )
             start.$random <- rbind(start.$random, newre)
             cat(sum(newid), 'subjects added\n')
@@ -566,8 +578,8 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         }
       }
       #	update fixed effects
-      if (length(fixef(object)) > df + 1)
-        fixed.extra <- (df + 2):length(fixef(object))
+      if (length(fo) > df + 1)
+        fixed.extra <- names(fo)[(df + 2):length(fo)]
       else
         fixed.extra <- NULL
       # new arg xoffset
@@ -589,6 +601,13 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       else if (!is.null(extras$df)) {
         df <- eval(extras$df)
         mcall$knots <- NULL
+        if (df == 1) {
+          knots <- numeric()
+          fixed.extra <- fixed.extra[!fixed.extra %in% c('b', 'c')]
+          start.$random['b'] <- NULL
+        }
+        else
+          knots <- quantile(x, 1:(df - 1) / df)
       }
       # new arg bounds
       if (!is.null(extras$bounds)) {
@@ -598,27 +617,25 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         else
           bounds <- bounds - xoffset
       }
-      if (df > 1 && object$ns$rank > 2) { # omit start if df was/is [01]
-        knots <- quantile(x, (1:(df - 1)) / df)
-        #	get spline start values
-        spline.lm <-
-          lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
-        start.$fixed <-
-          c(coef(spline.lm)[c(2:(df + 1), 1)], start.$fixed[fixed.extra])
-        # new arg bstart
-        if (!is.null(extras$bstart) && !is.null(start.$fixed['b'])) {
-          bstart <- eval(extras$bstart)
-          if (bstart == 'mean')
-            bstart <- mean(x)
-          else
-            bstart <- bstart - xoffset
-          start.$fixed['b'] <- bstart
-        }
-        #	save start. object
-        assign('start.', start., parent.frame())
-        mcall$start <- quote(start.)
+      #	get spline start values
+      spline.lm <-
+        lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
+      start.$fixed <-
+        c(coef(spline.lm)[c(2:(df + 1), 1)],
+          fo[names(fo) %in% fixed.extra])
+      # new arg bstart
+      if (!is.null(extras$bstart) && !is.null(start.$fixed['b'])) {
+        bstart <- eval(extras$bstart)
+        if (bstart == 'mean')
+          bstart <- mean(x)
+        else
+          bstart <- bstart - xoffset
+        start.$fixed['b'] <- bstart
       }
     }
+    #	save start. object
+    assign('start.', start., parent.frame())
+    mcall$start <- quote(start.)
   }
   if (evaluate) {
     # if data stored in object and either unchanging or original unavailable
@@ -626,7 +643,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     if (!is.null(object$data) &&
         (!'data' %in% names(extras) ||
          !all(vapply(all.vars(mcall$data), exists, TRUE)))) {
-      .data. <<- object$data
+      assign('.data.', object$data, parent.frame())
       mcall$data <- quote(.data.)
     }
     eval(mcall, parent.frame())
