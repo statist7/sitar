@@ -169,7 +169,7 @@ sitar <-
 
     # get data
     mcall <- match.call()
-    data <- eval(mcall$data, parent.frame())
+    data <- eval.parent(mcall$data)
     subset <- eval(mcall$subset, data)
     if (!is.null(subset))
       data <- data[subset,]
@@ -496,15 +496,15 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   }
   # update args
   mcall[names(extras)] <- extras
-  # check if mean curve is/was a spline
+  # check if mean curve is/was a spline with 2+ df
   fo <- fixef(object)
   ro <- ranef(object)
-  spline <- !is.na(fo['s1']) && (is.null(extras$df) || eval(extras$df) > 0)
+  spline2 <- !is.na(fo['s2']) && (is.null(extras$df) || eval.parent(extras$df) >= 2)
   # if df = 0 drop knots & bounds
-  if (!is.null(mcall$df) && eval(mcall$df) == 0) {
+  if (!is.null(mcall$df) && eval.parent(mcall$df) == 0) {
     mcall$knots <- mcall$bounds <- NULL
   }
-  #	add start arg if none of these args specified and is/was a spline
+  #	add start arg if none of these args specified and is/was spline curve with 2+ df
   if (!sum(pmatch(
     names(extras),
     c(
@@ -521,7 +521,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       "returndata"
     ),
     0
-  )) && spline) {
+  )) && spline2) {
     start. <- list(fixed = fo, random = ro)
     # update start if any of these args specified
     if (sum(pmatch(
@@ -539,7 +539,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     ))) {
       # get data etc
       if (any(c('data', 'subset') %in% names(extras))) {
-        data <- eval(mcall$data, parent.frame())
+        data <- eval.parent(mcall$data)
         subset <- eval(mcall$subset, data)
         if (!is.null(subset))
           data <- data[subset,]
@@ -585,7 +585,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       # new arg xoffset
       if (!is.null(extras$xoffset)) {
         xoffset.t <- xoffset
-        xoffset <- eval(extras$xoffset)
+        xoffset <- eval.parent(extras$xoffset)
         xoffset.t <- xoffset - xoffset.t
         x <- x - xoffset.t
         knots <- knots - xoffset.t
@@ -593,25 +593,19 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       }
       # new arg knots
       if (!is.null(extras$knots)) {
-        knots <- eval(extras$knots) - xoffset
+        knots <- eval.parent(extras$knots) - xoffset
         df <- length(knots) + 1
          mcall$df <- NULL
      }
       # new arg df
       else if (!is.null(extras$df)) {
-        df <- eval(extras$df)
+        df <- eval.parent(extras$df)
         mcall$knots <- NULL
-        if (df == 1) {
-          knots <- numeric()
-          fixed.extra <- fixed.extra[!fixed.extra %in% c('b', 'c')]
-          start.$random['b'] <- NULL
-        }
-        else
-          knots <- quantile(x, 1:(df - 1) / df)
+        knots <- quantile(x, 1:(df - 1) / df)
       }
       # new arg bounds
       if (!is.null(extras$bounds)) {
-        bounds <- eval(extras$bounds)
+        bounds <- eval.parent(extras$bounds)
         if (length(bounds) == 1)
           bounds <- range(x) + abs(bounds) * c(-1, 1) * diff(range(x))
         else
@@ -625,7 +619,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
           fo[names(fo) %in% fixed.extra])
       # new arg bstart
       if (!is.null(extras$bstart) && !is.null(start.$fixed['b'])) {
-        bstart <- eval(extras$bstart)
+        bstart <- eval.parent(extras$bstart)
         if (bstart == 'mean')
           bstart <- mean(x)
         else
@@ -646,7 +640,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       assign('.data.', object$data, parent.frame())
       mcall$data <- quote(.data.)
     }
-    eval(mcall, parent.frame())
+    eval.parent(mcall)
   }
   else
     mcall
