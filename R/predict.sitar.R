@@ -14,7 +14,7 @@
 #' \code{level = 1}, matching the names in \code{object}. Variables with the
 #' reserved names \code{x=.x} or \code{id=.id} take precedence over the model
 #' \code{x} and \code{id} variables. Any covariates in
-#' \code{a.formula}, \code{b.formula} or \code{c.formula} can also be included.
+#' \code{a.formula}, \code{b.formula}, \code{c.formula} or \code{d.formula} can also be included.
 #' By default their values are set to the mean, so when \code{level = 0} the
 #' prediction represents the mean curve.
 #' @param level an optional integer vector giving the level(s) of grouping to be used
@@ -27,9 +27,9 @@
 #' specifies the distance curve, \code{deriv = 1} the velocity curve and
 #' \code{deriv = 2} the acceleration curve.
 #' @param abc an optional named vector containing values of a subset of
-#' \code{a}, \code{b} and \code{c}, default \code{NULL}. Ignored if
+#' \code{a}, \code{b}, \code{c} and \code{d}, default \code{NULL}. Ignored if
 #' \code{level = 0}. It gives predictions for a single subject with the
-#' specified values of \code{a}, \code{b} and \code{c}, where missing values
+#' specified values of \code{a}, \code{b}, \code{c} and \code{d}, where missing values
 #' are set to 0. Alternatively \code{abc} can contain the value for a single id.
 #' @param xfun an optional function to apply to \code{x} to convert it back to
 #' the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
@@ -156,12 +156,9 @@
 # adjust abc for mean ranef
     if (!is.null(abc)) {
       abc.t <- re.mean
-      for (i in names(re.mean)) {
-        abc.t[, i] <- if (is.na(abc[i]))
-          re.mean[, i]
-        else
-          re.mean[, i] + abc[i]
-      }
+      for (i in names(abc.t))
+        if (!is.na(abc[i]))
+          abc.t[, i] <- abc.t[, i] + abc[i]
       abc <- abc.t
     }
 # set class to nlme to use predict.nlme

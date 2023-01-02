@@ -24,7 +24,7 @@ It requires named columns for \code{x}, and for \code{id} if
 \code{level = 1}, matching the names in \code{object}. Variables with the
 reserved names \code{x=.x} or \code{id=.id} take precedence over the model
 \code{x} and \code{id} variables. Any covariates in
-\code{a.formula}, \code{b.formula} or \code{c.formula} can also be included.
+\code{a.formula}, \code{b.formula}, \code{c.formula} or \code{d.formula} can also be included.
 By default their values are set to the mean, so when \code{level = 0} the
 prediction represents the mean curve.}
 
@@ -41,9 +41,9 @@ specifies the distance curve, \code{deriv = 1} the velocity curve and
 \code{deriv = 2} the acceleration curve.}
 
 \item{abc}{an optional named vector containing values of a subset of
-\code{a}, \code{b} and \code{c}, default \code{NULL}. Ignored if
+\code{a}, \code{b}, \code{c} and \code{d}, default \code{NULL}. Ignored if
 \code{level = 0}. It gives predictions for a single subject with the
-specified values of \code{a}, \code{b} and \code{c}, where missing values
+specified values of \code{a}, \code{b}, \code{c} and \code{d}, where missing values
 are set to 0. Alternatively \code{abc} can contain the value for a single id.}
 
 \item{xfun}{an optional function to apply to \code{x} to convert it back to
