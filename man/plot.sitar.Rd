@@ -21,6 +21,7 @@
   yfun = identity,
   subset = NULL,
   ns = 101,
+  design = NULL,
   abc = NULL,
   trim = 0,
   add = FALSE,
@@ -93,6 +94,11 @@ original \code{sitar} call.}
 
 \item{ns}{scalar defining the number of points for spline curves
 (default 101).}
+
+\item{design}{formula defining the variables to use to group data for multiple
+mean distance and/or velocity curves (opt = 'd'|'v'). By default includes
+all the variables in \code{a.formula}, \code{b.formula}, \code{c.formula} and
+\code{a.formula}.}
 
 \item{abc}{vector of named values of random effects a, b and c used to
 define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a

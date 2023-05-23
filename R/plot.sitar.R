@@ -63,6 +63,10 @@
 #' original \code{sitar} call.
 #' @param ns scalar defining the number of points for spline curves
 #' (default 101).
+#' @param design formula defining the variables to use to group data for multiple
+#' mean distance and/or velocity curves (opt = 'd'|'v'). By default includes
+#' all the variables in \code{a.formula}, \code{b.formula}, \code{c.formula} and
+#' \code{a.formula}.
 #' @param abc vector of named values of random effects a, b and c used to
 #' define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
 #' single character string defining an \code{id} level whose random effect
@@ -161,11 +165,12 @@
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr mutate rename filter
+#' @importFrom tidyr expand_grid
 #' @importFrom rlang .data as_label
 #' @importFrom glue glue
 #' @export
 plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=identity, subset=NULL,
-                       ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
+                       ns=101, design=NULL, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
                        returndata=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
                        xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
@@ -228,22 +233,33 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     seq(rx[1], rx[2], length.out=n)
   }
 
-  distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
+  distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns,
+                                   design=design) {
 # generate x values across the range to plot mean spline curve
     dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
-    .x <- xseq(getCovariate(model), ns)
-    newdata <- tibble(.x)
-    if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
     level <- ifelse(is.null(abc), 0, 1)
-    . <- tibble(
-      .x=xfun(.x),
-      .y=predict(model, newdata, level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
-    )
-    .
+    .x <- xseq(getCovariate(model), ns)
+    design_names <- all.vars(design)
+    newdata <- if (length(design_names) > 0L) {
+      design_labs <- lapply(design_names, as.name)
+      expand_grid(.x = .x, getData(model) %>%
+                    select(all_of(design_names)) %>%
+                    unique()) %>%
+        mutate(.groups = factor(paste(!!!design_labs, sep = '_')), .after = .x) %>%
+        as_tibble
+    } else {
+      tibble(.x)
+    }
+    newdata <- newdata %>%
+      mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x)
+    if (sum(subset) < length(subset))
+      attr(newdata, 'subset') <- subset
+    newdata
   }
 
-  Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
+  Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns,
+                                   design=design) {
 # generate x and id values across the range to plot spline curves
     dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
@@ -322,7 +338,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     with(data, data[order(.id, .x), ]) # sort data
   }
 
-  crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
+  crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns,
+                             design=design) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
     x <- xseq(x, ns) - model$xoffset
@@ -405,6 +422,13 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
   dv <- range(optaxis[opts])
   dv <- min(dv) + diff(dv) * 2 # 1=d, 2=v, 3=dv
 
+# derive design and if not ~1 set optmult TRUE for 'dv'
+  if (is.null(design))
+    design <- as.list(mcall)[grepl('.formula', names(mcall))] %>%
+    asOneFormula()
+  if (design != ~1)
+    optmult[c(1, 6)] <- TRUE
+
 # create missing labels
   if (missing(labels))
     labels <- vector('character', 3)
@@ -421,7 +445,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
 # generate list of data frames for selected options
   data <- lapply(opts, function(i) {
     if (optsmooth[[i]])
-      do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns))
+      do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns, design=design))
     else
       do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, trim=trim))
   })

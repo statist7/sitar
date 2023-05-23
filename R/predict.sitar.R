@@ -178,6 +178,17 @@
     pred0 <- yfun(predict(object, newdata, level=0L) - xy.id$y)
     if (deriv > 0L) {
 # VELOCITY
+# check if grouped opt dv
+      if ('.groups' %in% names(newdata)) {
+        level <- 1L
+        newdata <- newdata %>%
+          mutate(id = .groups,
+                 pred = pred0,
+                 n = 1:n()) %>%
+          arrange(id)
+        id <- newdata$id
+        pred <- newdata$pred
+      }
 # level 0 prediction
       ss0 <- smooth.spline(xfun(x), pred0)
       vel0 <- predict(ss0, xfun(x), deriv=deriv)
@@ -185,17 +196,17 @@
 # velocity curve on back-transformed axes
       if (any(level == 1L)) {
 # level 1 prediction
-        if (identical(xfun, identity) && identical(yfun, identity)) {
-# x and y untransformed
-            vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
-            if (!is.null(abc$c))
-              vel <- vel * exp(abc$c)
-          } else {
+#         if (identical(x, xfun(x)) && identical(x, yfun(x))) {
+# # x and y untransformed
+#             vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
+#             if (!is.null(abc$c))
+#               vel <- vel * exp(abc$c)
+#           } else {
 # x or y transformed
           newdata$pred <- pred
-          newdata$xorig <- xfun(x)
           vel <- by(newdata, id, function(z) {
             with(z, {
+              xorig <- xfun(x)
               if (length(xorig) >= 4) {
                 ss <- smooth.spline(xorig, pred, df=min(20, length(xorig)))
                 predict(ss, xorig, deriv=deriv)$y
@@ -204,7 +215,9 @@
             })
           })
           vel <- do.call('c', as.list(vel))
-        }
+          if ('n' %in% names(newdata))
+            vel <- vel[order(newdata$n)]
+        # }
         pred <- vel
       }
     }
