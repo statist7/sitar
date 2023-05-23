@@ -426,6 +426,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
   if (is.null(design))
     design <- as.list(mcall)[grepl('.formula', names(mcall))] %>%
     asOneFormula()
+  stopifnot('design should be a formula' = is.language(design))
   if (design != ~1)
     optmult[c(1, 6)] <- TRUE
 
@@ -519,32 +520,29 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
 # save and print vertical line(s) at age of peak velocity
   if (apv) {
 # single curve
-      xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns),
-                     setNames(getPeak(.x, .y), c('apv', 'pv')))
+    xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns, design=design),
+                   setNames(getPeak(.x, .y), c('apv', 'pv')))
     print(signif(xy$apv, 4))
-    if (any(optmult[opts])) {
-# multiple curves
-      ids <- levels(factor(getGroups(model)[subset]))
-      if (body(xfun) == as.name('x') &&
-          body(yfun) == as.name('x')) {
-# x and y untransformed
-        apv1 <- xyadj(model, xy$apv[1], y=0, id=ids, tomean=FALSE)$x # subject-specific APVs
-        pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
-        xy$apv <- data.frame(apv=apv1, pv=pv1)
+# multiple smooth curves
+    i <- (optmult & optsmooth)[opts]
+    if (any(i)) {
+      i <- which(i)
+      # multiple dv groups
+      if (opts[i] == 1 | opts[i] == 6) {
+        level <- 0L
+        gp_var <- as.name('.groups')
+      # multiple id groups
+      } else {
+        level <- 1L
+        gp_var <- as.name('.id')
       }
-# xfun or yfun set
-      else {
-        xt <- xseq(getCovariate(model)[subset])
-        newdata <- data.frame(.x=xt)
-        if (!is.null(abc))
-          ids <- factor(1, labels=ids[[1]])
-        . <- vapply(ids, function(z) {
-          newdata$.id <- z
-          vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
-          getPeak(xfun(xt), vt)
-        }, numeric(2))
-        xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
-      }
+      xy$apv <- data[[i]] %>%
+          mutate(id = !!gp_var) %>%
+          nest_by(id, .key = 'gp_data') %>%
+          mutate(vel = list(predict(model, gp_data, level=level, deriv=1, abc=abc, xfun=xfun, yfun=yfun)),
+                 xy = list(with(gp_data, getPeak(xfun(.x), vel)) %>% t() %>% as_tibble())) %>%
+          unnest(xy) %>%
+          select(id, apv = x, pv = y)
     }
 # plot apv
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
