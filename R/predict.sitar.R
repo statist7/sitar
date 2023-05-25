@@ -59,6 +59,8 @@
 #' vel1 <- predict(m1, deriv=1, abc=c(b=1))
 #' mplot(age, vel1, id, heights, col=id, add=TRUE)
 #'
+#' @importFrom dplyr arrange mutate n
+#' @importFrom rlang .data
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,

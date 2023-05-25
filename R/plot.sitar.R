@@ -10,17 +10,29 @@
 #' To suppress the legend that comes with it set \code{legend = NULL}.
 #'
 #' The transformations \code{xfun} and \code{yfun} are applied to the x and y
-#' variables after inverting any transformations applied in the original SITAR
+#' variables after back-transforming any transformations in the original SITAR
 #' call. So for example if \code{y = log(height)} in the SITAR call, then \code{yfun}
 #' is applied to \code{height}. Thus the default \code{yfun = identity} has the effect of
-#' inverting the transformation. This is achieved by setting
+#' back-transforming the SITAR call transformation - this is achieved by setting
 #' \code{yfun = yfun(ifun(x$call.sitar$y))}.
-#' For no transformation set \code{yfun = NULL}.
+#' For no transformation set \code{yfun = NULL}. The same applies to \code{xfun}.
+#'
+#' For models that include fixed effect variables (e.g. \code{a.formula = ~sex + region})
+#' the options 'dv' plot mean curves for each distinct group. If any of the variables
+#' are continuous (as opposed to grouped) they need to
+#' take a constant value in the plot, otherwise the mean curves will not be
+#' smooth. \code{design} allows such variables to be excluded from the grouping,
+#' so they are set to their mean values in the plots. The resulting plots can
+#' be formatted with \code{par} in the usual way,
+#' where the factor \code{id} indexes all the distinct plots.
 #'
 #' The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
 #' \code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
 #' correspond to the seven plot \code{option}s defined by their last letter,
-#' and return the data for plotting as a \code{tibble}, e.g. for use with \code{ggplot2}.
+#' and return the data for plotting as a \code{tibble}, e.g. for use with
+#' \code{ggplot2}. Setting \code{returndata = TRUE} works similarly
+#' but handles multiple \code{option}s, returning a list of tibbles corresponding
+#' to each specified \code{option}.
 #'
 #' The \code{trim} option allows unsightly long line segments to be omitted
 #' from plots with options 'a' or 'u'. It ranks the line segments on the basis
@@ -64,9 +76,9 @@
 #' @param ns scalar defining the number of points for spline curves
 #' (default 101).
 #' @param design formula defining the variables to use to group data for multiple
-#' mean distance and/or velocity curves (opt = 'd'|'v'). By default includes
-#' all the variables in \code{a.formula}, \code{b.formula}, \code{c.formula} and
-#' \code{a.formula}.
+#' mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
+#' all the variables named in \code{a.formula}, \code{b.formula}, \code{c.formula}
+#' and \code{d.formula}.
 #' @param abc vector of named values of random effects a, b and c used to
 #' define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
 #' single character string defining an \code{id} level whose random effect
@@ -100,8 +112,9 @@
 #' either overall or (with options D or V, invisibly) for all subjects.}
 #' If \code{returndata} is TRUE (which it is with the helper functions) returns
 #' invisibly either a tibble or named list of tibbles,
-#' containing the data to be plotted. The helper functions each return a tibble.
-#' The variable names are '.x', '.y' and
+#' containing the data to be plotted. The helper functions each return a tibble
+#' where the first two variables are '.x', and '.y', with a third
+#' variable (for curves grouped by \code{design}) '.groups' or
 #' (for curves grouped by subject) '.id'. Note that '.x' and '.y' are returned
 #' after applying \code{xfun} and \code{yfun}. Hence if for example \code{x = log(age)}
 #' in the SITAR call then '.x' corresponds by default to \code{age}.
@@ -164,7 +177,7 @@
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter
+#' @importFrom dplyr mutate rename filter nest_by
 #' @importFrom tidyr expand_grid
 #' @importFrom rlang .data as_label
 #' @importFrom glue glue
@@ -526,7 +539,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
 # multiple smooth curves
     i <- (optmult & optsmooth)[opts]
     if (any(i)) {
-      i <- which(i)
+      i <- which(i)[1]
       # multiple dv groups
       if (opts[i] == 1 | opts[i] == 6) {
         level <- 0L
@@ -537,12 +550,13 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
         gp_var <- as.name('.id')
       }
       xy$apv <- data[[i]] %>%
-          mutate(id = !!gp_var) %>%
-          nest_by(id, .key = 'gp_data') %>%
-          mutate(vel = list(predict(model, gp_data, level=level, deriv=1, abc=abc, xfun=xfun, yfun=yfun)),
-                 xy = list(with(gp_data, getPeak(xfun(.x), vel)) %>% t() %>% as_tibble())) %>%
-          unnest(xy) %>%
-          select(id, apv = x, pv = y)
+        mutate(id = !!gp_var) %>%
+        nest_by(id) %>%
+        mutate(vel = list(predict(model, data, level=level, deriv=1, abc=abc, xfun=xfun, yfun=yfun)),
+               xy = list(with(data, getPeak(xfun(.x), vel)) %>% t() %>% as_tibble())) %>%
+        unnest(xy) %>%
+        ungroup() %>%
+        select(id, apv = x, pv = y)
     }
 # plot apv
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
