@@ -265,7 +265,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
       tibble(.x)
     }
     newdata <- newdata %>%
-      mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x)
+      mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
+             .x = xfun(.x))
     if (sum(subset) < length(subset))
       attr(newdata, 'subset') <- subset
     newdata
@@ -424,11 +425,20 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
   ARG <- if (!is.null(dots))
     lapply(as.list(dots), eval, data[subset, ], parent.frame())
 
+  # pt <- tibble(
+  #   options   = c('d', 'c', 'u', 'a', 'D', 'v', 'V'),
+  #   optnames  = c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity'),
+  #   optaxis   = c( 1,   1,   1,   1,   1,   2,   2 ), # default y1=1, y2=2
+  #   optmult   = c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ), # multiple curves
+  #   optsmooth = c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+  # )
+
   options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
   optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
   optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
   optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
   optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+
   opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
   if (length(opts) == 0)
     stop('option(s) not recognised')
