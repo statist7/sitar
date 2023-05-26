@@ -198,28 +198,20 @@
 # velocity curve on back-transformed axes
       if (any(level == 1L)) {
 # level 1 prediction
-#         if (identical(x, xfun(x)) && identical(x, yfun(x))) {
-# # x and y untransformed
-#             vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
-#             if (!is.null(abc$c))
-#               vel <- vel * exp(abc$c)
-#           } else {
-# x or y transformed
-          newdata$pred <- pred
-          vel <- by(newdata, id, function(z) {
-            with(z, {
-              xorig <- xfun(x)
-              if (length(xorig) >= 4) {
-                ss <- smooth.spline(xorig, pred, df=min(20, length(xorig)))
-                predict(ss, xorig, deriv=deriv)$y
-              } else
-                predict(ss0, xorig, deriv=deriv)$y
-            })
-          })
-          vel <- do.call('c', as.list(vel))
-          if ('n' %in% names(newdata))
-            vel <- vel[order(newdata$n)]
-        # }
+        x.id <- xyadj(object, x = x, y = 0, id = id)$x # shift x to mean curve equivalents
+        vel <- spline(vel0, method = 'natural', xout = xfun(x.id))$y # get velocity at those points
+        ret <- as.data.frame(re)
+        for (i in letters[3:4]) # ensure c and d in ranef
+          if (!i %in% names(ret))
+            ret[, i] <- 0
+        vel <- vel * exp(ret[id, 3]) + ret[id, 4] # adjust velocity with c and d
+        if (!identical(x, yfun(x))) {
+# y transformed
+          y <- object$call.sitar$y
+          ny <- all.vars(y)
+          assign(ny, pred)
+          vel <- vel / eval(D(y, ny))
+        }
         pred <- vel
       }
     }
