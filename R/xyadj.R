@@ -14,6 +14,7 @@
 #' @param x a vector of x coordinates. If missing, \code{x} and
 #' \code{y} and \code{id} are obtained from \code{object}.
 #' @param y a vector of y coordinates (default NULL).
+#' @param v a vector of velocity coordinates (default 0).
 #' @param id a factor denoting the subject levels corresponding to \code{x} and
 #' \code{y}.
 #' @param abc a data frame containing random effects for a, b, c and d (default
@@ -29,16 +30,16 @@
 #'
 #' data(heights)
 #' ## fit sitar model for height
-#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+#' m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
 #'
 #' ## plot unadjusted data as growth curves
 #' plot(m1, opt='u')
 #'
 #' ## overplot with adjusted data as points
-#' with(heights, points(xyadj(m1), col='red', pch=19))
+#' with(heights, points(xyadj(m1), col='red', pch = 19))
 #'
 #' @export
-xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
+xyadj <- function(object, x, y = NULL, v = 0, id, abc = NULL, tomean = TRUE) {
 #	returns x and y adjusted for random effects a, b and c
   if (missing(x))
     x <- getCovariate(object)
@@ -49,21 +50,24 @@ xyadj <- function(object, x, y=NULL, id, abc=NULL, tomean=TRUE) {
   # add missing columns
   if (is.null(abc)) {
     re <- ranef(object)
-    abc <- re[match(id, rownames(re)), , drop=FALSE]
+    abc <- re[match(id, rownames(re)), , drop = FALSE]
   }
   abc <- as.data.frame(abc)
   for (i in letters[1:4])
     if (!i %in% names(abc))
       abc[, i] <- 0
   xoffset <- object$xoffset
-  if (!is.na(b0 <- fixef(object)['b'])) xoffset <- xoffset + b0
+  if (!is.na(b0 <- fixef(object)['b']))
+    xoffset <- xoffset + b0
   x <- x - xoffset
   if (tomean) {
     x.adj <- (x - abc$b) * exp(abc$c) + xoffset
     y.adj <- y - abc$a - abc$d * x
+    v.adj <- (v - abc$d) / exp(abc$c)
   } else {
     x.adj <- x / exp(abc$c) + abc$b + xoffset
     y.adj <- y + abc$a + abc$d * x
+    v.adj <- v * exp(abc$c) + abc$d
   }
-  return(list(x=x.adj, y=y.adj))
+  return(list(x = x.adj, y = y.adj, v = v.adj))
 }

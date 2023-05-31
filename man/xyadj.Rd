@@ -4,7 +4,7 @@
 \alias{xyadj}
 \title{Adjust x and y variables for SITAR random effects}
 \usage{
-xyadj(object, x, y = NULL, id, abc = NULL, tomean = TRUE)
+xyadj(object, x, y = NULL, v = 0, id, abc = NULL, tomean = TRUE)
 }
 \arguments{
 \item{object}{a SITAR model.}
@@ -13,6 +13,8 @@ xyadj(object, x, y = NULL, id, abc = NULL, tomean = TRUE)
 \code{y} and \code{id} are obtained from \code{object}.}
 
 \item{y}{a vector of y coordinates (default NULL).}
+
+\item{v}{a vector of velocity coordinates (default 0).}
 
 \item{id}{a factor denoting the subject levels corresponding to \code{x} and
 \code{y}.}
@@ -45,13 +47,13 @@ set to zero.
 
 data(heights)
 ## fit sitar model for height
-m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
 
 ## plot unadjusted data as growth curves
 plot(m1, opt='u')
 
 ## overplot with adjusted data as points
-with(heights, points(xyadj(m1), col='red', pch=19))
+with(heights, points(xyadj(m1), col='red', pch = 19))
 
 }
 \author{
