@@ -256,7 +256,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     design_names <- all.vars(design)
     newdata <- if (length(design_names) > 0L) {
       design_labs <- lapply(design_names, as.name)
-      expand_grid(.x = .x, getData(model) %>%
+      expand_grid(.x = .x, getData(model)[subset, ] %>%
                     select(all_of(design_names)) %>%
                     unique()) %>%
         mutate(.groups = factor(paste(!!!design_labs, sep = '_')), .after = .x) %>%
@@ -264,11 +264,11 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     } else {
       tibble(.x)
     }
+    if (sum(subset) < length(subset))
+      attr(newdata, 'subset') <- subset
     newdata <- newdata %>%
       mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
              .x = xfun(.x))
-    if (sum(subset) < length(subset))
-      attr(newdata, 'subset') <- subset
     newdata
   }
 

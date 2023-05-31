@@ -59,12 +59,26 @@
 #' vel1 <- predict(m1, deriv=1, abc=c(b=1))
 #' mplot(age, vel1, id, heights, col=id, add=TRUE)
 #'
-#' @importFrom dplyr arrange mutate n
 #' @importFrom rlang .data
+#' @importFrom dplyr arrange mutate n nest_by pull
+#' @importFrom tidyr unnest
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,
                             xfun=identity, yfun=identity) {
+
+# derive x-y velocity curve
+    get_vel <- function(x, y, deriv = 1) {
+      smooth.spline(x, y) |>
+        predict(x, deriv = deriv)
+    }
+# apply differential of x or y to variable
+    Dxy <- function(object, var, which = c('x', 'y')) {
+      which <- match.arg(which)
+      call <- object$call.sitar[[which]]
+      name <- all.vars(call)
+      eval(D(call, name), setNames(as.data.frame(var), name))
+    }
     mc <- match.call()
 # match call for sitar
     oc <- object$call.sitar
@@ -163,55 +177,48 @@
           abc.t[, i] <- abc.t[, i] + abc[i]
       abc <- abc.t
     }
-# set class to nlme to use predict.nlme
-    class(object) <- class(object)[-1]
+# create nlme object
+    object.nlme <- structure(object, class = c('nlme', 'lme'))
 # DISTANCE
 # level 1 prediction
     if (is.null(abc))
-      pred <- yfun(predict(object, newdata))
+      pred <- predict(object.nlme, newdata)
     else {
-      xy.id <- xyadj(object, x=x, y=0, id=id, abc=abc)
+      xy.id <- xyadj(object, x = x, y = 0, id = id, abc = abc)
       newdata$x <- xy.id$x - xoffset
-      pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+      pred <- predict(object.nlme, newdata, level = 0L) - xy.id$y
     }
+    pred <- yfun(pred)
 # level 0 prediction
-    xy.id <- xyadj(object, x=x, y=0, id=id, abc=re.mean)
+    xy.id <- xyadj(object, x = x, y = 0, id = id, abc = re.mean)
     newdata$x <- xy.id$x - xoffset
-    pred0 <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+    pred0.raw <- predict(object.nlme, newdata, level=0L) - xy.id$y
+    pred0 <- yfun(pred0.raw)
     if (deriv > 0L) {
 # VELOCITY
-# check if grouped opt dv
-      if ('.groups' %in% names(newdata)) {
-        level <- 1L
-        newdata <- newdata %>%
-          mutate(id = .groups,
-                 pred = pred0,
-                 n = 1:n()) %>%
-          arrange(id)
-        id <- newdata$id
-        pred <- newdata$pred
-      }
 # level 0 prediction
-      ss0 <- smooth.spline(xfun(x), pred0)
-      vel0 <- predict(ss0, xfun(x), deriv=deriv)
-      pred0 <- vel0$y
-# velocity curve on back-transformed axes
+      if (!'.groups' %in% names(newdata)) {
+        pred0 <- get_vel(xfun(x), pred0, deriv)$y
+# or if grouped opt dv
+      } else {
+        pred0 <- newdata %>%
+          mutate(id = .groups,
+                 pred0 = pred0,
+                 n = 1:n()) %>%
+          nest_by(.groups) %>%
+          mutate(vel = list(with(data, get_vel(xfun(x), pred0, deriv)$y))) %>%
+          unnest(cols = c(data, vel)) %>%
+          arrange(n) %>%
+          pull(vel)
+      }
       if (any(level == 1L)) {
 # level 1 prediction
+# velocity curve on back-transformed axes
         x.id <- xyadj(object, x = x, y = 0, id = id)$x # shift x to mean curve equivalents
-        vel <- spline(vel0, method = 'natural', xout = xfun(x.id))$y # get velocity at those points
-        ret <- as.data.frame(re)
-        for (i in letters[3:4]) # ensure c and d in ranef
-          if (!i %in% names(ret))
-            ret[, i] <- 0
-        vel <- vel * exp(ret[id, 3]) + ret[id, 4] # adjust velocity with c and d
-        if (!identical(x, yfun(x))) {
-# y transformed
-          y <- object$call.sitar$y
-          ny <- all.vars(y)
-          assign(ny, pred)
-          vel <- vel / eval(D(y, ny))
-        }
+        vel0.raw <- get_vel(x, pred0.raw, deriv) # mean spline curve on transformed x-y scales
+        vel <- spline(vel0.raw, method = 'natural', xout = x.id)$y # fit mean velocity curve
+        vel <- xyadj(object, x = 0, y = 0, v = vel, id = id, tomean = FALSE)$v # shift and scale to individual velocities
+        vel <- vel / Dxy(object, pred, 'y') * Dxy(object, xfun(x), 'x') # adjust for y and x transformations
         pred <- vel
       }
     }
