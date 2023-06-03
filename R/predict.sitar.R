@@ -100,7 +100,7 @@
     covnames <- all.vars(asOneFormula(oc$a.formula, oc$b.formula, oc$c.formula, oc$d.formula))
     covnames <- covnames[covnames %in% names(newdata)]
 # if non-numeric add linear contrasts to newdata
-    factornames <- covnames[unlist(lapply(covnames, function(x) !is.numeric(newdata[, x])))]
+    factornames <- covnames[unlist(lapply(covnames, function(x) !is.numeric(with(newdata, get(x)))))]
     if (length(factornames) > 0L) {
       extra <- eval(parse(text = paste(c("~0", factornames), collapse = "+"))[[1]])
       extra <- as_tibble(model.matrix(extra, newdata))
@@ -202,12 +202,12 @@
 # or if grouped opt dv
       } else {
         pred0 <- newdata %>%
-          mutate(id = .groups,
+          mutate(id = .data$.groups,
                  pred0 = pred0,
                  n = 1:n()) %>%
-          nest_by(.groups) %>%
-          mutate(vel = list(with(data, get_vel(xfun(x), pred0, deriv)$y))) %>%
-          unnest(cols = c(data, vel)) %>%
+          nest_by(.data$.groups) %>%
+          mutate(vel = list(with(.data$data, get_vel(xfun(x), pred0, deriv)$y))) %>%
+          unnest(cols = c(.data$data, vel)) %>%
           arrange(n) %>%
           pull(vel)
       }

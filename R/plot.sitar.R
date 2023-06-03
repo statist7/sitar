@@ -77,8 +77,8 @@
 #' (default 101).
 #' @param design formula defining the variables to use to group data for multiple
 #' mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
-#' all the variables named in \code{a.formula}, \code{b.formula}, \code{c.formula}
-#' and \code{d.formula}.
+#' all the categorical variables named in \code{a.formula}, \code{b.formula},
+#' \code{c.formula} and \code{d.formula}.
 #' @param abc vector of named values of random effects a, b and c used to
 #' define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
 #' single character string defining an \code{id} level whose random effect
@@ -189,7 +189,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
                        xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
                        legend=list(x='topleft', inset=0.04, bty='o')) {
 
-  plotaxes <- function(dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
+  plotaxes <- function(data, dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
 #	dv = 1 for distance, 2 for velocity, 3 for distance and velocity
 #	returns par()$usr for d and v
   {
@@ -252,15 +252,15 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
     level <- ifelse(is.null(abc), 0, 1)
-    .x <- xseq(getCovariate(model), ns)
     design_names <- all.vars(design)
+    .x <- xseq(getCovariate(model), ns)
     newdata <- if (length(design_names) > 0L) {
-      design_labs <- lapply(design_names, as.name)
-      expand_grid(.x = .x, getData(model)[subset, ] %>%
-                    select(all_of(design_names)) %>%
-                    unique()) %>%
-        mutate(.groups = factor(paste(!!!design_labs, sep = '_')), .after = .x) %>%
-        as_tibble
+      getData(model)[subset, ] %>%
+        select(all_of(design_names)) %>%
+        select(!where(is.numeric)) %>%
+        unique() %>%
+        mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
+        expand_grid(.x, .)
     } else {
       tibble(.x)
     }
@@ -319,6 +319,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
   adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # adjusted individual curves
     data <- as_tibble(xyadj(model)) %>%
+      select(-.data$v) %>%
       mutate(.id=getGroups(model)) %>%
       rename(.x=.data$x,
              .y=.data$y) %>%
@@ -492,8 +493,8 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     if (any(is.na(vlim)) && any(optaxis[opts] == 2))
       vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
     xy <- do.call('plotaxes',
-                  c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
-                          xlim=xlim, ylim=ylim, vlim=vlim), ARG))
+                  c(list(data = data, dv = dv, xlab = xlab, ylab = ylab, vlab = vlab,
+                          xlim = xlim, ylim = ylim, vlim = vlim), ARG))
 # add legend
     if (dv == 3 && !is.null(legend)) {
       legend[['legend']] <- c(ylab, vlab)
@@ -561,12 +562,12 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
       }
       xy$apv <- data[[i]] %>%
         mutate(id = !!gp_var) %>%
-        nest_by(id) %>%
+        nest_by(.data$id) %>%
         mutate(vel = list(predict(model, data, level=level, deriv=1, abc=abc, xfun=xfun, yfun=yfun)),
                xy = list(with(data, getPeak(xfun(.x), vel)) %>% t() %>% as_tibble())) %>%
         unnest(xy) %>%
         ungroup() %>%
-        select(id, apv = x, pv = y)
+        select(.data$id, apv = x, pv = .data$y)
     }
 # plot apv
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))

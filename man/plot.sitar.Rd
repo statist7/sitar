@@ -97,8 +97,8 @@ original \code{sitar} call.}
 
 \item{design}{formula defining the variables to use to group data for multiple
 mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
-all the variables named in \code{a.formula}, \code{b.formula}, \code{c.formula}
-and \code{d.formula}.}
+all the categorical variables named in \code{a.formula}, \code{b.formula},
+\code{c.formula} and \code{d.formula}.}
 
 \item{abc}{vector of named values of random effects a, b and c used to
 define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
