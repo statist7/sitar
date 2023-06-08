@@ -216,6 +216,7 @@
 # velocity curve on back-transformed axes
         x.id <- xyadj(object, x = x, y = 0, id = id)$x # shift x to mean curve equivalents
         vel0.raw <- get_vel(x, pred0.raw, deriv) # mean spline curve on transformed x-y scales
+        vel0.raw <- vel0.raw %>% as_tibble() %>% unique() # unique x values
         vel <- spline(vel0.raw, method = 'natural', xout = x.id)$y # fit mean velocity curve
         vel <- xyadj(object, x = 0, y = 0, v = vel, id = id, tomean = FALSE)$v # shift and scale to individual velocities
         vel <- vel / Dxy(object, pred, 'y') * Dxy(object, xfun(x), 'x') # adjust for y and x transformations
