@@ -184,13 +184,13 @@
     if (is.null(abc))
       pred <- predict(object.nlme, newdata)
     else {
-      xy.id <- xyadj(object, x = x, y = 0, id = id, abc = abc)
+      xy.id <- xyadj(object, x = x, id = id, abc = abc)
       newdata$x <- xy.id$x - xoffset
       pred <- predict(object.nlme, newdata, level = 0L) - xy.id$y
     }
     pred <- yfun(pred)
 # level 0 prediction
-    xy.id <- xyadj(object, x = x, y = 0, id = id, abc = re.mean)
+    xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
     newdata$x <- xy.id$x - xoffset
     pred0.raw <- predict(object.nlme, newdata, level=0L) - xy.id$y
     pred0 <- yfun(pred0.raw)
@@ -214,13 +214,16 @@
       if (any(level == 1L)) {
 # level 1 prediction
 # velocity curve on back-transformed axes
-        x.id <- xyadj(object, x = x, y = 0, id = id)$x # shift x to mean curve equivalents
-        vel0.raw <- get_vel(x, pred0.raw, deriv) # mean spline curve on transformed x-y scales
-        vel0.raw <- vel0.raw %>% as_tibble() %>% unique() # unique x values
-        vel <- spline(vel0.raw, method = 'natural', xout = x.id)$y # fit mean velocity curve
-        vel <- xyadj(object, x = 0, y = 0, v = vel, id = id, tomean = FALSE)$v # shift and scale to individual velocities
-        vel <- vel / Dxy(object, pred, 'y') * Dxy(object, xfun(x), 'x') # adjust for y and x transformations
-        pred <- vel
+    # shift x to mean curve equivalents
+        x.id <- xyadj(object, x = x, id = id, abc = abc)$x
+    # unique mean spline curve on transformed x-y scales
+        pred <- get_vel(x, pred0.raw, deriv) %>% as_tibble() %>% unique() %>%
+    # fit mean velocity curve
+          spline(., method = 'natural', xout = x.id) %>% as_tibble() %>% pull(y) %>%
+    # shift and scale to individual velocities
+          xyadj(object, x = 0, v = ., id = id, abc = abc, tomean = FALSE) %>% as_tibble() %>%
+    # adjust for y and x transformations
+          mutate(v = v / Dxy(object, pred, 'y') * Dxy(object, xfun(x), 'x')) %>% pull(v)
       }
     }
 # return data frame if level 0:1
