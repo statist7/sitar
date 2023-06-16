@@ -54,7 +54,7 @@ apv_se <- function(object,
     eval(parse(text = ".x <<- .x"))
     obj <- try(update(object, data = .x, start = fixef(object)))
     if (any(class(obj) %in% 'sitar')) {
-      vel <- do.call('plot_v', c(list(x = obj), edots))
+      vel <- do.call('plot_v', c(list(x = obj), edots))[, 1:2]
       fun(vel)
     } else
       c(x = NA_real_, y = NA_real_)
@@ -73,7 +73,7 @@ apv_se <- function(object,
   apv <- map_dfr(df$model, ~ as_tibble(t(.x))) %>%
     drop_na
 
-  vel <- do.call('plot_v', c(list(x = object), edots))
+  vel <- do.call('plot_v', c(list(x = object), edots))[, 1:2]
   peak <- fun(vel)
   names(apv) <- names(vel) <- names(peak) <- c('apv', 'pv')
 
