@@ -254,21 +254,25 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     level <- ifelse(is.null(abc), 0, 1)
     design_names <- all.vars(design)
     .x <- xseq(getCovariate(model), ns)
-    newdata <- if (length(design_names) > 0L) {
-      getData(model)[subset, ] %>%
+    newdata <- tibble()
+    if (length(design_names) > 0L) {
+      newdata <- getData(model)[subset, ] %>%
         select(all_of(design_names)) %>%
         select(!where(is.numeric)) %>%
-        unique() %>%
-        mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
-        expand_grid(.x, .)
-    } else {
-      tibble(.x)
+        unique()
+      if (length(newdata) > 0)
+        newdata <- newdata %>%
+          mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
+          expand_grid(.x, .)
     }
+    if (length(newdata) == 0)
+      newdata <- tibble(.x)
     if (sum(subset) < length(subset))
       attr(newdata, 'subset') <- subset
     newdata <- newdata %>%
       mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
-             .x = xfun(.x))
+             .x = xfun(.x),
+             .id = 1L)
     newdata
   }
 
@@ -360,9 +364,10 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     x <- xseq(x, ns) - model$xoffset
     . <- tibble(
       .y=yfun(predict(model$ns, tibble(x))),
-      .x=xfun(x + model$xoffset)
+      .x=xfun(x + model$xoffset),
+      .id = 1
     )
-    .[, c('.x', '.y')]
+    .[, c('.x', '.y', '.id')]
   }
 
   dolegend <- function(ARG1, ARG2, legend) {
@@ -451,8 +456,6 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     design <- as.list(mcall)[grepl('.formula', names(mcall))] %>%
     asOneFormula()
   stopifnot('design should be a formula' = is.language(design))
-  if (design != ~1)
-    optmult[c(1, 6)] <- TRUE
 
 # create missing labels
   if (missing(labels))
@@ -492,6 +495,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
       ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
     if (any(is.na(vlim)) && any(optaxis[opts] == 2))
       vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
+
     xy <- do.call('plotaxes',
                   c(list(data = data, dv = dv, xlab = xlab, ylab = ylab, vlab = vlab,
                           xlim = xlim, ylim = ylim, vlim = vlim), ARG))
@@ -516,15 +520,16 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
   }
 
 # plot curves
-  lapply(1:length(opts), function(i) {
+  for (i in 1:length(opts)) {
     opt <- opts[[i]]
-    . <- data[[i]]
-    ARG0 <- ARG
-# data frame extended, extend ARG
-    if (optmult[opt] && nrow(.) != model$dims$N && !is.null(dots)) {
-      names(.) <- as.character(unlist(as.list(mcall[2:(length(.) + 1)])))
-      ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
+    if (!optmult[opt] && '.groups' %in% names(data[[i]])) {
+      optmult[opt] <- TRUE
+      data[[i]][['.id']] <- NULL
     }
+    names(data[[i]])[1:3] <- all.vars(mcall)[1:3]
+    ARG <- if (!is.null(dots))
+      lapply(as.list(dots), eval, data[[i]], parent.frame())
+    ARG0 <- ARG
 # select distance or velocity axis
     if (optaxis[opt] == 1 || dv < 3) {
       fun <- identity
@@ -536,38 +541,30 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
         ARG0[['lty']] <- 2
     }
     if (optmult[opt])
-      do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
+      do.call("mplot", c(list(x=data[[i]][[1]], y=fun(data[[i]][[2]]), id=data[[i]][[3]], add=TRUE), ARG0))
     else
-      xy <- do.call("lines", c(list(x=.[[1]], y=fun(.[[2]])), ARG0))
-  })
+      xy <- do.call("lines", c(list(x=data[[i]][[1]], y=fun(data[[i]][[2]])), ARG0))
+  }
 
 # save and print vertical line(s) at age of peak velocity
   if (apv) {
 # single curve
-    xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns, design=design),
+    xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns, design=~1),
                    setNames(getPeak(.x, .y), c('apv', 'pv')))
     print(signif(xy$apv, 4))
 # multiple smooth curves
     i <- (optmult & optsmooth)[opts]
     if (any(i)) {
       i <- which(i)[1]
-      # multiple dv groups
-      if (opts[i] == 1 | opts[i] == 6) {
-        level <- 0L
-        gp_var <- as.name('.groups')
-      # multiple id groups
-      } else {
-        level <- 1L
-        gp_var <- as.name('.id')
-      }
+      # multiple dv groups or id groups
+      level <- as.numeric(opts[i] != 1 && opts[i] != 6)
       xy$apv <- data[[i]] %>%
-        mutate(id = !!gp_var) %>%
-        nest_by(.data$id) %>%
+        nest_by(.[[3]]) %>%
         mutate(vel = list(predict(model, data, level=level, deriv=1, abc=abc, xfun=xfun, yfun=yfun)),
-               xy = list(with(data, getPeak(xfun(.x), vel)) %>% t() %>% as_tibble())) %>%
+               xy = list(with(data, getPeak(xfun(data[[1]]), vel)) %>% t() %>% as_tibble())) %>%
         unnest(xy) %>%
         ungroup() %>%
-        select(.data$id, apv = x, pv = .data$y)
+        select(id = 3, apv = x, pv = .data$y)
     }
 # plot apv
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
