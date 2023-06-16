@@ -1,22 +1,26 @@
 #' Adjust x and y variables for SITAR random effects
 #'
-#' \code{xyadj} Adjusts \code{x} and \code{y} values for subject-specific
+#' \code{xyadj} Adjusts \code{x} and \code{y} and optionally \code{v} values for subject-specific
 #' random effects from a SITAR model.
 #'
-#' When tomean = TRUE the x and y values are adjusted to \deqn{(x - xoffset -
-#' b<fixed> - b<random>) * exp(c<random>) + xoffset + b<fixed>} \deqn{y -
-#' a<random> - d<random> * x} When tomean = FALSE they are adjusted to \deqn{(x - xoffset -
-#' b<fixed>) / exp(c<random>) + xoffset + b<fixed> + b<random>} \deqn{y +
-#' a<random> + d<random> * x} In each case missing values of the fixed or random effects are
+#' When \code{tomean = TRUE} the x and y and v values are adjusted to
+#' \deqn{(x - xoffset - b<fixed> - b<random>) * exp(c<random>) + xoffset + b<fixed>}
+#' \deqn{y - a<random> - d<random> * x}
+#' \deqn{(v - d<random>) / exp(c<random>)}
+#' When \code{tomean = FALSE} they are adjusted to
+#' \deqn{(x - xoffset - b<fixed>) / exp(c<random>) + xoffset + b<fixed> + b<random>}
+#' \deqn{y + a<random> + d<random> * x}
+#' \deqn{v * exp(c<random>) + d<random>}
+#' In each case missing values of the fixed or random effects are
 #' set to zero.
 #'
 #' @param object a SITAR model.
 #' @param x a vector of x coordinates. If missing, \code{x} and
 #' \code{y} and \code{id} are obtained from \code{object}.
-#' @param y a vector of y coordinates (default NULL).
+#' @param y a vector of y coordinates (default 0).
 #' @param v a vector of velocity coordinates (default 0).
 #' @param id a factor denoting the subject levels corresponding to \code{x} and
-#' \code{y}.
+#' \code{y} and \code{v}.
 #' @param abc a data frame containing random effects for a, b, c and d (default
 #' \code{ranef(object)[id, ]}).
 #' @param tomean a logical defining the direction of adjustment. TRUE (default)
@@ -25,6 +29,7 @@
 #' translated and rotated to match individual curves.
 #' @return The list of adjusted values: \item{x}{numeric vector.}
 #' \item{y}{numeric vector the same length as x, or NULL.}
+#' \item{v}{numeric vector the same length as x, or NULL.}
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @examples
 #'
@@ -39,14 +44,13 @@
 #' with(heights, points(xyadj(m1), col='red', pch = 19))
 #'
 #' @export
-xyadj <- function(object, x, y = NULL, v = 0, id, abc = NULL, tomean = TRUE) {
+xyadj <- function(object, x, y = 0, v = 0, id, abc = NULL, tomean = TRUE) {
 #	returns x and y adjusted for random effects a, b and c
-  if (missing(x))
+  if (missing(x)) {
     x <- getCovariate(object)
-  if (missing(y))
-      y <- getResponse(object)
-  if (missing(id))
+    y <- getResponse(object)
     id <- getGroups(object)
+  }
   # add missing columns
   if (is.null(abc)) {
     re <- ranef(object)
