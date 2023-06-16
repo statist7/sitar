@@ -207,9 +207,9 @@
                  n = 1:n()) %>%
           nest_by(.data$.groups) %>%
           mutate(vel = list(with(.data$data, get_vel(xfun(x), pred0, deriv)$y))) %>%
-          unnest(cols = c(.data$data, vel)) %>%
+          unnest(cols = c(.data$data, .data$vel)) %>%
           arrange(n) %>%
-          pull(vel)
+          pull(.data$vel)
       }
       if (any(level == 1L)) {
 # level 1 prediction
@@ -219,11 +219,11 @@
     # unique mean spline curve on transformed x-y scales
         pred <- get_vel(x, pred0.raw, deriv) %>% as_tibble() %>% unique() %>%
     # fit mean velocity curve
-          spline(., method = 'natural', xout = x.id) %>% as_tibble() %>% pull(y) %>%
+          spline(., method = 'natural', xout = x.id) %>% as_tibble() %>% pull(.data$y) %>%
     # shift and scale to individual velocities
           xyadj(object, x = 0, v = ., id = id, abc = abc, tomean = FALSE) %>% as_tibble() %>%
     # adjust for y and x transformations
-          mutate(v = v / Dxy(object, pred, 'y') * Dxy(object, xfun(x), 'x')) %>% pull(v)
+          mutate(v = .data$v / Dxy(object, pred, 'y') * Dxy(object, xfun(!!x), 'x')) %>% pull(.data$v)
       }
     }
 # return data frame if level 0:1
