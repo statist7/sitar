@@ -202,8 +202,8 @@
 # or if grouped opt dv
       } else {
         pred0 <- newdata %>%
-          mutate(id = .data$.groups,
-                 pred0 = pred0,
+          mutate(x = !!x,
+                 pred0 = !!pred0,
                  n = 1:n()) %>%
           nest_by(.data$.groups) %>%
           mutate(vel = list(with(.data$data, get_vel(xfun(x), pred0, deriv)$y))) %>%
