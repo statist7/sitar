@@ -183,7 +183,7 @@
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter nest_by
+#' @importFrom dplyr mutate rename filter nest_by slice
 #' @importFrom tidyr expand_grid
 #' @importFrom rlang .data as_label %||%
 #' @importFrom glue glue
@@ -451,54 +451,66 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
   xfun <- getfun(xfun, mcall$x)
   yfun <- getfun(yfun, mcall$y)
 
-  options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
-  optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
-  optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
-  optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
-  optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+  pt <- tibble(
+    options   = c('d', 'c', 'u', 'a', 'D', 'v', 'V'),
+    optnames  = c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity'),
+    optdv   = c( 1,   1,   1,   1,   1,   2,   2 ), # distance or velocity
+    optmult   = c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ), # multiple curves
+    optsmooth = c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+  )
 
-  opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
-  if (length(opts) == 0)
-    stop('option(s) not recognised')
-  dv <- optaxis[opts] %>% range %>% unique %>% sum # 1 = d, 2 = v, 3 = dv
+  pt <- pt %>%
+    slice(opt %>% strsplit('') %>% unlist %>% match(options) %>% unique)
+  stopifnot('no options recognised' = nrow(pt) > 0L)
+  dv <- pt %>% pull(.data$optdv) %>% range %>% unique %>% sum # 1 = d, 2 = v, 3 = dv
 
-# generate list of data frames for selected options
-  data <- lapply(opts, function(i) {
-    if (optsmooth[[i]])
-      do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=design))
-    else
-      do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, trim=trim))
-  })
+  # names of x y id vars
+  xyid <- setNames(1:3, map_chr(mcall[2:4], all.vars))
+  nid <- as.name(names(xyid)[3])
 
-# return data?
+  # generate tibble of data frames for selected options
+  pt <- pt %>%
+    rowwise %>%
+    mutate(optdv = if_else(.data$optdv == 2 & dv == 3, 3, .data$optdv), # velocity on y2 axis
+           data = ifelse(.data$optsmooth,
+                         list(do.call(.data$optnames, list(model=model, subset=subset, xfun=xfun, yfun=yfun,
+                                                     abc=abc, ns=ns, design=design))),
+                         list(do.call(.data$optnames, list(model=model, subset=subset, xfun=xfun, yfun=yfun,
+                                                     trim = trim)))),
+           xlim = list(range(data$.x, na.rm = TRUE)),
+           ylim = list(range(data$.y, na.rm = TRUE)),
+           groups = '.groups' %in% names(data),
+           data = if_else(.data$groups, list(data %>% select(-3)), list(data)),
+           optmult = if_else(.data$groups, TRUE, .data$optmult),
+           data = list(data %>% rename(all_of(xyid))))
+
+  # return data?
   if (returndata){
+    data <- structure(pt %>% pull(data), names = pt %>% pull(options))
     if (length(data) == 1)
       data <- data[[1]]
-    else
-      names(data) <- options[opts]
     return(invisible(data))
   }
 
-# extract axis ranges and plot axes
+  # extract axis ranges and plot axes
   if (!add) {
     if (any(is.na(xlim)))
-      xlim <- range(vapply(data, function(z) range(z$.x, na.rm=TRUE), numeric(2)))
-    if (any(is.na(ylim)) && any(optaxis[opts] == 1))
-      ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
-    if (any(is.na(vlim)) && any(optaxis[opts] == 2))
-      vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
+      xlim <- pt %>% pull(xlim) %>% unlist %>% range(., na.rm = TRUE)
+    if (any(is.na(ylim)) && any(pt %>% pull(.data$optdv) == 1))
+      ylim <- pt %>% filter(.data$optdv == 1) %>% pull(ylim) %>% unlist %>% range(., na.rm = TRUE)
+    if (any(is.na(vlim)) && any(pt %>% pull(.data$optdv) > 1))
+      vlim <- pt %>% filter(.data$optdv > 1) %>% pull(ylim) %>% unlist %>% range(., na.rm = TRUE)
 
     xy <- do.call('plotaxes',
-                  c(list(data = data, dv = dv, xlab = xlab, ylab = ylab, vlab = vlab,
-                          xlim = xlim, ylim = ylim, vlim = vlim), ARG))
-# add legend
+                  c(list(data = pt %>% pull(data), dv = dv, xlab = xlab, ylab = ylab, vlab = vlab,
+                         xlim = xlim, ylim = ylim, vlim = vlim), ARG))
+    # add legend
     if (dv == 3 && !is.null(legend)) {
       legend[['legend']] <- c(ylab, vlab)
       dolegend(ARG[names(ARG) != 'y2par'], ARG$y2par, legend)
     }
-  }
-# else retrieve axis ranges
-  else {
+    # else retrieve axis ranges
+  } else {
     xy <- list()
     xy$usr <- par('usr')
     xlim <- xaxsd()
@@ -508,61 +520,53 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
       vlim <- yaxsd(.par.usr2[3:4])
       xy$usr2 <- .par.usr2
     } else if (dv == 3)
-        stop('right y axis not set up')
+      stop('right y axis not set up')
   }
 
-# plot curves
-  for (i in 1:length(opts)) {
-    opt <- opts[[i]]
-    if (!optmult[opt] && '.groups' %in% names(data[[i]])) {
-      optmult[opt] <- TRUE
-      data[[i]][['.id']] <- NULL
-    }
-    names(data[[i]])[1:3] <- all.vars(mcall)[1:3]
-    ARG <- if (!is.null(dots))
-      lapply(as.list(dots), eval, data[[i]], parent.frame())
-    ARG0 <- ARG
-# select distance or velocity axis
-    if (optaxis[opt] == 1 || dv < 3) {
-      fun <- identity
-      ARG0 <- ARG0[names(ARG0) != 'y2par']
-    } else {
-      fun <- v2d(ylim, vlim)
-      ARG0 <- ARG0[['y2par']]
-      ARG0[['lty']] <- ARG0[['lty']] %||% 2
-    }
-    if (optmult[opt])
-      do.call("mplot", c(list(x=data[[i]][[1]], y=fun(data[[i]][[2]]), id=data[[i]][[3]], add=TRUE), ARG0))
-    else
-      xy <- do.call("lines", c(list(x=data[[i]][[1]], y=fun(data[[i]][[2]])), ARG0))
-  }
+  # plot curves
+  dots1 <- dots[names(dots) != 'y2par']
+  dots2 <- dots[['y2par']]
+  dots2 <- as.list(dots2)[-1]
+  dots2[['lty']] <- dots2[['lty']] %||% 2
+  pt <- pt %>%
+    rowwise %>%
+    mutate(ARG1 = list(lapply(as.list(dots1), eval, data)),
+           ARG2 = list(lapply(as.list(dots2), eval, data)),
+           ARG = ifelse(.data$optdv == 3, list(.data$ARG2), list(.data$ARG1)),
+           fun = list(ifelse(.data$optdv == 3, v2d(!!ylim, !!vlim), identity)),
+           plot = ifelse(.data$optmult,
+                         list(do.call("mplot", c(list(x = data[[1]], y = .data$fun(data[[2]]), id = data[[3]], add = TRUE), ARG))),
+                         list(do.call("lines", c(list(x = data[[1]], y = .data$fun(data[[2]])), ARG)))))
 
-# save and print vertical line(s) at age of peak velocity
+  # save and print vertical line(s) at age of peak velocity
   if (apv) {
-# single curve
+    # single curve
     xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=~1),
                    setNames(getPeak(.x, .y), c('apv', 'pv')))
     print(signif(xy$apv, 4))
-# multiple smooth curves
-    i <- (optmult & optsmooth)[opts]
-    if (any(i)) {
-      i <- which(i)[1]
-      # multiple dv groups or id groups
-      level <- as.numeric(opts[i] != 1 && opts[i] != 6)
-      xy$apv <- data[[i]] %>%
-        nest_by(.[[3]]) %>%
-        mutate(vel = list(predict(model, data, level=level, deriv=1, abc=abc, xfun=xfun, yfun=yfun)),
-               xy = list(with(data, getPeak(xfun(data[[1]]), vel)) %>% t() %>% as_tibble())) %>%
+    # multiple smooth curves or abc
+    pt <- pt %>%
+      ungroup %>%
+      filter(.data$optmult & .data$optsmooth) %>%
+      select(-starts_with('opt')) %>%
+      slice(1)
+    # multiple dv groups or id groups
+    level <- pt %>% pull(.data$groups) %>% `!` %>% as.numeric
+    if (nrow(pt) > 0)
+      xy$apv <- pt$data[[1]] %>%
+        nest_by({{nid}}, .keep = TRUE) %>%
+        mutate(vel = list(predict(model, data, level = level, deriv = 1, abc=abc, xfun = xfun, yfun = yfun)),
+               xy = list(getPeak(xfun(data[[1]]), .data$vel) %>% t %>% as_tibble)) %>%
+        select(-c(.data$data:.data$vel)) %>%
         unnest(xy) %>%
-        ungroup() %>%
-        select(id = 3, apv = x, pv = .data$y)
-    }
-# plot apv
+        ungroup %>%
+        select({{nid}}, apv = x, pv = .data$y)
+
+    # plot apv
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
   }
-# return xy
+  # return xy
   invisible(xy)
-
 }
 #############################
 #
