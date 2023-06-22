@@ -10,17 +10,29 @@
 #' To suppress the legend that comes with it set \code{legend = NULL}.
 #'
 #' The transformations \code{xfun} and \code{yfun} are applied to the x and y
-#' variables after inverting any transformations applied in the original SITAR
+#' variables after back-transforming any transformations in the original SITAR
 #' call. So for example if \code{y = log(height)} in the SITAR call, then \code{yfun}
 #' is applied to \code{height}. Thus the default \code{yfun = identity} has the effect of
-#' inverting the transformation. This is achieved by setting
+#' back-transforming the SITAR call transformation - this is achieved by setting
 #' \code{yfun = yfun(ifun(x$call.sitar$y))}.
-#' For no transformation set \code{yfun = NULL}.
+#' For no transformation set \code{yfun = NULL}. The same applies to \code{xfun}.
+#'
+#' For models that include categorical fixed effects (e.g. \code{a.formula = ~sex + region})
+#' the options 'dv' plot mean curves for each distinct group. Any continuous (as opposed
+#' to grouped) fixed effect variables are set to their mean values in the plots, to ensure that the mean curves are
+#' smooth. Setting \code{design} allows the grouping variables to be selected, e.g. \code{design = ~sex},
+#' and \code{design = ~1} gives a single mean curve. The resulting plots can
+#' be formatted with \code{par} in the usual way, indexed either by the individual grouping
+#' variables (e.g. \code{sex} or \code{region} in the example) or the subject
+#' factor \code{id} which indexes all the distinct plots.
 #'
 #' The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
 #' \code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
 #' correspond to the seven plot \code{option}s defined by their last letter,
-#' and return the data for plotting as a \code{tibble}, e.g. for use with \code{ggplot2}.
+#' and return the data for plotting as a \code{tibble}, e.g. for use with
+#' \code{ggplot2}. Setting \code{returndata = TRUE} works similarly
+#' but handles multiple \code{option}s, returning a list of tibbles corresponding
+#' to each specified \code{option}.
 #'
 #' The \code{trim} option allows unsightly long line segments to be omitted
 #' from plots with options 'a' or 'u'. It ranks the line segments on the basis
@@ -50,10 +62,11 @@
 #' @param apv optional logical specifying whether or not to calculate the age
 #' at peak velocity from the velocity curve. If TRUE, age at peak velocity is
 #' calculated as the age when the second derivative of the fitted curve changes
-#' sign (after applying \code{xfun} and/or \code{yfun}). Age at peak velocity
+#' from positive to negative (after applying \code{xfun} and/or \code{yfun}). Age at peak velocity
 #' is marked in the plot with a vertical dotted line, and its value, along with
 #' peak velocity, is printed and returned. NB their standard errors can be
-#' obtained using the bootstrap with the function \code{apv_se}.
+#' obtained using the bootstrap with the function \code{apv_se}. Values of \code{apv}
+#' for individual subjects or groups are also returned invisibly.
 #' @param xfun optional function to be applied to the x variable prior to
 #' plotting (default identity, see Details).
 #' @param yfun optional function to be applied to the y variable prior to
@@ -63,11 +76,15 @@
 #' original \code{sitar} call.
 #' @param ns scalar defining the number of points for spline curves
 #' (default 101).
-#' @param abc vector of named values of random effects a, b and c used to
-#' define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
+#' @param design formula defining the variables to use to group data for multiple
+#' mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
+#' all the categorical variables named in \code{a.formula}, \code{b.formula},
+#' \code{c.formula} and \code{d.formula}.
+#' @param abc vector of named values of random effects a, b, c and d used to
+#' define an individual growth curve, e.g. abc = c(a = 1, c = -0.1). Alternatively a
 #' single character string defining an \code{id} level whose random effect
 #' values are used. If \code{abc} is set, \code{level} is ignored. If
-#' \code{abc} is NULL (default), or if a, b or c values are missing, values of
+#' \code{abc} is NULL (default), or if a, b, c or d values are missing, values of
 #' zero are assumed.
 #' @param trim number (default 0) of long line segments to be excluded from plot
 #' with option 'u' or 'a'. See Details.
@@ -96,9 +113,10 @@
 #' either overall or (with options D or V, invisibly) for all subjects.}
 #' If \code{returndata} is TRUE (which it is with the helper functions) returns
 #' invisibly either a tibble or named list of tibbles,
-#' containing the data to be plotted. The helper functions each return a tibble.
-#' The variable names are '.x', '.y' and
-#' (for curves grouped by subject) '.id'. Note that '.x' and '.y' are returned
+#' containing the data to be plotted. The helper functions each return a tibble
+#' where the first three variables are '.x', '.y' and '.id', plus
+#' variable '.groups' for curves grouped by \code{design}) and other covariates in the model.
+#' Note that '.x' and '.y' are returned
 #' after applying \code{xfun} and \code{yfun}. Hence if for example \code{x = log(age)}
 #' in the SITAR call then '.x' corresponds by default to \code{age}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
@@ -108,27 +126,27 @@
 #' @examples
 #'
 #' ## fit sitar model
-#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=4)
+#' m1 <- sitar(x = age, y = height, id = id, data = heights, df = 4)
 #'
 #' ## draw fitted distance and velocity curves
 #' ## with velocity curve in blue
 #' ## adding age at peak velocity (apv)
-#' plot(m1, y2par=list(col='blue'), apv=TRUE)
+#' plot(m1, y2par = list(col = 'blue'), apv = TRUE)
 #'
 #' ## bootstrap standard errors for apv and pv
 #' \dontrun{
-#' res <- apv_se(m1, nboot=20, plot=TRUE)
+#' res <- apv_se(m1, nboot = 20, plot = TRUE)
 #' }
 
 #' ## draw individually coloured growth curves adjusted for random effects
 #' ## using same x-axis limits as for previous plot
-#' plot(m1, opt='a', col=id, xlim=xaxsd())
+#' plot(m1, opt = 'a', col = id, xlim = xaxsd())
 #'
 #' ## add mean curve in red
-#' lines(m1, opt='d', col='red', lwd=2)
+#' lines(m1, opt = 'd', col = 'red', lwd = 2)
 #'
 #' ## add mean curve for a, b, c = -1 SD
-#' lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
+#' lines(m1, opt = 'd', lwd = 2, abc = -sqrt(diag(getVarCov(m1))))
 #'
 #' ## use subset to plot mean curves by group
 #' ## compare curves for early versus late menarche
@@ -137,41 +155,47 @@
 #'     late <- factor(men > median(men))
 #'   })
 #' # fit model where size and timing differ by early vs late menarche
-#' object <- sitar(log(age), height, id, heights, 5,
+#' m2 <- sitar(log(age), height, id, heights, 5,
 #'   a.formula = ~late, b.formula = ~late)
 #' ## early group
-#' plot(object, subset = late == FALSE, col = 4, lwd = 3,
+#' plot(m2, subset = late == FALSE, col = 4, lwd = 3,
 #'   y2par = list(col = 4, lwd = 2), ylim = range(heights$height))
 #' ## late group
-#' lines(object, subset = late == TRUE, col = 2, lwd = 3,
+#' lines(m2, subset = late == TRUE, col = 2, lwd = 3,
 #'   y2par = list(col = 2, lwd = 2))
 #' ## add legend
 #' legend('right', paste(c('early', 'late'), 'menarche'),
 #'   lty = 1, col = c(4, 2), inset = 0.04)
 #'
+#' ## alternatively plot both groups together
+#' plot(m2, lwd = 3, col = late, y2par = list(lwd = 3, col = late))
+#' legend('right', paste(c('early', 'late'), 'menarche'),
+#'   lwd = 3, col = 1:2, inset = 0.04)
+
 #' ## draw fitted height distance curves coloured by subject, using ggplot
 #' \dontrun{
 #' require(ggplot2)
-#' ggplot(plot_D(m1), aes(.x, .y, colour=.id)) +
-#' labs(x='age', y='height') +
-#' geom_line(show.legend=FALSE)
+#' ggplot(plot_D(m1), aes(.x, .y, colour = .id)) +
+#' labs(x = 'age', y = 'height') +
+#' geom_line(show.legend = FALSE)
 #' }
 
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter
-#' @importFrom rlang .data as_label
+#' @importFrom dplyr mutate rename filter nest_by slice
+#' @importFrom tidyr expand_grid
+#' @importFrom rlang .data as_label %||%
 #' @importFrom glue glue
 #' @export
-plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=identity, subset=NULL,
-                       ns=101, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
+plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=identity, subset=NULL,
+                       ns=101, design=NULL, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
                        returndata=FALSE, ...,
                        xlab=NULL, ylab=NULL, vlab=NULL,
                        xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
                        legend=list(x='topleft', inset=0.04, bty='o')) {
 
-  plotaxes <- function(dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
+  plotaxes <- function(data, dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
 #	dv = 1 for distance, 2 for velocity, 3 for distance and velocity
 #	returns par()$usr for d and v
   {
@@ -228,22 +252,38 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     seq(rx[1], rx[2], length.out=n)
   }
 
-  distance <- velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
+  distance <- velocity <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
+                                   design=design) {
 # generate x values across the range to plot mean spline curve
     dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'velocity')
+    level <- as.numeric(!is.null(abc))
+    design_names <- all.vars(design)
     .x <- xseq(getCovariate(model), ns)
-    newdata <- tibble(.x)
-    if (sum(subset) < length(subset)) attr(newdata, 'subset') <- subset
-    level <- ifelse(is.null(abc), 0, 1)
-    . <- tibble(
-      .x=xfun(.x),
-      .y=predict(model, newdata, level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun)
-    )
-    .
+    newdata <- tibble()
+    if (length(design_names) > 0L) {
+      newdata <- getData(model)[subset, ] %>%
+        select(all_of(design_names)) %>%
+        select(!where(is.numeric)) %>%
+        unique()
+      if (length(newdata) > 0)
+        newdata <- newdata %>%
+          mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
+          expand_grid(.x, .)
+    }
+    if (length(newdata) == 0)
+      newdata <- tibble(.x)
+    if (sum(subset) < length(subset))
+      attr(newdata, 'subset') <- subset
+    newdata <- newdata %>%
+      mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
+             .x = xfun(.x),
+             .id = getGroups(model)[1])
+    newdata
   }
 
-  Distance <- Velocity <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
+  Distance <- Velocity <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
+                                   design=design) {
 # generate x and id values across the range to plot spline curves
     dvt <- as_label(match.call()[[1]])
     dvt <- as.numeric(dvt == 'Velocity')
@@ -289,6 +329,7 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
   adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # adjusted individual curves
     data <- as_tibble(xyadj(model)) %>%
+      select(-.data$v) %>%
       mutate(.id=getGroups(model)) %>%
       rename(.x=.data$x,
              .y=.data$y) %>%
@@ -322,22 +363,23 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
     with(data, data[order(.id, .x), ]) # sort data
   }
 
-  crosssectional <- function(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns) {
+  crosssectional <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
+                             design=design) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
     x <- xseq(x, ns) - model$xoffset
     . <- tibble(
-      .y=yfun(predict(model$ns, tibble(x))),
-      .x=xfun(x + model$xoffset)
+      .y = yfun(predict(model$ns, tibble(x))),
+      .x = xfun(x + model$xoffset),
+      .id = getGroups(model)[1]
     )
-    .[, c('.x', '.y')]
+    .[, c('.x', '.y', '.id')]
   }
 
   dolegend <- function(ARG1, ARG2, legend) {
 # add legend
     parlu <- function(...) par(do.call('par', list(...)))
-    if (is.null(ARG2$lty))
-      ARG2$lty <- 2
+    ARG2$lty <- ARG2$lty %||% 2
     llc <- sapply(c('lty', 'lwd', 'col'), function(i) {
       p12 <- rep(par()[[i]], 2)
       for (j in 1:2) {
@@ -386,74 +428,89 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
 #	extract list(...)
   ccall <- match.call(expand.dots=FALSE)
 #	subset to plot model
-  subset <- eval(ccall$subset, data, parent.frame())
-  if (is.null(subset))
-    subset <- rep_len(TRUE, model$dims$N)
+  subset <- eval(ccall$subset, data, parent.frame()) %||% rep_len(TRUE, model$dims$N)
 # ... args
   dots <- ccall$...
   ARG <- if (!is.null(dots))
     lapply(as.list(dots), eval, data[subset, ], parent.frame())
 
-  options   <- c('d', 'c', 'u', 'a', 'D', 'v', 'V')
-  optnames  <- c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity')
-  optaxis   <- c( 1,   1,   1,   1,   1,   2,   2 ) # default y1=1, y2=2
-  optmult   <- c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ) # multiple curves
-  optsmooth <- c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
-  opts <- unique(na.omit(match(unlist(strsplit(opt, '')), options)))
-  if (length(opts) == 0)
-    stop('option(s) not recognised')
-  dv <- range(optaxis[opts])
-  dv <- min(dv) + diff(dv) * 2 # 1=d, 2=v, 3=dv
+  # derive design
+  design <- design %||% as.list(mcall)[grepl('.formula', names(mcall))] %>%
+    asOneFormula()
+  stopifnot('design should be a formula' = is.language(design))
 
-# create missing labels
-  if (missing(labels))
-    labels <- vector('character', 3)
+  # create labels
+  labels <- labels %||% vector('character', 3)
 
-#	get axis labels
+  #	get axis labels
   xlab <- getlab(xlab, labels[1], mcall$x, paste(deparse(substitute(xfun)), collapse=''))
   ylab <- getlab(ylab, labels[2], mcall$y, paste(deparse(substitute(yfun)), collapse=''))
   vlab <- getlab(vlab, labels[3], ylab, 'velocity')
 
-# get xfun and yfun
+  # get xfun and yfun
   xfun <- getfun(xfun, mcall$x)
   yfun <- getfun(yfun, mcall$y)
 
-# generate list of data frames for selected options
-  data <- lapply(opts, function(i) {
-    if (optsmooth[[i]])
-      do.call(optnames[[i]], list(model=model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns))
-    else
-      do.call(optnames[[i]], list(model=model, subset=subset, xfun=xfun, yfun=yfun, trim=trim))
-  })
+  pt <- tibble(
+    options   = c('d', 'c', 'u', 'a', 'D', 'v', 'V'),
+    optnames  = c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity'),
+    optdv   = c( 1,   1,   1,   1,   1,   2,   2 ), # distance or velocity
+    optmult   = c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ), # multiple curves
+    optsmooth = c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+  )
 
-# return data?
+  pt <- pt %>%
+    slice(opt %>% strsplit('') %>% unlist %>% match(options) %>% unique)
+  stopifnot('no options recognised' = nrow(pt) > 0L)
+  dv <- pt %>% pull(.data$optdv) %>% range %>% unique %>% sum # 1 = d, 2 = v, 3 = dv
+
+  # names of x y id vars
+  xyid <- setNames(1:3, map_chr(mcall[2:4], all.vars))
+  nid <- as.name(names(xyid)[3])
+
+  # generate tibble of data frames for selected options
+  pt <- pt %>%
+    rowwise %>%
+    mutate(optdv = if_else(.data$optdv == 2 & dv == 3, 3, .data$optdv), # velocity on y2 axis
+           data = ifelse(.data$optsmooth,
+                         list(do.call(.data$optnames, list(model=model, subset=subset, xfun=xfun, yfun=yfun,
+                                                     abc=abc, ns=ns, design=design))),
+                         list(do.call(.data$optnames, list(model=model, subset=subset, xfun=xfun, yfun=yfun,
+                                                     trim = trim)))),
+           xlim = list(range(data$.x, na.rm = TRUE)),
+           ylim = list(range(data$.y, na.rm = TRUE)),
+           groups = '.groups' %in% names(data),
+           data = if_else(.data$groups, list(data %>% select(-3)), list(data)),
+           optmult = if_else(.data$groups, TRUE, .data$optmult),
+           data = list(data %>% rename(all_of(xyid))))
+
+  # return data?
   if (returndata){
+    data <- structure(pt %>% pull(data), names = pt %>% pull(options))
     if (length(data) == 1)
       data <- data[[1]]
-    else
-      names(data) <- options[opts]
     return(invisible(data))
   }
 
-# extract axis ranges and plot axes
+  # extract axis ranges and plot axes
   if (!add) {
     if (any(is.na(xlim)))
-      xlim <- range(vapply(data, function(z) range(z$.x, na.rm=TRUE), numeric(2)))
-    if (any(is.na(ylim)) && any(optaxis[opts] == 1))
-      ylim <- range(vapply(data[optaxis[opts] == 1], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
-    if (any(is.na(vlim)) && any(optaxis[opts] == 2))
-      vlim <- range(vapply(data[optaxis[opts] == 2], function(z) range(z$.y, na.rm=TRUE), numeric(2)))
+      xlim <- pt %>% pull(xlim) %>% unlist %>% range(., na.rm = TRUE)
+    if (any(is.na(ylim)) && any(pt %>% pull(.data$optdv) == 1))
+      ylim <- pt %>% filter(.data$optdv == 1) %>% pull(ylim) %>% unlist %>% range(., na.rm = TRUE)
+    if (any(is.na(vlim)) && any(pt %>% pull(.data$optdv) > 1))
+      vlim <- pt %>% filter(.data$optdv > 1) %>% pull(ylim) %>% unlist %>% range(., na.rm = TRUE)
+
     xy <- do.call('plotaxes',
-                  c(list(dv=dv, xlab=xlab, ylab=ylab, vlab=vlab,
-                          xlim=xlim, ylim=ylim, vlim=vlim), ARG))
-# add legend
+                  c(list(data = pt %>% pull(data), dv = dv, xlab = xlab, ylab = ylab, vlab = vlab,
+                         xlim = xlim, ylim = ylim, vlim = vlim), ARG))
+    # add legend
     if (dv == 3 && !is.null(legend)) {
       legend[['legend']] <- c(ylab, vlab)
       dolegend(ARG[names(ARG) != 'y2par'], ARG$y2par, legend)
     }
-  }
-# else retrieve axis ranges
-  else {
+    # else retrieve axis ranges
+  } else {
     xy <- list()
     xy$usr <- par('usr')
     xlim <- xaxsd()
@@ -463,71 +520,53 @@ plot.sitar <- function(x, opt="dv", labels, apv=FALSE, xfun=identity, yfun=ident
       vlim <- yaxsd(.par.usr2[3:4])
       xy$usr2 <- .par.usr2
     } else if (dv == 3)
-        stop('right y axis not set up')
+      stop('right y axis not set up')
   }
 
-# plot curves
-  lapply(1:length(opts), function(i) {
-    opt <- opts[[i]]
-    . <- data[[i]]
-    ARG0 <- ARG
-# data frame extended, extend ARG
-    if (optmult[opt] && nrow(.) != model$dims$N && !is.null(dots)) {
-      names(.) <- as.character(unlist(as.list(mcall[2:(length(.) + 1)])))
-      ARG0 <- lapply(as.list(dots), eval, ., parent.frame())
-    }
-# select distance or velocity axis
-    if (optaxis[opt] == 1 || dv < 3) {
-      fun <- identity
-      ARG0 <- ARG0[names(ARG0) != 'y2par']
-    } else {
-      fun <- v2d(ylim, vlim)
-      ARG0 <- ARG0[['y2par']]
-      if (is.null(ARG0[['lty']]))
-        ARG0[['lty']] <- 2
-    }
-    if (optmult[opt])
-      do.call("mplot", c(list(x=.[[1]], y=fun(.[[2]]), id=.[[3]], add=TRUE), ARG0))
-    else
-      xy <- do.call("lines", c(list(x=.[[1]], y=fun(.[[2]])), ARG0))
-  })
+  # plot curves
+  dots1 <- dots[names(dots) != 'y2par']
+  dots2 <- dots[['y2par']]
+  dots2 <- as.list(dots2)[-1]
+  dots2[['lty']] <- dots2[['lty']] %||% 2
+  pt <- pt %>%
+    rowwise %>%
+    mutate(ARG1 = list(lapply(as.list(dots1), eval, data)),
+           ARG2 = list(lapply(as.list(dots2), eval, data)),
+           ARG = ifelse(.data$optdv == 3, list(.data$ARG2), list(.data$ARG1)),
+           fun = list(ifelse(.data$optdv == 3, v2d(!!ylim, !!vlim), identity)),
+           plot = ifelse(.data$optmult,
+                         list(do.call("mplot", c(list(x = data[[1]], y = .data$fun(data[[2]]), id = data[[3]], add = TRUE), ARG))),
+                         list(do.call("lines", c(list(x = data[[1]], y = .data$fun(data[[2]])), ARG)))))
 
-# save and print vertical line(s) at age of peak velocity
+  # save and print vertical line(s) at age of peak velocity
   if (apv) {
-# single curve
-      xy$apv <- with(velocity(model, subset=subset, abc=abc, xfun=xfun, yfun=yfun, ns=ns),
-                     setNames(getPeak(.x, .y), c('apv', 'pv')))
+    # single curve
+    xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=~1),
+                   setNames(getPeak(.x, .y), c('apv', 'pv')))
     print(signif(xy$apv, 4))
-    if (any(optmult[opts])) {
-# multiple curves
-      ids <- levels(factor(getGroups(model)[subset]))
-      if (body(xfun) == as.name('x') &&
-          body(yfun) == as.name('x')) {
-# x and y untransformed
-        apv1 <- xyadj(model, xy$apv[1], y=0, id=ids, tomean=FALSE)$x # subject-specific APVs
-        pv1 <- xy$apv[2] * exp(ranef(model)$c) # subject-specific PVs
-        xy$apv <- data.frame(apv=apv1, pv=pv1)
-      }
-# xfun or yfun set
-      else {
-        xt <- xseq(getCovariate(model)[subset])
-        newdata <- data.frame(.x=xt)
-        if (!is.null(abc))
-          ids <- factor(1, labels=ids[[1]])
-        . <- vapply(ids, function(z) {
-          newdata$.id <- z
-          vt <- predict(object=model, newdata=newdata, deriv=1, abc=abc, xfun=xfun, yfun=yfun)
-          getPeak(xfun(xt), vt)
-        }, numeric(2))
-        xy$apv <- setNames(data.frame(t(.)), c('apv', 'pv'))
-      }
-    }
-# plot apv
+    # multiple smooth curves or abc
+    pt <- pt %>%
+      ungroup %>%
+      filter(.data$optmult & .data$optsmooth) %>%
+      select(-starts_with('opt')) %>%
+      slice(1)
+    # multiple dv groups or id groups
+    level <- pt %>% pull(.data$groups) %>% `!` %>% as.numeric
+    if (nrow(pt) > 0)
+      xy$apv <- pt$data[[1]] %>%
+        nest_by({{nid}}, .keep = TRUE) %>%
+        mutate(vel = list(predict(model, data, level = level, deriv = 1, abc=abc, xfun = xfun, yfun = yfun)),
+               xy = list(getPeak(xfun(data[[1]]), .data$vel) %>% t %>% as_tibble)) %>%
+        select(-c(.data$data:.data$vel)) %>%
+        unnest(xy) %>%
+        ungroup %>%
+        select({{nid}}, apv = x, pv = .data$y)
+
+    # plot apv
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
   }
-# return xy
+  # return xy
   invisible(xy)
-
 }
 #############################
 #

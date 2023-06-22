@@ -14,7 +14,7 @@
 #' \code{level = 1}, matching the names in \code{object}. Variables with the
 #' reserved names \code{x=.x} or \code{id=.id} take precedence over the model
 #' \code{x} and \code{id} variables. Any covariates in
-#' \code{a.formula}, \code{b.formula} or \code{c.formula} can also be included.
+#' \code{a.formula}, \code{b.formula}, \code{c.formula} or \code{d.formula} can also be included.
 #' By default their values are set to the mean, so when \code{level = 0} the
 #' prediction represents the mean curve.
 #' @param level an optional integer vector giving the level(s) of grouping to be used
@@ -27,9 +27,9 @@
 #' specifies the distance curve, \code{deriv = 1} the velocity curve and
 #' \code{deriv = 2} the acceleration curve.
 #' @param abc an optional named vector containing values of a subset of
-#' \code{a}, \code{b} and \code{c}, default \code{NULL}. Ignored if
+#' \code{a}, \code{b}, \code{c} and \code{d}, default \code{NULL}. Ignored if
 #' \code{level = 0}. It gives predictions for a single subject with the
-#' specified values of \code{a}, \code{b} and \code{c}, where missing values
+#' specified values of \code{a}, \code{b}, \code{c} and \code{d}, where missing values
 #' are set to 0. Alternatively \code{abc} can contain the value for a single id.
 #' @param xfun an optional function to apply to \code{x} to convert it back to
 #' the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
@@ -59,10 +59,26 @@
 #' vel1 <- predict(m1, deriv=1, abc=c(b=1))
 #' mplot(age, vel1, id, heights, col=id, add=TRUE)
 #'
+#' @importFrom rlang .data
+#' @importFrom dplyr arrange mutate n nest_by pull
+#' @importFrom tidyr unnest
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,
                             xfun=identity, yfun=identity) {
+
+# derive x-y velocity curve
+    get_vel <- function(x, y, deriv = 1) {
+      smooth.spline(x, y) |>
+        predict(x, deriv = deriv)
+    }
+# apply differential of x or y to variable
+    Dxy <- function(object, var, which = c('x', 'y')) {
+      which <- match.arg(which)
+      call <- object$call.sitar[[which]]
+      name <- all.vars(call)
+      eval(D(call, name), setNames(as.data.frame(var), name))
+    }
     mc <- match.call()
 # match call for sitar
     oc <- object$call.sitar
@@ -84,7 +100,7 @@
     covnames <- all.vars(asOneFormula(oc$a.formula, oc$b.formula, oc$c.formula, oc$d.formula))
     covnames <- covnames[covnames %in% names(newdata)]
 # if non-numeric add linear contrasts to newdata
-    factornames <- covnames[unlist(lapply(covnames, function(x) !is.numeric(newdata[, x])))]
+    factornames <- covnames[unlist(lapply(covnames, function(x) !is.numeric(with(newdata, get(x)))))]
     if (length(factornames) > 0L) {
       extra <- eval(parse(text = paste(c("~0", factornames), collapse = "+"))[[1]])
       extra <- as_tibble(model.matrix(extra, newdata))
@@ -156,59 +172,58 @@
 # adjust abc for mean ranef
     if (!is.null(abc)) {
       abc.t <- re.mean
-      for (i in names(re.mean)) {
-        abc.t[, i] <- if (is.na(abc[i]))
-          re.mean[, i]
-        else
-          re.mean[, i] + abc[i]
-      }
+      for (i in names(abc.t))
+        if (!is.na(abc[i]))
+          abc.t[, i] <- abc.t[, i] + abc[i]
       abc <- abc.t
     }
-# set class to nlme to use predict.nlme
-    class(object) <- class(object)[-1]
+# create nlme object
+    object.nlme <- structure(object, class = c('nlme', 'lme'))
 # DISTANCE
 # level 1 prediction
     if (is.null(abc))
-      pred <- yfun(predict(object, newdata))
+      pred <- predict(object.nlme, newdata)
     else {
-      xy.id <- xyadj(object, x=x, y=0, id=id, abc=abc)
+      xy.id <- xyadj(object, x = x, id = id, abc = abc)
       newdata$x <- xy.id$x - xoffset
-      pred <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+      pred <- predict(object.nlme, newdata, level = 0L) - xy.id$y
     }
+    pred <- yfun(pred)
 # level 0 prediction
-    xy.id <- xyadj(object, x=x, y=0, id=id, abc=re.mean)
+    xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
     newdata$x <- xy.id$x - xoffset
-    pred0 <- yfun(predict(object, newdata, level=0L) - xy.id$y)
+    pred0.raw <- predict(object.nlme, newdata, level=0L) - xy.id$y
+    pred0 <- yfun(pred0.raw)
     if (deriv > 0L) {
 # VELOCITY
 # level 0 prediction
-      ss0 <- smooth.spline(xfun(x), pred0)
-      vel0 <- predict(ss0, xfun(x), deriv=deriv)
-      pred0 <- vel0$y
-# velocity curve on back-transformed axes
+      if (!'.groups' %in% names(newdata)) {
+        pred0 <- get_vel(xfun(x), pred0, deriv)$y
+# or if grouped opt dv
+      } else {
+        pred0 <- newdata %>%
+          mutate(x = !!x,
+                 pred0 = !!pred0,
+                 n = 1:n()) %>%
+          nest_by(.data$.groups) %>%
+          mutate(vel = list(with(.data$data, get_vel(xfun(x), pred0, deriv)$y))) %>%
+          unnest(cols = c(.data$data, .data$vel)) %>%
+          arrange(n) %>%
+          pull(.data$vel)
+      }
       if (any(level == 1L)) {
 # level 1 prediction
-        if (identical(xfun, identity) && identical(yfun, identity)) {
-# x and y untransformed
-            vel <- spline(vel0, method='natural', xout=xfun(xy.id$x))$y
-            if (!is.null(abc$c))
-              vel <- vel * exp(abc$c)
-          } else {
-# x or y transformed
-          newdata$pred <- pred
-          newdata$xorig <- xfun(x)
-          vel <- by(newdata, id, function(z) {
-            with(z, {
-              if (length(xorig) >= 4) {
-                ss <- smooth.spline(xorig, pred, df=min(20, length(xorig)))
-                predict(ss, xorig, deriv=deriv)$y
-              } else
-                predict(ss0, xorig, deriv=deriv)$y
-            })
-          })
-          vel <- do.call('c', as.list(vel))
-        }
-        pred <- vel
+# velocity curve on back-transformed axes
+    # shift x to mean curve equivalents
+        x.id <- xyadj(object, x = x, id = id, abc = abc)$x
+    # unique mean spline curve on transformed x-y scales
+        pred <- get_vel(x, pred0.raw, deriv) %>% as_tibble() %>% unique() %>%
+    # fit mean velocity curve
+          spline(., method = 'natural', xout = x.id) %>% as_tibble() %>% pull(.data$y) %>%
+    # shift and scale to individual velocities
+          xyadj(object, x = 0, v = ., id = id, abc = abc, tomean = FALSE) %>% as_tibble() %>%
+    # adjust for y and x transformations
+          mutate(v = .data$v / Dxy(object, pred, 'y') * Dxy(object, xfun(!!x), 'x')) %>% pull(.data$v)
       }
     }
 # return data frame if level 0:1

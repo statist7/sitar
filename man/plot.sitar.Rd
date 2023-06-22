@@ -15,12 +15,13 @@
 \method{plot}{sitar}(
   x,
   opt = "dv",
-  labels,
+  labels = NULL,
   apv = FALSE,
   xfun = identity,
   yfun = identity,
   subset = NULL,
   ns = 101,
+  design = NULL,
   abc = NULL,
   trim = 0,
   add = FALSE,
@@ -76,10 +77,11 @@ via \code{xfun} and \code{yfun}.}
 \item{apv}{optional logical specifying whether or not to calculate the age
 at peak velocity from the velocity curve. If TRUE, age at peak velocity is
 calculated as the age when the second derivative of the fitted curve changes
-sign (after applying \code{xfun} and/or \code{yfun}). Age at peak velocity
+from positive to negative (after applying \code{xfun} and/or \code{yfun}). Age at peak velocity
 is marked in the plot with a vertical dotted line, and its value, along with
 peak velocity, is printed and returned. NB their standard errors can be
-obtained using the bootstrap with the function \code{apv_se}.}
+obtained using the bootstrap with the function \code{apv_se}. Values of \code{apv}
+for individual subjects or groups are also returned invisibly.}
 
 \item{xfun}{optional function to be applied to the x variable prior to
 plotting (default identity, see Details).}
@@ -94,11 +96,16 @@ original \code{sitar} call.}
 \item{ns}{scalar defining the number of points for spline curves
 (default 101).}
 
-\item{abc}{vector of named values of random effects a, b and c used to
-define an individual growth curve, e.g. abc=c(a=1, c=-0.1). Alternatively a
+\item{design}{formula defining the variables to use to group data for multiple
+mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
+all the categorical variables named in \code{a.formula}, \code{b.formula},
+\code{c.formula} and \code{d.formula}.}
+
+\item{abc}{vector of named values of random effects a, b, c and d used to
+define an individual growth curve, e.g. abc = c(a = 1, c = -0.1). Alternatively a
 single character string defining an \code{id} level whose random effect
 values are used. If \code{abc} is set, \code{level} is ignored. If
-\code{abc} is NULL (default), or if a, b or c values are missing, values of
+\code{abc} is NULL (default), or if a, b, c or d values are missing, values of
 zero are assumed.}
 
 \item{trim}{number (default 0) of long line segments to be excluded from plot
@@ -141,9 +148,10 @@ peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
 either overall or (with options D or V, invisibly) for all subjects.}
 If \code{returndata} is TRUE (which it is with the helper functions) returns
 invisibly either a tibble or named list of tibbles,
-containing the data to be plotted. The helper functions each return a tibble.
-The variable names are '.x', '.y' and
-(for curves grouped by subject) '.id'. Note that '.x' and '.y' are returned
+containing the data to be plotted. The helper functions each return a tibble
+where the first three variables are '.x', '.y' and '.id', plus
+variable '.groups' for curves grouped by \code{design}) and other covariates in the model.
+Note that '.x' and '.y' are returned
 after applying \code{xfun} and \code{yfun}. Hence if for example \code{x = log(age)}
 in the SITAR call then '.x' corresponds by default to \code{age}.
 }
@@ -159,17 +167,29 @@ For options involving both distance curves (options 'dcDua') and velocity curves
 To suppress the legend that comes with it set \code{legend = NULL}.
 
 The transformations \code{xfun} and \code{yfun} are applied to the x and y
-variables after inverting any transformations applied in the original SITAR
+variables after back-transforming any transformations in the original SITAR
 call. So for example if \code{y = log(height)} in the SITAR call, then \code{yfun}
 is applied to \code{height}. Thus the default \code{yfun = identity} has the effect of
-inverting the transformation. This is achieved by setting
+back-transforming the SITAR call transformation - this is achieved by setting
 \code{yfun = yfun(ifun(x$call.sitar$y))}.
-For no transformation set \code{yfun = NULL}.
+For no transformation set \code{yfun = NULL}. The same applies to \code{xfun}.
+
+For models that include categorical fixed effects (e.g. \code{a.formula = ~sex + region})
+the options 'dv' plot mean curves for each distinct group. Any continuous (as opposed
+to grouped) fixed effect variables are set to their mean values in the plots, to ensure that the mean curves are
+smooth. Setting \code{design} allows the grouping variables to be selected, e.g. \code{design = ~sex},
+and \code{design = ~1} gives a single mean curve. The resulting plots can
+be formatted with \code{par} in the usual way, indexed either by the individual grouping
+variables (e.g. \code{sex} or \code{region} in the example) or the subject
+factor \code{id} which indexes all the distinct plots.
 
 The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
 \code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
 correspond to the seven plot \code{option}s defined by their last letter,
-and return the data for plotting as a \code{tibble}, e.g. for use with \code{ggplot2}.
+and return the data for plotting as a \code{tibble}, e.g. for use with
+\code{ggplot2}. Setting \code{returndata = TRUE} works similarly
+but handles multiple \code{option}s, returning a list of tibbles corresponding
+to each specified \code{option}.
 
 The \code{trim} option allows unsightly long line segments to be omitted
 from plots with options 'a' or 'u'. It ranks the line segments on the basis
@@ -180,26 +200,26 @@ and omits those with the largest values.
 \examples{
 
 ## fit sitar model
-m1 <- sitar(x=age, y=height, id=id, data=heights, df=4)
+m1 <- sitar(x = age, y = height, id = id, data = heights, df = 4)
 
 ## draw fitted distance and velocity curves
 ## with velocity curve in blue
 ## adding age at peak velocity (apv)
-plot(m1, y2par=list(col='blue'), apv=TRUE)
+plot(m1, y2par = list(col = 'blue'), apv = TRUE)
 
 ## bootstrap standard errors for apv and pv
 \dontrun{
-res <- apv_se(m1, nboot=20, plot=TRUE)
+res <- apv_se(m1, nboot = 20, plot = TRUE)
 }
 ## draw individually coloured growth curves adjusted for random effects
 ## using same x-axis limits as for previous plot
-plot(m1, opt='a', col=id, xlim=xaxsd())
+plot(m1, opt = 'a', col = id, xlim = xaxsd())
 
 ## add mean curve in red
-lines(m1, opt='d', col='red', lwd=2)
+lines(m1, opt = 'd', col = 'red', lwd = 2)
 
 ## add mean curve for a, b, c = -1 SD
-lines(m1, opt='d', lwd=2, abc=-sqrt(diag(getVarCov(m1))))
+lines(m1, opt = 'd', lwd = 2, abc = -sqrt(diag(getVarCov(m1))))
 
 ## use subset to plot mean curves by group
 ## compare curves for early versus late menarche
@@ -208,24 +228,28 @@ heights <- within(sitar::heights, {
     late <- factor(men > median(men))
   })
 # fit model where size and timing differ by early vs late menarche
-object <- sitar(log(age), height, id, heights, 5,
+m2 <- sitar(log(age), height, id, heights, 5,
   a.formula = ~late, b.formula = ~late)
 ## early group
-plot(object, subset = late == FALSE, col = 4, lwd = 3,
+plot(m2, subset = late == FALSE, col = 4, lwd = 3,
   y2par = list(col = 4, lwd = 2), ylim = range(heights$height))
 ## late group
-lines(object, subset = late == TRUE, col = 2, lwd = 3,
+lines(m2, subset = late == TRUE, col = 2, lwd = 3,
   y2par = list(col = 2, lwd = 2))
 ## add legend
 legend('right', paste(c('early', 'late'), 'menarche'),
   lty = 1, col = c(4, 2), inset = 0.04)
 
+## alternatively plot both groups together
+plot(m2, lwd = 3, col = late, y2par = list(lwd = 3, col = late))
+legend('right', paste(c('early', 'late'), 'menarche'),
+  lwd = 3, col = 1:2, inset = 0.04)
 ## draw fitted height distance curves coloured by subject, using ggplot
 \dontrun{
 require(ggplot2)
-ggplot(plot_D(m1), aes(.x, .y, colour=.id)) +
-labs(x='age', y='height') +
-geom_line(show.legend=FALSE)
+ggplot(plot_D(m1), aes(.x, .y, colour = .id)) +
+labs(x = 'age', y = 'height') +
+geom_line(show.legend = FALSE)
 }
 }
 \seealso{

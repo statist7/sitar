@@ -1,6 +1,18 @@
 Changes in Version 1.3.0.9000
 
-  o the function identity is now recognised by ifun
+  o plot.sitar plots multiple curves for options 'd' and 'v' when the model
+    includes categorical variables.
+
+  o plot.sitar option 'V' returns velocity curves that are both faster and
+    more accurate.
+
+  o xyadj is extended to convert velocity from/to the mean.
+
+  o If df > 1 and random = 'a+b+c+d' then fixed = 'a+b+c' by default.
+
+  o If df = 1 in sitar then fixed effects b and d are excluded.
+
+  o the function identity is now recognised by ifun.
 
   o Bugs in update.sitar and BICadj relating to the keep.data argument are fixed.
 

@@ -4,7 +4,7 @@
 \alias{xyadj}
 \title{Adjust x and y variables for SITAR random effects}
 \usage{
-xyadj(object, x, y = NULL, id, abc = NULL, tomean = TRUE)
+xyadj(object, x, y = 0, v = 0, id, abc = NULL, tomean = TRUE)
 }
 \arguments{
 \item{object}{a SITAR model.}
@@ -12,10 +12,12 @@ xyadj(object, x, y = NULL, id, abc = NULL, tomean = TRUE)
 \item{x}{a vector of x coordinates. If missing, \code{x} and
 \code{y} and \code{id} are obtained from \code{object}.}
 
-\item{y}{a vector of y coordinates (default NULL).}
+\item{y}{a vector of y coordinates (default 0).}
+
+\item{v}{a vector of velocity coordinates (default 0).}
 
 \item{id}{a factor denoting the subject levels corresponding to \code{x} and
-\code{y}.}
+\code{y} and \code{v}.}
 
 \item{abc}{a data frame containing random effects for a, b, c and d (default
 \code{ranef(object)[id, ]}).}
@@ -28,30 +30,35 @@ translated and rotated to match individual curves.}
 \value{
 The list of adjusted values: \item{x}{numeric vector.}
 \item{y}{numeric vector the same length as x, or NULL.}
+\item{v}{numeric vector the same length as x, or NULL.}
 }
 \description{
-\code{xyadj} Adjusts \code{x} and \code{y} values for subject-specific
+\code{xyadj} Adjusts \code{x} and \code{y} and optionally \code{v} values for subject-specific
 random effects from a SITAR model.
 }
 \details{
-When tomean = TRUE the x and y values are adjusted to \deqn{(x - xoffset -
-b<fixed> - b<random>) * exp(c<random>) + xoffset + b<fixed>} \deqn{y -
-a<random> - d<random> * x} When tomean = FALSE they are adjusted to \deqn{(x - xoffset -
-b<fixed>) / exp(c<random>) + xoffset + b<fixed> + b<random>} \deqn{y +
-a<random> + d<random> * x} In each case missing values of the fixed or random effects are
+When \code{tomean = TRUE} the x and y and v values are adjusted to
+\deqn{(x - xoffset - b<fixed> - b<random>) * exp(c<random>) + xoffset + b<fixed>}
+\deqn{y - a<random> - d<random> * x}
+\deqn{(v - d<random>) / exp(c<random>)}
+When \code{tomean = FALSE} they are adjusted to
+\deqn{(x - xoffset - b<fixed>) / exp(c<random>) + xoffset + b<fixed> + b<random>}
+\deqn{y + a<random> + d<random> * x}
+\deqn{v * exp(c<random>) + d<random>}
+In each case missing values of the fixed or random effects are
 set to zero.
 }
 \examples{
 
 data(heights)
 ## fit sitar model for height
-m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
 
 ## plot unadjusted data as growth curves
 plot(m1, opt='u')
 
 ## overplot with adjusted data as points
-with(heights, points(xyadj(m1), col='red', pch=19))
+with(heights, points(xyadj(m1), col='red', pch = 19))
 
 }
 \author{
