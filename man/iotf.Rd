@@ -16,7 +16,7 @@ A tibble with 66 observations on the following 5 variables:
 \source{
 The values are tabulated in the Excel spreadsheet IOTF_LMS.xls
 provided with the Excel add-in LMSgrowth from
-\url{https://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
+https://www.healthforallchildren.com/shop-base/software/lmsgrowth/
 }
 \usage{
 iotf

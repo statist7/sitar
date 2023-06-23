@@ -49,7 +49,7 @@
 #' charts. BMJ 2010;340:c1140.
 #' @source The values are tabulated in the Excel spreadsheet UK_WHO_preterm.xls
 #' provided with the Excel add-in LMSgrowth from
-#' \url{https://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
+#' https://www.healthforallchildren.com/shop-base/software/lmsgrowth/
 #' @keywords datasets
 #' @examples
 #' data(ukwhoterm)

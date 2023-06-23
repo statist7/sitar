@@ -53,8 +53,7 @@
 #' reference curves for the UK, 1990. Arch Dis Child 1995;73:17-24.
 #' @source The values are tabulated in the spreadsheet British1990.xls provided
 #' with the Excel add-in LMSgrowth from:
-#'
-#' \url{https://www.healthforallchildren.com/shop-base/software/lmsgrowth/}.
+#' https://www.healthforallchildren.com/shop-base/software/lmsgrowth/
 #' @keywords datasets
 #' @examples
 #' data(uk90)
