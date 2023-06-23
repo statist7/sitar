@@ -62,13 +62,11 @@ Organization, 2006. Available at:
 The WHO reference for children aged 5-19 years is: de Onis M, Onyango AW,
 Borghi E, Siyam A, Nishida C, Siekmann J. Development of a WHO growth
 reference for school-aged children and adolescents. Bulletin of the World
-Health Organization 2007; 85: 660-7. Available at:
-\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2636412/pdf/07-043497.pdf/}
+Health Organization 2007; 85: 660-7.
 
 The CDC reference for children aged 2-20 years is: Must A, Dallal GE, Dietz
 WH. Reference data for obesity: 85th and 95th percentiles of body mass index
 (wt/ht2) and triceps skinfold thickness. American Journal of Clinical
-Nutrition 1991; 53: 839-46. Available at:
-\url{https://academic.oup.com/ajcn/article/53/4/839/4715058}
+Nutrition 1991; 53: 839-46.
 }
 \keyword{datasets}

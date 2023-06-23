@@ -18,9 +18,6 @@ A tibble with 486 observations on the following 11 variables:
 \item{S.bmi}{numeric vector}
 \item{sex}{two-level factor with level 1 male and level 2 female} }
 }
-\source{
-\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2636412/pdf/07-043497.pdf/}
-}
 \usage{
 who0607
 }

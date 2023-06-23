@@ -170,16 +170,15 @@ ob_convertr2(Age, Sex, from = 1:2, to = c(2.5, 3),
 \references{
 Cole TJ, Lobstein T. Exploring an algorithm to harmonize International Obesity
 Task Force and World Health Organization child overweight and obesity prevalence
-rates. Pediatr Obes 2022;In press.
+rates. Pediatr Obes 2022;17:e12905. Available at \doi{10.1111/ijpo.12905}
 
 Cole TJ, Lobstein T. An improved algorithm to harmonize child overweight and
-obesity prevalence rates. Pediatr Obes 2023;In press.
+obesity prevalence rates. Pediatr Obes 2023;18:e12970. Available at \doi{10.1111/ijpo.12970}
 
 The CDC reference for children aged 2-20 years is: Must A, Dallal GE, Dietz
 WH. Reference data for obesity: 85th and 95th percentiles of body mass index
 (wt/ht2) and triceps skinfold thickness. American Journal of Clinical
-Nutrition 1991; 53: 839-46. Available at:
-\url{https://academic.oup.com/ajcn/article/53/4/839/4715058}
+Nutrition 1991; 53: 839-46.
 
 The IOTF reference for children aged 2-18 years is: Cole TJ, Bellizzi MC,
 Flegal KM, Dietz WH. Establishing a standard definition for child overweight
@@ -195,8 +194,7 @@ Organization, 2006. Available at:
 The WHO reference for children aged 5-19 years is: de Onis M, Onyango AW,
 Borghi E, Siyam A, Nishida C, Siekmann J. Development of a WHO growth
 reference for school-aged children and adolescents. Bulletin of the World
-Health Organization 2007; 85: 660-7. Available at:
-\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2636412/pdf/07-043497.pdf/}
+Health Organization 2007; 85: 660-7.
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
