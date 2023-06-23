@@ -1,27 +1,25 @@
 # Platform
 
-|field    |value                                    |
-|:--------|:----------------------------------------|
-|version  |R version 4.2.0 (2022-04-22)             |
-|os       |macOS Big Sur 11.5.1                     |
-|system   |aarch64, darwin20                        |
-|ui       |RStudio                                  |
-|language |(EN)                                     |
-|collate  |en_US.UTF-8                              |
-|ctype    |en_US.UTF-8                              |
-|tz       |Europe/London                            |
-|date     |2022-07-20                               |
-|rstudio  |2022.02.3+492 Prairie Trillium (desktop) |
-|pandoc   |2.18 @ /usr/local/bin/pandoc             |
+|field    |value                                      |
+|:--------|:------------------------------------------|
+|version  |R version 4.3.0 (2023-04-21)               |
+|os       |macOS Monterey 12.6.6                      |
+|system   |aarch64, darwin20                          |
+|ui       |RStudio                                    |
+|language |(EN)                                       |
+|collate  |en_US.UTF-8                                |
+|ctype    |en_US.UTF-8                                |
+|tz       |Europe/London                              |
+|date     |2023-06-23                                 |
+|rstudio  |2023.06.0+421 Mountain Hydrangea (desktop) |
+|pandoc   |2.18 @ /usr/local/bin/pandoc               |
 
 # Dependencies
 
-|package  |old   |new   |Δ  |
-|:--------|:-----|:-----|:--|
-|sitar    |1.2.0 |1.3.0 |*  |
-|farver   |NA    |2.1.1 |*  |
-|generics |NA    |0.1.3 |*  |
-|rlang    |NA    |1.0.4 |*  |
+|package    |old   |new    |Δ  |
+|:----------|:-----|:------|:--|
+|sitar      |1.3.0 |1.4.0  |*  |
+|parallelly |NA    |1.36.0 |*  |
 
 # Revdeps
 
