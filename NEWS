@@ -1,4 +1,4 @@
-Changes in Version 1.3.0.9000
+Changes in Version 1.4.0
 
   o plot.sitar plots multiple curves for options 'd' and 'v' when the model
     includes categorical variables.

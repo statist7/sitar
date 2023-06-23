@@ -2,11 +2,11 @@ Type: Package
 Package: sitar
 Title: Super Imposition by Translation and Rotation Growth Curve
     Analysis
-Version: 1.3.0.9000
+Version: 1.4.0
 Authors@R: 
     person(given = "Tim",
            family = "Cole",
-           role = c("aut", "cre"),
+           role = c("cre", "aut", "cph"),
            email = "tim.cole@ucl.ac.uk",
            comment = c(ORCID = "0000-0001-5711-8200"))
 Maintainer: Tim Cole <tim.cole@ucl.ac.uk>
