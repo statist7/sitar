@@ -1,18 +1,12 @@
 ## R CMD check results
-There were no ERRORs or WARNINGs.
 
-There was a NOTE of a missing URL (which I didn't see):
+0 errors | 0 warnings | 0 notes
 
-   Found the following (possibly) invalid URLs:
-     URL: ...
-       From: man/deren.Rd
-             man/ob_convertr.Rd
-             man/who0607.Rd
-       Status: 404
-       Message: Not Found
-
-I have now updated the URL in the three files and there are no NOTEs.
+Note with R-dev on Windows Server: lastMiKTeXException left in temp directory.
 
 ## Downstream dependencies
-I have run revdepcheck for downstream dependencies.
-MonoInc the one relevant package passed.
+
+We checked 2 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
+
+ * We saw 0 new problems
+ * We failed to check 0 packages
