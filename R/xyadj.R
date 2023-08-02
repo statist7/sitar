@@ -43,35 +43,47 @@
 #' ## overplot with adjusted data as points
 #' with(heights, points(xyadj(m1), col='red', pch = 19))
 #'
+#' @importFrom rlang .data %||%
 #' @export
 xyadj <- function(object, x, y = 0, v = 0, id, abc = NULL, tomean = TRUE) {
-#	returns x and y adjusted for random effects a, b and c
+#	returns x, y and v adjusted for random effects a, b, c and d
   if (missing(x)) {
     x <- getCovariate(object)
     y <- getResponse(object)
     id <- getGroups(object)
   }
-  # add missing columns
+  xoffset <- object$xoffset
+  if (!is.na(b0 <- fixef(object)['b']))
+    xoffset <- xoffset + b0
+  # set up abc
   if (is.null(abc)) {
     re <- ranef(object)
     abc <- re[match(id, rownames(re)), , drop = FALSE]
   }
   abc <- as.data.frame(abc)
-  for (i in letters[1:4])
-    if (!i %in% names(abc))
-      abc[, i] <- 0
-  xoffset <- object$xoffset
-  if (!is.na(b0 <- fixef(object)['b']))
-    xoffset <- xoffset + b0
-  x <- x - xoffset
+  # add missing a:d columns
+  abc[, setdiff(letters[1:4], names(abc))] <- 0 # chatGPT suggestion
+  abc <- abc %>%
+    mutate(x = x - xoffset,
+           d.adjusted = attr(object, 'd.adjusted') %||% FALSE)
   if (tomean) {
-    x.adj <- (x - abc$b) * exp(abc$c) + xoffset
-    y.adj <- y - abc$a - abc$d * x
-    v.adj <- (v - abc$d) / exp(abc$c)
+    abc <- abc %>%
+      mutate(x.adj = (x - .data$b) * exp(.data$c) + xoffset,
+             y.adj = y - .data$a - .data$d * if_else(.data$d.adjusted,
+                                                     .data$x.adj - xoffset,
+                                                     x),
+             v.adj = if_else(.data$d.adjusted,
+                             v / exp(.data$c) - .data$d,
+                             (v - .data$d) / exp(.data$c)))
   } else {
-    x.adj <- x / exp(abc$c) + abc$b + xoffset
-    y.adj <- y + abc$a + abc$d * x
-    v.adj <- v * exp(abc$c) + abc$d
+    abc <- abc %>%
+      mutate(x.adj = x / exp(.data$c) + .data$b + xoffset,
+             y.adj = y + .data$a + .data$d * if_else(.data$d.adjusted,
+                                                     .data$x.adj - xoffset,
+                                                     x),
+             v.adj = if_else(.data$d.adjusted,
+                             (v + .data$d) * exp(.data$c),
+                             v * exp(.data$c) + .data$d))
   }
-  return(list(x = x.adj, y = y.adj, v = v.adj))
+  return(list(x = abc$x.adj, y = abc$y.adj, v = abc$v.adj))
 }

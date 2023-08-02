@@ -51,6 +51,8 @@
 #' @param b.formula formula for fixed effect b (default \code{~ 1}).
 #' @param c.formula formula for fixed effect c (default \code{~ 1}).
 #' @param d.formula formula for fixed effect d (default \code{~ 1}).
+#' @param d.adjusted logical defining x scale for random effect d (default
+#' FALSE means x unadjusted, TRUE means x adjusted with random effects b and c).
 #' @param bounds span of \code{x} for regression spline, or fractional
 #' extension of range (default 0.04).
 #' @param start optional numeric vector of initial estimates for the fixed
@@ -139,6 +141,7 @@ sitar <-
            b.formula =  ~ 1,
            c.formula =  ~ 1,
            d.formula =  ~ 1,
+           d.adjusted = FALSE,
            bounds = 0.04,
            start,
            xoffset = 'mean',
@@ -227,12 +230,12 @@ sitar <-
       fullrandom <- ifelse(is.character(random),
                            random,
                            deparse(random))
-      random <- extract(random)
     } else {
-      fullrandom <- ifelse (pdDiag,
-                            glue('list(id = pdDiag({random} ~ 1))'),
-                            NA)
+      fullrandom <- ifelse(pdDiag,
+                           glue('list(id = pdDiag({random} ~ 1))'),
+                           NA)
     }
+    random <- extract(random)
 
     # default fixed effects
     if (is.null(fixed))
@@ -241,9 +244,9 @@ sitar <-
         fixed <- extract(random, letters[1:3])
       else
         fixed <- random
-    # if fixed contains ~ drop it
-    else if (any(grepl('~', fixed)))
-      fixed <- as.character(as.formula(fixed))[-1]
+    # else format fixed
+    else
+      fixed <- extract(fixed)
 
     #	force fixed effect and intercept for a
     fixed <- extract(paste('a', fixed))
@@ -259,7 +262,7 @@ sitar <-
     # if df = 1 exclude b and d
       if (df == 1) {
         fixed <- 'a' # s1 = c
-        random <- extract(random, letters[c(1, 3)])
+        random <- extract(random, c('a', 'c'))
       }
     } else { # 0 df for spline so fit y ~ x
       ss <- character(0)
@@ -271,7 +274,7 @@ sitar <-
       if (!'random' %in% names(mcall))
         random <- fixed
       else
-        random <- extract(random, letters[c(1, 4)])
+        random <- extract(random, c('a', 'd'))
     }
     if (nchar(random) == 0)
       stop('no random effects')
@@ -335,7 +338,7 @@ sitar <-
         if (nostart) {
           if (l == 'b')
             start <- c(start, bstart)
-          else if (l == 'c')
+          else if ((l == 'c' || l == 'd') && grepl(l, fix) && df > 0)
             start <- c(start, 0)
         }
       }
@@ -374,9 +377,10 @@ sitar <-
     nsa <- cglue(model['a'], '', '')
     nsb <- cglue(model['b'], '-(', ')')
     nsc <- cglue(model['c'], ')*exp(', '')
-    nsd <- cglue(model['d'], '+(', ')*x')
+    dx <- ifelse(d.adjusted, 'ex', 'x') # set scale for d
+    nsd <- cglue(model['d'], '+(', ')*{dx}')
     ex <- glue('(x{nsb}{nsc})')
-    spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns({ex},k=knots,B=bounds)))'))
+    spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns(ex,k=knots,B=bounds)))'))
 
     # expand fixed and if necessary random
     fixed <- glue('{fixed} ~ 1')
@@ -388,6 +392,7 @@ sitar <-
     fitcode <- glue(
       "fitenv <- new.env()\n",
       "fitenv$fitnlme <- function(<<pars>>) {\n",
+      "ex <- <<ex>>\n",
       "<<nsa>><<spline>><<nsd>>\n",
       "}\n",
       "on.exit(detach(fitenv))\n",
@@ -473,6 +478,9 @@ sitar <-
     nlme.out$xoffset <- xoffset
     # save ns curve
     nlme.out$ns <- spline.lm
+    # save d.adjusted
+    if ('d' %in% random.names)
+      attr(nlme.out, 'd.adjusted') <- d.adjusted
     #   if (exists('start.')) rm(start., inherits=TRUE)
     nlme.out
   }

@@ -1,3 +1,12 @@
+Changes in Version 1.4.1
+
+  o The d random effect now has an alternative parameterisation, controlled by
+    the sitar argument d.adjusted. The age slope d is the regression coefficient
+    of y on x, and when d.adjusted == TRUE x is first adjusted for random
+    effects b and c, reflecting individual developmental age rather than
+    chronological age. This makes d more sensitive to the timing of puberty
+    in individuals.
+
 Changes in Version 1.4.0
 
   o plot.sitar plots multiple curves for options 'd' and 'v' when the model

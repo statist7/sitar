@@ -19,6 +19,7 @@ sitar(
   b.formula = ~1,
   c.formula = ~1,
   d.formula = ~1,
+  d.adjusted = FALSE,
   bounds = 0.04,
   start,
   xoffset = "mean",
@@ -68,6 +69,9 @@ covariance matrix, or if FALSE (default) a general covariance matrix.}
 \item{c.formula}{formula for fixed effect c (default \code{~ 1}).}
 
 \item{d.formula}{formula for fixed effect d (default \code{~ 1}).}
+
+\item{d.adjusted}{logical defining x scale for random effect d (default
+FALSE means x unadjusted, TRUE means x adjusted with random effects b and c).}
 
 \item{bounds}{span of \code{x} for regression spline, or fractional
 extension of range (default 0.04).}
