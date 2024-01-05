@@ -563,7 +563,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
       select(-data) %>%
       unnest(xy) %>%
       ungroup %>%
-      select({{nid}}, apv = x, pv = y)
+      rename_with(~c(as.character(nid), 'apv', 'pv'))
 
     # plot apvs
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
