@@ -183,7 +183,7 @@
 #' @importFrom grDevices xy.coords
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter nest_by slice
+#' @importFrom dplyr mutate rename filter nest_by select slice
 #' @importFrom tidyr expand_grid
 #' @importFrom rlang .data as_label %||%
 #' @importFrom glue glue
@@ -465,7 +465,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
   dv <- pt %>% pull(.data$optdv) %>% range %>% unique %>% sum # 1 = d, 2 = v, 3 = dv
 
   # names of x y id vars
-  xyid <- setNames(1:3, map_chr(mcall[2:4], all.vars))
+  xyid <- setNames(1:3, map_chr(as.list(mcall[2:4]), all.vars))
   nid <- as.name(names(xyid)[3])
 
   # generate tibble of data frames for selected options
@@ -544,25 +544,28 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=~1),
                    setNames(getPeak(.x, .y), c('apv', 'pv')))
     print(signif(xy$apv, 4))
-    # multiple smooth curves or abc
+    # multiple smooth curves (opt D | V or grouped d | v) or abc
     pt <- pt %>%
       ungroup %>%
       filter(.data$optmult & .data$optsmooth) %>%
-      select(-starts_with('opt')) %>%
       slice(1)
-    # multiple dv groups or id groups
-    level <- pt %>% pull(.data$groups) %>% `!` %>% as.numeric
+    # velocity or distance ?
+    options <- pt %>%
+      pull(options) %>%
+      toupper
+    # derive apvs
     if (nrow(pt) > 0)
-      xy$apv <- pt$data[[1]] %>%
-        nest_by({{nid}}, .keep = TRUE) %>%
-        mutate(vel = list(predict(model, data, level = level, deriv = 1, abc=abc, xfun = xfun, yfun = yfun)),
-               xy = list(getPeak(xfun(data[[1]]), .data$vel) %>% t %>% as_tibble)) %>%
-        select(-c(.data$data:.data$vel)) %>%
-        unnest(xy) %>%
-        ungroup %>%
-        select({{nid}}, apv = x, pv = .data$y)
+      xy$apv <- pt %>%
+      select(data) %>%
+      unnest(data) %>%
+      nest_by({{nid}}, .keep = TRUE) %>%
+      mutate(xy = list(getPeakTrough(data[[1]], data[[2]], Dy = options == 'D') %>% t %>% as_tibble)) %>%
+      select(-data) %>%
+      unnest(xy) %>%
+      ungroup %>%
+      select({{nid}}, apv = x, pv = y)
 
-    # plot apv
+    # plot apvs
     do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
   }
   # return xy
