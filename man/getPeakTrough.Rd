@@ -7,13 +7,13 @@
 \alias{getTakeoff}
 \title{Identify peak or trough on curve}
 \usage{
-getPeakTrough(x, y = NULL, peak = TRUE, takeoff = FALSE)
+getPeakTrough(x, y = NULL, peak = TRUE, takeoff = FALSE, Dy = FALSE)
 
-getPeak(x, y = NULL, peak = TRUE, takeoff = FALSE)
+getPeak(x, y = NULL, peak = TRUE, takeoff = FALSE, Dy = FALSE)
 
-getTrough(x, y = NULL, peak = FALSE, takeoff = FALSE)
+getTrough(x, y = NULL, peak = FALSE, takeoff = FALSE, Dy = FALSE)
 
-getTakeoff(x, y = NULL, peak = FALSE, takeoff = TRUE)
+getTakeoff(x, y = NULL, peak = FALSE, takeoff = TRUE, Dy = FALSE)
 }
 \arguments{
 \item{x}{vector.}
@@ -24,6 +24,8 @@ getTakeoff(x, y = NULL, peak = FALSE, takeoff = TRUE)
 
 \item{takeoff}{logical determining whether, if \code{peak} is FALSE, the
 trough is takeoff.}
+
+\item{Dy}{logical if TRUE then \code{y} is differentiated first (default FALSE).}
 }
 \value{
 A length-2 vector containing the values of \code{x} and \code{y} at

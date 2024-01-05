@@ -12,6 +12,7 @@
 #' @param peak logical determining whether peak or trough is returned.
 #' @param takeoff logical determining whether, if \code{peak} is FALSE, the
 #' trough is takeoff.
+#' @param Dy logical if TRUE then \code{y} is differentiated first (default FALSE).
 #' @return A length-2 vector containing the values of \code{x} and \code{y} at
 #' the peak or trough. If none are identified NA's are returned.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
@@ -27,10 +28,20 @@
 #' points(t(getTrough(xy)), pch=25, col=2, bg=2)
 #' points(t(getTakeoff(xy)), pch=25, col=3, bg=3)
 #' @export
-getPeakTrough <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
+getPeakTrough <- function(x, y = NULL, peak = TRUE, takeoff = FALSE, Dy = FALSE) {
   xy <- xy.coords(x, y)
   # sort data and remove duplicates
   xy <- unique(as.data.frame(xy[1:2])[order(xy$x),])
+  # check enough data
+  if (nrow(xy) < 4L)
+    return(c(x = NA, y = NA))
+  # if Dy differentiate y
+  if (Dy) {
+    ss <- smooth.spline(x, y)
+    xy <- within(xy, {
+      y <- predict(ss, x, deriv = 1L)$y
+    })
+  }
   x <- xy$x
   y <- xy$y
   # find peak
@@ -72,17 +83,17 @@ getPeakTrough <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
 }
 #' @rdname getPeakTrough
 #' @export
-getPeak <- function(x, y = NULL, peak = TRUE, takeoff = FALSE) {
+getPeak <- function(x, y = NULL, peak = TRUE, takeoff = FALSE, Dy = FALSE) {
 
 }
 #' @rdname getPeakTrough
 #' @export
-getTrough <- function(x, y = NULL, peak = FALSE, takeoff = FALSE) {
+getTrough <- function(x, y = NULL, peak = FALSE, takeoff = FALSE, Dy = FALSE) {
 
 }
 #' @rdname getPeakTrough
 #' @export
-getTakeoff <- function(x, y = NULL, peak = FALSE, takeoff = TRUE) {
+getTakeoff <- function(x, y = NULL, peak = FALSE, takeoff = TRUE, Dy = FALSE) {
 
 }
 body(getTakeoff) <- body(getTrough) <- body(getPeak) <- body(getPeakTrough)
