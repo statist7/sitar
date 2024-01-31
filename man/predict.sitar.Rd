@@ -20,9 +20,9 @@
 
 \item{newdata}{an optional data frame to be used for obtaining the
 predictions, defaulting to the data used to fit \code{object}.
-It requires named columns for \code{x}, and for \code{id} if
+It requires named columns for \code{x}, and also for \code{id} if
 \code{level = 1}, matching the names in \code{object}. Variables with the
-reserved names \code{x=.x} or \code{id=.id} take precedence over the model
+reserved names \code{x = .x} or \code{id = .id} take precedence over the model
 \code{x} and \code{id} variables. Any covariates in
 \code{a.formula}, \code{b.formula}, \code{c.formula} or \code{d.formula} can also be included.
 By default their values are set to the mean, so when \code{level = 0} the
@@ -36,9 +36,9 @@ predictions. Defaults to level 1, and \code{level = 0:1} fits both levels.}
 \code{naPattern}.}
 
 \item{deriv}{an optional integer specifying predictions corresponding to
-either the fitted curve or its derivative. \code{deriv = 0} (default)
+the fitted curve and/or its derivative. \code{deriv = 0} (default)
 specifies the distance curve, \code{deriv = 1} the velocity curve and
-\code{deriv = 2} the acceleration curve.}
+\code{deriv = 0:1} fits both.}
 
 \item{abc}{an optional named vector containing values of a subset of
 \code{a}, \code{b}, \code{c} and \code{d}, default \code{NULL}. Ignored if
@@ -48,23 +48,28 @@ are set to 0. Alternatively \code{abc} can contain the value for a single id.}
 
 \item{xfun}{an optional function to apply to \code{x} to convert it back to
 the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
-\code{deriv > 0} - see Details.}
+\code{deriv == 1} - see Details.}
 
 \item{yfun}{an optional function to apply to \code{y} to convert it back to
 the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
 }
 \value{
 A vector of the predictions, or a list of vectors if \code{asList =
-TRUE} and \code{level == 1}, or a data frame if \code{length(level) > 1}.
+TRUE} and \code{level == 1}, or a data frame if \code{length(level) * length(deriv) > 1}.
 }
 \description{
 Predict method for \code{sitar} objects, based on \code{predict.lme}.
 }
 \details{
 When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)}
-per \code{xfun(x)}. So if \code{x} and/or \code{y} are transformed, velocity
-in units of \code{y} per \code{x} can be obtained by specifying \code{xfun}
-and/or \code{yfun} to back-transform them appropriately.
+per \code{xfun(x)} where \code{xfun} and \code{yfun} default to
+\code{identity}. If \code{x} and/or \code{y} include transformations,
+e.g. \code{x = log(age)}, velocity
+in the original units is obtained by specifying \code{xfun}
+and/or \code{yfun} to back-transform them appropriately. By default this
+is done automatically by \code{ifun}, so if for example \code{x = log(age)}
+then \code{xfun} is set to \code{exp}. In this way velocity is in the
+untransformed units by default.
 }
 \examples{
 

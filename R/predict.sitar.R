@@ -3,16 +3,21 @@
 #' Predict method for \code{sitar} objects, based on \code{predict.lme}.
 #'
 #' When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)}
-#' per \code{xfun(x)}. So if \code{x} and/or \code{y} are transformed, velocity
-#' in units of \code{y} per \code{x} can be obtained by specifying \code{xfun}
-#' and/or \code{yfun} to back-transform them appropriately.
+#' per \code{xfun(x)} where \code{xfun} and \code{yfun} default to
+#' \code{identity}. If \code{x} and/or \code{y} include transformations,
+#' e.g. \code{x = log(age)}, velocity
+#' in the original units is obtained by specifying \code{xfun}
+#' and/or \code{yfun} to back-transform them appropriately. By default this
+#' is done automatically by \code{ifun}, so if for example \code{x = log(age)}
+#' then \code{xfun} is set to \code{exp}. In this way velocity is in the
+#' untransformed units by default.
 #'
 #' @param object an object inheriting from class \code{sitar}.
 #' @param newdata an optional data frame to be used for obtaining the
 #' predictions, defaulting to the data used to fit \code{object}.
-#' It requires named columns for \code{x}, and for \code{id} if
+#' It requires named columns for \code{x}, and also for \code{id} if
 #' \code{level = 1}, matching the names in \code{object}. Variables with the
-#' reserved names \code{x=.x} or \code{id=.id} take precedence over the model
+#' reserved names \code{x = .x} or \code{id = .id} take precedence over the model
 #' \code{x} and \code{id} variables. Any covariates in
 #' \code{a.formula}, \code{b.formula}, \code{c.formula} or \code{d.formula} can also be included.
 #' By default their values are set to the mean, so when \code{level = 0} the
@@ -23,9 +28,9 @@
 #' @param \dots other optional arguments: \code{asList}, \code{na.action} and
 #' \code{naPattern}.
 #' @param deriv an optional integer specifying predictions corresponding to
-#' either the fitted curve or its derivative. \code{deriv = 0} (default)
+#' the fitted curve and/or its derivative. \code{deriv = 0} (default)
 #' specifies the distance curve, \code{deriv = 1} the velocity curve and
-#' \code{deriv = 2} the acceleration curve.
+#' \code{deriv = 0:1} fits both.
 #' @param abc an optional named vector containing values of a subset of
 #' \code{a}, \code{b}, \code{c} and \code{d}, default \code{NULL}. Ignored if
 #' \code{level = 0}. It gives predictions for a single subject with the
@@ -33,11 +38,11 @@
 #' are set to 0. Alternatively \code{abc} can contain the value for a single id.
 #' @param xfun an optional function to apply to \code{x} to convert it back to
 #' the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
-#' \code{deriv > 0} - see Details.
+#' \code{deriv == 1} - see Details.
 #' @param yfun an optional function to apply to \code{y} to convert it back to
 #' the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.
 #' @return A vector of the predictions, or a list of vectors if \code{asList =
-#' TRUE} and \code{level == 1}, or a data frame if \code{length(level) > 1}.
+#' TRUE} and \code{level == 1}, or a data frame if \code{length(level) * length(deriv) > 1}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{ifun}} for a way to generate the functions \code{xfun}
 #' and \code{yfun} automatically from the \code{sitar} model call.
@@ -67,10 +72,49 @@
                             deriv=0L, abc=NULL,
                             xfun=identity, yfun=identity) {
 
-# derive x-y velocity curve
-    get_vel <- function(x, y, deriv = 1) {
-      smooth.spline(x, y) |>
-        predict(x, deriv = deriv)
+# obtain distance predictions
+    predictions <- function(object, newdata, level, dx = 1e-5, ...) {
+      # browser()
+      if (identical(yfun, identity))
+        yfun <- ifun(object$call.sitar$y)
+      if (identical(xfun, identity))
+        xfun <- ifun(object$call.sitar$x)
+      # offset for mean curve
+      xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
+      # convert object from sitar to nlme
+      object <- structure(object, class = c('nlme', 'lme'))
+      imap_dfr(setNames(level, c('fixed', 'id')[level + 1L]), ~{
+        if (.x == 0L)
+          newdata$x <- xy.id$x - xoffset
+        newdata %>%
+          rownames_to_column('rowname') %>%
+          as_tibble %>%
+          mutate(xc = xfun(x + xoffset),
+                 y = predict(object, ., level = .x),
+                 ym = predict(object, . |> mutate(x = x - dx), level = .x),
+                 yp = predict(object, . |> mutate(x = x + dx), level = .x),
+                 y = if (.x == 0L) y - xy.id$y else y,
+                 y.predict = yfun(y),
+                 v.predict = predict.velocity(y.predict, ym, yp, xc, dx)) %>%
+          select(c(rowname, y.predict, v.predict))
+        # } else {
+        #   newdata %>%
+        #     unnest(c(y, ym, yp), names_sep = '.') %>%
+        #     mutate(across(starts_with('y.predict'), ~yfun(.)),
+        #            v.predict.fixed = predict.velocity(y.predict.fixed, ym.predict.fixed,
+        #                                               yp.predict.fixed, xc, dx),
+        #            v.predict.id = predict.velocity(y.predict.id, ym.predict.id,
+        #                                            yp.predict.id, xc, dx)) %>%
+        #     select(!starts_with('ym') & !starts_with('yp') & !starts_with('x')) %>%
+        #     select(-y.id)
+      }, .id = 'level') %>%
+        pivot_wider(names_from = 'level', values_from = c(y.predict, v.predict),
+                    names_sep = '.') %>%
+        select(-rowname)
+    }
+# derive velocity predictions
+    predict.velocity <- function(y, ym, yp, xc, dx) {
+      (yp - ym) / dx / 2 / Dxy(object, y, 'y') * Dxy(object, xc, 'x')
     }
 # apply differential of x or y to variable
     Dxy <- function(object, var, which = c('x', 'y')) {
@@ -86,12 +130,12 @@
     re <- ranef(object)
 # ensure level is integral
     level <- as.integer(level)
-# ensure deriv is integral and unique
-    deriv <- as.integer(max(deriv))
+# ensure deriv is integral
+    deriv <- as.integer(deriv)
 # check if old-style object lacking fitnlme
     if (!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')
-      object <- update(object, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0))
+      object <- update(object, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0L))
     }
 # attach object for fitnlme
     on.exit(detach(object))
@@ -110,7 +154,7 @@
 # identify covariates in model (not x or coef)
     argnames <- names(formals(fitnlme))
     argnames <- argnames[!argnames %in% names(coef(object))][-1]
-    if (length(argnames) > 0) {
+    if (length(argnames) > 0L) {
 # drop any factors in covnames
       covnames <- names(newdata)
       covnames <- covnames[covnames %in% argnames]
@@ -118,7 +162,7 @@
       notnames <- argnames[!argnames %in% covnames]
       newdata[, notnames] <- 0
 # centre covariates in newdata (using means from sitar)
-      if (length(covnames) > 0) {
+      if (length(covnames) > 0L) {
         gd <- update(object, returndata=TRUE)
         covmeans <- attr(gd, 'scaled:center')
         for (i in covnames)
@@ -129,14 +173,14 @@
     subset <- attr(newdata, 'subset')
 # centre covariates not in newdata to mean gd
     if (!is.null(subset)) {
-      if (exists('notnames') && length(notnames) > 0) {
+      if (exists('notnames') && length(notnames) > 0L) {
         if (!exists('gd'))
           gd <- update(object, returndata=TRUE)
         for (i in notnames)
           newdata[, i] <- mean(gd[subset, i])
       }
     }
-# centre random effects
+# centre random effects for level 0
     re <- scale(re, scale = FALSE)
     re.mean <- data.frame(t(attr(re, 'scaled:center')))
     re.mean <- re.mean[rep(1, nrow(newdata)), , drop = FALSE]
@@ -150,93 +194,54 @@
       warning('xoffset set to mean(x) - best to refit model')
     }
     newdata$x <- x - xoffset
+# check abc and set level accordingly
+    if (!is.null(abc)) {
+      if (is.null(names(abc)) && length(abc) == 1 &&
+          as.character(abc) %in% rownames(re))
+      # abc is id
+        level <- 1L
+      else if (!is.null(names(abc)) && all(names(abc) %in% names(re.mean))) {
+        # abc is offset from re.mean
+        level <- 0L
+        for (i in names(abc))
+          re.mean[i] <- re.mean[i] + abc[i]
+        abc <- NULL
+      } else
+        stop('abc unrecognised')
+    }
 # create id in newdata
-    id <- rownames(re)
     newdata$id <- if ('.id' %in% names(newdata))
       newdata$.id
-    else {
-      if (any(level == 1L) && is.null(abc))
-        eval(oc$id, newdata)
-      else
-        factor(1, labels=id[1])
-    }
-# check if abc is id
-    if (all(level == 0L))
-      abc <- NULL
-    else if (!is.null(abc) && is.null(names(abc)) &&
-             length(abc) == 1 && as.character(abc) %in% rownames(re)) {
-      newdata$id <- abc
-      abc <- NULL
-    }
-    id <- newdata$id
-# adjust abc for mean ranef
-    if (!is.null(abc)) {
-      abc.t <- re.mean
-      for (i in names(abc.t))
-        if (!is.na(abc[i]))
-          abc.t[, i] <- abc.t[, i] + abc[i]
-      abc <- abc.t
-    }
-# create nlme object
-    object.nlme <- structure(object, class = c('nlme', 'lme'))
-# DISTANCE
-# level 1 prediction
-    if (is.null(abc))
-      pred <- predict(object.nlme, newdata)
-    else {
-      xy.id <- xyadj(object, x = x, id = id, abc = abc)
-      newdata$x <- xy.id$x - xoffset
-      pred <- predict(object.nlme, newdata, level = 0L) - xy.id$y
-    }
-    pred <- yfun(pred)
-# level 0 prediction
-    xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
-    newdata$x <- xy.id$x - xoffset
-    pred0.raw <- predict(object.nlme, newdata, level=0L) - xy.id$y
-    pred0 <- yfun(pred0.raw)
-    if (deriv > 0L) {
-# VELOCITY
-# level 0 prediction
-      if (!'.groups' %in% names(newdata)) {
-        pred0 <- get_vel(xfun(x), pred0, deriv)$y
-# or if grouped opt dv
-      } else {
-        pred0 <- newdata %>%
-          mutate(x = !!x,
-                 pred0 = !!pred0,
-                 n = 1:n()) %>%
-          nest_by(.data$.groups) %>%
-          mutate(vel = list(with(.data$data, get_vel(xfun(x), pred0, deriv)$y))) %>%
-          unnest(cols = c(.data$data, .data$vel)) %>%
-          arrange(n) %>%
-          pull(.data$vel)
-      }
-      if (any(level == 1L)) {
-# level 1 prediction
-# velocity curve on back-transformed axes
-    # shift x to mean curve equivalents
-        x.id <- xyadj(object, x = x, id = id, abc = abc)$x
-    # unique mean spline curve on transformed x-y scales
-        pred <- get_vel(x, pred0.raw, deriv) %>% as_tibble() %>% unique() %>%
-    # fit mean velocity curve
-          spline(., method = 'natural', xout = x.id) %>% as_tibble() %>% pull(.data$y) %>%
-    # shift and scale to individual velocities
-          xyadj(object, x = 0, v = ., id = id, abc = abc, tomean = FALSE) %>% as_tibble() %>%
-    # adjust for y and x transformations
-          mutate(v = .data$v / Dxy(object, pred, 'y') * Dxy(object, xfun(!!x), 'x')) %>% pull(.data$v)
-      }
-    }
-# return data frame if level 0:1
-    if (length(level) > 1L)
-      return(data.frame(id=factor(id), predict.fixed=pred0, predict.id=pred))
-# add names or split by id if level 1
-    if (level == 0L)
-      pred <- pred0
-    asList <- ifelse(is.null(asList <- eval(mc$asList)), FALSE, asList)
-    if (asList)
-      pred <- split(pred, id)
     else
-      names(pred) <- id
-    attr(pred, 'label') <- 'Predicted values'
-    return(pred)
+      if (any(level == 1L)) {
+        if (!is.null(abc))
+          factor(1, labels = abc)
+        else
+          eval(oc$id, newdata)
+      } else
+        factor(1, labels = rownames(re)[1])
+    id <- newdata$id
+# predictions
+    output <- predictions(object, newdata, level = level)
+# return columns of data frame
+    # single column
+    if (length(level) * length(deriv) == 1L) {
+      output <- output %>%
+        pull(length(output) - 1L + deriv)
+    # split by id?
+      asList <- ifelse(is.null(asList <- eval(mc$asList)), FALSE, asList)
+      if (asList && level == 1L)
+        output <- split(output, id)
+      return(output)
+    }
+    # multiple columns
+    else {
+      cols <- if (length(level) == 1L) {
+        c(1L:(length(output) - 2L), length(output) - 1L + deriv)
+      } else {
+        c(1L:(length(output) - 4L), length(output) - 3L + c(outer(level, deriv * 2L, `+`)))
+      }
+      return(output %>%
+               select(cols))
+    }
   }
