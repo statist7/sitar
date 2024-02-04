@@ -56,6 +56,8 @@ the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
 \value{
 A vector of the predictions, or a list of vectors if \code{asList =
 TRUE} and \code{level == 1}, or a data frame if \code{length(level) * length(deriv) > 1}.
+The data frame column names are (a subset of): \code{(id, predict.fixed,
+predict.id, vel.predict.fixed, vel.predict.id)}.
 }
 \description{
 Predict method for \code{sitar} objects, based on \code{predict.lme}.

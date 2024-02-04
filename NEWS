@@ -1,5 +1,8 @@
 Changes in Version 1.4.1
 
+  o predict.sitar now calculates velocity as dy/dx rather than assuming a
+    spline velocity curve, which is simpler and faster.
+
   o The d random effect now has an alternative parameterisation, controlled by
     the sitar argument d.adjusted. The age slope d is the regression coefficient
     of y on x, and when d.adjusted == TRUE x is first adjusted for random

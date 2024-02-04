@@ -43,6 +43,8 @@
 #' the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.
 #' @return A vector of the predictions, or a list of vectors if \code{asList =
 #' TRUE} and \code{level == 1}, or a data frame if \code{length(level) * length(deriv) > 1}.
+#' The data frame column names are (a subset of): \code{(id, predict.fixed,
+#' predict.id, vel.predict.fixed, vel.predict.id)}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @seealso \code{\link{ifun}} for a way to generate the functions \code{xfun}
 #' and \code{yfun} automatically from the \code{sitar} model call.
@@ -66,15 +68,14 @@
 #'
 #' @importFrom rlang .data
 #' @importFrom dplyr arrange mutate n nest_by pull
+#' @importFrom tibble rownames_to_column
 #' @importFrom tidyr unnest
 #' @export
   predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
                             deriv=0L, abc=NULL,
                             xfun=identity, yfun=identity) {
-
-# obtain distance predictions
+# obtain distance and velocity predictions
     predictions <- function(object, newdata, level, dx = 1e-5, ...) {
-      # browser()
       if (identical(yfun, identity))
         yfun <- ifun(object$call.sitar$y)
       if (identical(xfun, identity))
@@ -83,38 +84,29 @@
       xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
       # convert object from sitar to nlme
       object <- structure(object, class = c('nlme', 'lme'))
-      imap_dfr(setNames(level, c('fixed', 'id')[level + 1L]), ~{
-        if (.x == 0L)
+      # calculate predictions by level
+      map_dfr(setNames(level, c('fixed', 'id')[level + 1L]), \(ilevel){
+        if (ilevel == 0L)
           newdata$x <- xy.id$x - xoffset
         newdata %>%
           rownames_to_column('rowname') %>%
           as_tibble %>%
           mutate(xc = xfun(x + xoffset),
-                 y = predict(object, ., level = .x),
-                 ym = predict(object, . |> mutate(x = x - dx), level = .x),
-                 yp = predict(object, . |> mutate(x = x + dx), level = .x),
-                 y = if (.x == 0L) y - xy.id$y else y,
-                 y.predict = yfun(y),
-                 v.predict = predict.velocity(y.predict, ym, yp, xc, dx)) %>%
-          select(c(rowname, y.predict, v.predict))
-        # } else {
-        #   newdata %>%
-        #     unnest(c(y, ym, yp), names_sep = '.') %>%
-        #     mutate(across(starts_with('y.predict'), ~yfun(.)),
-        #            v.predict.fixed = predict.velocity(y.predict.fixed, ym.predict.fixed,
-        #                                               yp.predict.fixed, xc, dx),
-        #            v.predict.id = predict.velocity(y.predict.id, ym.predict.id,
-        #                                            yp.predict.id, xc, dx)) %>%
-        #     select(!starts_with('ym') & !starts_with('yp') & !starts_with('x')) %>%
-        #     select(-y.id)
+                 y = predict(object, ., level = ilevel),
+                 ylo = predict(object, . |> mutate(x = x - dx), level = ilevel),
+                 yhi = predict(object, . |> mutate(x = x + dx), level = ilevel),
+                 y = if (ilevel == 0L) .data$y - xy.id$y else .data$y,
+                 predict = yfun(.data$y),
+                 # calculate velocity as dy/dx
+                 vel.predict = (.data$yhi - .data$ylo) / dx / 2 /
+                   Dxy(object, .data$predict, 'y') * Dxy(object, .data$xc, 'x')) %>%
+          select(c(id, .data$rowname, predict, .data$vel.predict))
       }, .id = 'level') %>%
-        pivot_wider(names_from = 'level', values_from = c(y.predict, v.predict),
+        pivot_wider(names_from = 'level', values_from = c(predict, .data$vel.predict),
                     names_sep = '.') %>%
-        select(-rowname)
-    }
-# derive velocity predictions
-    predict.velocity <- function(y, ym, yp, xc, dx) {
-      (yp - ym) / dx / 2 / Dxy(object, y, 'y') * Dxy(object, xc, 'x')
+        mutate(across(ends_with('.fixed'), unname),
+               across(ends_with('.id'), ~setNames(., id))) %>%
+        select(-.data$rowname)
     }
 # apply differential of x or y to variable
     Dxy <- function(object, var, which = c('x', 'y')) {
@@ -128,10 +120,10 @@
     oc <- object$call.sitar
 # random effects
     re <- ranef(object)
-# ensure level is integral
-    level <- as.integer(level)
-# ensure deriv is integral
-    deriv <- as.integer(deriv)
+# ensure level is subset of 0:1
+    level <- intersect(as.integer(level), 0L:1L)
+# ensure deriv is subset of 0:1
+    deriv <- intersect(as.integer(deriv), 0L:1L)
 # check if old-style object lacking fitnlme
     if (!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')
@@ -152,7 +144,7 @@
       covnames <- c(covnames, names(extra))
     }
 # identify covariates in model (not x or coef)
-    argnames <- names(formals(fitnlme))
+    argnames <- names(formals(object$fitnlme))
     argnames <- argnames[!argnames %in% names(coef(object))][-1]
     if (length(argnames) > 0L) {
 # drop any factors in covnames
@@ -204,7 +196,7 @@
         # abc is offset from re.mean
         level <- 0L
         for (i in names(abc))
-          re.mean[i] <- re.mean[i] + abc[i]
+          re.mean[, i] <- re.mean[, i] + abc[i]
         abc <- NULL
       } else
         stop('abc unrecognised')
@@ -227,21 +219,16 @@
     # single column
     if (length(level) * length(deriv) == 1L) {
       output <- output %>%
-        pull(length(output) - 1L + deriv)
+        pull(deriv + 2L)
     # split by id?
       asList <- ifelse(is.null(asList <- eval(mc$asList)), FALSE, asList)
       if (asList && level == 1L)
         output <- split(output, id)
-      return(output)
     }
     # multiple columns
-    else {
-      cols <- if (length(level) == 1L) {
-        c(1L:(length(output) - 2L), length(output) - 1L + deriv)
-      } else {
-        c(1L:(length(output) - 4L), length(output) - 3L + c(outer(level, deriv * 2L, `+`)))
-      }
-      return(output %>%
-               select(cols))
+    else if (length(level) == 2L && length(deriv) == 1L) {
+      output <- output %>%
+      select(1L, 2L:3L + deriv * 2L)
     }
+    return(output)
   }
