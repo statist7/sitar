@@ -1,7 +1,9 @@
 Changes in Version 1.4.1
 
-  o predict.sitar now calculates velocity as dy/dx rather than assuming a
-    spline velocity curve, which is simpler and faster.
+  o predict.sitar now calculates velocity by differentiating each point (as dy/dx)
+    rather than differentiating the mean spline curve. This means it handles
+    velocities at a single age, and can return predicted distance and velocity
+    for both levels 0 and 1.
 
   o The d random effect now has an alternative parameterisation, controlled by
     the sitar argument d.adjusted. The age slope d is the regression coefficient
