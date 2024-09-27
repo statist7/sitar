@@ -80,7 +80,7 @@
 #' @param na.action function for when the data contain NAs (see
 #' \code{\link{nlme}}).
 #' @param control list of control values for the estimation algorithm (see
-#' \code{\link{nlme}}) (default {nlmeControl(returnObject = TRUE)}).
+#' \code{\link{nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).
 #' @param keep.data logical to control saving \code{data} as part of the model
 #' object (default TRUE).
 #' @param object object of class \code{sitar}.

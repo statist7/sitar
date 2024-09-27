@@ -20,7 +20,7 @@
 #' (or gamma) is velocity, and indicates how the x scale is stretched or shrunk
 #' reflecting the rate at which 'time' passes for individuals. Effect d is a
 #' rotation in the plane. The aim is for
-#' individual curves, adjusted for {abcd} to lie on top of (i.e. be
+#' individual curves, adjusted for \{abcd\} to lie on top of (i.e. be
 #' superimposed on) the mean curve.
 #'
 #' The package creates an object of class \code{sitar}, based on \pkg{nlme},
@@ -90,5 +90,4 @@
 #' Ward KA, Cole TJ, Laskey MA, et al. The Effect of Prepubertal Calcium
 #' Carbonate Supplementation on Skeletal Development in Gambian Boys-A 12-Year
 #' Follow-Up Study. J C E M 2014;99:3169-76.
-#' @keywords package
-NULL
+"_PACKAGE"
