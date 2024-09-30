@@ -140,8 +140,9 @@
     if (length(factornames) > 0L) {
       extra <- eval(parse(text = paste(c("~0", factornames), collapse = "+"))[[1]])
       extra <- as_tibble(model.matrix(extra, newdata))
+      # ensure valid names to match sitar model names
+      names(extra) <- make.names(names(extra), unique = TRUE)
       newdata <- bind_cols(newdata, extra)
-      covnames <- c(covnames, names(extra))
     }
 # identify covariates in model (not x or coef)
     argnames <- names(formals(object$fitnlme))
