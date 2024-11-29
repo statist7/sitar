@@ -76,10 +76,8 @@
                             xfun=identity, yfun=identity) {
 # obtain distance and velocity predictions
     predictions <- function(object, newdata, level, dx = 1e-5, ...) {
-      if (identical(yfun, identity))
-        yfun <- ifun(object$call.sitar$y)
-      if (identical(xfun, identity))
-        xfun <- ifun(object$call.sitar$x)
+      xfun <- ifun(object$call.sitar$x)
+      yfun <- ifun(object$call.sitar$y)
       # offset for mean curve
       xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
       # convert object from sitar to nlme
