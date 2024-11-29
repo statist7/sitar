@@ -96,7 +96,7 @@ getDV <- function(object, x = 'apv') {
                          xmax = max(pick(1)),
                          .groups = 'drop'),
              by = idname) %>%
-    mutate(missing = !between(pick(2) %>% pull(), xmin, xmax)) %>%
-    select(-c(xmin, xmax))
+    mutate(missing = !between(pick(2) %>% pull(), .data$xmin, .data$xmax)) %>%
+    select(-c(.data$xmin, .data$xmax))
 }
 

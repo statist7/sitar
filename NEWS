@@ -1,5 +1,8 @@
 Changes in Version 1.4.1
 
+  o New function getDV returns peak velocity and age at peak velocity for
+    individuals, including those with a truncated growth curve - see the example.
+
   o predict.sitar now calculates velocity by differentiating each point (as dy/dx)
     rather than differentiating the mean spline curve. This means it handles
     velocities at a single age, and can return predicted distance and velocity
