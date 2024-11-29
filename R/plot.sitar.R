@@ -180,13 +180,14 @@
 #' geom_line(show.legend = FALSE)
 #' }
 
-#' @importFrom grDevices xy.coords
-#' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
-#' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr mutate rename filter nest_by select slice
-#' @importFrom tidyr expand_grid
-#' @importFrom rlang .data as_label %||%
+#' @importFrom dplyr distinct filter group_by join_by left_join mutate nest_by pull rename rowwise select slice slice_head summarise
 #' @importFrom glue glue
+#' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
+#' @importFrom grDevices xy.coords
+#' @importFrom purrr map_lgl
+#' @importFrom rlang .data as_label %||%
+#' @importFrom tibble tibble as_tibble
+#' @importFrom tidyr expand_grid unnest
 #' @export
 plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=identity, subset=NULL,
                        ns=101, design=NULL, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
@@ -255,8 +256,8 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
   distance <- velocity <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
                                    design=design) {
 # generate x values across the range to plot mean spline curve
-    dvt <- as_label(match.call()[[1]])
-    dvt <- as.numeric(dvt == 'velocity')
+    deriv <- as_label(match.call()[[1]])
+    deriv <- as.numeric(deriv == 'velocity')
     level <- as.numeric(!is.null(abc))
     design_names <- all.vars(design)
     .x <- xseq(getCovariate(model), ns)
@@ -276,42 +277,89 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     if (sum(subset) < length(subset))
       attr(newdata, 'subset') <- subset
     newdata <- newdata %>%
-      mutate(.y = predict(model, ., level=level, deriv=dvt, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
+      mutate(.y = predict(model, ., level=level, deriv=deriv, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
              .x = xfun(.x),
              .id = getGroups(model)[1])
     newdata
   }
 
-  Distance <- Velocity <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
-                                   design=design) {
-# generate x and id values across the range to plot spline curves
-    dvt <- as_label(match.call()[[1]])
-    dvt <- as.numeric(dvt == 'Velocity')
-    .x <- getCovariate(model)[subset]
-    .id <- getGroups(model)[subset]
-    npt <- ns / diff(range(.x))
+  Distance <- Velocity <- function(model, subset = subset, xfun = xfun, yfun = yfun,
+                                   abc = abc, ns = ns, design = design) {
+
+    # Distance or Velocity?
+    deriv <- as_label(match.call()[[1]])
+    deriv <- as.numeric(deriv == 'Velocity')
+
+    # constants
+    idname <- all.vars(model$call.sitar$id)
+    xexpr <- model$call.sitar$x
+    xname <- all.vars(xexpr)
+    # NB xfun = ifun(xexpr)
+    design_names <- all.vars(design)
+    .id <- NULL # to avoid 'no visible binding for global variable' note
+
+    # create newdata with 1 row per id
     if (is.null(abc)) {
-      . <- by(tibble(.x, .id), .id, function(z) {
-        xrange <- range(z$.x)
-        nt <- ceiling(npt * diff(xrange))
-        tibble(
-          .x=xseq(xrange, nt),
-          .id=z$.id[[1]]
-        )
-      })
-      . <- do.call('rbind', .)
+      newdata <- getData(model)[subset, ] %>%
+        select(.id = idname, any_of(design_names)) %>%
+        distinct()
+
+      # check 1 row per id
+      if (length(design_names) > 0L) {
+        ok_cols <- map_lgl(design_names, ~{
+          newdata %>%
+            select(.data$.id, .data$.x) %>%
+            distinct() %>%
+            summarise(ok = n() == length(unique(.data$.id))) %>%
+            pull()
+        })
+        newdata <- newdata[, c(TRUE, ok_cols), drop = FALSE] %>%
+          distinct()
+      }
+    # abc not null
     } else {
-      . <- tibble(
-        .x=xseq(.x, ns),
-        .id=.id[[1]],
-      )
+      newdata <- getData(model)[subset, ] %>%
+        slice_head() %>%
+        select(.id = idname)
     }
-    . <- mutate(.,
-                .y=predict(model, ., deriv=dvt, abc=abc, xfun=xfun, yfun=yfun),
-                .x=xfun(.x)
-    )
-    .[, c('.x', '.y', '.id')]
-  }
+
+    # conditional select doesn't work
+    #   # check 1 row per id
+    # is.unique <- function(.data, x) {
+    #   .data %>%
+    #     select(.data$.id, {{x}}) %>%
+    #     distinct() %>%
+    #     summarise(ok = n() == length(unique(.data$.id))) %>%
+    #     pull()
+    # }
+    # newdata %>%
+    #   select(!where(~!is.unique(.id, .x))) %>%
+    #   distinct()
+
+    # add x values to each id
+    newdata <- left_join(
+      newdata,
+      getData(model)[subset, ] %>%
+        select(.id = idname, .x = xname) %>%
+        mutate(npt = ns / diff(range(.data$.x))) %>%
+        group_by(.data$.id) %>%
+        summarise(xmin = min(.data$.x),
+                  xmax = max(.data$.x),
+                  nt = ceiling(mean(.data$npt) * (.data$xmax - .data$xmin))) %>%
+        rowwise() %>%
+        mutate(.x = list(seq(.data$xmin, .data$xmax, length.out = .data$nt))) %>%
+        unnest(cols = .data$.x) %>%
+        select(.data$.id, .data$.x) %>%
+        mutate({{xname}} := .data$.x,
+               .x = eval(xexpr)),
+      by = join_by(.id))
+
+    # get predictions
+    newdata %>%
+      mutate(.y = predict(model, ., deriv = deriv, abc = abc, xfun = xfun, yfun = yfun),
+             .x = xfun(.data$.x)) %>%
+      select(.data$.x, .data$.y, .data$.id)
+    }
 
   unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
 # unadjusted individual curves
