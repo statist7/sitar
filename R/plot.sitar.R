@@ -308,7 +308,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
       if (length(design_names) > 0L) {
         ok_cols <- map_lgl(design_names, ~{
           newdata %>%
-            select(.data$.id, .data$.x) %>%
+            select(.data$.id, .x) %>%
             distinct() %>%
             summarise(ok = n() == length(unique(.data$.id))) %>%
             pull()
