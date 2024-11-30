@@ -71,9 +71,9 @@
 #' @importFrom tibble rownames_to_column
 #' @importFrom tidyr unnest
 #' @export
-  predict.sitar <- function(object, newdata=getData(object), level=1L, ...,
-                            deriv=0L, abc=NULL,
-                            xfun=identity, yfun=identity) {
+  predict.sitar <- function(object, newdata = getData(object), level = 1L, ...,
+                            deriv = 0L, abc = NULL,
+                            xfun = identity, yfun = identity) {
 # obtain distance and velocity predictions
     predictions <- function(object, newdata, level, dx = 1e-5, ...) {
       xfun <- ifun(object$call.sitar$x)
@@ -81,15 +81,14 @@
       # offset for mean curve
       xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
       # convert object from sitar to nlme
-      object <- structure(object, class = c('nlme', 'lme'))
+      class(object) <- setdiff(class(object), 'sitar')
       # calculate predictions by level
       map_dfr(setNames(level, c('fixed', 'id')[level + 1L]), \(ilevel){
-        if (ilevel == 0L)
-          newdata$x <- xy.id$x - xoffset
         newdata %>%
           rownames_to_column('rowname') %>%
           as_tibble %>%
-          mutate(xc = xfun(x + xoffset),
+          mutate(x = ifelse(ilevel == 0L, xy.id$x - xoffset, x),
+                 xc = xfun(x + xoffset),
                  y = predict(object, ., level = ilevel),
                  ylo = predict(object, . |> mutate(x = x - dx), level = ilevel),
                  yhi = predict(object, . |> mutate(x = x + dx), level = ilevel),
