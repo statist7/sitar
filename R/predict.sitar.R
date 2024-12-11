@@ -129,41 +129,45 @@
 # attach object for fitnlme
     on.exit(detach(object))
     eval(parse(text='attach(object)'))
-# identify sitar formula covariates in newdata
+# identify sitar formula covariates
     covnames <- all.vars(asOneFormula(oc$a.formula, oc$b.formula, oc$c.formula, oc$d.formula))
-    covnames <- covnames[covnames %in% names(newdata)]
-# if non-numeric add linear contrasts to newdata
-    factornames <- covnames[unlist(lapply(covnames, function(x) !is.numeric(with(newdata, get(x)))))]
-    if (length(factornames) > 0L) {
-      extra <- eval(parse(text = paste(c("~0", factornames), collapse = "+"))[[1]])
-      extra <- as_tibble(model.matrix(extra, newdata))
-      # ensure valid names to match sitar model names
-      names(extra) <- make.names(names(extra), unique = TRUE)
-      newdata <- bind_cols(newdata, extra)
-    }
-# identify covariates in model (not x or coef)
-    argnames <- names(formals(object$fitnlme))
-    argnames <- argnames[!argnames %in% names(coef(object))][-1]
-    if (length(argnames) > 0L) {
-# drop any factors in covnames
-      covnames <- names(newdata)
-      covnames <- covnames[covnames %in% argnames]
-# set to 0 covariates not in newdata
-      notnames <- argnames[!argnames %in% covnames]
-      newdata[, notnames] <- 0
-# centre covariates in newdata (using means from sitar)
-      if (length(covnames) > 0L) {
-        gd <- update(object, returndata=TRUE)
-        covmeans <- attr(gd, 'scaled:center')
-        for (i in covnames)
-          newdata[, i] <- newdata[, i] - covmeans[i]
+# covariates also in newdata
+    yesnames <- intersect(covnames, names(newdata))
+# covariates not in newdata
+    notnames <- setdiff(covnames, yesnames)
+    newdata[, notnames] <- NA
+# if groups add linear contrasts to newdata
+    if (length(yesnames) > 0L) {
+      groupnames <- yesnames[sapply(yesnames, function(x) !is.numeric(getData(object)[[x]]))]
+      if (length(groupnames) > 0L) {
+# convert newdata to factors
+        for (i in groupnames) {
+          storage.mode(newdata[[i]]) <- storage.mode(getData(object)[[i]])
+          attributes(newdata[[i]]) <- attributes(getData(object)[[i]])
+        }
+        extra <- formula(paste(c("~1", groupnames), collapse = "+"))
+        extra <- as_tibble(model.matrix(extra, newdata))[-1]
+# ensure valid names to match sitar model names
+        names(extra) <- make.names(names(extra), unique = TRUE)
+        newdata <- bind_cols(newdata, extra)
       }
+# centre covariates in newdata (using means from sitar)
+      gd <- update(object, returndata=TRUE)
+      covmeans <- attr(gd, 'scaled:center')
+# covariates and contrasts in model
+      allnames <- setdiff(formalArgs(object$fitnlme), names(coef(object)))[-1]
+      for (i in allnames)
+        if (is.numeric(newdata[, i]))
+          newdata[, i] <- newdata[, i] - covmeans[i]
     }
+# set covariates not in newdata to 0
+    if (length(notnames) > 0L) {
 # check if subset from plot
-    subset <- attr(newdata, 'subset')
+      subset <- attr(newdata, 'subset')
 # centre covariates not in newdata to mean gd
-    if (!is.null(subset)) {
-      if (exists('notnames') && length(notnames) > 0L) {
+      if (is.null(subset)) {
+        newdata[, notnames] <- 0
+      } else {
         if (!exists('gd'))
           gd <- update(object, returndata=TRUE)
         for (i in notnames)

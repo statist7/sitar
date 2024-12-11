@@ -180,12 +180,14 @@
 #' geom_line(show.legend = FALSE)
 #' }
 
-#' @importFrom dplyr distinct filter group_by join_by left_join mutate nest_by pull rename rowwise select slice slice_head summarise
+#' @importFrom dplyr desc distinct filter group_by join_by left_join mutate nest_by pull rename rowwise select slice slice_head summarise
 #' @importFrom glue glue
 #' @importFrom graphics plot axis identify legend lines locator par text title mtext abline
 #' @importFrom grDevices xy.coords
+#' @importFrom methods formalArgs
 #' @importFrom purrr map_lgl
 #' @importFrom rlang .data as_label %||%
+#' @importFrom stats formula
 #' @importFrom tibble tibble as_tibble
 #' @importFrom tidyr expand_grid unnest
 #' @export
@@ -261,19 +263,17 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     level <- as.numeric(!is.null(abc))
     design_names <- all.vars(design)
     .x <- xseq(getCovariate(model), ns)
-    newdata <- tibble()
-    if (length(design_names) > 0L) {
-      newdata <- getData(model)[subset, ] %>%
-        select(all_of(design_names)) %>%
-        select(!where(is.numeric)) %>%
-        unique()
-      if (length(newdata) > 0)
-        newdata <- newdata %>%
-          mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
-          expand_grid(.x, .)
+    newdata <- getData(model)[subset, ] %>%
+      select(all_of(design_names)) %>%
+      select(!where(is.numeric)) %>%
+      distinct()
+    if (length(newdata) > 0L) {
+      newdata <- newdata %>%
+        mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
+        expand_grid(.x, .)
+      } else {
+        newdata <- tibble(.x)
     }
-    if (length(newdata) == 0)
-      newdata <- tibble(.x)
     if (sum(subset) < length(subset))
       attr(newdata, 'subset') <- subset
     newdata <- newdata %>%
@@ -351,14 +351,15 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
         unnest(cols = .data$.x) %>%
         select(.data$.id, .data$.x) %>%
         mutate({{xname}} := .data$.x,
-               .x = eval(xexpr)),
+               .x = eval(xexpr)) %>%
+        select(-matches(xname)),
       by = join_by(.id))
 
     # get predictions
     newdata %>%
       mutate(.y = predict(model, ., deriv = deriv, abc = abc, xfun = xfun, yfun = yfun),
              .x = xfun(.data$.x)) %>%
-      select(.data$.x, .data$.y, .data$.id)
+      select(.data$.x, .data$.y, .data$.id, everything())
     }
 
   unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
@@ -588,33 +589,38 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
 
   # save and print vertical line(s) at age of peak velocity
   if (apv) {
-    # single curve
-    xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=~1),
-                   setNames(getPeak(.x, .y), c('apv', 'pv')))
-    print(signif(xy$apv, 4))
-    # multiple smooth curves (opt D | V or grouped d | v) or abc
     pt <- pt %>%
       ungroup %>%
-      filter(.data$optmult & .data$optsmooth) %>%
+      filter(.data$optsmooth) %>%
+      arrange(desc(.data$optmult), desc(options)) %>% # put vV options first
       slice(1)
-    # velocity or distance ?
-    options <- pt %>%
-      pull(options) %>%
-      toupper
-    # derive apvs
-    if (nrow(pt) > 0)
+
+    if (nrow(pt) > 0) {
+      # velocity or distance ?
+      options <- pt %>%
+        pull(options) %>%
+        toupper
+
+      # derive apvs
       xy$apv <- pt %>%
       select(data) %>%
       unnest(data) %>%
       nest_by({{nid}}, .keep = TRUE) %>%
-      mutate(xy = list(getPeakTrough(data[[1]], data[[2]], Dy = options == 'D') %>% t %>% as_tibble)) %>%
+      mutate(xy = list(getPeakTrough(data[, 1:2], Dy = options == 'D') %>%
+                         t %>%
+                         as_tibble)) %>%
       select(-data) %>%
       unnest(xy) %>%
       ungroup %>%
       rename_with(~c(as.character(nid), 'apv', 'pv'))
 
+    } else {
+      xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=design),
+                     setNames(getPeak(.x, .y), c('apv', 'pv')))
+    }
+
     # plot apvs
-    do.call('abline', list(v=unlist(xy$apv['apv']), lty=3))
+    do.call('abline', list(v=xy$apv[['apv']], lty=3))
   }
   # return xy
   invisible(xy)
