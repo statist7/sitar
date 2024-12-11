@@ -27,13 +27,14 @@ Imports:
     forcats,
     ggplot2,
     glue,
+    magrittr,
+    methods,
     purrr,
     rlang,
     rsample,
     stats,
     tibble,
-    tidyr,
-    magrittr
+    tidyr
 Suggests: 
     knitr,
     rmarkdown
