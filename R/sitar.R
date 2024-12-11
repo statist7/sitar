@@ -371,8 +371,9 @@ sitar <-
     ss <- paste(ss, collapse = ',')
 
     #	combine model elements
-    cglue <- function(x, start, end)
+    cglue <- function(x, start, end) {
       ifelse (x == '', x, glue(start, x, end))
+    }
 
     nsa <- cglue(model['a'], '', '')
     nsb <- cglue(model['b'], '-(', ')')
