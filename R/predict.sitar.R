@@ -87,7 +87,7 @@
         newdata %>%
           rownames_to_column('rowname') %>%
           as_tibble %>%
-          mutate(x = ifelse(ilevel == 0L, xy.id$x - xoffset, x),
+          mutate(x = if (ilevel == 0L) xy.id$x - xoffset else x,
                  xc = xfun(x + xoffset),
                  y = predict(object, ., level = ilevel),
                  ylo = predict(object, . |> mutate(x = x - dx), level = ilevel),

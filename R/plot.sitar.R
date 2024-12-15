@@ -345,7 +345,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
         group_by(.data$.id) %>%
         summarise(xmin = min(.data$.x),
                   xmax = max(.data$.x),
-                  nt = ceiling(mean(.data$npt) * (.data$xmax - .data$xmin))) %>%
+                  nt = ceiling(mean(.data$npt) * (.data$xmax - .data$xmin)) + 1) %>%
         rowwise() %>%
         mutate(.x = list(seq(.data$xmin, .data$xmax, length.out = .data$nt))) %>%
         unnest(cols = .data$.x) %>%
@@ -591,36 +591,34 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
   if (apv) {
     pt <- pt %>%
       ungroup %>%
-      filter(.data$optsmooth) %>%
-      arrange(desc(.data$optmult), desc(options)) %>% # put vV options first
+      filter(tolower(.data$options) == 'v') %>%
       slice(1)
 
+    # derive apv(s) from option v/V
     if (nrow(pt) > 0) {
-      # velocity or distance ?
-      options <- pt %>%
-        pull(options) %>%
-        toupper
-
-      # derive apvs
       xy$apv <- pt %>%
-      select(data) %>%
-      unnest(data) %>%
-      nest_by({{nid}}, .keep = TRUE) %>%
-      mutate(xy = list(getPeakTrough(data[, 1:2], Dy = options == 'D') %>%
+        select(data) %>%
+        unnest(data) %>%
+        nest_by({{nid}}, .keep = TRUE) %>%
+        mutate(xy = list(getPeak(data[, 1:2]) %>%
                          t %>%
                          as_tibble)) %>%
-      select(-data) %>%
-      unnest(xy) %>%
-      ungroup %>%
-      rename_with(~c(as.character(nid), 'apv', 'pv'))
+        select(-data) %>%
+        unnest(xy) %>%
+        ungroup %>%
+        rename_with(~c(as.character(nid), 'apv', 'pv'))
 
+    # no vV option so calculate directly
     } else {
       xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=design),
-                     setNames(getPeak(.x, .y), c('apv', 'pv')))
+                     setNames(getPeak(.x, .y), c('apv', 'pv'))) %>% t() %>% as_tibble()
     }
 
     # plot apvs
     do.call('abline', list(v=xy$apv[['apv']], lty=3))
+
+    if (nrow(xy$apv) == 1L)
+      print(xy$apv[c('apv', 'pv')])
   }
   # return xy
   invisible(xy)
