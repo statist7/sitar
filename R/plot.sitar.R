@@ -19,9 +19,8 @@
 #'
 #' For models that include categorical fixed effects (e.g. \code{a.formula = ~sex + region})
 #' the options 'dv' plot mean curves for each distinct group. Any continuous (as opposed
-#' to grouped) fixed effect variables are set to their mean values in the plots, to ensure that the mean curves are
-#' smooth. Setting \code{design} allows the grouping variables to be selected, e.g. \code{design = ~sex},
-#' and \code{design = ~1} gives a single mean curve. The resulting plots can
+#' to grouped) fixed effect variables are set to their mean values in the plots, to ensure
+#' that the mean curves are smooth. The resulting plots can
 #' be formatted with \code{par} in the usual way, indexed either by the individual grouping
 #' variables (e.g. \code{sex} or \code{region} in the example) or the subject
 #' factor \code{id} which indexes all the distinct plots.
@@ -76,10 +75,6 @@
 #' original \code{sitar} call.
 #' @param ns scalar defining the number of points for spline curves
 #' (default 101).
-#' @param design formula defining the variables to use to group data for multiple
-#' mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
-#' all the categorical variables named in \code{a.formula}, \code{b.formula},
-#' \code{c.formula} and \code{d.formula}.
 #' @param abc vector of named values of random effects a, b, c and d used to
 #' define an individual growth curve, e.g. abc = c(a = 1, c = -0.1). Alternatively a
 #' single character string defining an \code{id} level whose random effect
@@ -115,7 +110,7 @@
 #' invisibly either a tibble or named list of tibbles,
 #' containing the data to be plotted. The helper functions each return a tibble
 #' where the first three variables are '.x', '.y' and '.id', plus
-#' variable '.groups' for curves grouped by \code{design}) and other covariates in the model.
+#' variable '.groups' and the relevant categorical variables for grouped curves.
 #' Note that '.x' and '.y' are returned
 #' after applying \code{xfun} and \code{yfun}. Hence if for example \code{x = log(age)}
 #' in the SITAR call then '.x' corresponds by default to \code{age}.
@@ -191,12 +186,12 @@
 #' @importFrom tibble tibble as_tibble
 #' @importFrom tidyr expand_grid unnest
 #' @export
-plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=identity, subset=NULL,
-                       ns=101, design=NULL, abc=NULL, trim=0, add=FALSE, nlme=FALSE,
-                       returndata=FALSE, ...,
-                       xlab=NULL, ylab=NULL, vlab=NULL,
-                       xlim=c(NA, NA), ylim=c(NA, NA), vlim=c(NA, NA),
-                       legend=list(x='topleft', inset=0.04, bty='o')) {
+plot.sitar <- function(x, opt="dv", labels = NULL, apv = FALSE, xfun = identity, yfun = identity, subset = NULL,
+                       ns = 101, abc = NULL, trim = 0, add = FALSE, nlme = FALSE,
+                       returndata = FALSE, ...,
+                       xlab = NULL, ylab = NULL, vlab = NULL,
+                       xlim = c(NA, NA), ylim = c(NA, NA), vlim = c(NA, NA),
+                       legend = list(x = 'topleft', inset = 0.04, bty = 'o')) {
 
   plotaxes <- function(data, dv, xlab, ylab, vlab, xlim, ylim, vlim, ...)
 #	dv = 1 for distance, 2 for velocity, 3 for distance and velocity
@@ -209,9 +204,9 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     } else if (dv == 3) {
       mar <- par()$mar
       mar[4] <- mar[2]
-      par(mar=mar)
+      par(mar = mar)
     }
-    dots <- match.call(expand.dots=FALSE)$...
+    dots <- match.call(expand.dots = FALSE)$...
     ARG <- if (!is.null(dots))
       lapply(as.list(dots), eval, data, parent.frame())
     ARG1 <- ARG[names(ARG) != 'y2par']
@@ -220,22 +215,22 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
       ARG2$las <- ARG1$las
 
 #	plot x & y1 axes
-    do.call('plot', c(list(x=xlim, y=ylim, type='n', xlab=xlab, ylab=ylab), ARG1))
+    do.call('plot', c(list(x = xlim, y = ylim, type = 'n', xlab = xlab, ylab = ylab), ARG1))
     #	save x & y1 axis limits
     xy <- list()
     xy$usr <- par('usr')
 #	optionally add right axis
     if (dv == 3) {
-      par(new=TRUE)
-      plot(xlim, vlim, type='n', bty='n', ann=FALSE, axes=FALSE)
+      par(new = TRUE)
+      plot(xlim, vlim, type = 'n', bty = 'n', ann = FALSE, axes = FALSE)
       localaxis <- function(..., col, bg, pch, cex, lty, lwd) axis(...)
-      do.call('localaxis', c(list(side=4), ARG2))
+      do.call('localaxis', c(list(side = 4), ARG2))
       mtext(vlab, 4, par('mgp')[1])
 #	save y2 axis limits
       xy$usr2 <- par('usr')
       eval(parse(text=".par.usr2 <<- par('usr')"))
 #	reset axis limits
-      par(usr=xy$usr)
+      par(usr = xy$usr)
     } else {
 # save null y2 axis limits
       eval(parse(text=".par.usr2 <<- NULL"))
@@ -249,92 +244,76 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     function(v) rc[[1]] + rc[[2]] * v
   }
 
-  xseq <- function(x, n=ns) {
+  xseq <- function(x, n = ns) {
 # n is the number of points across the x range
-    rx <- range(x, na.rm=TRUE)
-    seq(rx[1], rx[2], length.out=n)
+    rx <- range(x, na.rm = TRUE)
+    seq(rx[1], rx[2], length.out = n)
   }
 
-  distance <- velocity <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
-                                   design=design) {
-# generate x values across the range to plot mean spline curve
+  distance <- velocity <- function(model, subset = subset, xfun = xfun, yfun = yfun,
+                                   abc = abc, ns = ns) {
+
+    # distance or velocity?
     deriv <- as_label(match.call()[[1]])
     deriv <- as.numeric(deriv == 'velocity')
+
     level <- as.numeric(!is.null(abc))
-    design_names <- all.vars(design)
-    .x <- xseq(getCovariate(model), ns)
+    mcall <- model$call.sitar
+    covnames <- as.list(mcall)[grepl('.formula', names(mcall))] %>%
+      asOneFormula() %>%
+      all.vars
+
+    .x <- xseq(getCovariate(model)[subset], ns)
     newdata <- getData(model)[subset, ] %>%
-      select(all_of(design_names)) %>%
+      select(all_of(covnames)) %>%
       select(!where(is.numeric)) %>%
-      distinct()
-    if (length(newdata) > 0L) {
-      newdata <- newdata %>%
-        mutate(.groups = factor(paste(!!!lapply(names(.), as.name), sep = '_')), .before = 1) %>%
+      distinct() %>%
+      mutate(.groups = factor(1:n()), .before = 1) %>%
         expand_grid(.x, .)
-      } else {
-        newdata <- tibble(.x)
-    }
+
     if (sum(subset) < length(subset))
       attr(newdata, 'subset') <- subset
+
     newdata <- newdata %>%
-      mutate(.y = predict(model, ., level=level, deriv=deriv, abc=abc, xfun=xfun, yfun=yfun), .after = .x,
+      mutate(.y = predict(model, ., level = level, deriv = deriv, abc = abc),
              .x = xfun(.x),
-             .id = getGroups(model)[1])
+             .id = getGroups(model)[subset][1],
+             .after = .x)
     newdata
   }
 
   Distance <- Velocity <- function(model, subset = subset, xfun = xfun, yfun = yfun,
-                                   abc = abc, ns = ns, design = design) {
+                                   abc = abc, ns = ns) {
 
     # Distance or Velocity?
     deriv <- as_label(match.call()[[1]])
     deriv <- as.numeric(deriv == 'Velocity')
 
     # constants
-    idname <- all.vars(model$call.sitar$id)
-    xexpr <- model$call.sitar$x
+    mcall <- model$call.sitar
+    idname <- all.vars(mcall$id)
+    xexpr <- mcall$x
     xname <- all.vars(xexpr)
     # NB xfun = ifun(xexpr)
-    design_names <- all.vars(design)
+    covnames <- as.list(mcall)[grepl('.formula', names(mcall))] %>%
+      asOneFormula() %>%
+      all.vars
     .id <- NULL # to avoid 'no visible binding for global variable' note
 
-    # create newdata with 1 row per id
+    # create newdata with 1 row per id/group
     if (is.null(abc)) {
       newdata <- getData(model)[subset, ] %>%
-        select(.id = idname, any_of(design_names)) %>%
-        distinct()
+        select(.id = idname, any_of(covnames)) %>%
+        distinct() %>%
+        mutate(.groups = 1:n(), .before = 1) %>%
+        as_tibble()
 
-      # check 1 row per id
-      if (length(design_names) > 0L) {
-        ok_cols <- map_lgl(design_names, ~{
-          newdata %>%
-            select(.data$.id, .x) %>%
-            distinct() %>%
-            summarise(ok = n() == length(unique(.data$.id))) %>%
-            pull()
-        })
-        newdata <- newdata[, c(TRUE, ok_cols), drop = FALSE] %>%
-          distinct()
-      }
     # abc not null
     } else {
       newdata <- getData(model)[subset, ] %>%
         slice_head() %>%
         select(.id = idname)
     }
-
-    # conditional select doesn't work
-    #   # check 1 row per id
-    # is.unique <- function(.data, x) {
-    #   .data %>%
-    #     select(.data$.id, {{x}}) %>%
-    #     distinct() %>%
-    #     summarise(ok = n() == length(unique(.data$.id))) %>%
-    #     pull()
-    # }
-    # newdata %>%
-    #   select(!where(~!is.unique(.id, .x))) %>%
-    #   distinct()
 
     # add x values to each id
     newdata <- left_join(
@@ -356,36 +335,37 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
       by = join_by(.id))
 
     # get predictions
-    newdata %>%
-      mutate(.y = predict(model, ., deriv = deriv, abc = abc, xfun = xfun, yfun = yfun),
+    newdata <- newdata %>%
+      mutate(.y = predict(model, ., deriv = deriv, abc = abc),
              .x = xfun(.data$.x)) %>%
       select(.data$.x, .data$.y, .data$.id, everything())
+    newdata
     }
 
-  unadjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
+  unadjusted <- function(model, subset = subset, xfun = xfun, yfun = yfun, trim = trim) {
 # unadjusted individual curves
     data <- tibble(
-      .x=getCovariate(model),
-      .y=getResponse(model),
-      .id=getGroups(model)) %>%
+      .x = getCovariate(model),
+      .y = getResponse(model),
+      .id = getGroups(model)) %>%
       filter(subset)
-    data <- trimlines(model, data, level=1, trim) %>%
-      mutate(.x=xfun(.data$.x),
-             .y=yfun(.data$.y))
+    data <- trimlines(model, data, level = 1, trim) %>%
+      mutate(.x = xfun(.data$.x),
+             .y = yfun(.data$.y))
     data
   }
 
-  adjusted <- function(model, subset=subset, xfun=xfun, yfun=yfun, trim=trim) {
+  adjusted <- function(model, subset = subset, xfun = xfun, yfun = yfun, trim = trim) {
 # adjusted individual curves
     data <- as_tibble(xyadj(model)) %>%
       select(-.data$v) %>%
-      mutate(.id=getGroups(model)) %>%
-      rename(.x=.data$x,
-             .y=.data$y) %>%
+      mutate(.id = getGroups(model)) %>%
+      rename(.x = .data$x,
+             .y = .data$y) %>%
       filter(subset)
-    data <- trimlines(model, data, level=0, trim) %>%
-      mutate(.x=xfun(.data$.x),
-             .y=yfun(.data$.y))
+    data <- trimlines(model, data, level = 0, trim) %>%
+      mutate(.x = xfun(.data$.x),
+             .y = yfun(.data$.y))
     data
   }
 
@@ -401,19 +381,18 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     extra$dx <- extra$.x # save dx age gap
     extra[, 1:2] <- data[-1, 1:2] - extra[, 1:2] / 2 # midpoints for .x and .y
     extra <- extra[!did, ] # restrict to same .id
-    extra$ey <- predict(model, extra, level=level) # predicted y value at midpoint
+    extra$ey <- predict(model, extra, level = level) # predicted y value at midpoint
     extra <- extra %>%
-      mutate(dy=abs(.data$.y - .data$ey), # gap between line segment and mean curve dy
-             xy=.data$dx / mad(.data$dx) + .data$dy / mad(.data$dy)) # add scaled dx and dy
-    outliers <- order(extra$xy, decreasing=TRUE)[1:trim] # identify outliers
+      mutate(dy = abs(.data$.y - .data$ey), # gap between line segment and mean curve dy
+             xy = .data$dx / mad(.data$dx) + .data$dy / mad(.data$dy)) # add scaled dx and dy
+    outliers <- order(extra$xy, decreasing = TRUE)[1:trim] # identify outliers
     extra <- extra[outliers, 1:3] # trim
     extra$.y <- NA
     data <- rbind(data, extra)
     with(data, data[order(.id, .x), ]) # sort data
   }
 
-  crosssectional <- function(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns,
-                             design=design) {
+  crosssectional <- function(model, subset = subset, xfun = xfun, yfun = yfun, abc = abc, ns = ns) {
 # fixed effect mean curve
     x <- getCovariate(model)[subset]
     x <- xseq(x, ns) - model$xoffset
@@ -438,7 +417,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
       }
       p12
     })
-    do.call('legend', c(legend, list(lty=llc[, 'lty'], lwd=llc[, 'lwd'], col=llc[, 'col'])))
+    do.call('legend', c(legend, list(lty = llc[, 'lty'], lwd = llc[, 'lwd'], col = llc[, 'col'])))
   }
 
   getlab <- function(lab, label, call, fun) {
@@ -475,7 +454,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     stop(glue('lengths of data ({nrow(data)}) and model ({model$dims$N}) do not match'))
   mcall <- model$call.sitar
 #	extract list(...)
-  ccall <- match.call(expand.dots=FALSE)
+  ccall <- match.call(expand.dots = FALSE)
 #	subset to plot model
   subset <- eval(ccall$subset, data, parent.frame()) %||% rep_len(TRUE, model$dims$N)
 # ... args
@@ -483,17 +462,12 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
   ARG <- if (!is.null(dots))
     lapply(as.list(dots), eval, data[subset, ], parent.frame())
 
-  # derive design
-  design <- design %||% as.list(mcall)[grepl('.formula', names(mcall))] %>%
-    asOneFormula()
-  stopifnot('design should be a formula' = is.language(design))
-
   # create labels
   labels <- labels %||% vector('character', 3)
 
   #	get axis labels
-  xlab <- getlab(xlab, labels[1], mcall$x, paste(deparse(substitute(xfun)), collapse=''))
-  ylab <- getlab(ylab, labels[2], mcall$y, paste(deparse(substitute(yfun)), collapse=''))
+  xlab <- getlab(xlab, labels[1], mcall$x, paste(deparse(substitute(xfun)), collapse = ''))
+  ylab <- getlab(ylab, labels[2], mcall$y, paste(deparse(substitute(yfun)), collapse = ''))
   vlab <- getlab(vlab, labels[3], ylab, 'velocity')
 
   # get xfun and yfun
@@ -504,8 +478,7 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     options   = c('d', 'c', 'u', 'a', 'D', 'v', 'V'),
     optnames  = c('distance', 'crosssectional', 'unadjusted', 'adjusted', 'Distance', 'velocity', 'Velocity'),
     optdv   = c( 1,   1,   1,   1,   1,   2,   2 ), # distance or velocity
-    optmult   = c( FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, TRUE ), # multiple curves
-    optsmooth = c( TRUE,  TRUE,  FALSE, FALSE, TRUE,  TRUE,  TRUE ) # spline curves
+    optsmooth = c( TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE ) # spline curves
   )
 
   pt <- pt %>%
@@ -522,20 +495,20 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
     rowwise %>%
     mutate(optdv = if_else(.data$optdv == 2 & dv == 3, 3, .data$optdv), # velocity on y2 axis
            data = ifelse(.data$optsmooth,
-                         list(do.call(.data$optnames, list(model=model, subset=subset, xfun=xfun, yfun=yfun,
-                                                     abc=abc, ns=ns, design=design))),
-                         list(do.call(.data$optnames, list(model=model, subset=subset, xfun=xfun, yfun=yfun,
+                         list(do.call(.data$optnames, list(model = model, subset = subset, xfun = xfun, yfun = yfun,
+                                                     abc = abc, ns = ns))),
+                         list(do.call(.data$optnames, list(model = model, subset = subset, xfun = xfun, yfun = yfun,
                                                      trim = trim)))),
            xlim = list(range(data$.x, na.rm = TRUE)),
            ylim = list(range(data$.y, na.rm = TRUE)),
            groups = '.groups' %in% names(data),
-           data = if_else(.data$groups, list(data %>% select(-3)), list(data)),
-           optmult = if_else(.data$groups, TRUE, .data$optmult),
            data = list(data %>% rename(all_of(xyid))))
 
   # return data?
   if (returndata){
-    data <- structure(pt %>% pull(data), names = pt %>% pull(options))
+    data <- structure(pt %>%
+                        pull(data), names = pt %>%
+                        pull(options))
     if (length(data) == 1)
       data <- data[[1]]
     return(invisible(data))
@@ -583,14 +556,12 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
            ARG2 = list(lapply(as.list(dots2), eval, data)),
            ARG = ifelse(.data$optdv == 3, list(.data$ARG2), list(.data$ARG1)),
            fun = list(ifelse(.data$optdv == 3, v2d(!!ylim, !!vlim), identity)),
-           plot = ifelse(.data$optmult,
-                         list(do.call("mplot", c(list(x = data[[1]], y = .data$fun(data[[2]]), id = data[[3]], add = TRUE), ARG))),
-                         list(do.call("lines", c(list(x = data[[1]], y = .data$fun(data[[2]])), ARG)))))
+           list(do.call("mplot", c(list(x = data[[1]], y = .data$fun(data[[2]]), id = .data$data[[3 + .data$groups]], add = TRUE), ARG))))
 
   # save and print vertical line(s) at age of peak velocity
   if (apv) {
     pt <- pt %>%
-      ungroup %>%
+      ungroup() %>%
       filter(tolower(.data$options) == 'v') %>%
       slice(1)
 
@@ -601,24 +572,24 @@ plot.sitar <- function(x, opt="dv", labels=NULL, apv=FALSE, xfun=identity, yfun=
         unnest(data) %>%
         nest_by({{nid}}, .keep = TRUE) %>%
         mutate(xy = list(getPeak(data[, 1:2]) %>%
-                         t %>%
-                         as_tibble)) %>%
+                         t() %>%
+                         as_tibble())) %>%
         select(-data) %>%
         unnest(xy) %>%
-        ungroup %>%
+        ungroup() %>%
         rename_with(~c(as.character(nid), 'apv', 'pv'))
 
     # no vV option so calculate directly
     } else {
-      xy$apv <- with(velocity(model, subset=subset, xfun=xfun, yfun=yfun, abc=abc, ns=ns, design=design),
+      xy$apv <- with(velocity(model, subset = subset, xfun = xfun, yfun = yfun, abc = abc, ns = ns),
                      setNames(getPeak(.x, .y), c('apv', 'pv'))) %>% t() %>% as_tibble()
     }
 
     # plot apvs
-    do.call('abline', list(v=xy$apv[['apv']], lty=3))
+    do.call('abline', list(v = xy$apv[['apv']], lty = 3))
 
     if (nrow(xy$apv) == 1L)
-      print(xy$apv[c('apv', 'pv')])
+      print(xy$apv[c('apv', 'pv')] %>% unlist())
   }
   # return xy
   invisible(xy)

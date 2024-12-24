@@ -2,15 +2,9 @@
 #'
 #' Predict method for \code{sitar} objects, based on \code{predict.lme}.
 #'
-#' When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)}
-#' per \code{xfun(x)} where \code{xfun} and \code{yfun} default to
-#' \code{identity}. If \code{x} and/or \code{y} include transformations,
-#' e.g. \code{x = log(age)}, velocity
-#' in the original units is obtained by specifying \code{xfun}
-#' and/or \code{yfun} to back-transform them appropriately. By default this
-#' is done automatically by \code{ifun}, so if for example \code{x = log(age)}
-#' then \code{xfun} is set to \code{exp}. In this way velocity is in the
-#' untransformed units by default.
+#' If \code{x} and/or \code{y} include transformations, e.g. \code{x = log(age)},
+#' predictions are returned in the original units by back-transforming \code{x} and/or
+#' \code{y} appropriately using the function \code{ifun}.
 #'
 #' @param object an object inheriting from class \code{sitar}.
 #' @param newdata an optional data frame to be used for obtaining the
@@ -36,35 +30,28 @@
 #' \code{level = 0}. It gives predictions for a single subject with the
 #' specified values of \code{a}, \code{b}, \code{c} and \code{d}, where missing values
 #' are set to 0. Alternatively \code{abc} can contain the value for a single id.
-#' @param xfun an optional function to apply to \code{x} to convert it back to
-#' the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
-#' \code{deriv == 1} - see Details.
-#' @param yfun an optional function to apply to \code{y} to convert it back to
-#' the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.
 #' @return A vector of the predictions, or a list of vectors if \code{asList =
 #' TRUE} and \code{level == 1}, or a data frame if \code{length(level) * length(deriv) > 1}.
 #' The data frame column names are (a subset of): \code{(id, predict.fixed,
 #' predict.id, vel.predict.fixed, vel.predict.id)}.
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @seealso \code{\link{ifun}} for a way to generate the functions \code{xfun}
-#' and \code{yfun} automatically from the \code{sitar} model call.
 #' @examples
 #'
 #' data(heights)
 #' ## fit model
-#' m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+#' m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
+#' df <- data.frame(age = 9:16, id = 5)
 #'
-#' ## predictions at level 0
-#' predict(m1, newdata=data.frame(age=9:16), level=0)
+#' ## height predictions at level 0
+#' predict(m1, newdata = df, level = 0)
 #'
-#' ## predictions at level 1 for subject 5
-#' predict(m1, newdata=data.frame(age=9:16, id=5), level=1)
+#' ## height predictions at level 1 for subject 5
+#' predict(m1, newdata = df, level = 1)
 #'
-#' ## velocity predictions for subjects with early and late puberty
-#' vel1 <- predict(m1, deriv=1, abc=c(b=-1))
-#' mplot(age, vel1, id, heights, col=id)
-#' vel1 <- predict(m1, deriv=1, abc=c(b=1))
-#' mplot(age, vel1, id, heights, col=id, add=TRUE)
+#' ## velocity predictions for subjects with early, average and late puberty
+#' early <- predict(m1, df, deriv = 1, abc = c(b = -1))
+#' average <- predict(m1, df, deriv = 1, level = 0)
+#' late <- predict(m1, df, deriv = 1, abc = c(b = 1))
 #'
 #' @importFrom rlang .data
 #' @importFrom dplyr arrange mutate n nest_by pull
@@ -72,38 +59,46 @@
 #' @importFrom tidyr unnest
 #' @export
   predict.sitar <- function(object, newdata = getData(object), level = 1L, ...,
-                            deriv = 0L, abc = NULL,
-                            xfun = identity, yfun = identity) {
+                            deriv = 0L, abc = NULL) {
 # obtain distance and velocity predictions
     predictions <- function(object, newdata, level, dx = 1e-5, ...) {
       xfun <- ifun(object$call.sitar$x)
       yfun <- ifun(object$call.sitar$y)
+      # xoffset
+      if (is.null(xoffset <- object$xoffset)) {
+        xoffset <- mean(getCovariate(object))
+        warning('xoffset set to mean(x) - best to refit model')
+      }
       # offset for mean curve
-      xy.id <- xyadj(object, x = x, id = id, abc = re.mean)
+      xy.id <- with(newdata, xyadj(object, x = x, id = id, abc = re.mean))
       # convert object from sitar to nlme
       class(object) <- setdiff(class(object), 'sitar')
       # calculate predictions by level
       map_dfr(setNames(level, c('fixed', 'id')[level + 1L]), \(ilevel){
+        newdata <- newdata %>%
+          mutate(xc = xfun(.data$x),
+                 x = if (ilevel == 0L) xy.id$x else .data$x,
+                 x = .data$x - xoffset)
         newdata %>%
-          rownames_to_column('rowname') %>%
+          rownames_to_column('row') %>%
           as_tibble %>%
-          mutate(x = if (ilevel == 0L) xy.id$x - xoffset else x,
-                 xc = xfun(x + xoffset),
-                 y = predict(object, ., level = ilevel),
-                 ylo = predict(object, . |> mutate(x = x - dx), level = ilevel),
-                 yhi = predict(object, . |> mutate(x = x + dx), level = ilevel),
+          mutate(
+                 y = predict(object, newdata, level = ilevel),
+                 ylo = predict(object, newdata |> mutate(x = .data$x - dx), level = ilevel),
+                 yhi = predict(object, newdata |> mutate(x = .data$x + dx), level = ilevel),
                  y = if (ilevel == 0L) .data$y - xy.id$y else .data$y,
                  predict = yfun(.data$y),
                  # calculate velocity as dy/dx
-                 vel.predict = (.data$yhi - .data$ylo) / dx / 2 /
-                   Dxy(object, .data$predict, 'y') * Dxy(object, .data$xc, 'x')) %>%
-          select(c(id, .data$rowname, predict, .data$vel.predict))
+                 vel.predict = (.data$yhi - .data$ylo) / dx / 2
+                  / Dxy(object, .data$predict, 'y')
+                  * Dxy(object, .data$xc, 'x')) %>%
+          select(c(id, .data$row, predict, .data$vel.predict))
       }, .id = 'level') %>%
         pivot_wider(names_from = 'level', values_from = c(predict, .data$vel.predict),
                     names_sep = '.') %>%
         mutate(across(ends_with('.fixed'), unname),
                across(ends_with('.id'), ~setNames(., id))) %>%
-        select(-.data$rowname)
+        select(-.data$row)
     }
 # apply differential of x or y to variable
     Dxy <- function(object, var, which = c('x', 'y')) {
@@ -124,11 +119,11 @@
 # check if old-style object lacking fitnlme
     if (!'fitnlme' %in% names(object)) {
       warning('fitnlme missing - best to refit model')
-      object <- update(object, control=nlmeControl(maxIter=0, pnlsMaxIter=0, msMaxIter=0L))
+      object <- update(object, control = nlmeControl(maxIter = 0, pnlsMaxIter = 0, msMaxIter = 0L))
     }
 # attach object for fitnlme
     on.exit(detach(object))
-    eval(parse(text='attach(object)'))
+    eval(parse(text = 'attach(object)'))
 # identify sitar formula covariates
     covnames <- all.vars(asOneFormula(oc$a.formula, oc$b.formula, oc$c.formula, oc$d.formula))
 # covariates also in newdata
@@ -152,13 +147,13 @@
         newdata <- bind_cols(newdata, extra)
       }
 # centre covariates in newdata (using means from sitar)
-      gd <- update(object, returndata=TRUE)
+      gd <- update(object, returndata = TRUE)
       covmeans <- attr(gd, 'scaled:center')
 # covariates and contrasts in model
       allnames <- setdiff(formalArgs(object$fitnlme), names(coef(object)))[-1]
-      for (i in allnames)
-        if (is.numeric(newdata[, i]))
-          newdata[, i] <- newdata[, i] - covmeans[i]
+      for (i in allnames) {
+        newdata[, i] <- newdata[, i] - covmeans[i]
+      }
     }
 # set covariates not in newdata to 0
     if (length(notnames) > 0L) {
@@ -169,7 +164,7 @@
         newdata[, notnames] <- 0
       } else {
         if (!exists('gd'))
-          gd <- update(object, returndata=TRUE)
+          gd <- update(object, returndata = TRUE)
         for (i in notnames)
           newdata[, i] <- mean(gd[subset, i])
       }
@@ -179,15 +174,10 @@
     re.mean <- data.frame(t(attr(re, 'scaled:center')))
     re.mean <- re.mean[rep(1, nrow(newdata)), , drop = FALSE]
 # create x in newdata
-    x <- if ('.x' %in% names(newdata))
+    newdata$x <- if ('.x' %in% names(newdata))
       newdata$.x
     else
       eval(oc$x, newdata)
-    if (is.null(xoffset <- object$xoffset)) {
-      xoffset <- mean(getCovariate(object))
-      warning('xoffset set to mean(x) - best to refit model')
-    }
-    newdata$x <- x - xoffset
 # check abc and set level accordingly
     if (!is.null(abc)) {
       if (is.null(names(abc)) && length(abc) == 1 &&
@@ -216,7 +206,7 @@
         factor(1, labels = rownames(re)[1])
     id <- newdata$id
 # predictions
-    output <- predictions(object, newdata, level = level)
+    output <- predictions(object, newdata, level)
 # return columns of data frame
     # single column
     if (length(level) * length(deriv) == 1L) {

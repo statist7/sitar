@@ -21,7 +21,6 @@
   yfun = identity,
   subset = NULL,
   ns = 101,
-  design = NULL,
   abc = NULL,
   trim = 0,
   add = FALSE,
@@ -96,11 +95,6 @@ original \code{sitar} call.}
 \item{ns}{scalar defining the number of points for spline curves
 (default 101).}
 
-\item{design}{formula defining the variables to use to group data for multiple
-mean distance and/or velocity curves (\code{opt = 'dv'}). By default includes
-all the categorical variables named in \code{a.formula}, \code{b.formula},
-\code{c.formula} and \code{d.formula}.}
-
 \item{abc}{vector of named values of random effects a, b, c and d used to
 define an individual growth curve, e.g. abc = c(a = 1, c = -0.1). Alternatively a
 single character string defining an \code{id} level whose random effect
@@ -150,7 +144,7 @@ If \code{returndata} is TRUE (which it is with the helper functions) returns
 invisibly either a tibble or named list of tibbles,
 containing the data to be plotted. The helper functions each return a tibble
 where the first three variables are '.x', '.y' and '.id', plus
-variable '.groups' for curves grouped by \code{design}) and other covariates in the model.
+variable '.groups' and the relevant categorical variables for grouped curves.
 Note that '.x' and '.y' are returned
 after applying \code{xfun} and \code{yfun}. Hence if for example \code{x = log(age)}
 in the SITAR call then '.x' corresponds by default to \code{age}.
@@ -176,9 +170,8 @@ For no transformation set \code{yfun = NULL}. The same applies to \code{xfun}.
 
 For models that include categorical fixed effects (e.g. \code{a.formula = ~sex + region})
 the options 'dv' plot mean curves for each distinct group. Any continuous (as opposed
-to grouped) fixed effect variables are set to their mean values in the plots, to ensure that the mean curves are
-smooth. Setting \code{design} allows the grouping variables to be selected, e.g. \code{design = ~sex},
-and \code{design = ~1} gives a single mean curve. The resulting plots can
+to grouped) fixed effect variables are set to their mean values in the plots, to ensure
+that the mean curves are smooth. The resulting plots can
 be formatted with \code{par} in the usual way, indexed either by the individual grouping
 variables (e.g. \code{sex} or \code{region} in the example) or the subject
 factor \code{id} which indexes all the distinct plots.

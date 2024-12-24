@@ -10,9 +10,7 @@
   level = 1L,
   ...,
   deriv = 0L,
-  abc = NULL,
-  xfun = identity,
-  yfun = identity
+  abc = NULL
 )
 }
 \arguments{
@@ -45,13 +43,6 @@ specifies the distance curve, \code{deriv = 1} the velocity curve and
 \code{level = 0}. It gives predictions for a single subject with the
 specified values of \code{a}, \code{b}, \code{c} and \code{d}, where missing values
 are set to 0. Alternatively \code{abc} can contain the value for a single id.}
-
-\item{xfun}{an optional function to apply to \code{x} to convert it back to
-the original scale, e.g. if x = log(age) then xfun = exp. Only relevant if
-\code{deriv == 1} - see Details.}
-
-\item{yfun}{an optional function to apply to \code{y} to convert it back to
-the original scale, e.g. if y = sqrt(height) then yfun = function(z) z^2.}
 }
 \value{
 A vector of the predictions, or a list of vectors if \code{asList =
@@ -63,38 +54,28 @@ predict.id, vel.predict.fixed, vel.predict.id)}.
 Predict method for \code{sitar} objects, based on \code{predict.lme}.
 }
 \details{
-When \code{deriv = 1} the returned velocity is in units of \code{yfun(y)}
-per \code{xfun(x)} where \code{xfun} and \code{yfun} default to
-\code{identity}. If \code{x} and/or \code{y} include transformations,
-e.g. \code{x = log(age)}, velocity
-in the original units is obtained by specifying \code{xfun}
-and/or \code{yfun} to back-transform them appropriately. By default this
-is done automatically by \code{ifun}, so if for example \code{x = log(age)}
-then \code{xfun} is set to \code{exp}. In this way velocity is in the
-untransformed units by default.
+If \code{x} and/or \code{y} include transformations, e.g. \code{x = log(age)},
+predictions are returned in the original units by back-transforming \code{x} and/or
+\code{y} appropriately using the function \code{ifun}.
 }
 \examples{
 
 data(heights)
 ## fit model
-m1 <- sitar(x=age, y=height, id=id, data=heights, df=5)
+m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
+df <- data.frame(age = 9:16, id = 5)
 
-## predictions at level 0
-predict(m1, newdata=data.frame(age=9:16), level=0)
+## height predictions at level 0
+predict(m1, newdata = df, level = 0)
 
-## predictions at level 1 for subject 5
-predict(m1, newdata=data.frame(age=9:16, id=5), level=1)
+## height predictions at level 1 for subject 5
+predict(m1, newdata = df, level = 1)
 
-## velocity predictions for subjects with early and late puberty
-vel1 <- predict(m1, deriv=1, abc=c(b=-1))
-mplot(age, vel1, id, heights, col=id)
-vel1 <- predict(m1, deriv=1, abc=c(b=1))
-mplot(age, vel1, id, heights, col=id, add=TRUE)
+## velocity predictions for subjects with early, average and late puberty
+early <- predict(m1, df, deriv = 1, abc = c(b = -1))
+average <- predict(m1, df, deriv = 1, level = 0)
+late <- predict(m1, df, deriv = 1, abc = c(b = 1))
 
-}
-\seealso{
-\code{\link{ifun}} for a way to generate the functions \code{xfun}
-and \code{yfun} automatically from the \code{sitar} model call.
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
