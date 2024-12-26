@@ -55,8 +55,8 @@ Predict method for \code{sitar} objects, based on \code{predict.lme}.
 }
 \details{
 If \code{x} and/or \code{y} include transformations, e.g. \code{x = log(age)},
-predictions are returned in the original units by back-transforming \code{x} and/or
-\code{y} appropriately using the function \code{ifun}.
+predictions are returned in the original units by back-transforming \code{x}
+and/or \code{y} appropriately using the function \code{ifun}.
 }
 \examples{
 

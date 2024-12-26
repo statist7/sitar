@@ -3,8 +3,8 @@
 #' Predict method for \code{sitar} objects, based on \code{predict.lme}.
 #'
 #' If \code{x} and/or \code{y} include transformations, e.g. \code{x = log(age)},
-#' predictions are returned in the original units by back-transforming \code{x} and/or
-#' \code{y} appropriately using the function \code{ifun}.
+#' predictions are returned in the original units by back-transforming \code{x}
+#' and/or \code{y} appropriately using the function \code{ifun}.
 #'
 #' @param object an object inheriting from class \code{sitar}.
 #' @param newdata an optional data frame to be used for obtaining the
@@ -64,37 +64,28 @@
     predictions <- function(object, newdata, level, dx = 1e-5, ...) {
       xfun <- ifun(object$call.sitar$x)
       yfun <- ifun(object$call.sitar$y)
-      # xoffset
-      if (is.null(xoffset <- object$xoffset)) {
-        xoffset <- mean(getCovariate(object))
-        warning('xoffset set to mean(x) - best to refit model')
-      }
       # offset for mean curve
       xy.id <- with(newdata, xyadj(object, x = x, id = id, abc = re.mean))
       # convert object from sitar to nlme
       class(object) <- setdiff(class(object), 'sitar')
       # calculate predictions by level
       map_dfr(setNames(level, c('fixed', 'id')[level + 1L]), \(ilevel){
-        newdata <- newdata %>%
-          mutate(xc = xfun(.data$x),
-                 x = if (ilevel == 0L) xy.id$x else .data$x,
-                 x = .data$x - xoffset)
         newdata %>%
-          rownames_to_column('row') %>%
-          as_tibble %>%
-          mutate(
-                 y = predict(object, newdata, level = ilevel),
-                 ylo = predict(object, newdata |> mutate(x = .data$x - dx), level = ilevel),
-                 yhi = predict(object, newdata |> mutate(x = .data$x + dx), level = ilevel),
+          mutate(xvar = xfun(.data$x),
+                 x = if (ilevel == 0L) xy.id$x else .data$x,
+                 x = .data$x - object$xoffset) %>%
+          mutate(y = predict(object, ., level = ilevel),
+                 ylo = predict(object, . |> mutate(x = .data$x - dx), level = ilevel),
+                 yhi = predict(object, . |> mutate(x = .data$x + dx), level = ilevel),
                  y = if (ilevel == 0L) .data$y - xy.id$y else .data$y,
                  predict = yfun(.data$y),
                  # calculate velocity as dy/dx
                  vel.predict = (.data$yhi - .data$ylo) / dx / 2
-                  / Dxy(object, .data$predict, 'y')
-                  * Dxy(object, .data$xc, 'x')) %>%
-          select(c(id, .data$row, predict, .data$vel.predict))
+                 / Dxy(object, .data$predict, 'y')
+                 * Dxy(object, .data$xvar, 'x')) %>%
+          select(c(id, .data$row, .data$predict, .data$vel.predict))
       }, .id = 'level') %>%
-        pivot_wider(names_from = 'level', values_from = c(predict, .data$vel.predict),
+        pivot_wider(names_from = 'level', values_from = c(.data$predict, .data$vel.predict),
                     names_sep = '.') %>%
         mutate(across(ends_with('.fixed'), unname),
                across(ends_with('.id'), ~setNames(., id))) %>%
@@ -204,7 +195,6 @@
           eval(oc$id, newdata)
       } else
         factor(1, labels = rownames(re)[1])
-    id <- newdata$id
 # predictions
     output <- predictions(object, newdata, level)
 # return columns of data frame
@@ -215,7 +205,7 @@
     # split by id?
       asList <- ifelse(is.null(asList <- eval(mc$asList)), FALSE, asList)
       if (asList && level == 1L)
-        output <- split(output, id)
+        output <- split(output, newdata$id)
     }
     # multiple columns
     else if (length(level) == 2L && length(deriv) == 1L) {
