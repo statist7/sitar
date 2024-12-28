@@ -66,15 +66,16 @@
       yfun <- ifun(object$call.sitar$y)
       # offset for mean curve
       xy.id <- with(newdata, xyadj(object, x = x, id = id, abc = re.mean))
-      # convert object from sitar to nlme
+      # convert sitar object to nlme
       class(object) <- setdiff(class(object), 'sitar')
       # calculate predictions by level
       map_dfr(setNames(level, c('fixed', 'id')[level + 1L]), \(ilevel){
         newdata %>%
+          rownames_to_column('row') %>%
           mutate(xvar = xfun(.data$x),
                  x = if (ilevel == 0L) xy.id$x else .data$x,
                  x = .data$x - object$xoffset) %>%
-          mutate(y = predict(object, ., level = ilevel),
+          mutate(y = predict(object, ., level = ilevel), # workaround re bug
                  ylo = predict(object, . |> mutate(x = .data$x - dx), level = ilevel),
                  yhi = predict(object, . |> mutate(x = .data$x + dx), level = ilevel),
                  y = if (ilevel == 0L) .data$y - xy.id$y else .data$y,
