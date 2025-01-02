@@ -60,27 +60,29 @@ the options: 'd' for fitted Distance curve, 'v' for fitted Velocity curve,
 'c' for fitted Crosssectional distance curve, 'D' for individual fitted
 Distance curves, 'V' for individual fitted Velocity curves, 'u' for
 Unadjusted individual growth curves, and 'a' for Adjusted individual growth
-curves. Options 'dvcDV' give spline curves, while 'ua' give data curves made
-up as line segments. If both distance and velocity curves are specified, the
-axis for the velocity curve appears on the right side of the plot (y2), and
-a legend identifying the distance and velocity curves is provided.}
+curves. Options 'dvcDV' give spline curves, while 'ua' give data curves
+made up of line segments. If both distance and velocity curves are
+specified, the axis for the velocity curve appears on the right side of the
+plot (y2), and a legend identifying the distance and velocity curves is
+provided.}
 
 \item{labels}{optional character vector containing plot labels for \code{x},
 \code{y} and \code{y} velocity from the original SITAR model. The three
-elements can alternatively be provided via parameters
-\code{xlab}, \code{ylab} and \code{vlab}. The latter take precedence.
-Default labels are the names of \code{x} and \code{y}, and
-"\code{y} velocity", suitably adjusted to reflect any back-transformation
-via \code{xfun} and \code{yfun}.}
+elements can alternatively be provided via parameters \code{xlab},
+\code{ylab} and \code{vlab}. The latter take precedence. Default labels are
+the names of \code{x} and \code{y}, and "\code{y} velocity", suitably
+adjusted to reflect any back-transformation via \code{xfun} and
+\code{yfun}.}
 
-\item{apv}{optional logical specifying whether or not to calculate the age
-at peak velocity from the velocity curve. If TRUE, age at peak velocity is
-calculated as the age when the second derivative of the fitted curve changes
-from positive to negative (after applying \code{xfun} and/or \code{yfun}). Age at peak velocity
-is marked in the plot with a vertical dotted line, and its value, along with
-peak velocity, is printed and returned. NB their standard errors can be
-obtained using the bootstrap with the function \code{apv_se}. Values of \code{apv}
-for individual subjects or groups are also returned invisibly.}
+\item{apv}{optional logical specifying whether or not to calculate the age at
+peak velocity from the velocity curve. If TRUE, age at peak velocity is
+calculated as the age when the second derivative of the fitted curve
+changes from positive to negative (after applying \code{xfun} and/or
+\code{yfun}). Age at peak velocity is marked in the plot with a vertical
+dotted line, and its value, along with peak velocity, is printed and
+returned. NB their standard errors can be obtained using the bootstrap with
+the function \code{apv_se}. With plot options 'D' or 'V' values of
+\code{apv} for individual subjects or groups are also returned invisibly.}
 
 \item{xfun}{optional function to be applied to the x variable prior to
 plotting (default identity, see Details).}
@@ -88,19 +90,19 @@ plotting (default identity, see Details).}
 \item{yfun}{optional function to be applied to the y variable prior to
 plotting (default identity, see Details).}
 
-\item{subset}{optional logical vector of length \code{x} defining a subset
-of \code{data} rows to be plotted, for \code{x} and \code{data} in the
+\item{subset}{optional logical vector of length \code{x} defining a subset of
+\code{data} rows to be plotted, for \code{x} and \code{data} in the
 original \code{sitar} call.}
 
-\item{ns}{scalar defining the number of points for spline curves
-(default 101).}
+\item{ns}{scalar defining the number of points for spline curves (default
+101).}
 
 \item{abc}{vector of named values of random effects a, b, c and d used to
-define an individual growth curve, e.g. abc = c(a = 1, c = -0.1). Alternatively a
-single character string defining an \code{id} level whose random effect
-values are used. If \code{abc} is set, \code{level} is ignored. If
-\code{abc} is NULL (default), or if a, b, c or d values are missing, values of
-zero are assumed.}
+define an individual growth curve, e.g. abc = c(a = 1, c = -0.1).
+Alternatively a single character string defining an \code{id} level whose
+random effect values are used. If \code{abc} is set, \code{level} is
+ignored. If \code{abc} is NULL (default), or if a, b, c or d values are
+missing, values of zero are assumed.}
 
 \item{trim}{number (default 0) of long line segments to be excluded from plot
 with option 'u' or 'a'. See Details.}
@@ -108,16 +110,17 @@ with option 'u' or 'a'. See Details.}
 \item{add}{optional logical defining if the plot is pre-existing (TRUE) or
 new (FALSE). TRUE is equivalent to using \code{lines}.}
 
-\item{nlme}{optional logical which set TRUE plots the model as an
-\code{nlme} object, using \code{plot.nlme} arguments.}
+\item{nlme}{optional logical which set TRUE plots the model as an \code{nlme}
+object, using \code{plot.nlme} arguments.}
 
 \item{returndata}{logical defining whether to plot the data (default FALSE)
 or just return the data for plotting (TRUE). See Value.}
 
 \item{\dots}{Further graphical parameters (see \code{par}) may also be
-supplied as arguments, e.g. line
-type \code{lty}, line width \code{lwd}, and colour \code{col}. For the
-velocity (y2) plot \code{y2par} can be used (see Details).}
+supplied as arguments, e.g. line type \code{lty}, line width \code{lwd},
+and colour \code{col}. For plots involving both distance curves (y1) and
+velocity curves (y2) the \code{par} arguments can be combined (see
+Details).}
 
 \item{xlab}{optional label for x axis}
 
@@ -131,23 +134,26 @@ velocity (y2) plot \code{y2par} can be used (see Details).}
 
 \item{vlim}{optional v axis limits}
 
-\item{legend}{optional list of arguments for legend with distance-velocity plots}
+\item{legend}{optional list of arguments for legend with distance-velocity
+plots, default \code{list(x = 'topleft', inset = 0.04, bty = 'o')}}
 }
 \value{
-If \code{returndata} is FALSE returns invisibly a list of (up to) three objects:
-\item{usr}{value of \code{par('usr')} for the main plot.}
-\item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
-\item{apv}{if argument \code{apv} is TRUE a named list giving the age at
-peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
-either overall or (with options D or V, invisibly) for all subjects.}
-If \code{returndata} is TRUE (which it is with the helper functions) returns
-invisibly either a tibble or named list of tibbles,
-containing the data to be plotted. The helper functions each return a tibble
-where the first three variables are '.x', '.y' and '.id', plus
-variable '.groups' and the relevant categorical variables for grouped curves.
-Note that '.x' and '.y' are returned
-after applying \code{xfun} and \code{yfun}. Hence if for example \code{x = log(age)}
-in the SITAR call then '.x' corresponds by default to \code{age}.
+If \code{returndata} is FALSE returns invisibly a list of (up to)
+  three objects:
+  \item{usr}{value of \code{par('usr')} for the main plot.}
+.  \item{usr2}{the value of \code{par('usr')} for the velocity (y2) plot.}
+  \item{apv}{if argument \code{apv} is TRUE a named list giving the age at
+  peak velocity (apv) and peak velocity (pv) from the fitted velocity curve,
+  either overall or (with options D or V, invisibly) for all subjects.}
+  If \code{returndata} is TRUE (which it is with the helper functions)
+  returns invisibly either a tibble or named list of tibbles, containing the
+  data to be plotted. The helper functions each return a tibble where the
+  first three variables are named according to x, y and id from the original
+  sitar call, plus variable '.groups' and
+  the relevant categorical variables for grouped curves. Note that x and
+  y are returned after applying \code{xfun} and \code{yfun}. Hence if for
+  example \code{x = log(age)} in the SITAR call then x as returned
+  corresponds by default to \code{age}.
 }
 \description{
 \code{plot} and \code{lines} methods for objects of class \code{sitar},
@@ -155,40 +161,44 @@ providing various flavours of plot of the fitted growth curves. Also helper
 functions to return the data for plotting, e.g. with \code{ggplot2}.
 }
 \details{
-For options involving both distance curves (options 'dcDua') and velocity curves
-(options 'vV') the velocity curve plot (with right axis) can be annotated with
-\code{par} parameters given as a named list called \code{y2par}.
-To suppress the legend that comes with it set \code{legend = NULL}.
+For plots involving both distance curves (options 'dcDua') and velocity
+curves (options 'vV') the two sets of curves use the y1 and y2 axes
+respectively and can be annotated differently by combining their \code{par}
+parameters. For example \code{col = c(2, 4)} sets the distance curve(s) to
+red and the velocity curve(s) to blue. (Previously this was done using the
+named list \code{y2par}.) To suppress the associated legend set \code{legend
+= NULL}.
 
 The transformations \code{xfun} and \code{yfun} are applied to the x and y
 variables after back-transforming any transformations in the original SITAR
-call. So for example if \code{y = log(height)} in the SITAR call, then \code{yfun}
-is applied to \code{height}. Thus the default \code{yfun = identity} has the effect of
-back-transforming the SITAR call transformation - this is achieved by setting
-\code{yfun = yfun(ifun(x$call.sitar$y))}.
-For no transformation set \code{yfun = NULL}. The same applies to \code{xfun}.
+call. So for example if \code{y = log(height)} in the SITAR call, then
+\code{yfun} is applied to \code{height}. Thus the default \code{yfun =
+identity} has the effect of back-transforming the SITAR call transformation -
+this is achieved by setting \code{yfun = yfun(ifun(x$call.sitar$y))}. For no
+transformation set \code{yfun = NULL}. The same applies to \code{xfun}.
 
-For models that include categorical fixed effects (e.g. \code{a.formula = ~sex + region})
-the options 'dv' plot mean curves for each distinct group. Any continuous (as opposed
-to grouped) fixed effect variables are set to their mean values in the plots, to ensure
-that the mean curves are smooth. The resulting plots can
-be formatted with \code{par} in the usual way, indexed either by the individual grouping
-variables (e.g. \code{sex} or \code{region} in the example) or the subject
-factor \code{id} which indexes all the distinct plots.
+For models that include categorical fixed effects (e.g. \code{a.formula =
+~sex + region}) the options 'dv' provide mean curves for each distinct group.
+Any continuous (as opposed to grouped) fixed effect variables are set to
+their mean values in the plots, to ensure that the mean curves are smooth.
+The resulting plots can be formatted with \code{par} in the usual way,
+indexed either by the individual grouping variables (e.g. \code{sex} or
+\code{region} in the example) or the subject factor \code{id} which indexes
+all the distinct plots.
 
 The helper functions \code{plot_d}, \code{plot_v}, \code{plot_D},
-\code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c}
-correspond to the seven plot \code{option}s defined by their last letter,
-and return the data for plotting as a \code{tibble}, e.g. for use with
-\code{ggplot2}. Setting \code{returndata = TRUE} works similarly
-but handles multiple \code{option}s, returning a list of tibbles corresponding
-to each specified \code{option}.
+\code{plot_V}, \code{plot_u}, \code{plot_a} and \code{plot_c} correspond to
+the seven plot \code{option}s defined by their last letter, and return the
+data for plotting as a \code{tibble}, e.g. for use with \code{ggplot2}.
+Setting \code{returndata = TRUE} works similarly but handles multiple
+\code{option}s, returning a list of tibbles corresponding to each specified
+\code{option}.
 
-The \code{trim} option allows unsightly long line segments to be omitted
-from plots with options 'a' or 'u'. It ranks the line segments on the basis
-of the age gap (dx) and the distance of the midpoint of the line from the
-mean curve (dy) using the formula \code{abs(dx)/mad(dx) + abs(dy)/mad(dy)}
-and omits those with the largest values.
+The \code{trim} option allows unsightly long line segments to be omitted from
+plots with options 'a' or 'u'. It ranks the line segments on the basis of the
+age gap (dx) and the distance of the midpoint of the line from the mean curve
+(dy) using the formula \code{abs(dx)/mad(dx) + abs(dy)/mad(dy)} and omits
+those with the largest values.
 }
 \examples{
 
@@ -196,9 +206,9 @@ and omits those with the largest values.
 m1 <- sitar(x = age, y = height, id = id, data = heights, df = 4)
 
 ## draw fitted distance and velocity curves
-## with velocity curve in blue
-## adding age at peak velocity (apv)
-plot(m1, y2par = list(col = 'blue'), apv = TRUE)
+## with distance in red and velocity in blue
+## marking age at peak velocity (apv)
+plot(m1, col = c('red', 'blue'), apv = TRUE)
 
 ## bootstrap standard errors for apv and pv
 \dontrun{
@@ -211,43 +221,37 @@ plot(m1, opt = 'a', col = id, xlim = xaxsd())
 ## add mean curve in red
 lines(m1, opt = 'd', col = 'red', lwd = 2)
 
-## add mean curve for a, b, c = -1 SD
+## add curve for an individual with random effects a, b and c = -1 SD
 lines(m1, opt = 'd', lwd = 2, abc = -sqrt(diag(getVarCov(m1))))
 
-## use subset to plot mean curves by group
 ## compare curves for early versus late menarche
 heights <- within(sitar::heights, {
   men <- abs(men)
-    late <- factor(men > median(men))
-  })
-# fit model where size and timing differ by early vs late menarche
+  late <- factor(men > median(men))
+})
+## fit model where size and timing differ by early vs late menarche
 m2 <- sitar(log(age), height, id, heights, 5,
   a.formula = ~late, b.formula = ~late)
-## early group
-plot(m2, subset = late == FALSE, col = 4, lwd = 3,
-  y2par = list(col = 4, lwd = 2), ylim = range(heights$height))
-## late group
-lines(m2, subset = late == TRUE, col = 2, lwd = 3,
-  y2par = list(col = 2, lwd = 2))
-## add legend
-legend('right', paste(c('early', 'late'), 'menarche'),
-  lty = 1, col = c(4, 2), inset = 0.04)
+## plot distance and velocity curves for the two groups
+plot(m2, opt = 'dv', lwd = 2, col = late)
+legend('bottom', paste(c('early', 'late'), 'menarche'),
+  lwd = 2, col = 1:2, inset = 0.04)
+## alternatively plot early and late groups separately
+## early
+lines(m2, opt = 'dv', subset = late == FALSE, col = 'white')
+## late
+lines(m2, opt = 'dv', subset = late == TRUE, col = 'white')
 
-## alternatively plot both groups together
-plot(m2, lwd = 3, col = late, y2par = list(lwd = 3, col = late))
-legend('right', paste(c('early', 'late'), 'menarche'),
-  lwd = 3, col = 1:2, inset = 0.04)
 ## draw fitted height distance curves coloured by subject, using ggplot
 \dontrun{
 require(ggplot2)
-ggplot(plot_D(m1), aes(.x, .y, colour = .id)) +
-labs(x = 'age', y = 'height') +
+ggplot(plot_D(m1), aes(age, height, colour = .id)) +
 geom_line(show.legend = FALSE)
 }
 }
 \seealso{
-\code{\link{mplot}},
-\code{\link{plotclean}}, \code{\link{ifun}}, \code{\link{apv_se}}
+\code{\link{mplot}}, \code{\link{plotclean}}, \code{\link{ifun}},
+  \code{\link{apv_se}}
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
