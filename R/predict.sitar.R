@@ -38,6 +38,9 @@
 #' @examples
 #'
 #' data(heights)
+#' require(dplyr)
+#' require(tidyr)
+#' require(ggplot2)
 #' ## fit model
 #' m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
 #' df <- data.frame(age = 9:16, id = 5)
@@ -49,10 +52,14 @@
 #' predict(m1, newdata = df, level = 1)
 #'
 #' ## velocity predictions for subjects with early, average and late puberty
-#' early <- predict(m1, df, deriv = 1, abc = c(b = -1))
-#' average <- predict(m1, df, deriv = 1, level = 0)
-#' late <- predict(m1, df, deriv = 1, abc = c(b = 1))
-#'
+#' m2 <- sitar(x = log(age), y = height, id = id, data = heights, df = 5)
+#' tibble(age = 80:160/10) %>%
+#'   mutate(early = predict(m2, ., deriv = 1, abc = c(b = -0.07)),
+#'          average = predict(m2, ., deriv = 1, level = 0),
+#'          late = predict(m2, ., deriv = 1, abc = c(b = 0.07))) %>%
+#'   pivot_longer(early:late, names_to = 'group', values_to = 'height_velocity') %>%
+#'   ggplot(aes(age, height_velocity, group = group, colour = group)) +
+#'   geom_path(show.legend = FALSE)
 #' @importFrom rlang .data
 #' @importFrom dplyr arrange mutate n nest_by pull
 #' @importFrom tibble rownames_to_column
@@ -84,12 +91,12 @@
                  vel.predict = (.data$yhi - .data$ylo) / dx / 2
                  / Dxy(object, .data$predict, 'y')
                  * Dxy(object, .data$xvar, 'x')) %>%
-          select(c(id, .data$row, .data$predict, .data$vel.predict))
+          select(c(.data$id, .data$row, .data$predict, .data$vel.predict))
       }, .id = 'level') %>%
         pivot_wider(names_from = 'level', values_from = c(.data$predict, .data$vel.predict),
                     names_sep = '.') %>%
         mutate(across(ends_with('.fixed'), unname),
-               across(ends_with('.id'), ~setNames(., id))) %>%
+               across(ends_with('.id'), ~setNames(., .data$id))) %>%
         select(-.data$row)
     }
 # apply differential of x or y to variable

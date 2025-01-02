@@ -61,6 +61,9 @@ and/or \code{y} appropriately using the function \code{ifun}.
 \examples{
 
 data(heights)
+require(dplyr)
+require(tidyr)
+require(ggplot2)
 ## fit model
 m1 <- sitar(x = age, y = height, id = id, data = heights, df = 5)
 df <- data.frame(age = 9:16, id = 5)
@@ -72,10 +75,14 @@ predict(m1, newdata = df, level = 0)
 predict(m1, newdata = df, level = 1)
 
 ## velocity predictions for subjects with early, average and late puberty
-early <- predict(m1, df, deriv = 1, abc = c(b = -1))
-average <- predict(m1, df, deriv = 1, level = 0)
-late <- predict(m1, df, deriv = 1, abc = c(b = 1))
-
+m2 <- sitar(x = log(age), y = height, id = id, data = heights, df = 5)
+tibble(age = 80:160/10) \%>\%
+  mutate(early = predict(m2, ., deriv = 1, abc = c(b = -0.07)),
+         average = predict(m2, ., deriv = 1, level = 0),
+         late = predict(m2, ., deriv = 1, abc = c(b = 0.07))) \%>\%
+  pivot_longer(early:late, names_to = 'group', values_to = 'height_velocity') \%>\%
+  ggplot(aes(age, height_velocity, group = group, colour = group)) +
+  geom_path(show.legend = FALSE)
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
