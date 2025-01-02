@@ -9,33 +9,32 @@ getDV(object, x = "apv")
 \arguments{
 \item{object}{a SITAR model.}
 
-\item{x}{the age of interest, specified either as 'apv', mean age at peak velocity,
-or 'ato', mean age at take-off, or else a numerical age.}
+\item{x}{the age of interest, specified either as 'apv', the mean age at peak
+velocity, or 'ato', the mean age at take-off, or a numerical age.}
 }
 \value{
 A tibble with one row per individual and five columns, where id, age
-and distance have names corresponding to those used in the SITAR call:
-\item{id}{subject id.}
-\item{age}{subject's age corresponding to \code{x}.}
-\item{distance}{subject's distance at specified age.}
-\item{velocity}{subject's velocity at specified age.}
-\item{missing}{logical where TRUE means subject's specified age outside their
-measurement range.}
+  and distance have names corresponding to those used in the SITAR call:
+  \item{id}{subject id.} \item{age}{subject's age corresponding to \code{x}.}
+  \item{distance}{subject's distance at specified age.}
+  \item{velocity}{subject's velocity at specified age.}
+  \item{missing}{logical where TRUE means subject's specified age lies outside
+  their measurement range.}
 }
 \description{
 \code{getDV} takes a point on the mean fitted velocity curve, defined
-typically as the age at peak velocity or an otherwise specified
-age, and maps it onto the corresponding point on individual velocity
-curves taking into account their timing and intensity.
+typically as the age at peak velocity or an equivalent landmark age, and maps
+it onto the corresponding point on individual velocity curves taking into
+account their timing and intensity.
 }
 \details{
 SITAR is a shape-invariant model, so if there is a turning point on the mean
 velocity curve, e.g. a peak in puberty, then there will be a corresponding
 turning point on the velocity curves of all individuals, at an age depending
-on their timing and intensity. This applies even to individuals lacking
-measurements at that age, have stopped earlier or started later,
-so their growth curve is incomplete. The returned variable \code{missing}
-flags such individuals.
+on their timing and intensity. This applies even to individuals who lack
+measurements at that age, have stopped earlier or started later, so their
+growth curve is incomplete and lacks the turning point. The returned variable
+\code{missing} flags such individuals.
 
 Note that 'D' and 'V' in \code{getDV} correspond to the plot options for
 individual Distance and Velocity curves.
