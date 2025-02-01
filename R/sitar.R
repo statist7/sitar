@@ -136,6 +136,7 @@ sitar <-
            knots,
            fixed = NULL,
            random = 'a + b + c',
+           stype = 'ns', # Edited for splines2
            pdDiag = FALSE,
            a.formula =  ~ 1,
            b.formula =  ~ 1,
@@ -154,13 +155,31 @@ sitar <-
            method = 'ML',
            na.action = na.fail,
            control = nlmeControl(msMaxIter = 100, returnObject = TRUE),
-           keep.data = TRUE)
-  {
+           keep.data = TRUE) {
+    
+    # Edited for splines2
+    # Intercept is always set as 'False' when fitting the SITAR model
+    # Hence not included as an argument
+    sintercept <- FALSE 
+    
+    
     b.origin <- function(b) {
       if (b == 'mean')
         return(mean(x))
       if (b == 'apv') {
-        spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+        
+        # Edited for splines2
+        # spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+        if(stype == 'ns') {
+          spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+        } else {
+          spline_lm_str <- paste0("lm(y ~ ", "splines2::", stype, "(", "x, ",
+                                  "knots = knots, Bound = bounds, ", "intercept = ", sintercept,
+                                  "))")
+          spline.lm <- eval(parse(text = spline_lm_str))
+        }
+        
+        
         return(getPeak(x, predict(
           smooth.spline(x, fitted(spline.lm)), x, deriv = 1
         )$y)[1])
@@ -170,6 +189,8 @@ sitar <-
       b
     }
 
+    
+    
     # get data
     mcall <- match.call()
     data <- eval.parent(mcall$data)
@@ -256,7 +277,19 @@ sitar <-
     if (df > 0) { # fit spline
       ss <- paste0('s', 1:df)
     #	if start missing get start values for ss and a
-      spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+      
+      # Edited for splines2
+      # spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+      if(stype == 'ns') {
+        spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
+      } else {
+        spline_lm_str <- paste0("lm(y ~ ", "splines2::", stype, "(", "x, ",
+                                "knots = knots, Bound = bounds, ", "intercept = ", sintercept,
+                                "))")
+        spline.lm <- eval(parse(text = spline_lm_str))
+      }
+      
+      
       if (nostart <- missing(start))
         start <- coef(spline.lm)[c(2:(df + 1), 1)]
     # if df = 1 exclude b and d
@@ -381,7 +414,19 @@ sitar <-
     dx <- ifelse(d.adjusted, 'ex', 'x') # set scale for d
     nsd <- cglue(model['d'], '+(', ')*{dx}')
     ex <- glue('(x{nsb}{nsc})')
-    spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns(ex,k=knots,B=bounds)))'))
+    
+    # Edited for splines2
+    # spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns(ex,k=knots,B=bounds)))'))
+    if(stype == 'ns') {
+      spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns(ex,k=knots,B=bounds)))'))
+    } else {
+      glue_spline_str <- paste0(")*", "splines2::", stype, "(", "ex, ",
+                                "knots = knots, Bound = bounds, ", 
+                                "intercept = ", sintercept,
+                                ")))")
+      spline <- glue(cglue(ss, '+rowSums((cbind(', glue_spline_str))
+    }
+    
 
     # expand fixed and if necessary random
     fixed <- glue('{fixed} ~ 1')
@@ -495,6 +540,11 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   if (is.null(mcall))
     stop("need an object with call.sitar component")
   extras <- as.list(match.call(expand.dots = FALSE)$...)
+  
+  # Edited for splines2
+  stype <- mcall$stype
+  sintercept <- FALSE
+  
   mcall$start <- NULL
   #	expand formulae
   if (any(grep('formula', names(extras)))) {
@@ -621,8 +671,22 @@ update.sitar <- function (object, ..., evaluate = TRUE)
           bounds <- bounds - xoffset
       }
       #	get spline start values
-      spline.lm <-
-        lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
+      
+      
+      # Edited for splines2
+      # spline.lm <-lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
+      if(stype == 'ns') {
+        spline.lm <-lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
+      } else {
+        spline_lm_str <- paste0("lm(predict(object, data, level = 0) ~ ", 
+                                "splines2::", stype, "(", "x, ",
+                                "knots = knots, Bound = bounds, ", 
+                                "intercept = ", sintercept,
+                                "))")
+        spline.lm <- eval(parse(text = spline_lm_str))
+      }
+      
+      
       start.$fixed <-
         c(coef(spline.lm)[c(2:(df + 1), 1)],
           fo[names(fo) %in% fixed.extra])
