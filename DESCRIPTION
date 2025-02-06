@@ -32,6 +32,8 @@ Imports:
     purrr,
     rlang,
     rsample,
+    splines,
+    splines2,
     stats,
     tibble,
     tidyr
