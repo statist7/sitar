@@ -1,4 +1,4 @@
-Changes in Version 1.4.1
+Changes in Version 1.5.0
 
   o plot.sitar now handles par() parameters for combined distance-velocity plots
     differently - a breaking change. Instead of entries for the y2 axis being
@@ -25,8 +25,8 @@ Changes in Version 1.4.1
     the sitar argument d.adjusted. The age slope d is the regression coefficient
     of y on x, and when d.adjusted = TRUE x is first adjusted for random
     effects b and c, reflecting individual developmental age rather than
-    chronological age. This makes d more sensitive to the timing of puberty
-    in individuals.
+    chronological age. The default d.adjusted = FALSE appears on limited testing
+    to fit better.
 
 Changes in Version 1.4.0
 
