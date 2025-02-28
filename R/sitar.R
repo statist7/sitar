@@ -6,13 +6,13 @@
 #' defining how individual growth curves differ from the mean curve.
 #'
 #' The SITAR model usually has up to three random effects (a, b and c), termed
-#' size, timing and intensity respectively. \code{df} sets the degrees of freedom
-#' for the mean spline curve, taking values from 1 (i.e. linear) upwards. In
-#' addition there is a random effect for the slope, d, which is fitted when
-#' \code{df = 0}, and combined with a, it provides the classic random intercept random
-#' slope model, which is similar to the 1 df spline model. In addition d can be
-#' fitted, along with a, b and c, to extend
-#' SITAR to model variability in the adult slope of the growth curve.
+#' size, timing and intensity respectively. \code{df} sets the degrees of
+#' freedom for the mean spline curve, taking values from 1 (i.e. linear)
+#' upwards. In addition there is a random effect for the slope, d, which is
+#' fitted when \code{df = 0}, and combined with a, it provides the classic
+#' random intercept random slope model, which is similar to the 1 df spline
+#' model. In addition d can be fitted, along with a, b and c, to extend SITAR to
+#' model variability in the adult slope of the growth curve.
 #'
 #' \code{xoffset} allows the origin of \code{x} to be varied, while
 #' \code{bstart} specifies the starting value for \code{b}, both of which can
@@ -20,94 +20,107 @@
 #' \code{knots} and \code{bounds} are offset by \code{xoffset} for fitting
 #' purposes, and similarly for fixed effect \code{b}.
 #'
-#' The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and \code{d.formula}
-#' allow for cov.names and
-#' can include functions and interactions. \code{\link{make.names}} is used to
-#' ensure that the names of the corresponding model terms are valid. The
-#' modified not the original names need to be specified in \code{predict.sitar}.
+#' The formulae \code{a.formula}, \code{b.formula}, \code{c.formula} and
+#' \code{d.formula} allow for cov.names and can include functions and
+#' interactions. \code{\link{make.names}} is used to ensure that the names of
+#' the corresponding model terms are valid. The modified names, not the original
+#' names, need to be specified in \code{predict.sitar}.
 #'
 #' \code{update} updates the model by taking the \code{object} call, adding any
 #' new parameters and replacing changed ones. Where feasible the fixed and
 #' random effects of the model being updated are suitably modified and passed
 #' via the \code{start} argument.
 #'
+#' The mean curve is a natural cubic spline, fitted originally with
+#' \code{splines::ns} but now by default with \code{splines2::nsk}, where the
+#' choice is set by \code{stype}. Both give the same mean curve, but \code{nsk}
+#' is faster than \code{ns} and its fixed effect coefficients have a direct
+#' interpretation: added to fixed effect \code{a} they give the values of the
+#' mean curve at the \code{df} right-most knots, while \code{a} is the value at
+#' the left-most knot. The knots themselves depend on fixed effects \code{b} and
+#' \code{c} and are accessed via \code{attr(object, "knots")}.
+#'
 #' @aliases sitar update.sitar
 #' @param x vector of ages.
 #' @param y vector of measurements.
 #' @param id factor of subject identifiers.
-#' @param data data frame containing variables \code{x}, \code{y} and
-#' \code{id}.
-#' @param df degrees of freedom for cubic regression spline (0 or more, see Details).
+#' @param data data frame containing variables \code{x}, \code{y} and \code{id}.
+#' @param df degrees of freedom for cubic regression spline (0 or more, see
+#'   Details).
 #' @param knots vector of values for knots (default \code{df} quantiles of
-#' \code{x} distribution).
+#'   \code{x} distribution).
 #' @param fixed character string specifying a, b, c, d fixed effects (default
-#' \code{random} or the subset of "a + b + c + d" within \code{random}).
+#'   \code{random} or the subset of "a + b + c + d" within \code{random}).
 #' @param random character string specifying a, b, c, d random effects (default
-#' \code{"a+b+c"}). Alternatively \code{nlme} formula e.g.
-#' \code{"list(id = pdDiag(a + b + c ~ 1))"}.
-#' @param pdDiag logical which if TRUE fits a diagonal random effects
-#' covariance matrix, or if FALSE (default) a general covariance matrix.
+#'   \code{"a+b+c"}). Alternatively \code{nlme} formula e.g. \code{"list(id =
+#'   pdDiag(a + b + c ~ 1))"}.
+#' @param pdDiag logical which if TRUE fits a diagonal random effects covariance
+#'   matrix, or if FALSE (default) a general covariance matrix.
 #' @param a.formula formula for fixed effect a (default \code{~ 1}).
 #' @param b.formula formula for fixed effect b (default \code{~ 1}).
 #' @param c.formula formula for fixed effect c (default \code{~ 1}).
 #' @param d.formula formula for fixed effect d (default \code{~ 1}).
-#' @param d.adjusted logical defining x scale for random effect d (default
-#' FALSE means x unadjusted, TRUE means x adjusted with random effects b and c).
-#' @param bounds span of \code{x} for regression spline, or fractional
-#' extension of range (default 0.04).
+#' @param d.adjusted logical defining x scale for random effect d (default FALSE
+#'   means x unadjusted, TRUE means x adjusted with random effects b and c).
+#' @param stype version of natural spline curve to be fitted, default
+#'   \code{"nsk"} or \code{"ns"}. See Details.
+#' @param bounds span of \code{x} for regression spline, or fractional extension
+#'   of range (default 0.04).
 #' @param start optional numeric vector of initial estimates for the fixed
-#' effects, or list of initial estimates for the fixed and random effects (see
-#' \code{\link{nlme}}).
+#'   effects, or list of initial estimates for the fixed and random effects (see
+#'   \code{\link{nlme}}).
 #' @param xoffset optional value of offset for \code{x} (either "mean"
-#' (default), "apv" or value).
+#'   (default), "apv" or value).
 #' @param bstart optional starting value for fixed effect \code{b} (either
-#' "mean", "apv" or value (default \code{xoffset})).
+#'   "mean", "apv" or value (default \code{xoffset})).
 #' @param returndata logical which if TRUE causes the model matrix to be
-#' returned, or if FALSE (default) the fitted model. Setting returndata TRUE is
-#' useful in conjunction with \code{subset} and \code{\link{subsample}} for
-#' simulation purposes.
+#'   returned, or if FALSE (default) the fitted model. Setting returndata TRUE
+#'   is useful in conjunction with \code{subset} and \code{\link{subsample}} for
+#'   simulation purposes.
 #' @param verbose optional logical value to print information on the evolution
-#' of the iterative algorithm (see \code{\link{nlme}}).
+#'   of the iterative algorithm (see \code{\link{nlme}}).
 #' @param correlation optional \code{corStruct} object describing the
-#' within-group correlation structure (see \code{\link{nlme}}).
-#' @param weights optional \code{varFunc} object or one-sided formula
-#' describing the within-group heteroscedasticity structure (see
-#' \code{\link{nlme}}).
+#'   within-group correlation structure (see \code{\link{nlme}}).
+#' @param weights optional \code{varFunc} object or one-sided formula describing
+#'   the within-group heteroscedasticity structure (see \code{\link{nlme}}).
 #' @param subset optional expression indicating the subset of the rows of data
-#' that should be used in the fit (see \code{\link{nlme}}).
+#'   that should be used in the fit (see \code{\link{nlme}}).
 #' @param method character string, either "REML" or "ML" (default) (see
-#' \code{\link{nlme}}).
+#'   \code{\link{nlme}}).
 #' @param na.action function for when the data contain NAs (see
-#' \code{\link{nlme}}).
+#'   \code{\link{nlme}}).
 #' @param control list of control values for the estimation algorithm (see
-#' \code{\link{nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).
+#'   \code{\link{nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).
 #' @param keep.data logical to control saving \code{data} as part of the model
-#' object (default TRUE).
+#'   object (default TRUE).
 #' @param object object of class \code{sitar}.
 #' @param \dots further parameters for \code{update} consisting of any of the
-#' above \code{sitar} parameters.
+#'   above \code{sitar} parameters.
 #' @param evaluate logical to control evaluation.  If TRUE (default) the
-#' expanded \code{update} call is passed to \code{sitar} for evaluation, while
-#' if FALSE the expanded call itself is returned.
+#'   expanded \code{update} call is passed to \code{sitar} for evaluation, while
+#'   if FALSE the expanded call itself is returned.
 #'
 #' @return An object inheriting from class \code{sitar} representing the
-#' nonlinear mixed-effects model fit, with all the components returned by
-#' \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
-#' following components:
-#' \item{fitnlme}{the function returning the predicted value of \code{y}.}
-#' \item{data}{copy of \code{data} (if \code{keep.data} true).}
+#'   nonlinear mixed-effects model fit, with all the components returned by
+#'   \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
+#'   following components: \item{fitnlme}{the function returning the predicted
+#'   value of \code{y}.} \item{data}{copy of \code{data} (if \code{keep.data}
+#'   true).}
 #' \item{constants}{data frame of mean a-b-c-d values for unique combinations
-#' of covariates (excluding \code{x}).}
-#' \item{call.sitar}{the internal \code{sitar} call that produced the object.}
-#' \item{xoffset}{the value of \code{xoffset}.}
-#' \item{ns}{the \code{lm} object providing starting values for the B-spline curve.}
+#'   of covariates (excluding \code{x}).}
+#'   \item{call.sitar}{the internal \code{sitar} call that produced the object.}
+#'   \item{xoffset}{the value of \code{xoffset}.}
+#' \item{ns}{the \code{lm} object providing starting values for the B-spline
+#'  curve.}
 #'
-#' Generic functions such as \code{print}, \code{plot}, \code{anova} and
-#' \code{summary} have methods to show the results of the fit. The functions
-#' \code{residuals}, \code{coef}, \code{fitted}, \code{fixed.effects},
-#' \code{random.effects}, \code{predict}, \code{getData}, \code{getGroups},
-#' \code{getCovariate} and \code{getVarCov} can be used to extract some of its
-#' components.
+#'   In addition attributes \code{stype} and \code{knots} are set.
+#'
+#'   Generic functions such as \code{print}, \code{plot}, \code{anova} and
+#'   \code{summary} have methods to show the results of the fit. The functions
+#'   \code{residuals}, \code{coef}, \code{fitted}, \code{fixed.effects},
+#'   \code{random.effects}, \code{predict}, \code{getData}, \code{getGroups},
+#'   \code{getCovariate} and \code{getVarCov} can be used to extract some of its
+#'   components.
 #'
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
 #' @keywords package nonlinear regression models
@@ -123,9 +136,10 @@
 #' @import nlme
 #' @importFrom glue glue
 #' @importFrom splines ns
-#' @importFrom stats AIC BIC as.formula coef cor fitted lm logLik
-#' mad model.frame model.matrix na.fail na.omit pnorm predict qnorm quantile
-#' residuals sd setNames smooth.spline spline update update.formula
+#' @importFrom splines2 nsk
+#' @importFrom stats AIC BIC as.formula coef cor fitted lm logLik mad
+#'   model.frame model.matrix na.fail na.omit pnorm predict qnorm quantile
+#'   residuals sd setNames smooth.spline spline update update.formula
 #' @export
 sitar <-
   function(x,
@@ -136,13 +150,13 @@ sitar <-
            knots,
            fixed = NULL,
            random = 'a + b + c',
-           stype = 'ns', # Edited for splines2
            pdDiag = FALSE,
            a.formula =  ~ 1,
            b.formula =  ~ 1,
            c.formula =  ~ 1,
            d.formula =  ~ 1,
            d.adjusted = FALSE,
+           stype = c('nsk', 'ns'),
            bounds = 0.04,
            start,
            xoffset = 'mean',
@@ -156,30 +170,15 @@ sitar <-
            na.action = na.fail,
            control = nlmeControl(msMaxIter = 100, returnObject = TRUE),
            keep.data = TRUE) {
-    
-    # Edited for splines2
-    # Intercept is always set as 'False' when fitting the SITAR model
-    # Hence not included as an argument
-    sintercept <- FALSE 
-    
-    
+
+    stype <- match.arg(stype)
+    splinefun <- get(stype)
+
     b.origin <- function(b) {
       if (b == 'mean')
         return(mean(x))
       if (b == 'apv') {
-        
-        # Edited for splines2
-        # spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
-        if(stype == 'ns') {
-          spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
-        } else {
-          spline_lm_str <- paste0("lm(y ~ ", "splines2::", stype, "(", "x, ",
-                                  "knots = knots, Bound = bounds, ", "intercept = ", sintercept,
-                                  "))")
-          spline.lm <- eval(parse(text = spline_lm_str))
-        }
-        
-        
+        spline.lm <- lm(y ~ splinefun(x, knots = knots, Bound = bounds))
         return(getPeak(x, predict(
           smooth.spline(x, fitted(spline.lm)), x, deriv = 1
         )$y)[1])
@@ -189,8 +188,6 @@ sitar <-
       b
     }
 
-    
-    
     # get data
     mcall <- match.call()
     data <- eval.parent(mcall$data)
@@ -277,19 +274,7 @@ sitar <-
     if (df > 0) { # fit spline
       ss <- paste0('s', 1:df)
     #	if start missing get start values for ss and a
-      
-      # Edited for splines2
-      # spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
-      if(stype == 'ns') {
-        spline.lm <- lm(y ~ ns(x, knots = knots, Bound = bounds))
-      } else {
-        spline_lm_str <- paste0("lm(y ~ ", "splines2::", stype, "(", "x, ",
-                                "knots = knots, Bound = bounds, ", "intercept = ", sintercept,
-                                "))")
-        spline.lm <- eval(parse(text = spline_lm_str))
-      }
-      
-      
+      spline.lm <- lm(y ~ splinefun(x, knots = knots, Bound = bounds))
       if (nostart <- missing(start))
         start <- coef(spline.lm)[c(2:(df + 1), 1)]
     # if df = 1 exclude b and d
@@ -414,20 +399,7 @@ sitar <-
     dx <- ifelse(d.adjusted, 'ex', 'x') # set scale for d
     nsd <- cglue(model['d'], '+(', ')*{dx}')
     ex <- glue('(x{nsb}{nsc})')
-    
-    # Edited for splines2
-    # spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns(ex,k=knots,B=bounds)))'))
-    if(stype == 'ns') {
-      spline <- glue(cglue(ss, '+rowSums((cbind(', ')*ns(ex,k=knots,B=bounds)))'))
-    } else {
-      glue_spline_str <- paste0(")*", "splines2::", stype, "(", "ex, ",
-                                "knots = knots, Bound = bounds, ", 
-                                "intercept = ", sintercept,
-                                ")))")
-      spline <- glue(cglue(ss, '+rowSums((cbind(', glue_spline_str))
-    }
-    
-
+    spline <- glue(cglue(ss, '+rowSums((cbind(', glue(')*', stype, '(ex,k=knots,B=bounds)))')))
     # expand fixed and if necessary random
     fixed <- glue('{fixed} ~ 1')
     random <- ifelse (is.na(fullrandom),
@@ -522,6 +494,14 @@ sitar <-
     nlme.out$call.sitar <- mcall
     # save xoffset
     nlme.out$xoffset <- xoffset
+    # save spline type
+    attr(nlme.out, 'stype') <- stype
+    # save knots on original scale to match nsk fixed effects
+    fe <- fixef(nlme.out)
+    fe[setdiff(letters[2:3], names(fe))] <- 0
+    aknots <- sort(c(knots, bounds))
+    aknots <- ifun(mcall$x)(aknots / exp(fe[['c']]) + fe[['b']] + xoffset)
+    attr(nlme.out, 'knots') <- aknots
     # save ns curve
     nlme.out$ns <- spline.lm
     # save d.adjusted
@@ -540,11 +520,6 @@ update.sitar <- function (object, ..., evaluate = TRUE)
   if (is.null(mcall))
     stop("need an object with call.sitar component")
   extras <- as.list(match.call(expand.dots = FALSE)$...)
-  
-  # Edited for splines2
-  stype <- mcall$stype
-  sintercept <- FALSE
-  
   mcall$start <- NULL
   #	expand formulae
   if (any(grep('formula', names(extras)))) {
@@ -610,8 +585,8 @@ update.sitar <- function (object, ..., evaluate = TRUE)
         xoffset <- mean(x)
       x <- x - xoffset
       df <- object$ns$rank - 1
-      knots <- attr(object$ns$model$ns, 'knots')
-      bounds <- attr(object$ns$model$ns, 'Boundary.knots')
+      knots <- attr(object$ns$model$splinefun, 'knots')
+      bounds <- attr(object$ns$model$splinefun, 'Boundary.knots')
       # update random effects
       if (any(c('data', 'subset') %in% names(extras))) {
         id <- factor(eval(mcall$id, data))
@@ -671,22 +646,9 @@ update.sitar <- function (object, ..., evaluate = TRUE)
           bounds <- bounds - xoffset
       }
       #	get spline start values
-      
-      
-      # Edited for splines2
-      # spline.lm <-lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
-      if(stype == 'ns') {
-        spline.lm <-lm(predict(object, data, level = 0) ~ ns(x, knots = knots, Bound = bounds))
-      } else {
-        spline_lm_str <- paste0("lm(predict(object, data, level = 0) ~ ", 
-                                "splines2::", stype, "(", "x, ",
-                                "knots = knots, Bound = bounds, ", 
-                                "intercept = ", sintercept,
-                                "))")
-        spline.lm <- eval(parse(text = spline_lm_str))
-      }
-      
-      
+      stype <- extras$stype %||% attr(object, 'stype')
+      splinefun <- get(stype)
+      spline.lm <-lm(predict(object, data, level = 0) ~ splinefun(x, knots = knots, Bound = bounds))
       start.$fixed <-
         c(coef(spline.lm)[c(2:(df + 1), 1)],
           fo[names(fo) %in% fixed.extra])
