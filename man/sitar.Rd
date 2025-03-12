@@ -191,7 +191,7 @@ is faster than \code{ns} and its fixed effect coefficients have a direct
 interpretation: added to fixed effect \code{a} they give the values of the
 mean curve at the \code{df} right-most knots, while \code{a} is the value at
 the left-most knot. The knots themselves depend on fixed effects \code{b} and
-\code{c} and are accessed via \code{attr(object, "knots")}.
+\code{c} (where fitted) and are accessed via \code{attr(object, "knots")}.
 }
 \examples{
 
