@@ -193,7 +193,7 @@ sitar <-
     data <- eval.parent(mcall$data)
     subset <- eval(mcall$subset, data)
     if (!is.null(subset))
-      data <- data[subset,]
+      data <- data[subset, ]
     x <- eval(mcall$x, data)
     y <- eval(mcall$y, data)
 
@@ -521,6 +521,10 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     stop("need an object with call.sitar component")
   extras <- as.list(match.call(expand.dots = FALSE)$...)
   mcall$start <- NULL
+  if (exists('data', object)) {
+    mcall$data <- NULL
+    mcall$subset <- NULL
+  }
   #	expand formulae
   if (any(grep('formula', names(extras)))) {
     for (n in paste0(letters[1:4], '.formula')) {
@@ -571,12 +575,15 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       ),
       0
     ))) {
-      # get data etc
-      if (any(c('data', 'subset') %in% names(extras))) {
-        data <- eval.parent(mcall$data)
+      # get data
+      if (any(c('data', 'subset') %in% names(mcall))) {
+        data <- if (is.null(mcall$data))
+          object$data
+        else
+          eval.parent(mcall$data)
         subset <- eval(mcall$subset, data)
         if (!is.null(subset))
-          data <- data[subset,]
+          data <- data[subset, ]
       } else
         data <- getData(object)
       x <- eval(mcall$x, data)
@@ -588,7 +595,7 @@ update.sitar <- function (object, ..., evaluate = TRUE)
       knots <- attr(object$ns$model$splinefun, 'knots')
       bounds <- attr(object$ns$model$splinefun, 'Boundary.knots')
       # update random effects
-      if (any(c('data', 'subset') %in% names(extras))) {
+      if (any(c('data', 'subset') %in% names(mcall))) {
         id <- factor(eval(mcall$id, data))
         levels.obj <- levels(getGroups(object))
         if (!identical(levels(id), levels.obj)) {
@@ -646,9 +653,14 @@ update.sitar <- function (object, ..., evaluate = TRUE)
           bounds <- bounds - xoffset
       }
       #	get spline start values
-      stype <- extras$stype %||% attr(object, 'stype')
+      stype <- extras$stype %||% attr(object, 'stype') %||% 'ns'
       splinefun <- get(stype)
-      spline.lm <-lm(predict(object, data, level = 0) ~ splinefun(x, knots = knots, Bound = bounds))
+      # define missing b and c fixed effects
+      fo[setdiff(letters[2:3], names(fo))] <- 0
+      # refit spline to update coefficients
+      spline.lm <-lm(predict(object, data, level = 0) ~
+                       splinefun(((x - fo['b']) * exp(fo['c'])),
+                                 knots = knots, Bound = bounds))
       start.$fixed <-
         c(coef(spline.lm)[c(2:(df + 1), 1)],
           fo[names(fo) %in% fixed.extra])
@@ -667,13 +679,11 @@ update.sitar <- function (object, ..., evaluate = TRUE)
     mcall$start <- quote(start.)
   }
   if (evaluate) {
-    # if data stored in object and either unchanging or original unavailable
-    # put a copy in globalenv
-    if (!is.null(object$data) &&
-        (!'data' %in% names(extras) ||
-         !all(vapply(all.vars(mcall$data), exists, TRUE)))) {
-      assign('.data.', object$data, parent.frame())
+    # if data stored in object$data then data not in mcall
+    # add data to mcall and put copy of data in globalenv
+    if (!'data' %in% names(mcall)) {
       mcall$data <- quote(.data.)
+      assign('.data.', object$data, parent.frame())
     }
     eval.parent(mcall)
   }
