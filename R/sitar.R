@@ -68,7 +68,7 @@
 #'   of range (default 0.04).
 #' @param start optional numeric vector of initial estimates for the fixed
 #'   effects, or list of initial estimates for the fixed and random effects (see
-#'   \code{\link{nlme}}).
+#'   \code{\link{nlme::nlme}}).
 #' @param xoffset optional value of offset for \code{x} (either "mean"
 #'   (default), "apv" or value).
 #' @param bstart optional starting value for fixed effect \code{b} (either
@@ -78,19 +78,19 @@
 #'   is useful in conjunction with \code{subset} and \code{\link{subsample}} for
 #'   simulation purposes.
 #' @param verbose optional logical value to print information on the evolution
-#'   of the iterative algorithm (see \code{\link{nlme}}).
+#'   of the iterative algorithm (see \code{\link{nlme::nlme}}).
 #' @param correlation optional \code{corStruct} object describing the
-#'   within-group correlation structure (see \code{\link{nlme}}).
+#'   within-group correlation structure (see \code{\link{nlme::nlme}}).
 #' @param weights optional \code{varFunc} object or one-sided formula describing
-#'   the within-group heteroscedasticity structure (see \code{\link{nlme}}).
+#'   the within-group heteroscedasticity structure (see \code{\link{nlme::nlme}}).
 #' @param subset optional expression indicating the subset of the rows of data
-#'   that should be used in the fit (see \code{\link{nlme}}).
+#'   that should be used in the fit (see \code{\link{nlme::nlme}}).
 #' @param method character string, either "REML" or "ML" (default) (see
-#'   \code{\link{nlme}}).
+#'   \code{\link{nlme::nlme}}).
 #' @param na.action function for when the data contain NAs (see
-#'   \code{\link{nlme}}).
+#'   \code{\link{nlme::nlme}}).
 #' @param control list of control values for the estimation algorithm (see
-#'   \code{\link{nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).
+#'   \code{\link{nlme::nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).
 #' @param keep.data logical to control saving \code{data} as part of the model
 #'   object (default TRUE).
 #' @param object object of class \code{sitar}.
@@ -102,7 +102,7 @@
 #'
 #' @return An object inheriting from class \code{sitar} representing the
 #'   nonlinear mixed-effects model fit, with all the components returned by
-#'   \code{nlme} (see \code{\link{nlmeObject}} for a full description) plus the
+#'   \code{nlme} (see \code{\link{nlme::nlmeObject}} for a full description) plus the
 #'   following components: \item{fitnlme}{the function returning the predicted
 #'   value of \code{y}.} \item{data}{copy of \code{data} (if \code{keep.data}
 #'   true).}
