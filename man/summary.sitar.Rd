@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{object inheriting from class \code{sitar}.}
 
-\item{adjustSigma}{optional logical (see \code{\link{summary.lme}}).}
+\item{adjustSigma}{optional logical (see \code{\link{nlme::summary.lme}}).}
 
 \item{verbose}{optional logical to control the amount of output in
 \code{print.summary.sitar}.}
@@ -19,9 +19,9 @@ None are used in this method.}
 }
 \value{
 an object inheriting from class \code{summary.sitar} with all
-components included in \code{object} (see \code{\link{lmeObject}} for a full
+components included in \code{object} (see \code{\link{nlme::lmeObject}} for a full
 description of the components) plus the components for
-\code{\link{summary.lme}} and the following components: \item{x.adj}{vector
+\code{\link{nlme::summary.lme}} and the following components: \item{x.adj}{vector
 of length \code{x} in \code{object} with \code{x} values adjusted for
 subject-specific random effects b and c.} \item{y.adj}{vector of length
 \code{y} in \code{object} with \code{y} values adjusted for subject-specific
@@ -31,7 +31,7 @@ transformed \code{x} and \code{y} where specified).}
 }
 \description{
 A \code{summary} method for \code{sitar} objects based on
-\code{\link{summary.lme}}.
+\code{\link{nlme::summary.lme}}.
 }
 \author{
 Tim Cole \email{tim.cole@ucl.ac.uk}
