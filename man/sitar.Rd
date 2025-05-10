@@ -82,7 +82,7 @@ of range (default 0.04).}
 
 \item{start}{optional numeric vector of initial estimates for the fixed
 effects, or list of initial estimates for the fixed and random effects (see
-\code{\link{nlme::nlme}}).}
+\code{\link[nlme]{nlme}}).}
 
 \item{xoffset}{optional value of offset for \code{x} (either "mean"
 (default), "apv" or value).}
@@ -96,25 +96,25 @@ is useful in conjunction with \code{subset} and \code{\link{subsample}} for
 simulation purposes.}
 
 \item{verbose}{optional logical value to print information on the evolution
-of the iterative algorithm (see \code{\link{nlme::nlme}}).}
+of the iterative algorithm (see \code{\link[nlme]{nlme}}).}
 
 \item{correlation}{optional \code{corStruct} object describing the
-within-group correlation structure (see \code{\link{nlme::nlme}}).}
+within-group correlation structure (see \code{\link[nlme]{nlme}}).}
 
 \item{weights}{optional \code{varFunc} object or one-sided formula describing
-the within-group heteroscedasticity structure (see \code{\link{nlme::nlme}}).}
+the within-group heteroscedasticity structure (see \code{\link[nlme]{nlme}}).}
 
 \item{subset}{optional expression indicating the subset of the rows of data
-that should be used in the fit (see \code{\link{nlme::nlme}}).}
+that should be used in the fit (see \code{\link[nlme]{nlme}}).}
 
 \item{method}{character string, either "REML" or "ML" (default) (see
-\code{\link{nlme::nlme}}).}
+\code{\link[nlme]{nlme}}).}
 
 \item{na.action}{function for when the data contain NAs (see
-\code{\link{nlme::nlme}}).}
+\code{\link[nlme]{nlme}}).}
 
 \item{control}{list of control values for the estimation algorithm (see
-\code{\link{nlme::nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).}
+\code{\link[nlme]{nlme}}) (default \code{nlmeControl(returnObject = TRUE)}).}
 
 \item{keep.data}{logical to control saving \code{data} as part of the model
 object (default TRUE).}
@@ -131,7 +131,7 @@ if FALSE the expanded call itself is returned.}
 \value{
 An object inheriting from class \code{sitar} representing the
   nonlinear mixed-effects model fit, with all the components returned by
-  \code{nlme} (see \code{\link{nlme::nlmeObject}} for a full description) plus the
+  \code{nlme} (see \code{\link[nlme]{nlmeObject}} for a full description) plus the
   following components: \item{fitnlme}{the function returning the predicted
   value of \code{y}.} \item{data}{copy of \code{data} (if \code{keep.data}
   true).}

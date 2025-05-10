@@ -26,11 +26,11 @@ tests should be used.}
 \item{type}{an optional character string specifying the type of sum of
 squares to be used.}
 
-\item{adjustSigma}{see \code{\link{nlme::anova.lme}}.}
+\item{adjustSigma}{see \code{\link[nlme]{anova.lme}}.}
 
-\item{Terms}{see \code{\link{nlme::anova.lme}}.}
+\item{Terms}{see \code{\link[nlme]{anova.lme}}.}
 
-\item{L}{see \code{\link{nlme::anova.lme}}.}
+\item{L}{see \code{\link[nlme]{anova.lme}}.}
 
 \item{verbose}{an optional logical value.}
 }

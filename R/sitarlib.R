@@ -70,19 +70,19 @@
 #' Create summary of SITAR model
 #'
 #' A \code{summary} method for \code{sitar} objects based on
-#' \code{\link{nlme::summary.lme}}.
+#' \code{\link[nlme]{summary.lme}}.
 #'
 #'
 #' @param object object inheriting from class \code{sitar}.
-#' @param adjustSigma optional logical (see \code{\link{nlme::summary.lme}}).
+#' @param adjustSigma optional logical (see \code{\link[nlme]{summary.lme}}).
 #' @param verbose optional logical to control the amount of output in
 #' \code{print.summary.sitar}.
 #' @param \dots some methods for this generic require additional arguments.
 #' None are used in this method.
 #' @return an object inheriting from class \code{summary.sitar} with all
-#' components included in \code{object} (see \code{\link{nlme::lmeObject}} for a full
+#' components included in \code{object} (see \code{\link[nlme]{lmeObject}} for a full
 #' description of the components) plus the components for
-#' \code{\link{nlme::summary.lme}} and the following components: \item{x.adj}{vector
+#' \code{\link[nlme]{summary.lme}} and the following components: \item{x.adj}{vector
 #' of length \code{x} in \code{object} with \code{x} values adjusted for
 #' subject-specific random effects b and c.} \item{y.adj}{vector of length
 #' \code{y} in \code{object} with \code{y} values adjusted for subject-specific

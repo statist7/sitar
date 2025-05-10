@@ -9,9 +9,9 @@
 #' tests should be used.
 #' @param type an optional character string specifying the type of sum of
 #' squares to be used.
-#' @param adjustSigma see \code{\link{nlme::anova.lme}}.
-#' @param Terms see \code{\link{nlme::anova.lme}}.
-#' @param L see \code{\link{nlme::anova.lme}}.
+#' @param adjustSigma see \code{\link[nlme]{anova.lme}}.
+#' @param Terms see \code{\link[nlme]{anova.lme}}.
+#' @param L see \code{\link[nlme]{anova.lme}}.
 #' @param verbose an optional logical value.
 #' @return a data frame inheriting from class "anova.lme".
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
