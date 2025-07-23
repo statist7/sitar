@@ -13,14 +13,19 @@
 #' to construct growth reference centiles (see \pkg{gamlss}).
 #'
 #' \tabular{ll}{ Package: \tab sitar\cr Type: \tab Package\cr Version: \tab
-#' 1.0\cr Date: \tab 2013-09-23\cr License: \tab GPL-2\cr } Effect a (or alpha)
+#' 1.4.0\cr Date: \tab 2013-09-23\cr License: \tab GPL-2\cr } Effect a (or
+#' \ifelse{latex}{\out{$\alpha$}}{\ifelse{html}{\out{&alpha;}}{alpha}})
 #' measures size, and is a random intercept relative to the spline curve
-#' intercept. Effect b (or beta) measures tempo, the timing of the growth
-#' process, and reflects a shift on the x scale relative to the mean. Effect c
-#' (or gamma) is velocity, and indicates how the x scale is stretched or shrunk
-#' reflecting the rate at which 'time' passes for individuals. Effect d is a
-#' rotation in the plane. The aim is for
-#' individual curves, adjusted for \{abcd\} to lie on top of (i.e. be
+#' intercept. Effect b (or
+#' \ifelse{latex}{\out{$\beta$}}{\ifelse{html}{\out{&beta;}}{beta}})
+#' measures timing, the timing of the growth
+#' process, and reflects a shift on the x scale relative to the mean. Effect c (or
+#' \ifelse{latex}{\out{$\gamma$}}{\ifelse{html}{\out{&gamma;}}{gamma}})
+#' is intensity, and indicates how the x scale is stretched or shrunk
+#' reflecting the rate at which 'time' passes for individuals. Effect d (or
+#' \ifelse{latex}{\out{$\delta$}}{\ifelse{html}{\out{&delta;}}{delta}})
+#' is a rotation in the plane. The aim is for
+#' individual curves, adjusted for \code{abcd} to lie on top of (i.e. be
 #' superimposed on) the mean curve.
 #'
 #' The package creates an object of class \code{sitar}, based on \pkg{nlme},
@@ -37,9 +42,13 @@
 #' @name sitar-package
 #' @docType package
 #' @author Tim Cole \email{tim.cole@@ucl.ac.uk}
-#' @references The idea of SITAR growth curve analysis arose from the paper by
+#' @references The idea of SITAR growth curve analysis arose from papers by
+#' Lindstrom (1995) and
 #' Beath (2007) and was first described in Cole et al (2010). The other
 #' references describe applications of SITAR to a variety of data forms.
+#'
+#' Lindstrom MJ. Self-modelling with random shift and scale parameters and a
+#' free-knot spline shape function. Stat Med 1995;14:2009-21.
 #'
 #' Beath KJ. Infant growth modelling using a shape invariant model with random
 #' efffects. Stat Med 2007;26:2547-64.
@@ -87,7 +96,7 @@
 #' and tempo of iInfant growth: findings from three contemporary cohorts. PLoS
 #' ONE 2014;9:e90291.
 #'
-#' Ward KA, Cole TJ, Laskey MA, et al. The Effect of Prepubertal Calcium
-#' Carbonate Supplementation on Skeletal Development in Gambian Boys-A 12-Year
-#' Follow-Up Study. J C E M 2014;99:3169-76.
+#' Ward KA, Cole TJ, Laskey MA, et al. The effect of prepubertal calcium
+#' carbonate supplementation on skeletal development in Gambian boys-a 12-year
+#' follow-up study. J C E M 2014;99:3169-76.
 "_PACKAGE"
