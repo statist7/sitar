@@ -75,7 +75,7 @@
 #'   "mean", "apv" or value (default \code{xoffset})).
 #' @param returndata logical which if TRUE causes the model matrix to be
 #'   returned, or if FALSE (default) the fitted model. Setting returndata TRUE
-#'   is useful in conjunction with \code{subset} and \code{\link{subsample}} for
+#'   is useful in conjunction with \code{\link{subset}} and \code{\link{subsample}} for
 #'   simulation purposes.
 #' @param verbose optional logical value to print information on the evolution
 #'   of the iterative algorithm (see \code{\link[nlme]{nlme}}).
@@ -96,7 +96,7 @@
 #' @param object object of class \code{sitar}.
 #' @param \dots further parameters for \code{update} consisting of any of the
 #'   above \code{sitar} parameters.
-#' @param evaluate logical to control evaluation.  If TRUE (default) the
+#' @param evaluate logical to control evaluation. If TRUE (default) the
 #'   expanded \code{update} call is passed to \code{sitar} for evaluation, while
 #'   if FALSE the expanded call itself is returned.
 #'

@@ -92,7 +92,7 @@ effects, or list of initial estimates for the fixed and random effects (see
 
 \item{returndata}{logical which if TRUE causes the model matrix to be
 returned, or if FALSE (default) the fitted model. Setting returndata TRUE
-is useful in conjunction with \code{subset} and \code{\link{subsample}} for
+is useful in conjunction with \code{\link{subset}} and \code{\link{subsample}} for
 simulation purposes.}
 
 \item{verbose}{optional logical value to print information on the evolution
@@ -124,7 +124,7 @@ object (default TRUE).}
 \item{\dots}{further parameters for \code{update} consisting of any of the
 above \code{sitar} parameters.}
 
-\item{evaluate}{logical to control evaluation.  If TRUE (default) the
+\item{evaluate}{logical to control evaluation. If TRUE (default) the
 expanded \code{update} call is passed to \code{sitar} for evaluation, while
 if FALSE the expanded call itself is returned.}
 }
