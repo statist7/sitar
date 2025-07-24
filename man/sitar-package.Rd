@@ -106,6 +106,7 @@ follow-up study. J C E M 2014;99:3169-76.
 Useful links:
 \itemize{
   \item \url{https://github.com/statist7/sitar}
+  \item Report bugs at \url{https://github.com/statist7/sitar/issues}
 }
 
 }
