@@ -47,3 +47,4 @@ Encoding: UTF-8
 LazyData: yes
 LazyLoad: yes
 RoxygenNote: 7.3.2
+BugReports: https://github.com/statist7/sitar/issues
