@@ -1,5 +1,7 @@
 Changes in Version 1.5.0
 
+  o Now depends on R >= 4.1.0.
+
   o update.sitar has been streamlined and should now be faster.
 
   o plot.sitar now handles par() parameters for combined distance-velocity plots
