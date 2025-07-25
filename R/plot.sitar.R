@@ -580,13 +580,14 @@ plot.sitar <- function(x, opt="dv", labels = NULL, apv = FALSE, xfun = identity,
 
   # save and print vertical line(s) at age of peak velocity
   if (apv) {
+    # identify first v/V option
     pt <- pt %>%
       ungroup() %>%
       filter(tolower(.data$options) == 'v') %>%
       slice(1)
 
-    # derive apv(s) from option v/V
-    if (nrow(pt) > 0) {
+    # derive apv(s) for first option v/V
+    if (nrow(pt) > 0L) {
       xy$apv <- pt %>%
         select(data) %>%
         unnest(data) %>%
@@ -608,8 +609,11 @@ plot.sitar <- function(x, opt="dv", labels = NULL, apv = FALSE, xfun = identity,
     # plot apvs
     do.call('abline', list(v = xy$apv[['apv']], lty = 3))
 
-    if (nrow(xy$apv) == 1L)
-      print(xy$apv[c('apv', 'pv')] %>% unlist())
+    # drop id if just one row
+    if (nrow(xy$apv) == 1L) {
+      xy$apv <- xy$apv[-1]
+      print(xy$apv %>% unlist())
+    }
   }
   # return xy
   invisible(xy)
